@@ -75,6 +75,7 @@ b64 = b64 .. [[LHkpO2VuZDtlbmQ7ZW5kO3VudGlsIGZhbHNlO2ZvciBZPTEuMCxpLDB4MSBkbyBsb
 print("Base64 长度:", #b64)
 -- 以下为解码和执行逻辑
 local function decode_base64(data)
+    data = data:gsub("%s+", "")
     local chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     local result = {}
     for i = 1, #data, 4 do
