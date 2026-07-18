@@ -5090,20 +5090,3 @@ function aa.CreateWindow(ar, as)
 end
 
 return library
-```
-
----
-
-📌 使用方法
-
-1. 把上面所有代码复制到你的 WindUI.txt（或 README.md）中
-2. 上传到你的 GitHub
-3. 加载并创建窗口：
-
-```lua
-local WindUI = loadstring(game:HttpGetAsync("你的链接"))()
-local window = WindUI:CreateWindow({
-    Title = "测试窗口",
-    Theme = "Dark",
-    Size = UDim2.new(0, 600, 0, 450)
-})
