@@ -1,9 +1,4 @@
 
--- ============================================================
---  修改版 WindUI（外部依赖已内联，可直接运行）
---  保留压缩体积，仅替换图标加载器部分
--- ============================================================
-
 local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
 local b=game:GetService"RunService"local d=
 b.Heartbeat
@@ -11,9 +6,7 @@ local e=game:GetService"UserInputService"
 local f=game:GetService"TweenService"
 local g=game:GetService"LocalizationService"
 
--- ============================================================
---  内联图标加载器（替代外部 mian f Yuan.lua）
--- ============================================================
+-- 内联图标加载器（替代外部 mian f Yuan.lua）
 local h = {
     SetIconsType = function() end,
     Icon = function(self, name)
@@ -29,7 +22,6 @@ local h = {
     Init = function() end,
     AddIcons = function() end,
 }
--- ============================================================
 
 local i
 local j={
