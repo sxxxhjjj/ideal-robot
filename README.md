@@ -1,8 +1,9 @@
---[[
-    这是你提供的 WindUI 原版库（从 WindUI.txt 完整复制） + 使用示例
-    所有功能均为原版实现，未作任何简化。
-]]
 
+--[[
+    WindUI 完整库（你提供的原始文件）
+    直接运行，会自动创建演示窗口，按 G 切换显示。
+    悬浮窗（Open 按钮）默认出现在左上角。
+]]
 local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
 local b=game:GetService"RunService"local d=
 b.Heartbeat
@@ -4809,7 +4810,7 @@ return ay
 end
 
 -- ============================================================
--- 示例：创建窗口并使用
+-- 示例：创建窗口并使用（这段是自动演示，可直接运行）
 -- ============================================================
 local library = {
     flags = {},
@@ -4828,11 +4829,10 @@ function library:new(title, theme)
         OpenButton = {
             Enabled = true,
             Title = "悬浮窗",
-            Icon = "rbxassetid://6031064764", -- 可自定义图标
+            Icon = "rbxassetid://6031064764",
         }
     })
     self._window = window
-    -- 建立 flags 映射（用于外部读取）
     self.flags = setmetatable({}, {
         __index = function(t, k)
             return rawget(t, k)
@@ -4856,7 +4856,7 @@ function library:UiDestroy()
     end
 end
 
--- 封装控件创建，自动绑定 flag
+-- 封装控件，自动绑定 flag
 local function wrapElement(element, flag, elementType)
     if flag then
         library.flags[flag] = element.Value or false
@@ -4882,16 +4882,13 @@ local function wrapElement(element, flag, elementType)
     return element
 end
 
--- 在 Tab 中创建 Section 的方法（与原版一致）
 local function createSectionMethods(section, window, tab)
     function section:Label(text)
         return section.Paragraph({ Title = text, Desc = "" })
     end
-    
     function section:Button(text, callback)
         return section.Button({ Title = text, Callback = callback })
     end
-    
     function section:Toggle(text, flag, default, callback)
         local toggle = section.Toggle({
             Title = text,
@@ -4908,7 +4905,6 @@ local function createSectionMethods(section, window, tab)
         end
         return wrapped
     end
-    
     function section:Slider(text, flag, default, min, max, isFloat, callback)
         local sliderData = {
             Title = text,
@@ -4928,7 +4924,6 @@ local function createSectionMethods(section, window, tab)
         end
         return wrapped
     end
-    
     function section:Keybind(text, default, callback)
         local keybind = section.Keybind({
             Title = text,
@@ -4937,7 +4932,6 @@ local function createSectionMethods(section, window, tab)
         })
         return wrapElement(keybind, nil, "Keybind")
     end
-    
     function section:Dropdown(text, flag, options, callback)
         local dropdown = section.Dropdown({
             Title = text,
@@ -4965,7 +4959,6 @@ local function createSectionMethods(section, window, tab)
         end
         return wrapped
     end
-    
     function section:Textbox(text, flag, placeholder, callback)
         local input = section.Input({
             Title = text,
@@ -4987,7 +4980,6 @@ local function wrapSection(sectionObj, window, tab)
     return sectionObj
 end
 
--- 包装 Tab，使其 section 方法返回可用的 section
 local function wrapTab(tabObj, window)
     function tabObj:section(title, isOpen)
         local section = tabObj.Section({
@@ -4999,7 +4991,6 @@ local function wrapTab(tabObj, window)
     return tabObj
 end
 
--- 重写 CreateWindow 以返回支持上述功能的窗口
 local originalCreateWindow = aa.CreateWindow
 function aa.CreateWindow(ar, as)
     local window = originalCreateWindow(ar, as)
@@ -5021,7 +5012,7 @@ end
 local win = library:new("我的应用", "Dark")
 
 -- 添加 Tab 1: 主页
-local homeTab = win:Tab("主页", 6031064764)  -- 使用图标 ID
+local homeTab = win:Tab("主页", 6031064764)
 
 homeTab:section("基本控件", true):Label("欢迎使用 WindUI 原版库！")
 homeTab:section("交互演示", true):Button("点我弹出通知", function()
