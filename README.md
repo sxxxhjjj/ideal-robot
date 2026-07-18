@@ -1,4 +1,9 @@
 
+-- ============================================================
+--  补全版 WindUI（精简版 + 原版 a.T() 窗口创建模块）
+--  不改变原有布局，仅补充窗口功能
+-- ============================================================
+
 local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
 local b=game:GetService"RunService"local d=
 b.Heartbeat
@@ -6,7 +11,7 @@ local e=game:GetService"UserInputService"
 local f=game:GetService"TweenService"
 local g=game:GetService"LocalizationService"
 
--- 内联图标加载器（替代外部 mian f Yuan.lua）
+-- 内联图标加载器
 local h = {
     SetIconsType = function() end,
     Icon = function(self, name)
@@ -3646,7 +3651,13 @@ updateSliderSize()
 updateThumbPosition()
 return aj
 end
-return aa end function a.T()
+return aa end
+
+-- ============================================================
+--  从原版 main.lua 提取的 a.T() 窗口创建模块
+--  这是补全的关键部分，所有代码保持原版逻辑不变
+-- ============================================================
+function a.T()
 local aa=game:GetService"UserInputService"
 game:GetService"RunService"
 local ac=workspace.CurrentCamera
@@ -4577,7 +4588,11 @@ z
 return A
 end
 return ap
-end end end
+end end
+
+-- ============================================================
+--  入口点
+-- ============================================================
 local aa={
 Window=nil,
 Theme=nil,
@@ -4740,6 +4755,10 @@ function aa.Popup(ar,as)
 as.WindUI=aa
 return a.load'r'.new(as)
 end
+
+-- ============================================================
+--  aa.CreateWindow 调用 a.T() 创建窗口
+-- ============================================================
 function aa.CreateWindow(ar,as)
 local at=a.load'T'
 if not isfolder"WindUI"then
@@ -4819,6 +4838,9 @@ end
 return ay
 end
 
+-- ============================================================
+--  library 包装表（兼容精简版调用方式）
+-- ============================================================
 local library = {
     flags = {},
     _window = nil,
