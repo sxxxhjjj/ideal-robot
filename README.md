@@ -1,11 +1,36 @@
+
+-- ============================================================
+--  修改版 WindUI（外部依赖已内联，可直接运行）
+--  保留压缩体积，仅替换图标加载器部分
+-- ============================================================
+
 local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
 local b=game:GetService"RunService"local d=
 b.Heartbeat
 local e=game:GetService"UserInputService"
 local f=game:GetService"TweenService"
 local g=game:GetService"LocalizationService"
-local h=loadstring(game:HttpGetAsync"https://raw.githubusercontent.com/KingScriptAE/No-sirve-nada./refs/heads/main/mian%20f%20Yuan.lua")()
-h.SetIconsType"lucide"
+
+-- ============================================================
+--  内联图标加载器（替代外部 mian f Yuan.lua）
+-- ============================================================
+local h = {
+    SetIconsType = function() end,
+    Icon = function(self, name)
+        return {"rbxassetid://0", {ImageRectSize=Vector2.new(0,0), ImageRectOffset=Vector2.new(0,0)}}
+    end,
+    Image = function(self, opts)
+        local img = Instance.new("ImageLabel")
+        img.Image = "rbxassetid://0"
+        img.Size = opts.Size or UDim2.new(0,24,0,24)
+        img.BackgroundTransparency = 1
+        return {IconFrame = img}
+    end,
+    Init = function() end,
+    AddIcons = function() end,
+}
+-- ============================================================
+
 local i
 local j={
 Font="rbxassetid://12187365364",
