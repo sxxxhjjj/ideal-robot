@@ -1,34 +1,11 @@
-
--- ============================================================
---  补全版 WindUI（精简版 + 兼容窗口创建模块）
---  不改变原有布局，仅补充窗口功能
---  所有外部依赖已内联
--- ============================================================
-
 local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
 local b=game:GetService"RunService"local d=
 b.Heartbeat
 local e=game:GetService"UserInputService"
 local f=game:GetService"TweenService"
 local g=game:GetService"LocalizationService"
-
--- 内联图标加载器
-local h = {
-    SetIconsType = function() end,
-    Icon = function(self, name)
-        return {"rbxassetid://0", {ImageRectSize=Vector2.new(0,0), ImageRectOffset=Vector2.new(0,0)}}
-    end,
-    Image = function(self, opts)
-        local img = Instance.new("ImageLabel")
-        img.Image = "rbxassetid://0"
-        img.Size = opts.Size or UDim2.new(0,24,0,24)
-        img.BackgroundTransparency = 1
-        return {IconFrame = img}
-    end,
-    Init = function() end,
-    AddIcons = function() end,
-}
-
+local h=loadstring(game:HttpGetAsync"https://raw.githubusercontent.com/KingScriptAE/No-sirve-nada./refs/heads/main/mian%20f%20Yuan.lua")()
+h.SetIconsType"lucide"
 local i
 local j={
 Font="rbxassetid://12187365364",
@@ -3652,34 +3629,23 @@ updateSliderSize()
 updateThumbPosition()
 return aj
 end
-return aa end
-
--- ============================================================
---  兼容精简版的 a.T() 窗口创建模块
---  移除不存在的模块依赖，保留核心窗口功能
--- ============================================================
-function a.T()
+return aa end function a.T()
 local aa=game:GetService"UserInputService"
+game:GetService"RunService"
 local ac=workspace.CurrentCamera
-
--- 获取精简版已有的模块
+local ae=a.load'q'
 local af=a.load'a'
 local ag=af.New
 local ah=af.Tween
-
 local ai={
 UICorner=8,
 UIPadding=8,
 }
-
 local aj=a.load'j'.New
 local ak=a.load'k'.New
 local al=a.load't'.New
-
--- 精简版中没有 a.load'u' 和 a.load'v'，我们用空表替代
-local am={}
-local an={}
-
+local am=a.load'u'
+local an=a.load'v'
 return function(ao)
 local ap={
 Title=ao.Title or"UI Library",
@@ -3729,15 +3695,15 @@ ap.Resizable=true
 end
 if ap.Folder then
 makefolder("WindUI/"..ap.Folder)
-end
-
--- 跳过 AcrylicPaint（精简版不支持）
-ap.AcrylicPaint=nil
-
+end local
+ar, as=ae.AcrylicPaint{UseAcrylic=ap.Acrylic}
+ap.AcrylicPaint=ar
 local at=ag("UICorner",{
 CornerRadius=UDim.new(0,ap.UICorner)
 })
-
+if ap.Folder then
+ap.ConfigManager=an:Init(ap)
+end
 local au=ag("Frame",{
 Size=UDim2.new(0,32,0,32),
 Position=UDim2.new(1,0,1,0),
@@ -3755,7 +3721,6 @@ AnchorPoint=Vector2.new(0.5,0.5),
 ImageTransparency=1,
 })
 })
-
 local av=af.NewRoundFrame(ap.UICorner,"Squircle",{
 Size=UDim2.new(1,0,1,0),
 ImageTransparency=1,
@@ -3774,7 +3739,6 @@ AnchorPoint=Vector2.new(0.5,0.5),
 ImageTransparency=1,
 }),
 })
-
 local aw=af.NewRoundFrame(ap.UICorner,"Squircle",{
 Size=UDim2.new(1,0,1,0),
 ImageTransparency=1,
@@ -3782,7 +3746,6 @@ ImageColor3=Color3.new(0,0,0),
 ZIndex=999,
 Active=false,
 })
-
 ap.UIElements.SideBar=ag("ScrollingFrame",{
 Size=UDim2.new(
 1,
@@ -3821,7 +3784,6 @@ PaddingLeft=UDim.new(0,ap.UIPadding/2),
 PaddingRight=UDim.new(0,ap.UIPadding/2),
 }),
 })
-
 ap.UIElements.SideBarContainer=ag("Frame",{
 Size=UDim2.new(0,ap.SideBarWidth,1,ap.User.Enabled and-94-(ap.UIPadding*2)or-52),
 Position=UDim2.new(0,0,0,52),
@@ -3842,11 +3804,9 @@ AnchorPoint=Vector2.new(0,1),
 }),
 ap.UIElements.SideBar,
 })
-
 if ap.ScrollBarEnabled then
 al(ap.UIElements.SideBar,ap.UIElements.SideBarContainer.Content,ap,3)
 end
-
 ap.UIElements.MainBar=ag("Frame",{
 Size=UDim2.new(1,-ap.UIElements.SideBarContainer.AbsoluteSize.X,1,-52),
 Position=UDim2.new(1,0,1,0),
@@ -3867,7 +3827,6 @@ PaddingRight=UDim.new(0,ap.UIPadding/2),
 PaddingBottom=UDim.new(0,ap.UIPadding/2),
 })
 })
-
 local ax=ag("ImageLabel",{
 Image="rbxassetid://8992230677",
 ImageColor3=Color3.new(0,0,0),
@@ -3880,7 +3839,6 @@ BackgroundTransparency=1,
 ZIndex=-999999999999999,
 Name="Blur",
 })
-
 local ay
 if aa.TouchEnabled and not aa.KeyboardEnabled then
 ay=false
@@ -3889,7 +3847,6 @@ ay=true
 else
 ay=nil
 end
-
 local az
 local aA
 if ap.User.Enabled then local
@@ -4012,7 +3969,6 @@ ah(aA.Outline,0.04,{ImageTransparency=1}):Play()
 end)
 end
 end
-
 local aB
 local aC=false
 local aD=typeof(ap.Background)=="string"and string.match(ap.Background,"^video:(.+)")or nil
@@ -4062,7 +4018,6 @@ CornerRadius=UDim.new(0,ap.UICorner)
 }),
 })
 end
-
 local aE=af.NewRoundFrame(99,"Squircle",{
 ImageTransparency=.8,
 ImageColor3=Color3.new(1,1,1),
@@ -4079,7 +4034,6 @@ Active=true,
 ZIndex=99,
 })
 })
-
 function createAuthor(b)
 return ag("TextLabel",{
 Text=b,
@@ -4097,13 +4051,11 @@ TextColor3="Text"
 Name="Author",
 })
 end
-
 local b
 local e
 if ap.Author then
 b=createAuthor(ap.Author)
 end
-
 local g=ag("TextLabel",{
 Text=ap.Title,
 FontFace=Font.new(af.Font,Enum.FontWeight.SemiBold),
@@ -4116,7 +4068,6 @@ ThemeTag={
 TextColor3="Text"
 }
 })
-
 ap.UIElements.Main=ag("Frame",{
 Size=ap.Size,
 Position=ap.Position,
@@ -4125,6 +4076,7 @@ Parent=ao.Parent,
 AnchorPoint=Vector2.new(0.5,0.5),
 Active=true,
 },{
+ap.AcrylicPaint.Frame,
 ax,
 af.NewRoundFrame(ap.UICorner,"Squircle",{
 ImageTransparency=1,
@@ -4140,6 +4092,7 @@ aB,
 aE,
 at,
 }),
+UIStroke,
 au,
 av,
 aw,
@@ -4235,7 +4188,6 @@ PaddingBottom=UDim.new(0,ap.UIPadding),
 })
 })
 })
-
 af.AddSignal(ap.UIElements.Main.Main.Topbar.Left:GetPropertyChangedSignal"AbsoluteSize",function()
 local h=0
 local i=ap.UIElements.Main.Main.Topbar.Right.UIListLayout.AbsoluteContentSize.X
@@ -4255,7 +4207,6 @@ ap.UIElements.Main.Main.Topbar.Center.Size=UDim2.new(
 0
 )
 end)
-
 function ap.CreateTopbarButton(h,i,j,l,m,p)
 local r=af.Image(
 j,
@@ -4320,7 +4271,6 @@ ah(x.Outline,.1,{ImageTransparency=1}):Play()
 end)
 return x
 end
-
 local h=af.Drag(
 ap.UIElements.Main,
 {ap.UIElements.Main.Main.Topbar,aE.Frame},
@@ -4334,7 +4284,6 @@ end
 end
 end
 )
-
 if not aC and ap.Background and typeof(ap.Background)=="table"then
 local i=ag"UIGradient"
 for j,l in next,ap.Background do
@@ -4343,12 +4292,11 @@ end
 ap.UIElements.BackgroundGradient=af.NewRoundFrame(ap.UICorner,"Squircle",{
 Size=UDim2.new(1,0,1,0),
 Parent=ap.UIElements.Main.Background,
-ImageTransparency=ap.Transparent and 0.15 or 0
+ImageTransparency=ap.Transparent and an.WindUI.TransparencyValue or 0
 },{
 i
 })
 end
-
 local i=a.load'w'.New(ap)
 task.spawn(function()
 if ap.Icon then
@@ -4368,7 +4316,6 @@ else
 i:SetIcon(ap.Icon)
 end
 end)
-
 function ap.SetToggleKey(j,l)
 ap.ToggleKey=l
 end
@@ -4390,13 +4337,13 @@ function ap.SetBackgroundImageTransparency(j,l)
 ap.UIElements.Main.Background.ImageLabel.ImageTransparency=l
 ap.BackgroundImageTransparency=l
 end
-
 local j
 local l
+af.Icon"minimize"
+af.Icon"maximize"
 ap:CreateTopbarButton("Fullscreen","maximize",function()
 ap:ToggleFullscreen()
 end,998)
-
 function ap.ToggleFullscreen(m)
 local p=ap.IsFullscreen
 h:Set(p)
@@ -4413,7 +4360,6 @@ ah(ap.UIElements.Main,0.45,{Size=p and l or UDim2.new(1,-20,1,-72)},Enum.EasingS
 ah(ap.UIElements.Main,0.45,{Position=p and j or UDim2.new(0.5,0,0.5,26)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 ap.IsFullscreen=not p
 end
-
 ap:CreateTopbarButton("Minimize","minus",function()
 ap:Close()
 task.spawn(function()
@@ -4423,20 +4369,18 @@ i:Visible(true)
 end
 end)
 end,997)
-
 function ap.OnClose(m,p)
 ap.OnCloseCallback=p
 end
 function ap.OnDestroy(m,p)
 ap.OnDestroyCallback=p
 end
-
 function ap.Open(m)
 task.spawn(function()
 task.wait(.06)
 ap.Closed=false
 ah(ap.UIElements.Main.Background,0.2,{
-ImageTransparency=ap.Transparent and 0.15 or 0,
+ImageTransparency=ap.Transparent and an.WindUI.TransparencyValue or 0,
 },Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 if ap.UIElements.BackgroundGradient then
 ah(ap.UIElements.BackgroundGradient,0.2,{
@@ -4455,6 +4399,9 @@ ImageTransparency=aB:IsA"ImageLabel"and 0 or nil,
 },Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 end
 ah(ax,0.25,{ImageTransparency=.7},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if UIStroke then
+ah(UIStroke,0.25,{Transparency=.8},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
 task.spawn(function()
 task.wait(.5)
 ah(aE,.45,{Size=UDim2.new(0,200,0,4),ImageTransparency=.8},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
@@ -4470,10 +4417,10 @@ ap.UIElements.Main.Visible=true
 task.spawn(function()
 task.wait(.05)
 ap.UIElements.Main:WaitForChild"Main".Visible=true
+an.WindUI:ToggleAcrylic(true)
 end)
 end)
 end
-
 function ap.Close(m)
 local p={}
 if ap.OnCloseCallback then
@@ -4481,6 +4428,7 @@ task.spawn(function()
 af.SafeCallback(ap.OnCloseCallback)
 end)
 end
+an.WindUI:ToggleAcrylic(false)
 ap.UIElements.Main:WaitForChild"Main".Visible=false
 ap.CanDropdown=false
 ap.Closed=true
@@ -4504,6 +4452,9 @@ ImageTransparency=aB:IsA"ImageLabel"and 1 or nil,
 },Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 end
 ah(ax,0.25,{ImageTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if UIStroke then
+ah(UIStroke,0.25,{Transparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
 ah(aE,.3,{Size=UDim2.new(0,0,0,4),ImageTransparency=1},Enum.EasingStyle.Exponential,Enum.EasingDirection.InOut):Play()
 ah(av.ImageLabel,.3,{ImageTransparency=1},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
 h:Set(false)
@@ -4518,27 +4469,28 @@ task.spawn(function()
 af.SafeCallback(ap.OnDestroyCallback)
 end)
 end
+if ap.AcrylicPaint.Model then
+ap.AcrylicPaint.Model:Destroy()
+end
 ap.Destroyed=true
 task.wait(0.4)
 ao.Parent.Parent:Destroy()
 end
 return p
 end
-
 function ap.Destroy(m)
 ap:Close():Destroy()
 end
-
 function ap.ToggleTransparency(m,p)
 ap.Transparent=p
-ap.UIElements.Main.Background.ImageTransparency=p and 0.15 or 0
+an.WindUI.Transparent=p
+ap.UIElements.Main.Background.ImageTransparency=p and an.WindUI.TransparencyValue or 0
 ap.UIElements.MainBar.Background.ImageTransparency=p and 0.97 or 0.95
 end
-
 function ap.SetUIScale(m,p)
-ah(an.WindUI and an.WindUI.ScreenGui and an.WindUI.ScreenGui.UIScale or Instance.new("UIScale"),.2,{Scale=p},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+an.WindUI.UIScale=p
+ah(an.WindUI.ScreenGui.UIScale,.2,{Scale=p},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
 end
-
 do
 if(ac.ViewportSize.X-40<ap.UIElements.Main.AbsoluteSize.X)
 or(ac.ViewportSize.Y-40<ap.UIElements.Main.AbsoluteSize.Y)then
@@ -4547,14 +4499,12 @@ ap:SetUIScale(.9)
 end
 end
 end
-
 if not ay and ap.IsOpenButtonEnabled then
 af.AddSignal(i.Button.TextButton.MouseButton1Click,function()
 i:Visible(false)
 ap:Open()
 end)
 end
-
 af.AddSignal(aa.InputBegan,function(m,p)
 if p then return end
 if m.KeyCode==ap.ToggleKey then
@@ -4565,39 +4515,31 @@ ap:Close()
 end
 end
 end)
-
 task.spawn(function()
 ap:Open()
 end)
-
 function ap.EditOpenButton(m,p)
 return i:Edit(p)
 end
-
 local m=a.load'P'
 local p=a.load'Q'
-local r=m.Init(ap,{Window=ap},an)
+local r=m.Init(ap,an.WindUI,an.Parent.Parent.ToolTips)
 r:OnChange(function(x)ap.CurrentTab=x end)
 ap.TabModule=m
-
 function ap.Tab(x,z)
 z.Parent=ap.UIElements.SideBar.Frame
-return r.New(z,1)
+return r.New(z,an.WindUI.UIScale)
 end
-
 function ap.SelectTab(x,z)
 r:SelectTab(z)
 end
-
 function ap.Section(x,z)
-return p.New(z,ap.UIElements.SideBar.Frame,ap.Folder,1)
+return p.New(z,ap.UIElements.SideBar.Frame,ap.Folder,an.WindUI.UIScale)
 end
-
 function ap.IsResizable(x,z)
 ap.Resizable=z
 ap.CanResize=z
 end
-
 function ap.Divider(x)
 local z=ag("Frame",{
 Size=UDim2.new(1,0,0,1),
@@ -4617,13 +4559,8 @@ z
 })
 return A
 end
-
 return ap
-end end
-
--- ============================================================
---  入口点
--- ============================================================
+end end end
 local aa={
 Window=nil,
 Theme=nil,
@@ -4746,6 +4683,11 @@ function aa.ToggleAcrylic(ar,as)
 if aa.Window and aa.Window.AcrylicPaint and aa.Window.AcrylicPaint.Model then
 aa.Window.Acrylic=as
 aa.Window.AcrylicPaint.Model.Transparency=as and 0.98 or 1
+if as then
+al.Enable()
+else
+al.Disable()
+end
 end
 end
 aa:SetTheme"Dark"
@@ -4781,10 +4723,6 @@ function aa.Popup(ar,as)
 as.WindUI=aa
 return a.load'r'.new(as)
 end
-
--- ============================================================
---  aa.CreateWindow 调用 a.T() 创建窗口
--- ============================================================
 function aa.CreateWindow(ar,as)
 local at=a.load'T'
 if not isfolder"WindUI"then
@@ -4859,14 +4797,11 @@ local ay=at(as)
 aa.Transparent=as.Transparent
 aa.Window=ay
 if as.Acrylic then
--- 简化版丙烯酸初始化
+al.init()
 end
 return ay
 end
 
--- ============================================================
---  library 包装表（兼容精简版调用方式）
--- ============================================================
 local library = {
     flags = {},
     _window = nil,
