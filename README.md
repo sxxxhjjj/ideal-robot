@@ -1576,7 +1576,591 @@ end
 end)
 return an
 end
-return aa end function a.z()
+return aa end
+-- ===== 补全缺失模块开始 =====
+function a.u()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah,ai)
+ah=ah or"Input"
+local aj=10
+local ak
+if af and af~=""then
+ak=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local al=ah~="Input"
+local am=ac("TextBox",{
+BackgroundTransparency=1,
+TextSize=17,
+FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
+Size=UDim2.new(1,ak and-29 or 0,1,0),
+PlaceholderText=ae,
+ClearTextOnFocus=ai or false,
+ClipsDescendants=true,
+TextWrapped=al,
+MultiLine=al,
+TextXAlignment="Left",
+TextYAlignment=ah=="Input"and"Center"or"Top",
+ThemeTag={
+PlaceholderColor3="PlaceholderText",
+TextColor3="Text",
+},
+})
+local an=ac("Frame",{
+Size=UDim2.new(1,0,0,42),
+Parent=ag,
+BackgroundTransparency=1
+},{
+ac("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ab.NewRoundFrame(aj,"Squircle",{
+ThemeTag={
+ImageColor3="Accent",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.85,
+}),
+ab.NewRoundFrame(aj,"SquircleOutline",{
+ThemeTag={
+ImageColor3="Outline",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.9,
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=.95
+},{
+ac("UIPadding",{
+PaddingTop=UDim.new(0,ah=="Input"and 0 or 12),
+PaddingLeft=UDim.new(0,12),
+PaddingRight=UDim.new(0,12),
+PaddingBottom=UDim.new(0,ah=="Input"and 0 or 12),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment=ah=="Input"and"Center"or"Top",
+HorizontalAlignment="Left",
+}),
+ak,
+am,
+})
+})
+})
+ab.AddSignal(am.FocusLost,function()
+if ah then
+ab.SafeCallback(ah,am.Text)
+end
+end)
+return an
+end
+return aa end
+function a.v()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah,ai)
+ah=ah or"Input"
+local aj=10
+local ak
+if af and af~=""then
+ak=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local al=ah~="Input"
+local am=ac("TextBox",{
+BackgroundTransparency=1,
+TextSize=17,
+FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
+Size=UDim2.new(1,ak and-29 or 0,1,0),
+PlaceholderText=ae,
+ClearTextOnFocus=ai or false,
+ClipsDescendants=true,
+TextWrapped=al,
+MultiLine=al,
+TextXAlignment="Left",
+TextYAlignment=ah=="Input"and"Center"or"Top",
+ThemeTag={
+PlaceholderColor3="PlaceholderText",
+TextColor3="Text",
+},
+})
+local an=ac("Frame",{
+Size=UDim2.new(1,0,0,42),
+Parent=ag,
+BackgroundTransparency=1
+},{
+ac("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ab.NewRoundFrame(aj,"Squircle",{
+ThemeTag={
+ImageColor3="Accent",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.85,
+}),
+ab.NewRoundFrame(aj,"SquircleOutline",{
+ThemeTag={
+ImageColor3="Outline",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.9,
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=.95
+},{
+ac("UIPadding",{
+PaddingTop=UDim.new(0,ah=="Input"and 0 or 12),
+PaddingLeft=UDim.new(0,12),
+PaddingRight=UDim.new(0,12),
+PaddingBottom=UDim.new(0,ah=="Input"and 0 or 12),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment=ah=="Input"and"Center"or"Top",
+HorizontalAlignment="Left",
+}),
+ak,
+am,
+})
+})
+})
+ab.AddSignal(am.FocusLost,function()
+if ah then
+ab.SafeCallback(ah,am.Text)
+end
+end)
+return an
+end
+return aa end
+function a.w()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag)
+local ah=10
+local ai
+if af and af~=""then
+ai=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local aj=ac("TextLabel",{
+BackgroundTransparency=1,
+TextSize=17,
+FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
+Size=UDim2.new(1,ai and-29 or 0,1,0),
+TextXAlignment="Left",
+ThemeTag={
+TextColor3="Text",
+},
+Text=ae,
+})
+local ak=ac("TextButton",{
+Size=UDim2.new(1,0,0,42),
+Parent=ag,
+BackgroundTransparency=1,
+Text="",
+},{
+ac("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ab.NewRoundFrame(ah,"Squircle",{
+ThemeTag={
+ImageColor3="Accent",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.85,
+}),
+ab.NewRoundFrame(ah,"SquircleOutline",{
+ThemeTag={
+ImageColor3="Outline",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.9,
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(ah,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=.95
+},{
+ac("UIPadding",{
+PaddingLeft=UDim.new(0,12),
+PaddingRight=UDim.new(0,12),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment="Center",
+HorizontalAlignment="Left",
+}),
+ai,
+aj,
+})
+})
+})
+return ak
+end
+return aa end
+function a.x()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah)
+local ai=ac("Frame",{
+Size=UDim2.new(0,ah,1,0),
+BackgroundTransparency=1,
+Position=UDim2.new(1,0,0,0),
+AnchorPoint=Vector2.new(1,0),
+Parent=ag,
+ZIndex=999,
+Active=true,
+})
+local aj=ab.NewRoundFrame(ah/2,"Squircle",{
+Size=UDim2.new(1,0,0,0),
+ImageTransparency=0.85,
+ThemeTag={ImageColor3="Text"},
+Parent=ai,
+})
+local ak=ac("Frame",{
+Size=UDim2.new(1,12,1,12),
+Position=UDim2.new(0.5,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+BackgroundTransparency=1,
+Active=true,
+ZIndex=999,
+Parent=aj,
+})
+local al=false
+local am=0
+local function updateSliderSize()
+local an=ae
+local ao=an.AbsoluteCanvasSize.Y
+local ap=an.AbsoluteWindowSize.Y
+if ao<=ap then
+aj.Visible=false
+return
+end
+local aq=math.clamp(ap/ao,0.1,1)
+aj.Size=UDim2.new(1,0,aq,0)
+aj.Visible=true
+end
+local function updateScrollingFramePosition()
+local an=aj.Position.Y.Scale
+local ao=ae.AbsoluteCanvasSize.Y
+local ap=ae.AbsoluteWindowSize.Y
+local aq=math.max(ao-ap,0)
+if aq<=0 then return end
+local ar=math.max(1-aj.Size.Y.Scale,0)
+if ar<=0 then return end
+local as=an/ar
+ae.CanvasPosition=Vector2.new(
+ae.CanvasPosition.X,
+as*aq
+)
+end
+local function updateThumbPosition()
+if al then return end
+local an=ae.CanvasPosition.Y
+local ao=ae.AbsoluteCanvasSize.Y
+local ap=ae.AbsoluteWindowSize.Y
+local aq=math.max(ao-ap,0)
+if aq<=0 then
+aj.Position=UDim2.new(0,0,0,0)
+return
+end
+local ar=an/aq
+local as=math.max(1-aj.Size.Y.Scale,0)
+local at=math.clamp(ar*as,0,as)
+aj.Position=UDim2.new(0,0,at,0)
+end
+local an
+local ao
+ac.AddSignal(aj.InputBegan,function(ap)
+if(ap.UserInputType==Enum.UserInputType.MouseButton1 or ap.UserInputType==Enum.UserInputType.Touch)then
+local aq=aj.AbsolutePosition.Y
+local ar=aq+aj.AbsoluteSize.Y
+if not(ap.Position.Y>=aq and ap.Position.Y<=ar)then
+local as=ai.AbsolutePosition.Y
+local at=ai.AbsoluteSize.Y
+local au=aj.AbsoluteSize.Y
+local av=ap.Position.Y-as-au/2
+local aw=at-au
+local ax=math.clamp(av/aw,0,1-aj.Size.Y.Scale)
+aj.Position=UDim2.new(0,0,ax,0)
+updateScrollingFramePosition()
+end
+end
+end)
+ac.AddSignal(ak.InputBegan,function(ap)
+if ap.UserInputType==Enum.UserInputType.MouseButton1 or ap.UserInputType==Enum.UserInputType.Touch then
+al=true
+am=ap.Position.Y-aj.AbsolutePosition.Y
+an=game:GetService"UserInputService".InputChanged:Connect(function(aq)
+if aq.UserInputType==Enum.UserInputType.MouseMovement or aq.UserInputType==Enum.UserInputType.Touch then
+local ar=ai.AbsolutePosition.Y
+local as=ai.AbsoluteSize.Y
+local at=aj.AbsoluteSize.Y
+local au=aq.Position.Y-ar-am
+local av=as-at
+local aw=math.clamp(au/av,0,1-aj.Size.Y.Scale)
+aj.Position=UDim2.new(0,0,aw,0)
+updateScrollingFramePosition()
+end
+end)
+ao=game:GetService"UserInputService".InputEnded:Connect(function(aq)
+if aq.UserInputType==Enum.UserInputType.MouseButton1 or aq.UserInputType==Enum.UserInputType.Touch then
+al=false
+if an then an:Disconnect()end
+if ao then ao:Disconnect()end
+end
+end)
+end
+end)
+ac.AddSignal(ae:GetPropertyChangedSignal"AbsoluteWindowSize",function()
+updateSliderSize()
+updateThumbPosition()
+end)
+ac.AddSignal(ae:GetPropertyChangedSignal"AbsoluteCanvasSize",function()
+updateSliderSize()
+updateThumbPosition()
+end)
+ac.AddSignal(ae:GetPropertyChangedSignal"CanvasPosition",function()
+if not al then
+updateThumbPosition()
+end
+end)
+updateSliderSize()
+updateThumbPosition()
+return ai
+end
+return aa end
+function a.y()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag)
+local ah={
+Title=af.Title or"Tag",
+Icon=af.Icon,
+Color=af.Color or Color3.fromHex"#315dff",
+Radius=af.Radius or 999,
+Border=af.Border or false,
+TagFrame=nil,
+Height=26,
+Padding=10,
+TextSize=14,
+IconSize=16,
+}
+local ai
+if ah.Icon then
+ai=ab.Image(ah.Icon,ah.Icon,0,af.Window,"Tag",false)
+ai.Size=UDim2.new(0,ah.IconSize,0,ah.IconSize)
+ai.ImageLabel.ImageColor3=typeof(ah.Color)=="Color3"
+and ab.GetTextColorForHSB(ah.Color)
+or typeof(ah.Color)=="string"
+and(ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme)))
+end
+local aj=ac("TextLabel",{
+BackgroundTransparency=1,
+AutomaticSize="XY",
+TextSize=ah.TextSize,
+FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
+Text=ah.Title,
+TextColor3=typeof(ah.Color)=="Color3"and ab.GetTextColorForHSB(ah.Color)or typeof(
+ah.Color
+)=="string"and(ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme))),
+})
+local ak
+if typeof(ah.Color)=="table"then
+ak=ac"UIGradient"
+for al,am in next,ah.Color do
+ak[al]=am
+end
+aj.TextColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
+if ai then
+ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
+end
+end
+local al=ab.NewRoundFrame(ah.Radius,"Squircle",{
+AutomaticSize="X",
+Size=UDim2.new(0,0,0,ah.Height),
+Parent=ag,
+ImageColor3=typeof(ah.Color)=="Color3"and ah.Color
+or typeof(ah.Color)=="table"and Color3.new(1,1,1)
+or nil,
+ThemeTag=typeof(ah.Color)=="string"and{
+ImageColor3=ah.Color,
+},
+},{
+ak,
+ab.NewRoundFrame(ah.Radius+1,"SquircleGlass",{
+Size=UDim2.new(1,1,1,1),
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+ThemeTag={
+ImageColor3="White",
+},
+ImageTransparency=0.75,
+}),
+ac("Frame",{
+Size=UDim2.new(0,0,1,0),
+AutomaticSize="X",
+Name="Content",
+BackgroundTransparency=1,
+},{
+ai,
+aj,
+ac("UIPadding",{
+PaddingLeft=UDim.new(0,ah.Padding),
+PaddingRight=UDim.new(0,ah.Padding),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+Padding=UDim.new(0,ah.Padding/1.5),
+}),
+}),
+})
+function ah.SetTitle(am,an)
+ah.Title=an
+aj.Text=an
+return ah
+end
+function ah.SetColor(am,an)
+ah.Color=an
+if typeof(an)=="table"then
+local ao=ab.GetAverageColor(an)
+ad(aj,0.06,{TextColor3=ab.GetTextColorForHSB(ao)}):Play()
+local ap=al:FindFirstChildOfClass"UIGradient"or ac("UIGradient",{Parent=al})
+for aq,ar in next,an do
+ap[aq]=ar
+end
+ad(al,0.06,{ImageColor3=Color3.new(1,1,1)}):Play()
+else
+if ak then
+ak:Destroy()
+end
+ad(aj,0.06,{TextColor3=ab.GetTextColorForHSB(an)}):Play()
+if ai then
+ad(ai.ImageLabel,0.06,{ImageColor3=ab.GetTextColorForHSB(an)}):Play()
+end
+ad(al,0.06,{ImageColor3=an}):Play()
+end
+return ah
+end
+function ah.SetIcon(am,an)
+ah.Icon=an
+if an then
+ai=ab.Image(an,an,0,af.Window,"Tag",false)
+ai.Size=UDim2.new(0,ah.IconSize,0,ah.IconSize)
+ai.Parent=al
+if typeof(ah.Color)=="Color3"then
+ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ah.Color)
+elseif typeof(ah.Color)=="table"then
+ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
+end
+else
+if ai then
+ai:Destroy()
+ai=nil
+end
+end
+return ah
+end
+function ah.Destroy(am)
+al:Destroy()
+return ah
+end
+return ah
+end
+return aa end
+function a.z()
 local aa=a.load'a'
 local ab=aa.New
 local ac={}
@@ -1612,7 +2196,9 @@ end
 end
 return ag.__type,ag
 end
-return ac end function a.A()
+return ac end
+-- ===== 补全缺失模块结束 =====
+function a.A()
 local aa=a.load'a'
 local ab=aa.New
 local ac={}
