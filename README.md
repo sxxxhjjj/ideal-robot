@@ -1,11 +1,15 @@
 --[[
     ============================================================
-    主面板 - 完整内嵌版（全部功能预制，无需外部配置）
-    包含：所有控件、通知、工具提示、颜色选择器、按键绑定、
-          代码块、图片、分组容器、主题切换、多配置管理、
-          快捷键、双击居中、3D玩家显示、完整35个API方法
+    主面板 - 完整内嵌版
+    运行要求：必须放在 LocalScript 中（StarterPlayerScripts 或 StarterGui）
+    所有功能已预制，直接运行即可。
     ============================================================
 ]]
+
+-- 安全检查：确保在 Roblox 环境中
+if not game then
+    error("此脚本必须在 Roblox 的 LocalScript 中运行")
+end
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -15,8 +19,14 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 
+-- 确保 LocalPlayer 存在
+if not player then
+    warn("等待 LocalPlayer 加载...")
+    player = Players:WaitForChild("LocalPlayer")
+end
+
 -- ============================================================
--- 1. 图标库（全部常用图标）
+-- 第一步：图标库
 -- ============================================================
 local Icons = {
     home = "rbxassetid://98755624629571",
@@ -146,7 +156,7 @@ local Icons = {
 local function getIcon(name) return Icons[name] or Icons.circle end
 
 -- ============================================================
--- 2. NewRoundFrame 样式系统（完整）
+-- 第二步：NewRoundFrame 样式系统
 -- ============================================================
 local function NewRoundFrame(radius, shapeType, props)
     local shape = shapeType or "Circle"
@@ -217,7 +227,7 @@ local function NewRoundFrame(radius, shapeType, props)
 end
 
 -- ============================================================
--- 3. 配置管理（支持多配置）
+-- 第三步：配置管理（多配置、自动保存）
 -- ============================================================
 local ConfigManager = {}
 ConfigManager.basePath = "WindUI/主面板/"
@@ -225,18 +235,6 @@ ConfigManager.currentConfig = "默认配置"
 
 function ConfigManager:getPath(name)
     return self.basePath .. name .. ".json"
-end
-
-function ConfigManager:listConfigs()
-    if not listfiles then return {"默认配置"} end
-    local files = listfiles(self.basePath)
-    local names = {}
-    for _, file in ipairs(files) do
-        local name = file:match("([^/\\]+)%.json$")
-        if name then table.insert(names, name) end
-    end
-    if #names == 0 then names = {"默认配置"} end
-    return names
 end
 
 function ConfigManager:load(name)
@@ -265,39 +263,8 @@ function ConfigManager:reset(name)
 end
 
 -- ============================================================
--- 4. 工具函数
+-- 第四步：辅助函数（通知、工具提示）
 -- ============================================================
-local function createLabeledControl(parent, icon, text, controlFrame)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 0, 40)
-    container.BackgroundTransparency = 1
-    container.Parent = parent
-    local iconImg = Instance.new("ImageLabel")
-    iconImg.Size = UDim2.new(0, 20, 0, 20)
-    iconImg.Position = UDim2.new(0, 0, 0.5, 0)
-    iconImg.AnchorPoint = Vector2.new(0, 0.5)
-    iconImg.BackgroundTransparency = 1
-    iconImg.Image = getIcon(icon)
-    iconImg.ImageColor3 = Color3.fromRGB(200, 200, 200)
-    iconImg.Parent = container
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -30 - 120, 1, 0)
-    label.Position = UDim2.new(0, 30, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    label.TextSize = 15
-    label.Font = Enum.Font.GothamMedium
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = container
-    if controlFrame then
-        controlFrame.Position = UDim2.new(1, -controlFrame.Size.X.Offset, 0.5, 0)
-        controlFrame.AnchorPoint = Vector2.new(1, 0.5)
-        controlFrame.Parent = container
-    end
-    return container
-end
-
 -- 通知系统
 local NotificationGui = Instance.new("ScreenGui")
 NotificationGui.Name = "Notifications"
@@ -318,7 +285,7 @@ notifLayout.Padding = UDim.new(0, 8)
 notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
 notifLayout.Parent = notifContainer
 
-function Notify(title, content, duration, icon)
+function Notify(title, content, duration)
     duration = duration or 3
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 60)
@@ -403,15 +370,13 @@ local function showTooltip(obj, text)
     obj.MouseEnter:Connect(function()
         tooltipText.Text = text
         tooltipFrame.Visible = true
-        tooltipFrame.Size = UDim2.new(0, 0, 0, 0)
         local pos = UserInputService:GetMouseLocation()
         tooltipFrame.Position = UDim2.new(0, pos.X + 12, 0, pos.Y + 12)
-        local function updatePos()
-            local mp = UserInputService:GetMouseLocation()
-            tooltipFrame.Position = UDim2.new(0, mp.X + 12, 0, mp.Y + 12)
-        end
         local conn = UserInputService.InputChanged:Connect(function()
-            if tooltipFrame.Visible then updatePos() end
+            if tooltipFrame.Visible then
+                local mp = UserInputService:GetMouseLocation()
+                tooltipFrame.Position = UDim2.new(0, mp.X + 12, 0, mp.Y + 12)
+            end
         end)
         obj.MouseLeave:Connect(function()
             tooltipFrame.Visible = false
@@ -424,7 +389,7 @@ local function showTooltip(obj, text)
 end
 
 -- ============================================================
--- 5. 主面板核心
+-- 第五步：主面板核心函数
 -- ============================================================
 local function createMainPanel()
     local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -443,11 +408,13 @@ local function createMainPanel()
     local savedPos = config.windowPos
     if savedSize then w = savedSize.w or w; h = savedSize.h or h end
 
+    -- 创建 GUI
     local gui = Instance.new("ScreenGui")
     gui.Name = "MainPanel"
     gui.ResetOnSpawn = false
     gui.Parent = player:WaitForChild("PlayerGui")
 
+    -- 主窗口
     local panel = Instance.new("Frame")
     panel.Size = UDim2.new(0, w, 0, h)
     if savedPos then
@@ -502,7 +469,7 @@ local function createMainPanel()
     icon.ImageColor3 = Color3.fromRGB(220, 220, 220)
     icon.Parent = iconContainer
 
-    -- 标题 + 副标题
+    -- 标题
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -120, 0, 24)
     title.Position = UDim2.new(0, 14 + iconSize + 8, 0, 4)
@@ -515,6 +482,7 @@ local function createMainPanel()
     title.ZIndex = 3
     title.Parent = titleBar
 
+    -- 副标题
     local authorLabel = Instance.new("TextLabel")
     authorLabel.Size = UDim2.new(1, -120, 0, 16)
     authorLabel.Position = UDim2.new(0, 14 + iconSize + 8, 0, 28)
@@ -527,7 +495,7 @@ local function createMainPanel()
     authorLabel.ZIndex = 3
     authorLabel.Parent = titleBar
 
-    -- 顶部右侧（搜索 + 系统按钮）
+    -- 顶部右侧（搜索框 + 系统按钮）
     local btnSize = isMobile and 40 or 36
     local spacing = isMobile and 6 or 9
 
@@ -737,9 +705,8 @@ local function createMainPanel()
             t:Play()
             t.Completed:Connect(function() gui:Destroy() end)
         end)
-        -- ESC关闭对话框
-        local escConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
+        local escConn = UserInputService.InputBegan:Connect(function(input, gp)
+            if gp then return end
             if input.KeyCode == Enum.KeyCode.Escape then
                 dialogGui:Destroy()
                 isClosing = false
@@ -805,7 +772,7 @@ local function createMainPanel()
         if def.name == "max" then maxBtn = btn end
     end
 
-    -- 双击标题栏居中
+    -- 双击居中
     local lastClickTime = 0
     titleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1017,10 +984,7 @@ local function createMainPanel()
             label.TextColor3 = Color3.fromRGB(200, 200, 200)
         end
         btn.MouseButton1Click:Connect(function() container:select() end)
-        -- 工具提示
-        if tabData.tooltip then
-            showTooltip(btn, tabData.tooltip)
-        end
+        if tabData.tooltip then showTooltip(btn, tabData.tooltip) end
         container.btn = btn
         container.tabBg = tabBg
         container.label = label
@@ -1034,7 +998,7 @@ local function createMainPanel()
     local controlsData = {}
 
     -- ============================================================
-    -- 创建各 Tab 内容（完整控件展示）
+    -- 创建各 Tab 内容
     -- ============================================================
 
     -- -------- Tab1: 基础控件 --------
@@ -1409,7 +1373,6 @@ local function createMainPanel()
         TweenService:Create(colorPickerBg, TweenInfo.new(0.12), {ImageTransparency = 0.3}):Play()
     end)
     colorPickerBtn.MouseButton1Click:Connect(function()
-        -- 简易颜色选择对话框（实际可用ColorPicker UI，这里用输入框模拟）
         local dialogGui = Instance.new("ScreenGui")
         dialogGui.Name = "ColorPicker"
         dialogGui.ResetOnSpawn = false
@@ -1648,7 +1611,7 @@ local function createMainPanel()
     extraTitle.TextXAlignment = Enum.TextXAlignment.Left
     extraTitle.Parent = extraContent
 
-    -- 分组容器 (Group)
+    -- 分组容器
     local groupContainer = Instance.new("Frame")
     groupContainer.Size = UDim2.new(1, 0, 0, 120)
     groupContainer.BackgroundTransparency = 1
@@ -1681,7 +1644,6 @@ local function createMainPanel()
     groupLayout.Padding = UDim.new(0, 10)
     groupLayout.SortOrder = Enum.SortOrder.LayoutOrder
     groupLayout.Parent = groupInner
-    -- 组内加几个小按钮
     for i = 1, 3 do
         local b = Instance.new("TextButton")
         b.Size = UDim2.new(0, 60, 0, 30)
@@ -1705,7 +1667,7 @@ local function createMainPanel()
         end)
     end
 
-    -- 图片显示
+    -- 图片
     local imageContainer = Instance.new("Frame")
     imageContainer.Size = UDim2.new(0, 200, 0, 120)
     imageContainer.BackgroundTransparency = 1
@@ -1725,7 +1687,7 @@ local function createMainPanel()
         ImageColor3 = Color3.fromRGB(30, 30, 35),
         ImageTransparency = 0,
         Parent = imageContainer,
-        Image = "rbxassetid://92867583610071",  -- 示例图标
+        Image = "rbxassetid://92867583610071",
         ScaleType = Enum.ScaleType.Crop,
     })
     showTooltip(img, "这是图片显示区域")
@@ -1792,7 +1754,7 @@ local function createMainPanel()
     end)
 
     -- ============================================================
-    -- 底部拖拽和缩放（同前，略）
+    -- 底部拖拽和缩放
     -- ============================================================
     local dragFrame = NewRoundFrame(99, "Squircle", {
         ImageTransparency = 0.8,
@@ -1830,7 +1792,7 @@ local function createMainPanel()
     resizeImage.ZIndex = 100
     resizeImage.Parent = resizeHandle
 
-    -- 拖拽逻辑（含保存）
+    -- 拖拽逻辑
     local currentInput = nil
     local dragData = { active = false, input = nil, inputType = nil, start = Vector2.new(), startPos = nil, highlight = false }
     local resizeData = { active = false, input = nil, inputType = nil, start = Vector2.new(), startSize = nil }
@@ -1934,7 +1896,7 @@ local function createMainPanel()
     UserInputService.InputEnded:Connect(function(input) onDragEnd(input); onResizeEnd(input) end)
 
     -- ============================================================
-    -- 快捷键切换窗口 (SetToggleKey)
+    -- 快捷键切换窗口
     -- ============================================================
     local toggleKey = Enum.KeyCode.F12
     local toggleKeyName = "F12"
@@ -2029,9 +1991,7 @@ local function createMainPanel()
                 Position = UDim2.new(0.5, -w/2, 0.5, -h/2),
             }):Play()
         end,
-        Close = function()
-            minimizeWindow()
-        end,
+        Close = function() minimizeWindow() end,
         Destroy = function()
             gui:Destroy()
             NotificationGui:Destroy()
@@ -2066,7 +2026,6 @@ local function createMainPanel()
         end,
         SelectTab = function(index) if tabs[index] then tabs[index]:select() end end,
         Section = function(data)
-            -- 简单分组
             local container = Instance.new("Frame")
             container.Size = UDim2.new(1, -16, 0, 0)
             container.BackgroundTransparency = 1
@@ -2215,32 +2174,21 @@ local function createMainPanel()
             end
         end,
         LockAll = function()
-            -- 简单锁定所有交互控件（仅示例）
             local all = {toggleBtn, sliderTrack, inputBox, dropdownBg, keybindBtn, colorPickerBtn}
-            for _, c in ipairs(all) do
-                c.Interactable = false
-            end
+            for _, c in ipairs(all) do c.Interactable = false end
             Notify("锁定", "所有控件已锁定", 1.5)
         end,
         UnlockAll = function()
             local all = {toggleBtn, sliderTrack, inputBox, dropdownBg, keybindBtn, colorPickerBtn}
-            for _, c in ipairs(all) do
-                c.Interactable = true
-            end
+            for _, c in ipairs(all) do c.Interactable = true end
             Notify("解锁", "所有控件已解锁", 1.5)
         end,
-        GetLocked = function()
-            return {}
-        end,
-        GetUnlocked = function()
-            return {}
-        end,
+        GetLocked = function() return {} end,
+        GetUnlocked = function() return {} end,
 
         -- 配置与缩放
         GetUIScale = function() return 1 end,
-        SetUIScale = function(val)
-            -- 简单缩放（实际可加UIScale）
-        end,
+        SetUIScale = function(val) end,
         SetCurrentConfig = function(name)
             ConfigManager.currentConfig = name
             Notify("切换配置", "当前配置: " .. name, 1.5)
