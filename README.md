@@ -1,4577 +1,5027 @@
-runautoexec = function() end
-local httpService = cloneref(game:GetService("HttpService"))
-local _tablefind = clonefunction(table.find)
-local isA = clonefunction(game.IsA)
-local GuiService = game:GetService("GuiService")
-makefolder("d_android_script_dir")
-if gethui():FindFirstChild("DeltaGui") then
-	gethui():FindFirstChild("DeltaGui"):Destroy()
-end;
-if not isfile("iconsize") then
-	writefile("iconsize", "Medium")
-end;
-if not isfile("iconshape") then
-	writefile("iconshape", "Squircle")
-end;
-if not isfile("iconcolor") then
-	writefile("iconcolor", "Blue")
-end;
-getgenv().readclipboard_hideenv = nil;
-local DELTA = {}
-getgenv().Vm9vaE59PzVBeTVNdyY4JDsieDglUzdwRDNabyExbjR1ezBmYHNNT2kjOXk = true;
-if gethui():FindFirstChild("Delta") then
-	gethui():FindFirstChild("Delta"):Destroy()
-end;
-DELTA["1"] = Instance.new("ScreenGui", gethui())
-DELTA["1"]["Name"] = [[Delta]]
-DELTA["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
-DELTA["1"]["ResetOnSpawn"] = false;
-DELTA["1"]["DisplayOrder"] = 10;
-DELTA["1"].Enabled = false;
-DELTA["Ui"] = Instance.new("ScreenGui", gethui())
-DELTA["Ui"].Enabled = false;
-DELTA["Ui"].Name = "DeltaIcon"
-DELTA["DaIcon"] = Instance.new("ImageButton", DELTA["Ui"])
-local iconsize = readfile("iconsize")
-if iconsize == "Medium" then
-	DELTA["DaIcon"].Size = UDim2.new(0, 45, 0, 45)
-elseif iconsize == "Small" then
-	DELTA["DaIcon"].Size = UDim2.new(0, 30, 0, 30)
-elseif iconsize == "Large" then
-	DELTA["DaIcon"].Size = UDim2.new(0, 60, 0, 60)
-else
-	DELTA["DaIcon"].Size = UDim2.new(0, 45, 0, 45)
-end;
-local DaIconSize = DELTA["DaIcon"].Size;
-local ScreenCenterX = GuiService:GetScreenResolution().X / 2;
-local ScreenCenterY = GuiService:GetScreenResolution().Y / 2;
-local DaIconPositionX = ScreenCenterX - DaIconSize.X.Offset / 2;
-local DaIconPositionY = ScreenCenterY - DaIconSize.Y.Offset / 2;
-DELTA["DaIcon"].Position = UDim2.new(0, DaIconPositionX, 0, DaIconPositionY / 20)
-DELTA["DaIcon"].Draggable = true;
-DELTA["DaIcon"].Image = "rbxassetid://118949589874199"
-DELTA["DaIcon"].BackgroundColor3 = Color3.fromRGB(26, 28, 36)
-DELTA["das"] = Instance.new("UICorner", DELTA["DaIcon"])
-local iconsize = readfile("iconshape")
-if iconsize == "Squircle" then
-	DELTA["das"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-elseif iconsize == "Circle" then
-	DELTA["das"]["CornerRadius"] = UDim.new(0.50000000298023224, 0)
-elseif iconsize == "Square" then
-	DELTA["das"]["CornerRadius"] = UDim.new(0, 0)
-else
-	DELTA["das"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-end;
-DELTA["daStroke"] = Instance.new("UIStroke", DELTA["DaIcon"])
-DELTA["daStroke"].Thickness = 2;
-DELTA["daStroke"].ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
-local iconsize = readfile("iconcolor")
-if iconsize == "Blue" then
-	DELTA["daStroke"].Color = Color3.fromRGB(65, 169, 255)
-elseif iconsize == "Green" then
-	DELTA["daStroke"].Color = Color3.fromRGB(55, 219, 69)
-elseif iconsize == "Purple" then
-	DELTA["daStroke"].Color = Color3.fromRGB(125, 65, 255)
-else
-	DELTA["daStroke"].Color = Color3.fromRGB(65, 169, 255)
-end;
-DELTA["2"] = Instance.new("Frame", DELTA["1"])
-DELTA["2"]["BackgroundColor3"] = Color3.fromRGB(26, 28, 36)
-DELTA["2"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["2"]["Size"] = UDim2.new(0.328000009059906, 0, 1.2, 0)
-DELTA["2"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["2"]["Visible"] = false;
-DELTA["2"]["Name"] = [[KeySystem]]
-DELTA["3"] = Instance.new("Frame", DELTA["2"])
-DELTA["3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["3"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["3"]["BackgroundTransparency"] = 1;
-DELTA["3"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["3"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["3"]["Name"] = [[Holder]]
-DELTA["4"] = Instance.new("UIListLayout", DELTA["3"])
-DELTA["4"]["Padding"] = UDim.new(0.03999999910593033, 0)
-DELTA["4"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["5"] = Instance.new("Frame", DELTA["3"])
-DELTA["5"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["5"]["BackgroundTransparency"] = 1;
-DELTA["5"]["Size"] = UDim2.new(1, 0, 0.18677474558353424, 0)
-DELTA["5"]["Name"] = [[Title]]
-DELTA["6"] = Instance.new("UIListLayout", DELTA["5"])
-DELTA["6"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["7"] = Instance.new("TextLabel", DELTA["5"])
-DELTA["7"]["TextWrapped"] = true;
-DELTA["7"]["TextScaled"] = true;
-DELTA["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["7"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["7"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["7"]["TextSize"] = 14;
-DELTA["7"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["7"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["7"]["Size"] = UDim2.new(0.8398135900497437, 0, 0.4, 0)
-DELTA["7"]["Text"] = [[Welcome back!]]
-DELTA["7"]["Name"] = [[Title]]
-DELTA["7"]["BackgroundTransparency"] = 1;
-DELTA["7"]["Position"] = UDim2.new(0.4199067950248718, 0, 0, 0)
-DELTA["8"] = Instance.new("TextLabel", DELTA["5"])
-DELTA["8"]["TextWrapped"] = true;
-DELTA["8"]["TextScaled"] = true;
-DELTA["8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["8"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["8"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["8"]["TextSize"] = 14;
-DELTA["8"]["TextColor3"] = Color3.fromRGB(115, 127, 152)
-DELTA["8"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["8"]["Size"] = UDim2.new(0.8980631828308105, 0, 0.35361653566360474, 0)
-DELTA["8"]["Text"] = [[Access Delta through completing the key system, doesn't take long!]]
-DELTA["8"]["Name"] = [[Paragraph]]
-DELTA["8"]["BackgroundTransparency"] = 1;
-DELTA["8"]["Position"] = UDim2.new(0.4490315914154053, 0, 0.85361647605896, 0)
-DELTA["9"] = Instance.new("Frame", DELTA["3"])
-DELTA["9"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["9"]["BackgroundTransparency"] = 1;
-DELTA["9"]["LayoutOrder"] = 1;
-DELTA["9"]["Size"] = UDim2.new(1, 0, 0.13557736575603485, 0)
-DELTA["9"]["Position"] = UDim2.new(0, 0, 0.22365736961364746, 0)
-DELTA["9"]["Name"] = [[Input]]
-DELTA["a"] = Instance.new("TextLabel", DELTA["9"])
-DELTA["a"]["TextWrapped"] = true;
-DELTA["a"]["TextScaled"] = true;
-DELTA["a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["a"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["a"]["TextSize"] = 14;
-DELTA["a"]["TextColor3"] = Color3.fromRGB(129, 143, 164)
-DELTA["a"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["a"]["Size"] = UDim2.new(0.6213776469230652, 0, 0.2623675465583801, 0)
-DELTA["a"]["Text"] = [[Enter key]]
-DELTA["a"]["Name"] = [[Title]]
-DELTA["a"]["BackgroundTransparency"] = 1;
-DELTA["a"]["Position"] = UDim2.new(0.3106888234615326, 0, -2.339766922432318e-07, 0)
-DELTA["b"] = Instance.new("Frame", DELTA["9"])
-DELTA["b"]["BorderSizePixel"] = 0;
-DELTA["b"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["b"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["b"]["Size"] = UDim2.new(0.9975729584693909, 0, 0.6160375475883484, 0)
-DELTA["b"]["Position"] = UDim2.new(0.49878647923469543, 0, 1, 0)
-DELTA["b"]["Name"] = [[TextBox]]
-DELTA["c"] = Instance.new("TextBox", DELTA["b"])
-DELTA["c"]["Active"] = true;
-DELTA["c"]["PlaceholderColor3"] = Color3.fromRGB(104, 120, 144)
-DELTA["c"]["BorderSizePixel"] = 0;
-DELTA["c"]["TextSize"] = 14;
-DELTA["c"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["c"]["TextWrapped"] = true;
-DELTA["c"]["TextScaled"] = true;
-DELTA["c"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["c"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["c"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["c"]["BackgroundTransparency"] = 1;
-DELTA["c"]["PlaceholderText"] = [[examplekey123$]]
-DELTA["c"]["Size"] = UDim2.new(0.8865329027175903, 0, 0.5, 0)
-DELTA["c"]["Selectable"] = false;
-DELTA["c"]["Text"] = [[]]
-DELTA["c"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["c"]["Name"] = [[Input]]
-DELTA["d"] = Instance.new("UICorner", DELTA["b"])
-DELTA["d"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["e"] = Instance.new("Frame", DELTA["3"])
-DELTA["e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["e"]["BackgroundTransparency"] = 1;
-DELTA["e"]["LayoutOrder"] = 2;
-DELTA["e"]["Size"] = UDim2.new(1, 0, 0.19585928320884705, 0)
-DELTA["e"]["Position"] = UDim2.new(0, 0, 0.39611735939979553, 0)
-DELTA["e"]["Name"] = [[Buttons]]
-DELTA["f"] = Instance.new("ImageButton", DELTA["e"])
-DELTA["f"]["Active"] = false;
-DELTA["f"]["BorderSizePixel"] = 0;
-DELTA["f"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["f"]["Selectable"] = false;
-DELTA["f"]["Size"] = UDim2.new(0.9975729584693909, 0, 0.43042951822280884, 0)
-DELTA["f"]["Name"] = [[Button1]]
-DELTA["f"]["BackgroundTransparency"] = 0.8799999952316284;
-DELTA["10"] = Instance.new("UICorner", DELTA["f"])
-DELTA["10"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["11"] = Instance.new("UIStroke", DELTA["f"])
-DELTA["11"]["Color"] = Color3.fromRGB(60, 137, 196)
-DELTA["11"]["Thickness"] = 2;
-DELTA["12"] = Instance.new("TextLabel", DELTA["f"])
-DELTA["12"]["TextWrapped"] = true;
-DELTA["12"]["BorderSizePixel"] = 0;
-DELTA["12"]["TextScaled"] = true;
-DELTA["12"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["12"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["12"]["TextSize"] = 14;
-DELTA["12"]["TextColor3"] = Color3.fromRGB(140, 206, 255)
-DELTA["12"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["12"]["Size"] = UDim2.new(0.8865329027175903, 0, 0.5, 0)
-DELTA["12"]["Text"] = [[Continue]]
-DELTA["12"]["Name"] = [[Input]]
-DELTA["12"]["BackgroundTransparency"] = 1;
-DELTA["12"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["13"] = Instance.new("ImageButton", DELTA["e"])
-DELTA["13"]["Active"] = false;
-DELTA["13"]["BorderSizePixel"] = 0;
-DELTA["13"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["13"]["Selectable"] = false;
-DELTA["13"]["AnchorPoint"] = Vector2.new(0, 1)
-DELTA["13"]["Size"] = UDim2.new(0.9975729584693909, 0, 0.4304293990135193, 0)
-DELTA["13"]["Name"] = [[Button2]]
-DELTA["13"]["Position"] = UDim2.new(0, 0, 0.9999996423721313, 0)
-DELTA["14"] = Instance.new("UICorner", DELTA["13"])
-DELTA["14"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["15"] = Instance.new("UIStroke", DELTA["13"])
-DELTA["15"]["Color"] = Color3.fromRGB(31, 37, 47)
-DELTA["15"]["Thickness"] = 2;
-DELTA["16"] = Instance.new("TextLabel", DELTA["13"])
-DELTA["16"]["TextWrapped"] = true;
-DELTA["16"]["BorderSizePixel"] = 0;
-DELTA["16"]["TextScaled"] = true;
-DELTA["16"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["16"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["16"]["TextSize"] = 14;
-DELTA["16"]["TextColor3"] = Color3.fromRGB(162, 191, 212)
-DELTA["16"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["16"]["Size"] = UDim2.new(0.8865329027175903, 0, 0.5, 0)
-DELTA["16"]["Text"] = [[Receive Key]]
-DELTA["16"]["Name"] = [[Input]]
-DELTA["16"]["BackgroundTransparency"] = 1;
-DELTA["16"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["17"] = Instance.new("ImageLabel", DELTA["3"])
-DELTA["17"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17"]["Image"] = [[rbxassetid://13363093418]]
-DELTA["17"]["LayoutOrder"] = 3;
-DELTA["17"]["Size"] = UDim2.new(1, 0, 0.13, 0)
-DELTA["17"]["Name"] = [[Message]]
-DELTA["17"]["BackgroundTransparency"] = 1;
-DELTA["17"]["Position"] = UDim2.new(0, 0, 0.6288594007492065, 0)
-DELTA["18"] = Instance.new("TextLabel", DELTA["17"])
-DELTA["18"]["TextWrapped"] = true;
-DELTA["18"]["TextScaled"] = true;
-DELTA["18"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["18"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["18"]["TextSize"] = 14;
-DELTA["18"]["TextColor3"] = Color3.fromRGB(115, 127, 152)
-DELTA["18"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["18"]["Size"] = UDim2.new(0.6844813227653503, 0, 0.4, 0)
-DELTA["18"]["Text"] = [[Start exploiting when you complete our key system!]]
-DELTA["18"]["Name"] = [[Paragraph]]
-DELTA["18"]["BackgroundTransparency"] = 1;
-DELTA["18"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["19"] = Instance.new("ImageButton", DELTA["3"])
-DELTA["19"]["Active"] = false;
-DELTA["19"]["BorderSizePixel"] = 0;
-DELTA["19"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["19"]["Selectable"] = false;
-DELTA["19"]["LayoutOrder"] = 4;
-DELTA["19"]["AnchorPoint"] = Vector2.new(0, 1)
-DELTA["19"]["Size"] = UDim2.new(0.9975730180740356, 0, 0.08399911224842072, 0)
-DELTA["19"]["Name"] = [[Button2]]
-DELTA["19"]["Position"] = UDim2.new(0, 0, 0.9326172471046448, 0)
-DELTA["1a"] = Instance.new("UICorner", DELTA["19"])
-DELTA["1a"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["1b"] = Instance.new("TextButton", DELTA["19"])
-DELTA["1b"]["TextWrapped"] = true;
-DELTA["1b"]["Active"] = false;
-DELTA["1b"]["BorderSizePixel"] = 0;
-DELTA["1b"]["AutoButtonColor"] = false;
-DELTA["1b"]["TextScaled"] = true;
-DELTA["1b"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["1b"]["TextSize"] = 14;
-DELTA["1b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["1b"]["TextColor3"] = Color3.fromRGB(162, 191, 212)
-DELTA["1b"]["Selectable"] = false;
-DELTA["1b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["1b"]["Size"] = UDim2.new(0.8865329027175903, 0, 0.5, 0)
-DELTA["1b"]["Name"] = [[Input]]
-DELTA["1b"]["Text"] = [[Discord]]
-DELTA["1b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["1b"]["BackgroundTransparency"] = 1;
-DELTA["1c"] = Instance.new("UIStroke", DELTA["19"])
-DELTA["1c"]["Color"] = Color3.fromRGB(31, 37, 47)
-DELTA["1c"]["Thickness"] = 2;
-DELTA["1d"] = Instance.new("UIPadding", DELTA["2"])
-DELTA["1d"]["PaddingTop"] = UDim.new(0.05000000074505806, 0)
-DELTA["1d"]["PaddingRight"] = UDim.new(0.15000000596046448, 0)
-DELTA["1d"]["PaddingLeft"] = UDim.new(0.15000000596046448, 0)
-DELTA["1e"] = Instance.new("ImageButton", DELTA["2"])
-DELTA["1e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["1e"]["AnchorPoint"] = Vector2.new(1, 0)
-DELTA["1e"]["Image"] = [[rbxassetid://13363121645]]
-DELTA["1e"]["Size"] = UDim2.new(0.07999999821186066, 0, 0.07999999821186066, 0)
-DELTA["1e"]["Position"] = UDim2.new(1, 0, 0.02012072503566742, 0)
-DELTA["1e"]["BackgroundTransparency"] = 1;
-DELTA["1f"] = Instance.new("UIAspectRatioConstraint", DELTA["1e"])
-DELTA["20"] = Instance.new("StringValue", DELTA["2"])
-DELTA["20"]["Value"] = [[Menu]]
-DELTA["20"]["Name"] = [[Marker]]
-DELTA["21"] = Instance.new("LocalScript", DELTA["2"])
-DELTA["22"] = Instance.new("Frame", DELTA["1"])
-DELTA["22"]["BorderSizePixel"] = 0;
-DELTA["22"]["BackgroundColor3"] = Color3.fromRGB(24, 25, 33)
-DELTA["22"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["22"]["Size"] = UDim2.new(0.07823482155799866, 0, 1.17552649974823, 0)
-DELTA["22"]["Position"] = UDim2.new(0.9997662901878357, 0, 0.4742202162742615, 0)
-DELTA["22"]["Visible"] = false;
-DELTA["22"]["Name"] = [[Sidebar]]
-DELTA["23"] = Instance.new("UIListLayout", DELTA["22"])
-DELTA["23"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["23"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["23"]["Padding"] = UDim.new(0.03999999910593033, 0)
-DELTA["23"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["24"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["24"]["AutoButtonColor"] = false;
-DELTA["24"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["24"]["LayoutOrder"] = 1;
-DELTA["24"]["Image"] = [[rbxassetid://0]]
-DELTA["24"]["Size"] = UDim2.new(0.5135505795478821, 0, 0.08553311228752136, 0)
-DELTA["24"]["Name"] = [[Home]]
-DELTA["24"]["Position"] = UDim2.new(0.274707168340683, 0, 0.29129067063331604, 0)
-DELTA["25"] = Instance.new("UIAspectRatioConstraint", DELTA["24"])
-DELTA["26"] = Instance.new("UICorner", DELTA["24"])
-DELTA["26"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["27"] = Instance.new("ImageLabel", DELTA["24"])
-DELTA["27"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["27"]["ImageColor3"] = Color3.fromRGB(138, 145, 164)
-DELTA["27"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["27"]["Image"] = [[rbxassetid://13462268450]]
-DELTA["27"]["Size"] = UDim2.new(0.4556732177734375, 0, 0.4556732177734375, 0)
-DELTA["27"]["BackgroundTransparency"] = 1;
-DELTA["27"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["28"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["28"]["AutoButtonColor"] = false;
-DELTA["28"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["28"]["LayoutOrder"] = 3;
-DELTA["28"]["Image"] = [[rbxassetid://0]]
-DELTA["28"]["Size"] = UDim2.new(0.5135507583618164, 0, 0.08553311228752136, 0)
-DELTA["28"]["Name"] = [[Scripthub]]
-DELTA["28"]["Position"] = UDim2.new(0.274707168340683, 0, 0.5514350533485413, 0)
-DELTA["29"] = Instance.new("UIAspectRatioConstraint", DELTA["28"])
-DELTA["2a"] = Instance.new("UICorner", DELTA["28"])
-DELTA["2a"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["2b"] = Instance.new("ImageLabel", DELTA["28"])
-DELTA["2b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["2b"]["ImageColor3"] = Color3.fromRGB(138, 145, 164)
-DELTA["2b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["2b"]["Image"] = [[rbxassetid://13462270380]]
-DELTA["2b"]["Size"] = UDim2.new(0.40817680954933167, 0, 0.3085578680038452, 0)
-DELTA["2b"]["BackgroundTransparency"] = 1;
-DELTA["2b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["2c"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["2c"]["AutoButtonColor"] = false;
-DELTA["2c"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["2c"]["LayoutOrder"] = 4;
-DELTA["2c"]["Image"] = [[rbxassetid://0]]
-DELTA["2c"]["Size"] = UDim2.new(0.5135504603385925, 0, 0.08553305268287659, 0)
-DELTA["2c"]["Name"] = [[Settings]]
-DELTA["2c"]["Position"] = UDim2.new(0.274707168340683, 0, 0.6815073490142822, 0)
-DELTA["2d"] = Instance.new("UICorner", DELTA["2c"])
-DELTA["2d"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["2e"] = Instance.new("UIAspectRatioConstraint", DELTA["2c"])
-DELTA["2f"] = Instance.new("ImageLabel", DELTA["2c"])
-DELTA["2f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["2f"]["ImageColor3"] = Color3.fromRGB(138, 145, 164)
-DELTA["2f"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["2f"]["Image"] = [[rbxassetid://13462271348]]
-DELTA["2f"]["Size"] = UDim2.new(0.4556732177734375, 0, 0.4556732177734375, 0)
-DELTA["2f"]["BackgroundTransparency"] = 1;
-DELTA["2f"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["30"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["30"]["AutoButtonColor"] = false;
-DELTA["30"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["30"]["LayoutOrder"] = 2;
-DELTA["30"]["Image"] = [[rbxassetid://0]]
-DELTA["30"]["Size"] = UDim2.new(0.5135505795478821, 0, 0.08553306758403778, 0)
-DELTA["30"]["Name"] = [[Executor]]
-DELTA["30"]["Position"] = UDim2.new(0.274707168340683, 0, 0.42136284708976746, 0)
-DELTA["31"] = Instance.new("UIAspectRatioConstraint", DELTA["30"])
-DELTA["32"] = Instance.new("UICorner", DELTA["30"])
-DELTA["32"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["33"] = Instance.new("ImageLabel", DELTA["30"])
-DELTA["33"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["33"]["ImageColor3"] = Color3.fromRGB(138, 145, 164)
-DELTA["33"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["33"]["Image"] = [[rbxassetid://13462269327]]
-DELTA["33"]["Size"] = UDim2.new(0.4556732177734375, 0, 0.4556732177734375, 0)
-DELTA["33"]["BackgroundTransparency"] = 1;
-DELTA["33"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["34"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["34"]["AutoButtonColor"] = false;
-DELTA["34"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["34"]["LayoutOrder"] = 4;
-DELTA["34"]["Size"] = UDim2.new(0.5135504603385925, 0, 0.08553305268287659, 0)
-DELTA["34"]["Name"] = [[Console]]
-DELTA["34"]["Position"] = UDim2.new(0.274707168340683, 0, 0.6815073490142822, 0)
-DELTA["35"] = Instance.new("UICorner", DELTA["34"])
-DELTA["35"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["36"] = Instance.new("UIAspectRatioConstraint", DELTA["34"])
-DELTA["37"] = Instance.new("ImageLabel", DELTA["34"])
-DELTA["37"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["37"]["ImageColor3"] = Color3.fromRGB(137, 139, 172)
-DELTA["37"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["37"]["Image"] = [[rbxassetid://13569242972]]
-DELTA["37"]["Size"] = UDim2.new(0.4556732177734375, 0, 0.4556732177734375, 0)
-DELTA["37"]["BackgroundTransparency"] = 1;
-DELTA["37"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["34tf"] = Instance.new("ImageButton", DELTA["22"])
-DELTA["34tf"]["AutoButtonColor"] = false;
-DELTA["34tf"]["BackgroundColor3"] = Color3.fromRGB(41, 45, 58)
-DELTA["34tf"]["LayoutOrder"] = 4;
-DELTA["34tf"]["Size"] = UDim2.new(0.5135504603385925, 0, 0.08553305268287659, 0)
-DELTA["34tf"]["Name"] = [[ToggleUI]]
-DELTA["34tf"]["Position"] = UDim2.new(0.274707168340683, 0, 0.6815073490142822, 0)
-DELTA["35tf"] = Instance.new("UICorner", DELTA["34tf"])
-DELTA["35tf"]["CornerRadius"] = UDim.new(0.4000000059604645, 0)
-DELTA["36tf"] = Instance.new("UIAspectRatioConstraint", DELTA["34tf"])
-DELTA["37tf"] = Instance.new("ImageLabel", DELTA["34tf"])
-DELTA["37tf"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["37tf"]["ImageColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["37tf"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["37tf"]["Image"] = [[http://www.roblox.com/asset?id=13711943220]]
-DELTA["37tf"]["Size"] = UDim2.new(0.4556732177734375, 0, 0.4556732177734375, 0)
-DELTA["37tf"]["BackgroundTransparency"] = 1;
-DELTA["37tf"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["38"] = Instance.new("Color3Value", DELTA["22"])
-DELTA["38"]["Value"] = Color3.fromRGB(34, 160, 255)
-DELTA["38"]["Name"] = [[ActiveColor]]
-DELTA["39"] = Instance.new("LocalScript", DELTA["22"])
-DELTA["39"]["Name"] = [[SidebarHandler]]
-DELTA["3a"] = Instance.new("Color3Value", DELTA["22"])
-DELTA["3a"]["Value"] = Color3.fromRGB(41, 45, 58)
-DELTA["3a"]["Name"] = [[InactiveColor]]
-DELTA["3b"] = Instance.new("Frame", DELTA["1"])
-DELTA["3b"]["ZIndex"] = 100;
-DELTA["3b"]["BackgroundColor3"] = Color3.fromRGB(255, 0, 0)
-DELTA["3b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["3b"]["BackgroundTransparency"] = 1;
-DELTA["3b"]["Size"] = UDim2.new(0.8483448028564453, 0, 0.8924814462661743, 0)
-DELTA["3b"]["Position"] = UDim2.new(0.47624671459198, 0, 0.5082324147224426, 0)
-DELTA["3b"]["Visible"] = false;
-DELTA["3b"]["Name"] = [[Scripthub]]
-DELTA["3c"] = Instance.new("Frame", DELTA["3b"])
-DELTA["3c"]["ZIndex"] = 2;
-DELTA["3c"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["3c"]["Size"] = UDim2.new(1, 0, 0.12585513293743134, 0)
-DELTA["3c"]["Name"] = [[Searchbar]]
-DELTA["3d"] = Instance.new("UICorner", DELTA["3c"])
-DELTA["3d"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["3e"] = Instance.new("ImageLabel", DELTA["3c"])
-DELTA["3e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["3e"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["3e"]["Image"] = [[rbxassetid://13365156882]]
-DELTA["3e"]["Size"] = UDim2.new(0.025552265346050262, 0, 0.40771156549453735, 0)
-DELTA["3e"]["BackgroundTransparency"] = 1;
-DELTA["3e"]["Position"] = UDim2.new(0.01834862306714058, 0, 0.5, 0)
-DELTA["3f"] = Instance.new("UIAspectRatioConstraint", DELTA["3e"])
-DELTA["40"] = Instance.new("TextBox", DELTA["3c"])
-DELTA["40"]["Active"] = true;
-DELTA["40"]["TextSize"] = 14;
-DELTA["40"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["40"]["TextWrapped"] = true;
-DELTA["40"]["TextScaled"] = true;
-DELTA["40"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["40"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["40"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["40"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["40"]["BackgroundTransparency"] = 1;
-DELTA["40"]["PlaceholderText"] = [[Search on scriptblox.com...]]
-DELTA["40"]["Size"] = UDim2.new(0.8766564130783081, 0, 0.35361653566360474, 0)
-DELTA["40"]["Selectable"] = false;
-DELTA["40"]["Text"] = [[]]
-DELTA["40"]["Position"] = UDim2.new(0.061162080615758896, 0, 0.49999991059303284, 0)
-DELTA["40"]["Name"] = [[Input]]
-DELTA["41"] = Instance.new("ScrollingFrame", DELTA["3b"])
-DELTA["41"]["CanvasSize"] = UDim2.new(0, 0, 3, 0)
-DELTA["41"]["ScrollBarImageTransparency"] = 1;
-DELTA["41"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["41"]["VerticalScrollBarInset"] = Enum.ScrollBarInset.Always;
-DELTA["41"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["41"]["BackgroundTransparency"] = 1;
-DELTA["41"]["Size"] = UDim2.new(1, 0, 0.8350700736045837, 0)
-DELTA["41"]["Selectable"] = false;
-DELTA["41"]["ScrollBarThickness"] = 0;
-DELTA["41"]["Position"] = UDim2.new(0.5, 0, 1, 0)
-DELTA["41"]["Name"] = [[Holder]]
-DELTA["42"] = Instance.new("UIGridLayout", DELTA["41"])
-DELTA["42"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["42"]["CellSize"] = UDim2.new(0.31299999356269836, 0, 0.10000000149011612, 0)
-DELTA["42"]["CellPadding"] = UDim2.new(0.029999999329447746, 0, 0.009999999776482582, 0)
-DELTA["43"] = Instance.new("Folder", DELTA["41"])
-DELTA["43"]["Name"] = [[Reserved]]
-DELTA["44"] = Instance.new("ImageButton", DELTA["43"])
-DELTA["44"]["Active"] = false;
-DELTA["44"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-DELTA["44"]["Selectable"] = false;
-DELTA["44"]["Image"] = [[rbxassetid://13365407660]]
-DELTA["44"]["Size"] = UDim2.new(0.313303679227829, 0, 0.31330370903015137, 0)
-DELTA["44"]["Name"] = [[OldThumbnail]]
-DELTA["44"]["Visible"] = false;
-DELTA["44"]["Position"] = UDim2.new(9.43648092999183e-09, 0, 0, 0)
-DELTA["45"] = Instance.new("UICorner", DELTA["44"])
-DELTA["45"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["46"] = Instance.new("Frame", DELTA["44"])
-DELTA["46"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-DELTA["46"]["BackgroundTransparency"] = 0.09200000017881393;
-DELTA["46"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["46"]["Name"] = [[Overlay]]
-DELTA["47"] = Instance.new("UICorner", DELTA["46"])
-DELTA["47"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["48"] = Instance.new("Frame", DELTA["46"])
-DELTA["48"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["48"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["48"]["BackgroundTransparency"] = 1;
-DELTA["48"]["Size"] = UDim2.new(0.8982645273208618, 0, 0.5242727994918823, 0)
-DELTA["48"]["Position"] = UDim2.new(0.04966278374195099, 0, 0.3592950105667114, 0)
-DELTA["48"]["Name"] = [[Title]]
-DELTA["49"] = Instance.new("TextLabel", DELTA["48"])
-DELTA["49"]["TextWrapped"] = true;
-DELTA["49"]["TextScaled"] = true;
-DELTA["49"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["49"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["49"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["49"]["TextSize"] = 14;
-DELTA["49"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["49"]["Size"] = UDim2.new(0.4335988163948059, 0, 0.5, 0)
-DELTA["49"]["Text"] = [[Arsenal 🐰]]
-DELTA["49"]["Name"] = [[Title]]
-DELTA["49"]["BackgroundTransparency"] = 1;
-DELTA["4a"] = Instance.new("TextLabel", DELTA["48"])
-DELTA["4a"]["TextWrapped"] = true;
-DELTA["4a"]["TextScaled"] = true;
-DELTA["4a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["4a"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["4a"]["TextTransparency"] = 0.30000001192092896;
-DELTA["4a"]["TextSize"] = 14;
-DELTA["4a"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4a"]["AnchorPoint"] = Vector2.new(0, 1)
-DELTA["4a"]["Size"] = UDim2.new(0.6313457489013672, 0, 0.5, 0)
-DELTA["4a"]["Text"] = [[Aimbot, triggerbot, aim assist, wall-check gui]]
-DELTA["4a"]["Name"] = [[Paragraph]]
-DELTA["4a"]["BackgroundTransparency"] = 1;
-DELTA["4a"]["Position"] = UDim2.new(0, 0, 1.0000001192092896, 0)
-DELTA["4b"] = Instance.new("Frame", DELTA["48"])
-DELTA["4b"]["BackgroundColor3"] = Color3.fromRGB(86, 173, 239)
-DELTA["4b"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["4b"]["Size"] = UDim2.new(0.3242603540420532, 0, 0.3846021890640259, 0)
-DELTA["4b"]["Position"] = UDim2.new(0.9999999403953552, 0, 0.2522916793823242, 0)
-DELTA["4b"]["Name"] = [[Verified]]
-DELTA["4c"] = Instance.new("UICorner", DELTA["4b"])
-DELTA["4c"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["4d"] = Instance.new("TextLabel", DELTA["4b"])
-DELTA["4d"]["TextWrapped"] = true;
-DELTA["4d"]["TextScaled"] = true;
-DELTA["4d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4d"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["4d"]["TextSize"] = 14;
-DELTA["4d"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4d"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["4d"]["Size"] = UDim2.new(0.8315319418907166, 0, 0.5, 0)
-DELTA["4d"]["Text"] = [[VERIFIED]]
-DELTA["4d"]["Name"] = [[Title]]
-DELTA["4d"]["BackgroundTransparency"] = 1;
-DELTA["4d"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["4e"] = Instance.new("Frame", DELTA["46"])
-DELTA["4e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4e"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["4e"]["BackgroundTransparency"] = 1;
-DELTA["4e"]["Size"] = UDim2.new(0.8982645869255066, 0, 0.233791321516037, 0)
-DELTA["4e"]["Position"] = UDim2.new(0.04966278374195099, 0, 0.7775326371192932, 0)
-DELTA["4e"]["Name"] = [[Views]]
-DELTA["4f"] = Instance.new("TextLabel", DELTA["4e"])
-DELTA["4f"]["TextWrapped"] = true;
-DELTA["4f"]["TextScaled"] = true;
-DELTA["4f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4f"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["4f"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["4f"]["TextSize"] = 14;
-DELTA["4f"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["4f"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["4f"]["Size"] = UDim2.new(1.0098563432693481, 0, 0.473459392786026, 0)
-DELTA["4f"]["Text"] = [[10 Views]]
-DELTA["4f"]["Name"] = [[Title]]
-DELTA["4f"]["BackgroundTransparency"] = 1;
-DELTA["4f"]["Position"] = UDim2.new(1.0098564624786377, 0, 0.7708343267440796, 0)
-DELTA["50"] = Instance.new("LocalScript", DELTA["41"])
-DELTA["50"]["Name"] = [[ScriptBloxHandler]]
-DELTA["51"] = Instance.new("Frame", DELTA["3b"])
-DELTA["51"]["ZIndex"] = 99999;
-DELTA["51"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
-DELTA["51"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["51"]["BackgroundTransparency"] = 0.5;
-DELTA["51"]["Size"] = UDim2.new(10, 10, 2, 0)
-DELTA["51"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["51"]["Visible"] = false;
-DELTA["51"]["Name"] = [[DarkOverlay]]
-DELTA["52"] = Instance.new("Frame", DELTA["3b"])
-DELTA["52"]["ZIndex"] = 100000;
-DELTA["52"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 49)
-DELTA["52"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["52"]["Size"] = UDim2.new(0.43205055594444275, 0, 1.0513142347335815, 0)
-DELTA["52"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["52"]["Name"] = [[Popup]]
-DELTA["52"].Active = true;
-DELTA["52"].Visible = false;
-DELTA["53"] = Instance.new("Frame", DELTA["52"])
-DELTA["53"]["ZIndex"] = 999999999;
-DELTA["53"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["53"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["53"]["BackgroundTransparency"] = 1;
-DELTA["53"]["Size"] = UDim2.new(0.8193565607070923, 0, 0.23179079592227936, 0)
-DELTA["53"]["Position"] = UDim2.new(0.5, 0, 0.09408924728631973, 0)
-DELTA["53"]["Name"] = [[Title]]
-DELTA["54"] = Instance.new("UIListLayout", DELTA["53"])
-DELTA["54"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["55"] = Instance.new("TextLabel", DELTA["53"])
-DELTA["55"]["TextWrapped"] = true;
-DELTA["55"]["ZIndex"] = 999999999;
-DELTA["55"]["TextScaled"] = true;
-DELTA["55"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["55"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["55"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["55"]["TextSize"] = 14;
-DELTA["55"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["55"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["55"]["Size"] = UDim2.new(0.7438986301422119, 0, 0.5, 0)
-DELTA["55"]["Text"] = [[Select Your Option]]
-DELTA["55"]["Name"] = [[Title]]
-DELTA["55"]["BackgroundTransparency"] = 1;
-DELTA["55"]["Position"] = UDim2.new(0.37194931507110596, 0, 0, 0)
-DELTA["56"] = Instance.new("TextLabel", DELTA["53"])
-DELTA["56"]["TextWrapped"] = true;
-DELTA["56"]["ZIndex"] = 999999999;
-DELTA["56"]["TextScaled"] = true;
-DELTA["56"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["56"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["56"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["56"]["TextSize"] = 14;
-DELTA["56"]["TextColor3"] = Color3.fromRGB(161, 167, 182)
-DELTA["56"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["56"]["Size"] = UDim2.new(0.7438986301422119, 0, 0.3536166250705719, 0)
-DELTA["56"]["Text"] = [[Choose whether to execute, open in a new tab, etc..]]
-DELTA["56"]["Name"] = [[Paragraph]]
-DELTA["56"]["BackgroundTransparency"] = 1;
-DELTA["56"]["Position"] = UDim2.new(0.37194931507110596, 0, 0.8536167144775391, 0)
-DELTA["57"] = Instance.new("Frame", DELTA["52"])
-DELTA["57"]["ZIndex"] = 999999999;
-DELTA["57"]["BorderSizePixel"] = 0;
-DELTA["57"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["57"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["57"]["BackgroundTransparency"] = 1;
-DELTA["57"]["Size"] = UDim2.new(0.8189999461174011, 0, 0.5725698471069336, 0)
-DELTA["57"]["ClipsDescendants"] = true;
-DELTA["57"]["Position"] = UDim2.new(0.5, 0, 0.9148041009902954, 0)
-DELTA["57"]["Name"] = [[Buttons]]
-DELTA["58"] = Instance.new("UIListLayout", DELTA["57"])
-DELTA["58"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["58"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["58"]["Padding"] = UDim.new(0.05000000074505806, 0)
-DELTA["58"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["59"] = Instance.new("ImageButton", DELTA["57"])
-DELTA["59"]["Active"] = false;
-DELTA["59"]["ZIndex"] = 999999999;
-DELTA["59"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["59"]["Selectable"] = false;
-DELTA["59"]["Size"] = UDim2.new(0.9621250629425049, 0, 0.16304326057434082, 0)
-DELTA["59"]["Name"] = [[Button1]]
-DELTA["59"]["Position"] = UDim2.new(0.018937479704618454, 0, 0.17102082073688507, 0)
-DELTA["59"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["5a"] = Instance.new("UICorner", DELTA["59"])
-DELTA["5a"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["5b"] = Instance.new("TextLabel", DELTA["59"])
-DELTA["5b"]["TextWrapped"] = true;
-DELTA["5b"]["ZIndex"] = 999999999;
-DELTA["5b"]["TextScaled"] = true;
-DELTA["5b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["5b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["5b"]["TextSize"] = 14;
-DELTA["5b"]["TextColor3"] = Color3.fromRGB(140, 206, 255)
-DELTA["5b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["5b"]["Size"] = UDim2.new(0.8766257762908936, 0, 0.3993089199066162, 0)
-DELTA["5b"]["Text"] = [[EXECUTE SELECTED SCRIPT]]
-DELTA["5b"]["Name"] = [[Title]]
-DELTA["5b"]["BackgroundTransparency"] = 1;
-DELTA["5b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["5c"] = Instance.new("UIStroke", DELTA["59"])
-DELTA["5c"]["Color"] = Color3.fromRGB(60, 137, 196)
-DELTA["5c"]["Thickness"] = 2;
-DELTA["5d"] = Instance.new("ImageButton", DELTA["57"])
-DELTA["5d"]["Active"] = false;
-DELTA["5d"]["ZIndex"] = 999999999;
-DELTA["5d"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["5d"]["Selectable"] = false;
-DELTA["5d"]["LayoutOrder"] = 1;
-DELTA["5d"]["Size"] = UDim2.new(0.9621250629425049, 0, 0.16304320096969604, 0)
-DELTA["5d"]["Name"] = [[Button2]]
-DELTA["5d"]["Position"] = UDim2.new(0.018937479704618454, 0, 0.3772318959236145, 0)
-DELTA["5d"]["BackgroundTransparency"] = 0.8999999761581421;
-DELTA["5e"] = Instance.new("UICorner", DELTA["5d"])
-DELTA["5e"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["5f"] = Instance.new("TextLabel", DELTA["5d"])
-DELTA["5f"]["TextWrapped"] = true;
-DELTA["5f"]["TextScaled"] = true;
-DELTA["5f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["5f"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["5f"]["TextSize"] = 14;
-DELTA["5f"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["5f"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["5f"]["Size"] = UDim2.new(0.8766260147094727, 0, 0.3993089199066162, 0)
-DELTA["5f"]["Text"] = [[OPEN SCRIPT IN EDITOR]]
-DELTA["5f"]["Name"] = [[Title]]
-DELTA["5f"]["BackgroundTransparency"] = 1;
-DELTA["5f"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["60"] = Instance.new("UIStroke", DELTA["5d"])
-DELTA["60"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["60"]["Thickness"] = 2;
-DELTA["61"] = Instance.new("ImageButton", DELTA["57"])
-DELTA["61"]["Active"] = false;
-DELTA["61"]["ZIndex"] = 999999999;
-DELTA["61"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["61"]["Selectable"] = false;
-DELTA["61"]["LayoutOrder"] = 2;
-DELTA["61"]["Size"] = UDim2.new(0.9621250629425049, 0, 0.1630433201789856, 0)
-DELTA["61"]["Name"] = [[Button3]]
-DELTA["61"]["Position"] = UDim2.new(0.018937479704618454, 0, 0.5834426283836365, 0)
-DELTA["61"]["BackgroundTransparency"] = 0.8999999761581421;
-DELTA["62"] = Instance.new("UICorner", DELTA["61"])
-DELTA["62"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["63"] = Instance.new("TextLabel", DELTA["61"])
-DELTA["63"]["TextWrapped"] = true;
-DELTA["63"]["TextScaled"] = true;
-DELTA["63"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["63"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["63"]["TextSize"] = 14;
-DELTA["63"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["63"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["63"]["Size"] = UDim2.new(0.8766259551048279, 0, 0.3993089497089386, 0)
-DELTA["63"]["Text"] = [[SAVE SELECTED SCRIPT]]
-DELTA["63"]["Name"] = [[Title]]
-DELTA["63"]["BackgroundTransparency"] = 1;
-DELTA["63"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["64"] = Instance.new("UIStroke", DELTA["61"])
-DELTA["64"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["64"]["Thickness"] = 2;
-DELTA["65"] = Instance.new("ImageButton", DELTA["57"])
-DELTA["65"]["Active"] = false;
-DELTA["65"]["ZIndex"] = 999999999;
-DELTA["65"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["65"]["Selectable"] = false;
-DELTA["65"]["LayoutOrder"] = 3;
-DELTA["65"]["Size"] = UDim2.new(0.9621250629425049, 0, 0.16304323077201843, 0)
-DELTA["65"]["Name"] = [[Button4]]
-DELTA["65"]["Position"] = UDim2.new(0.018937479704618454, 0, 0.7896538376808167, 0)
-DELTA["65"]["BackgroundTransparency"] = 0.8999999761581421;
-DELTA["66"] = Instance.new("UICorner", DELTA["65"])
-DELTA["66"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["67"] = Instance.new("TextLabel", DELTA["65"])
-DELTA["67"]["TextWrapped"] = true;
-DELTA["67"]["TextScaled"] = true;
-DELTA["67"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["67"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["67"]["TextSize"] = 14;
-DELTA["67"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["67"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["67"]["Size"] = UDim2.new(0.8766259551048279, 0, 0.3993089497089386, 0)
-DELTA["67"]["Text"] = [[COPY TO CLIPBOARD]]
-DELTA["67"]["Name"] = [[Title]]
-DELTA["67"]["BackgroundTransparency"] = 1;
-DELTA["67"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["68"] = Instance.new("UIStroke", DELTA["65"])
-DELTA["68"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["68"]["Thickness"] = 2;
-DELTA["69"] = Instance.new("LocalScript", DELTA["57"])
-DELTA["69"]["Name"] = [[ButtonsHandler]]
-DELTA["6a"] = Instance.new("UICorner", DELTA["52"])
-DELTA["6a"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["6b"] = Instance.new("ImageButton", DELTA["52"])
-DELTA["6b"]["ZIndex"] = 999999999;
-DELTA["6b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["6b"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["6b"]["Image"] = [[rbxassetid://13363121645]]
-DELTA["6b"]["Size"] = UDim2.new(0.04585733264684677, 0, 0.04716602712869644, 0)
-DELTA["6b"]["Position"] = UDim2.new(0.8981863260269165, 0, 0.15145258605480194, 0)
-DELTA["6b"]["BackgroundTransparency"] = 1;
-DELTA["6c"] = Instance.new("UIAspectRatioConstraint", DELTA["6b"])
-DELTA["6d"] = Instance.new("StringValue", DELTA["3b"])
-DELTA["6d"]["Value"] = [[Menu]]
-DELTA["6d"]["Name"] = [[Marker]]
-DELTA["6e"] = Instance.new("Frame", DELTA["1"])
-DELTA["6e"]["ZIndex"] = 100;
-DELTA["6e"]["BackgroundColor3"] = Color3.fromRGB(255, 0, 0)
-DELTA["6e"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["6e"]["BackgroundTransparency"] = 1;
-DELTA["6e"]["Size"] = UDim2.new(0.8064976334571838, 0, 0.9616625905036926, 0)
-DELTA["6e"]["Position"] = UDim2.new(0.47783252596855164, 0, 0.5, 0)
-DELTA["6e"]["Visible"] = false;
-DELTA["6e"]["Name"] = [[Settings]]
-DELTA["6f"] = Instance.new("Frame", DELTA["6e"])
-DELTA["6f"]["ZIndex"] = 2;
-DELTA["6f"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["6f"]["AnchorPoint"] = Vector2.new(1, 0)
-DELTA["6f"]["Size"] = UDim2.new(0.7300000190734863, 0, 0.12585513293743134, 0)
-DELTA["6f"]["Position"] = UDim2.new(1, 0, 0, 0)
-DELTA["6f"]["Name"] = [[Searchbar]]
-DELTA["70"] = Instance.new("UICorner", DELTA["6f"])
-DELTA["70"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["71"] = Instance.new("ImageLabel", DELTA["6f"])
-DELTA["71"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["71"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["71"]["Image"] = [[rbxassetid://13365156882]]
-DELTA["71"]["Size"] = UDim2.new(0.025552265346050262, 0, 0.40771156549453735, 0)
-DELTA["71"]["BackgroundTransparency"] = 1;
-DELTA["71"]["Position"] = UDim2.new(0.01834862306714058, 0, 0.5, 0)
-DELTA["72"] = Instance.new("UIAspectRatioConstraint", DELTA["71"])
-DELTA["73"] = Instance.new("TextBox", DELTA["6f"])
-DELTA["73"]["Active"] = true;
-DELTA["73"]["TextSize"] = 14;
-DELTA["73"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["73"]["TextWrapped"] = true;
-DELTA["73"]["TextScaled"] = true;
-DELTA["73"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["73"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["73"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["73"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["73"]["BackgroundTransparency"] = 1;
-DELTA["73"]["PlaceholderText"] = [[Search for options]]
-DELTA["73"]["Size"] = UDim2.new(0.8766564130783081, 0, 0.35361653566360474, 0)
-DELTA["73"]["Selectable"] = false;
-DELTA["73"]["Text"] = [[]]
-DELTA["73"]["Position"] = UDim2.new(0.061162080615758896, 0, 0.49999991059303284, 0)
-DELTA["73"]["Name"] = [[Input]]
-DELTA["74"] = Instance.new("LocalScript", DELTA["6f"])
-DELTA["74"]["Name"] = [[SettingsSearchHandler]]
-DELTA["75"] = Instance.new("Frame", DELTA["6e"])
-DELTA["75"]["ZIndex"] = 2;
-DELTA["75"]["BackgroundColor3"] = Color3.fromRGB(24, 25, 33)
-DELTA["75"]["Size"] = UDim2.new(0.25, 0, 0.12585513293743134, 0)
-DELTA["75"]["Name"] = [[Sort]]
-DELTA["76"] = Instance.new("UICorner", DELTA["75"])
-DELTA["76"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["77"] = Instance.new("UIListLayout", DELTA["75"])
-DELTA["77"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["77"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["77"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["77"]["Padding"] = UDim.new(0.029999999329447746, 0)
-DELTA["77"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["78"] = Instance.new("TextButton", DELTA["75"])
-DELTA["78"]["TextWrapped"] = true;
-DELTA["78"]["TextScaled"] = true;
-DELTA["78"]["BackgroundColor3"] = Color3.fromRGB(51, 56, 70)
-DELTA["78"]["TextSize"] = 14;
-DELTA["78"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["78"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["78"]["Size"] = UDim2.new(0.27783116698265076, 0, 0.5168541073799133, 0)
-DELTA["78"]["LayoutOrder"] = 1;
-DELTA["78"]["Name"] = [[Enabled]]
-DELTA["78"]["Text"] = [[Enabled]]
-DELTA["78"]["Position"] = UDim2.new(0.02489338628947735, 0, 0.24157275259494781, 0)
-DELTA["78"]["BackgroundTransparency"] = 1;
-DELTA["79"] = Instance.new("UICorner", DELTA["78"])
-DELTA["79"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["7a"] = Instance.new("UIPadding", DELTA["78"])
-DELTA["7a"]["PaddingTop"] = UDim.new(0.30000001192092896, 0)
-DELTA["7a"]["PaddingBottom"] = UDim.new(0.30000001192092896, 0)
-DELTA["7b"] = Instance.new("TextButton", DELTA["75"])
-DELTA["7b"]["TextWrapped"] = true;
-DELTA["7b"]["TextScaled"] = true;
-DELTA["7b"]["BackgroundColor3"] = Color3.fromRGB(51, 56, 70)
-DELTA["7b"]["TextSize"] = 14;
-DELTA["7b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["7b"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["7b"]["Size"] = UDim2.new(0.2778310179710388, 0, 0.5168541073799133, 0)
-DELTA["7b"]["LayoutOrder"] = 2;
-DELTA["7b"]["Name"] = [[Disabled]]
-DELTA["7b"]["Text"] = [[Disabled]]
-DELTA["7b"]["Position"] = UDim2.new(0.33081313967704773, 0, 0.24157275259494781, 0)
-DELTA["7b"]["BackgroundTransparency"] = 1;
-DELTA["7c"] = Instance.new("UICorner", DELTA["7b"])
-DELTA["7c"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["7d"] = Instance.new("UIPadding", DELTA["7b"])
-DELTA["7d"]["PaddingTop"] = UDim.new(0.30000001192092896, 0)
-DELTA["7d"]["PaddingBottom"] = UDim.new(0.30000001192092896, 0)
-DELTA["7e"] = Instance.new("TextButton", DELTA["75"])
-DELTA["7e"]["TextWrapped"] = true;
-DELTA["7e"]["TextScaled"] = true;
-DELTA["7e"]["BackgroundColor3"] = Color3.fromRGB(51, 56, 70)
-DELTA["7e"]["TextSize"] = 14;
-DELTA["7e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["7e"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["7e"]["Size"] = UDim2.new(0.2778310179710388, 0, 0.5168541073799133, 0)
-DELTA["7e"]["LayoutOrder"] = 3;
-DELTA["7e"]["Name"] = [[All]]
-DELTA["7e"]["Text"] = [[All]]
-DELTA["7e"]["Position"] = UDim2.new(0.6367325186729431, 0, 0.24157275259494781, 0)
-DELTA["7f"] = Instance.new("UICorner", DELTA["7e"])
-DELTA["7f"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["80"] = Instance.new("UIPadding", DELTA["7e"])
-DELTA["80"]["PaddingTop"] = UDim.new(0.30000001192092896, 0)
-DELTA["80"]["PaddingBottom"] = UDim.new(0.30000001192092896, 0)
-DELTA["81"] = Instance.new("LocalScript", DELTA["75"])
-DELTA["81"]["Name"] = [[SettingsFilterHandler]]
-DELTA["82"] = Instance.new("ScrollingFrame", DELTA["6e"])
-DELTA["82"]["CanvasSize"] = UDim2.new(0, 0, 4, 0)
-DELTA["82"]["ScrollBarImageTransparency"] = 1;
-DELTA["82"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["82"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["82"]["BackgroundTransparency"] = 1;
-DELTA["82"]["Size"] = UDim2.new(1, 0, 0.8416813015937805, 0)
-DELTA["82"]["Selectable"] = false;
-DELTA["82"]["ScrollBarThickness"] = 1;
-DELTA["82"]["Position"] = UDim2.new(0.5, 0, 1.0000001192092896, 0)
-DELTA["82"]["Name"] = [[Holder]]
-DELTA["83"] = Instance.new("UIListLayout", DELTA["82"])
-DELTA["83"]["Padding"] = UDim.new(0.004999999888241291, 0)
-DELTA["83"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["84"] = Instance.new("StringValue", DELTA["6e"])
-DELTA["84"]["Value"] = [[Menu]]
-DELTA["84"]["Name"] = [[Marker]]
-DELTA["85"] = Instance.new("Frame", DELTA["1"])
-DELTA["85"]["ZIndex"] = -100
-DELTA["85"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
-DELTA["85"]["BackgroundTransparency"] = 0.6600000262260437;
-DELTA["85"]["Size"] = UDim2.new(2, 0, 2, 0)
-DELTA["85"]["Position"] = UDim2.new(-1, 0, -1, 0)
-DELTA["85"]["Name"] = [[DarkOverlay]]
-DELTA["86"] = Instance.new("Frame", DELTA["1"])
-DELTA["86"]["ZIndex"] = 100;
-DELTA["86"]["BackgroundColor3"] = Color3.fromRGB(255, 0, 0)
-DELTA["86"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["86"]["BackgroundTransparency"] = 1;
-DELTA["86"]["Size"] = UDim2.new(0.8397729992866516, 0, 0.7730588316917419, 0)
-DELTA["86"]["Position"] = UDim2.new(0.4824247360229492, 0, 0.524213433265686, 0)
-DELTA["86"]["Visible"] = false;
-DELTA["86"]["Name"] = [[Executor]]
-DELTA["87"] = Instance.new("ImageLabel", DELTA["86"])
-DELTA["87"]["BorderSizePixel"] = 0;
-DELTA["87"]["ScaleType"] = Enum.ScaleType.Crop;
-DELTA["87"]["BackgroundColor3"] = Color3.fromRGB(36, 0, 0)
-DELTA["87"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["87"]["Image"] = [[rbxassetid://13387419794]]
-DELTA["87"]["Size"] = UDim2.new(0.6566376686096191, 0, 0.9981886148452759, 0)
-DELTA["87"]["ClipsDescendants"] = true;
-DELTA["87"]["Name"] = [[Executor]]
-DELTA["87"]["Position"] = UDim2.new(1.0000001192092896, 0, 0.5, 0)
-DELTA["88"] = Instance.new("ImageLabel", DELTA["87"])
-DELTA["88"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-DELTA["88"]["Image"] = [[rbxassetid://13387657138]]
-DELTA["88"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["88"]["Name"] = [[Overlay]]
-DELTA["88"]["BackgroundTransparency"] = 0.800000011920929;
-DELTA["89"] = Instance.new("UICorner", DELTA["88"])
-DELTA["89"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["8a"] = Instance.new("ImageButton", DELTA["88"])
-DELTA["8a"]["ZIndex"] = 1000;
-DELTA["8a"]["BorderSizePixel"] = 0;
-DELTA["8a"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["8a"]["AnchorPoint"] = Vector2.new(1, 0)
-DELTA["8a"]["Image"] = [[rbxassetid://0]]
-DELTA["8a"]["Size"] = UDim2.new(0.06392838805913925, 0, 0.08036314696073532, 0)
-DELTA["8a"]["Name"] = [[Menu]]
-DELTA["8a"]["Position"] = UDim2.new(0.9912378787994385, 0, 0.026684332638978958, 0)
-DELTA["8b"] = Instance.new("ImageButton", DELTA["8a"])
-DELTA["8b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["8b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["8b"]["Image"] = [[rbxassetid://13387875723]]
-DELTA["8b"]["Size"] = UDim2.new(0.0789814367890358, 0, 0.4144761860370636, 0)
-DELTA["8b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["8b"]["BackgroundTransparency"] = 1;
-DELTA["8c"] = Instance.new("UICorner", DELTA["8a"])
-DELTA["8c"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["8d"] = Instance.new("UIAspectRatioConstraint", DELTA["8a"])
-DELTA["8e"] = Instance.new("Frame", DELTA["8a"])
-DELTA["8e"]["BackgroundColor3"] = Color3.fromRGB(41, 44, 52)
-DELTA["8e"]["Size"] = UDim2.new(4.045529842376709, 0, 2.321711778640747, 0)
-DELTA["8e"]["Position"] = UDim2.new(-3.045860767364502, 0, 1.093127965927124, 0)
-DELTA["8e"]["Visible"] = false;
-DELTA["8e"]["Name"] = [[Dropdown]]
-DELTA["8f"] = Instance.new("UIListLayout", DELTA["8e"])
-DELTA["8f"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["8f"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["8f"]["Padding"] = UDim.new(0.029999999329447746, 0)
-DELTA["8f"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["90"] = Instance.new("ImageButton", DELTA["8e"])
-DELTA["90"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["90"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["90"]["Image"] = [[rbxassetid://0]]
-DELTA["90"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.22047363221645355, 0)
-DELTA["90"]["Name"] = [[Option1]]
-DELTA["90"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.276297390460968, 0)
-DELTA["90"]["BackgroundTransparency"] = 1;
-DELTA["91"] = Instance.new("UICorner", DELTA["90"])
-DELTA["91"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["92"] = Instance.new("TextLabel", DELTA["90"])
-DELTA["92"]["TextWrapped"] = true;
-DELTA["92"]["ZIndex"] = 999999999;
-DELTA["92"]["TextScaled"] = true;
-DELTA["92"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["92"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["92"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["92"]["TextSize"] = 14;
-DELTA["92"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["92"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["92"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["92"]["Text"] = [[Default]]
-DELTA["92"]["Name"] = [[Title]]
-DELTA["92"]["BackgroundTransparency"] = 1;
-DELTA["92"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["93"] = Instance.new("ImageButton", DELTA["90"])
-DELTA["93"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["93"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["93"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["93"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["93"]["Name"] = [[Checked]]
-DELTA["93"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["93"]["BackgroundTransparency"] = 1;
-DELTA["94"] = Instance.new("UIAspectRatioConstraint", DELTA["93"])
-DELTA["95"] = Instance.new("Frame", DELTA["8e"])
-DELTA["95"]["BackgroundColor3"] = Color3.fromRGB(59, 63, 74)
-DELTA["95"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.012410691007971764, 0)
-DELTA["95"]["Position"] = UDim2.new(0.06975728273391724, 0, 0.4001886248588562, 0)
-DELTA["95"]["Name"] = [[Divider]]
-DELTA["96"] = Instance.new("ImageButton", DELTA["8e"])
-DELTA["96"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["96"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["96"]["Image"] = [[rbxassetid://0]]
-DELTA["96"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.22047372162342072, 0)
-DELTA["96"]["Name"] = [[Option2]]
-DELTA["96"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.5364913940429688, 0)
-DELTA["96"]["BackgroundTransparency"] = 1;
-DELTA["97"] = Instance.new("UICorner", DELTA["96"])
-DELTA["97"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["98"] = Instance.new("TextLabel", DELTA["96"])
-DELTA["98"]["TextWrapped"] = true;
-DELTA["98"]["ZIndex"] = 999999999;
-DELTA["98"]["TextScaled"] = true;
-DELTA["98"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["98"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["98"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["98"]["TextSize"] = 14;
-DELTA["98"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["98"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["98"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["98"]["Text"] = [[Light]]
-DELTA["98"]["Name"] = [[Title]]
-DELTA["98"]["BackgroundTransparency"] = 1;
-DELTA["98"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["99"] = Instance.new("ImageButton", DELTA["96"])
-DELTA["99"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["99"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["99"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["99"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["99"]["Name"] = [[Checked]]
-DELTA["99"]["Visible"] = false;
-DELTA["99"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["99"]["BackgroundTransparency"] = 1;
-DELTA["9a"] = Instance.new("UIAspectRatioConstraint", DELTA["99"])
-DELTA["9b"] = Instance.new("Frame", DELTA["8e"])
-DELTA["9b"]["BackgroundColor3"] = Color3.fromRGB(59, 63, 74)
-DELTA["9b"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.012410691007971764, 0)
-DELTA["9b"]["Position"] = UDim2.new(0.06975728273391724, 0, 0.6603825688362122, 0)
-DELTA["9b"]["Name"] = [[Divider]]
-DELTA["9c"] = Instance.new("ImageButton", DELTA["8e"])
-DELTA["9c"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["9c"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["9c"]["Image"] = [[rbxassetid://0]]
-DELTA["9c"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.2204737514257431, 0)
-DELTA["9c"]["Name"] = [[Option3]]
-DELTA["9c"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.7966850399971008, 0)
-DELTA["9c"]["BackgroundTransparency"] = 1;
-DELTA["9d"] = Instance.new("UICorner", DELTA["9c"])
-DELTA["9d"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["9e"] = Instance.new("TextLabel", DELTA["9c"])
-DELTA["9e"]["TextWrapped"] = true;
-DELTA["9e"]["ZIndex"] = 999999999;
-DELTA["9e"]["TextScaled"] = true;
-DELTA["9e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["9e"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["9e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["9e"]["TextSize"] = 14;
-DELTA["9e"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["9e"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["9e"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["9e"]["Text"] = [[Amoled]]
-DELTA["9e"]["Name"] = [[Title]]
-DELTA["9e"]["BackgroundTransparency"] = 1;
-DELTA["9e"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["9f"] = Instance.new("ImageButton", DELTA["9c"])
-DELTA["9f"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["9f"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["9f"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["9f"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["9f"]["Name"] = [[Checked]]
-DELTA["9f"]["Visible"] = false;
-DELTA["9f"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["9f"]["BackgroundTransparency"] = 1;
-DELTA["a0"] = Instance.new("UIAspectRatioConstraint", DELTA["9f"])
-DELTA["a1"] = Instance.new("UICorner", DELTA["8e"])
-DELTA["a1"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["a2"] = Instance.new("LocalScript", DELTA["8a"])
-DELTA["a3"] = Instance.new("Frame", DELTA["88"])
-DELTA["a3"]["ZIndex"] = 200;
-DELTA["a3"]["BorderSizePixel"] = 0;
-DELTA["a3"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["a3"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["a3"]["BackgroundTransparency"] = 1;
-DELTA["a3"]["Size"] = UDim2.new(0.96828693151474, 0, 0.17342007160186768, 0)
-DELTA["a3"]["ClipsDescendants"] = true;
-DELTA["a3"]["Position"] = UDim2.new(0.507856547832489, 0, 0.9821560382843018, 0)
-DELTA["a3"]["Name"] = [[Buttons]]
-DELTA["a4"] = Instance.new("UIListLayout", DELTA["a3"])
-DELTA["a4"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["a4"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["a4"]["Padding"] = UDim.new(0.029999999329447746, 0)
-DELTA["a4"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["a5"] = Instance.new("ImageButton", DELTA["a3"])
-DELTA["a5"]["Active"] = false;
-DELTA["a5"]["ZIndex"] = 300;
-DELTA["a5"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["a5"]["Selectable"] = false;
-DELTA["a5"]["Size"] = UDim2.new(0.2561585009098053, 0, 0.7000001668930054, 0)
-DELTA["a5"]["Name"] = [[Execute]]
-DELTA["a5"]["Position"] = UDim2.new(0.008000015281140804, 0, 0.20599937438964844, 0)
-DELTA["a5"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["a6"] = Instance.new("UICorner", DELTA["a5"])
-DELTA["a6"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["a7"] = Instance.new("TextLabel", DELTA["a5"])
-DELTA["a7"]["TextWrapped"] = true;
-DELTA["a7"]["TextScaled"] = true;
-DELTA["a7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["a7"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["a7"]["TextSize"] = 14;
-DELTA["a7"]["TextColor3"] = Color3.fromRGB(140, 206, 255)
-DELTA["a7"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["a7"]["Size"] = UDim2.new(0.8766257762908936, 0, 0.3993089199066162, 0)
-DELTA["a7"]["Text"] = [[EXECUTE]]
-DELTA["a7"]["Name"] = [[Title]]
-DELTA["a7"]["BackgroundTransparency"] = 1;
-DELTA["a7"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["a8"] = Instance.new("UIStroke", DELTA["a5"])
-DELTA["a8"]["Color"] = Color3.fromRGB(60, 137, 196)
-DELTA["a8"]["Thickness"] = 2;
-DELTA["a9"] = Instance.new("ImageButton", DELTA["a3"])
-DELTA["a9"]["Active"] = false;
-DELTA["a9"]["ZIndex"] = 300;
-DELTA["a9"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["a9"]["Selectable"] = false;
-DELTA["a9"]["LayoutOrder"] = 1;
-DELTA["a9"]["Size"] = UDim2.new(0.22138313949108124, 0, 0.7000001668930054, 0)
-DELTA["a9"]["Name"] = [[Clear]]
-DELTA["a9"]["Position"] = UDim2.new(0.27973994612693787, 0, 0.20599937438964844, 0)
-DELTA["a9"]["BackgroundTransparency"] = 0.9300000071525574;
-DELTA["aa"] = Instance.new("UICorner", DELTA["a9"])
-DELTA["aa"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["ab"] = Instance.new("TextLabel", DELTA["a9"])
-DELTA["ab"]["TextWrapped"] = true;
-DELTA["ab"]["TextScaled"] = true;
-DELTA["ab"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["ab"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["ab"]["TextSize"] = 14;
-DELTA["ab"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["ab"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["ab"]["Size"] = UDim2.new(0.8766260147094727, 0, 0.3993089199066162, 0)
-DELTA["ab"]["Text"] = [[CLEAR]]
-DELTA["ab"]["Name"] = [[Title]]
-DELTA["ab"]["BackgroundTransparency"] = 1;
-DELTA["ab"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["ac"] = Instance.new("UIStroke", DELTA["a9"])
-DELTA["ac"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["ac"]["Thickness"] = 2;
-DELTA["ad"] = Instance.new("ImageButton", DELTA["a3"])
-DELTA["ad"]["Active"] = false;
-DELTA["ad"]["ZIndex"] = 300;
-DELTA["ad"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["ad"]["Selectable"] = false;
-DELTA["ad"]["LayoutOrder"] = 2;
-DELTA["ad"]["Size"] = UDim2.new(0.3552889823913574, 0, 0.699999988079071, 0)
-DELTA["ad"]["Name"] = [[ExecuteClipboard]]
-DELTA["ad"]["Position"] = UDim2.new(0.5057284832000732, 0, 0.20600003004074097, 0)
-DELTA["ad"]["BackgroundTransparency"] = 0.9300000071525574;
-DELTA["ae"] = Instance.new("UICorner", DELTA["ad"])
-DELTA["ae"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["af"] = Instance.new("TextLabel", DELTA["ad"])
-DELTA["af"]["TextWrapped"] = true;
-DELTA["af"]["TextScaled"] = true;
-DELTA["af"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["af"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["af"]["TextSize"] = 14;
-DELTA["af"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["af"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["af"]["Size"] = UDim2.new(0.8766259551048279, 0, 0.3993089497089386, 0)
-DELTA["af"]["Text"] = [[EXECUTE CLIPBOARD]]
-DELTA["af"]["Name"] = [[Title]]
-DELTA["af"]["BackgroundTransparency"] = 1;
-DELTA["af"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["b0"] = Instance.new("UIStroke", DELTA["ad"])
-DELTA["b0"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["b0"]["Thickness"] = 2;
-DELTA["b1"] = Instance.new("UIPadding", DELTA["a3"])
-DELTA["b1"]["PaddingTop"] = UDim.new(0.07999999821186066, 0)
-DELTA["b1"]["PaddingRight"] = UDim.new(0.00800000037997961, 0)
-DELTA["b1"]["PaddingBottom"] = UDim.new(0.07999999821186066, 0)
-DELTA["b1"]["PaddingLeft"] = UDim.new(0.00800000037997961, 0)
-DELTA["b2"] = Instance.new("LocalScript", DELTA["a3"])
-DELTA["b2"]["Name"] = [[ButtonHandlers]]
-DELTA["b3"] = Instance.new("TextBox", DELTA["a3"])
-DELTA["b3"]["Active"] = true;
-DELTA["b3"]["ZIndex"] = 300;
-DELTA["b3"]["TextSize"] = 21;
-DELTA["b3"]["TextWrapped"] = true;
-DELTA["b3"]["BackgroundColor3"] = Color3.fromRGB(94, 136, 169)
-DELTA["b3"]["TextColor3"] = Color3.fromRGB(185, 211, 230)
-DELTA["b3"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["b3"]["LayoutOrder"] = 2;
-DELTA["b3"]["BackgroundTransparency"] = 0.9300000071525574;
-DELTA["b3"]["Size"] = UDim2.new(0.07424724847078323, 0, 0.699999988079071, 0)
-DELTA["b3"]["Selectable"] = false;
-DELTA["b3"]["Text"] = [[]]
-DELTA["b3"]["Position"] = UDim2.new(0.9160652756690979, 0, 0.20599988102912903, 0)
-DELTA["b3"]["Visible"] = false;
-DELTA["b3"]["Name"] = [[Button3]]
-DELTA["b4"] = Instance.new("UICorner", DELTA["b3"])
-DELTA["b4"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["b5"] = Instance.new("UIStroke", DELTA["b3"])
-DELTA["b5"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["b5"]["Thickness"] = 2;
-DELTA["b5"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-DELTA["b6"] = Instance.new("ScrollingFrame", DELTA["88"])
-DELTA["b6"]["ZIndex"] = 200;
-DELTA["b6"]["BorderSizePixel"] = 0;
-DELTA["b6"]["CanvasSize"] = UDim2.new(2, 0, 0, 0)
-DELTA["b6"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["b6"]["HorizontalScrollBarInset"] = Enum.ScrollBarInset.Always;
-DELTA["b6"]["AutomaticCanvasSize"] = Enum.AutomaticSize.X;
-DELTA["b6"]["Size"] = UDim2.new(0.9840000867843628, 0, 0.12545627355575562, 0)
-DELTA["b6"]["Selectable"] = false;
-DELTA["b6"]["ScrollBarThickness"] = 0;
-DELTA["b6"]["Position"] = UDim2.new(0.007965609431266785, 0, 0.016980938613414764, 0)
-DELTA["b6"]["Name"] = [[Tabs]]
-DELTA["b7"] = Instance.new("UIPadding", DELTA["b6"])
-DELTA["b7"]["PaddingTop"] = UDim.new(0.07999999821186066, 0)
-DELTA["b7"]["PaddingRight"] = UDim.new(0.00800000037997961, 0)
-DELTA["b7"]["PaddingBottom"] = UDim.new(0.07999999821186066, 0)
-DELTA["b7"]["PaddingLeft"] = UDim.new(0.00800000037997961, 0)
-DELTA["b8"] = Instance.new("UIListLayout", DELTA["b6"])
-DELTA["b8"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["b8"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["b8"]["Padding"] = UDim.new(0.009999999776482582, 0)
-DELTA["b8"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["b9"] = Instance.new("ImageButton", DELTA["b6"])
-DELTA["b9"]["Active"] = false;
-DELTA["b9"]["ZIndex"] = 300;
-DELTA["b9"]["BackgroundColor3"] = Color3.fromRGB(34, 41, 50)
-DELTA["b9"]["Selectable"] = false;
-DELTA["b9"]["LayoutOrder"] = 1000;
-DELTA["b9"]["Size"] = UDim2.new(0.0526634119451046, 0, 0.6154626607894897, 0)
-DELTA["b9"]["Name"] = [[AddTab]]
-DELTA["b9"]["Position"] = UDim2.new(0.26442891359329224, 0, 0.30375349521636963, 0)
-DELTA["ba"] = Instance.new("UICorner", DELTA["b9"])
-DELTA["ba"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["bb"] = Instance.new("ImageButton", DELTA["b9"])
-DELTA["bb"]["Active"] = false;
-DELTA["bb"]["Modal"] = true;
-DELTA["bb"]["AutoButtonColor"] = false;
-DELTA["bb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["bb"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["bb"]["Image"] = [[rbxassetid://13387627918]]
-DELTA["bb"]["Size"] = UDim2.new(0.35981613397598267, 0, 0.3613884449005127, 0)
-DELTA["bb"]["Rotation"] = 45;
-DELTA["bb"]["Position"] = UDim2.new(0.699999988079071, 0, 0.5, 0)
-DELTA["bb"]["BackgroundTransparency"] = 1;
-DELTA["bc"] = Instance.new("UIAspectRatioConstraint", DELTA["bb"])
-DELTA["bd"] = Instance.new("LocalScript", DELTA["b9"])
-DELTA["be"] = Instance.new("UIAspectRatioConstraint", DELTA["b9"])
-DELTA["be"]["AspectRatio"] = 1.004372477531433;
-DELTA["bf"] = Instance.new("Folder", DELTA["88"])
-DELTA["bf"]["Name"] = [[Reserved]]
-DELTA["c0"] = Instance.new("TextBox", DELTA["bf"])
-DELTA["c0"]["LineHeight"] = 1.840000033378601;
-DELTA["c0"]["TextSize"] = 21;
-DELTA["c0"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["c0"]["TextWrapped"] = false;
-DELTA["c0"]["TextYAlignment"] = Enum.TextYAlignment.Top;
-DELTA["c0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c0"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c0"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["c0"]["ShowNativeInput"] = false;
-DELTA["c0"]["MultiLine"] = true;
-DELTA["c0"]["BackgroundTransparency"] = 1;
-DELTA["c0"]["Size"] = UDim2.new(0.9882024526596069, 0, 0.9716954827308655, 0)
-DELTA["c0"]["Text"] = ""
-DELTA["c0"]["PlaceholderText"] = "-- put your lua script here ^_^"
-DELTA["c0"]["Position"] = UDim2.new(0.011494521982967854, 0, 0.012946978211402893, 3)
-DELTA["c0"]["AutomaticSize"] = Enum.AutomaticSize.XY;
-DELTA["c0"]["Visible"] = false;
-DELTA["c0"]["Name"] = [[Textbox]]
-DELTA["c0"]["ClearTextOnFocus"] = false;
-DELTA["c1"] = Instance.new("Frame", DELTA["bf"])
-DELTA["c1"]["BackgroundColor3"] = Color3.fromRGB(31, 51, 80)
-DELTA["c1"]["Size"] = UDim2.new(1, 0, 0.03193088620901108, 0)
-DELTA["c1"]["Visible"] = false;
-DELTA["c1"]["Name"] = [[SettingSwitchOn]]
-DELTA["c2"] = Instance.new("UICorner", DELTA["c1"])
-DELTA["c2"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["c3"] = Instance.new("TextLabel", DELTA["c1"])
-DELTA["c3"]["TextWrapped"] = true;
-DELTA["c3"]["TextScaled"] = true;
-DELTA["c3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c3"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["c3"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["c3"]["TextSize"] = 14;
-DELTA["c3"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c3"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["c3"]["Size"] = UDim2.new(0.18567337095737457, 0, 0.31746408343315125, 0)
-DELTA["c3"]["Text"] = [[Auto Execute]]
-DELTA["c3"]["Name"] = [[Title]]
-DELTA["c3"]["BackgroundTransparency"] = 1;
-DELTA["c3"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["c4"] = Instance.new("UIPadding", DELTA["c1"])
-DELTA["c4"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["c4"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["c5"] = Instance.new("TextLabel", DELTA["c1"])
-DELTA["c5"]["TextWrapped"] = true;
-DELTA["c5"]["TextScaled"] = true;
-DELTA["c5"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["c5"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["c5"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["c5"]["TextSize"] = 14;
-DELTA["c5"]["TextColor3"] = Color3.fromRGB(126, 139, 176)
-DELTA["c5"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["c5"]["Size"] = UDim2.new(0.6590386629104614, 0, 0.23099972307682037, 0)
-DELTA["c5"]["Text"] = [[automatically execute scripts in your autoexec file upon attached.]]
-DELTA["c5"]["Name"] = [[Desc]]
-DELTA["c5"]["BackgroundTransparency"] = 1;
-DELTA["c5"]["Position"] = UDim2.new(0.18517163395881653, 0, 0.5, 0)
-DELTA["c6"] = Instance.new("ImageButton", DELTA["c1"])
-DELTA["c6"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["c6"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["c6"]["Image"] = [[rbxassetid://0]]
-DELTA["c6"]["Size"] = UDim2.new(0.06560052931308746, 0, 0.473985493183136, 0)
-DELTA["c6"]["Name"] = [[Switch]]
-DELTA["c6"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["c7"] = Instance.new("UICorner", DELTA["c6"])
-DELTA["c7"]["CornerRadius"] = UDim.new(10, 0)
-DELTA["c8"] = Instance.new("ImageLabel", DELTA["c6"])
-DELTA["c8"]["BackgroundColor3"] = Color3.fromRGB(254, 254, 254)
-DELTA["c8"]["Selectable"] = true;
-DELTA["c8"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["c8"]["Image"] = [[rbxassetid://0]]
-DELTA["c8"]["Size"] = UDim2.new(0.34452590346336365, 0, 0.6585104465484619, 0)
-DELTA["c8"]["Active"] = true;
-DELTA["c8"]["Name"] = [[ImageButton]]
-DELTA["c8"]["Position"] = UDim2.new(0.8884302377700806, 0, 0.5, 0)
-DELTA["c9"] = Instance.new("UICorner", DELTA["c8"])
-DELTA["c9"]["CornerRadius"] = UDim.new(10, 0)
-DELTA["ca"] = Instance.new("UIAspectRatioConstraint", DELTA["c8"])
-DELTA["cb"] = Instance.new("BoolValue", DELTA["c1"])
-DELTA["cb"]["Value"] = true;
-DELTA["cb"]["Name"] = [[Enabled]]
-DELTA["cc"] = Instance.new("Frame", DELTA["bf"])
-DELTA["cc"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["cc"]["LayoutOrder"] = 2;
-DELTA["cc"]["Size"] = UDim2.new(1, 0, 0.03193088620901108, 0)
-DELTA["cc"]["Position"] = UDim2.new(0, 0, 0.079827219247818, 0)
-DELTA["cc"]["Visible"] = false;
-DELTA["cc"]["Name"] = [[Button]]
-DELTA["cd"] = Instance.new("UICorner", DELTA["cc"])
-DELTA["cd"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["ce"] = Instance.new("TextLabel", DELTA["cc"])
-DELTA["ce"]["TextWrapped"] = true;
-DELTA["ce"]["TextScaled"] = true;
-DELTA["ce"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["ce"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["ce"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["ce"]["TextSize"] = 14;
-DELTA["ce"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["ce"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["ce"]["Size"] = UDim2.new(0.18567337095737457, 0, 0.31746408343315125, 0)
-DELTA["ce"]["Text"] = [[Kill ROBLOX]]
-DELTA["ce"]["Name"] = [[Title]]
-DELTA["ce"]["BackgroundTransparency"] = 1;
-DELTA["ce"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["cf"] = Instance.new("UIPadding", DELTA["cc"])
-DELTA["cf"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["cf"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["d0"] = Instance.new("TextLabel", DELTA["cc"])
-DELTA["d0"]["TextWrapped"] = true;
-DELTA["d0"]["TextScaled"] = true;
-DELTA["d0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d0"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["d0"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["d0"]["TextSize"] = 14;
-DELTA["d0"]["TextColor3"] = Color3.fromRGB(103, 109, 126)
-DELTA["d0"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["d0"]["Size"] = UDim2.new(0.6590386629104614, 0, 0.23099972307682037, 0)
-DELTA["d0"]["Text"] = [[self explanitory function right here]]
-DELTA["d0"]["Name"] = [[Desc]]
-DELTA["d0"]["BackgroundTransparency"] = 1;
-DELTA["d0"]["Position"] = UDim2.new(0.18517163395881653, 0, 0.5, 0)
-DELTA["d1"] = Instance.new("ImageButton", DELTA["cc"])
-DELTA["d1"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["d1"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["d1"]["Image"] = [[rbxassetid://0]]
-DELTA["d1"]["Size"] = UDim2.new(0.12388666719198227, 0, 0.473985493183136, 0)
-DELTA["d1"]["Name"] = [[Button]]
-DELTA["d1"]["Position"] = UDim2.new(0.9995027780532837, 0, 0.5000000596046448, 0)
-DELTA["d2"] = Instance.new("UICorner", DELTA["d1"])
-DELTA["d2"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["d3"] = Instance.new("TextLabel", DELTA["d1"])
-DELTA["d3"]["TextWrapped"] = true;
-DELTA["d3"]["ZIndex"] = 999999999;
-DELTA["d3"]["TextScaled"] = true;
-DELTA["d3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d3"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["d3"]["TextSize"] = 14;
-DELTA["d3"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d3"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["d3"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["d3"]["Text"] = [[CLICK HERE]]
-DELTA["d3"]["Name"] = [[Title]]
-DELTA["d3"]["BackgroundTransparency"] = 1;
-DELTA["d3"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["d4"] = Instance.new("Frame", DELTA["bf"])
-DELTA["d4"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["d4"]["LayoutOrder"] = 1;
-DELTA["d4"]["Size"] = UDim2.new(1, 0, 0.03193089738488197, 0)
-DELTA["d4"]["Position"] = UDim2.new(0, 0, 0.0399135947227478, 0)
-DELTA["d4"]["Visible"] = false;
-DELTA["d4"]["Name"] = [[SettingSwitch]]
-DELTA["d5"] = Instance.new("UICorner", DELTA["d4"])
-DELTA["d5"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["d6"] = Instance.new("TextLabel", DELTA["d4"])
-DELTA["d6"]["TextWrapped"] = true;
-DELTA["d6"]["TextScaled"] = true;
-DELTA["d6"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d6"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["d6"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["d6"]["TextSize"] = 14;
-DELTA["d6"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d6"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["d6"]["Size"] = UDim2.new(0.18567337095737457, 0, 0.31746408343315125, 0)
-DELTA["d6"]["Text"] = [[Auto Execute]]
-DELTA["d6"]["Name"] = [[Title]]
-DELTA["d6"]["BackgroundTransparency"] = 1;
-DELTA["d6"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["d7"] = Instance.new("UIPadding", DELTA["d4"])
-DELTA["d7"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["d7"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["d8"] = Instance.new("TextLabel", DELTA["d4"])
-DELTA["d8"]["TextWrapped"] = true;
-DELTA["d8"]["TextScaled"] = true;
-DELTA["d8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["d8"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["d8"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["d8"]["TextSize"] = 14;
-DELTA["d8"]["TextColor3"] = Color3.fromRGB(103, 109, 126)
-DELTA["d8"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["d8"]["Size"] = UDim2.new(0.6590386629104614, 0, 0.23099972307682037, 0)
-DELTA["d8"]["Text"] = [[automatically execute scripts in your autoexec file upon attached.]]
-DELTA["d8"]["Name"] = [[Desc]]
-DELTA["d8"]["BackgroundTransparency"] = 1;
-DELTA["d8"]["Position"] = UDim2.new(0.18517163395881653, 0, 0.5, 0)
-DELTA["d9"] = Instance.new("ImageButton", DELTA["d4"])
-DELTA["d9"]["BackgroundColor3"] = Color3.fromRGB(61, 66, 81)
-DELTA["d9"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["d9"]["Image"] = [[rbxassetid://0]]
-DELTA["d9"]["Size"] = UDim2.new(0.06560052931308746, 0, 0.473985493183136, 0)
-DELTA["d9"]["Name"] = [[Switch]]
-DELTA["d9"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["da"] = Instance.new("UICorner", DELTA["d9"])
-DELTA["da"]["CornerRadius"] = UDim.new(10, 0)
-DELTA["db"] = Instance.new("ImageLabel", DELTA["d9"])
-DELTA["db"]["BackgroundColor3"] = Color3.fromRGB(136, 140, 151)
-DELTA["db"]["Selectable"] = true;
-DELTA["db"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["db"]["Image"] = [[rbxassetid://0]]
-DELTA["db"]["Size"] = UDim2.new(0.34452590346336365, 0, 0.6585104465484619, 0)
-DELTA["db"]["Active"] = true;
-DELTA["db"]["Name"] = [[ImageButton]]
-DELTA["db"]["Position"] = UDim2.new(0.11156979203224182, 0, 0.5, 0)
-DELTA["dc"] = Instance.new("UICorner", DELTA["db"])
-DELTA["dc"]["CornerRadius"] = UDim.new(10, 0)
-DELTA["dd"] = Instance.new("UIAspectRatioConstraint", DELTA["db"])
-DELTA["de"] = Instance.new("BoolValue", DELTA["d4"])
-DELTA["de"]["Name"] = [[Enabled]]
-DELTA["df"] = Instance.new("Frame", DELTA["bf"])
-DELTA["df"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["df"]["LayoutOrder"] = 3;
-DELTA["df"]["Size"] = UDim2.new(1, 0, 0.03193089738488197, 0)
-DELTA["df"]["Position"] = UDim2.new(0, 0, 0.11974083632230759, 0)
-DELTA["df"]["Visible"] = false;
-DELTA["df"]["Name"] = [[SettingDropdown]]
-DELTA["e0"] = Instance.new("UICorner", DELTA["df"])
-DELTA["e0"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["e1"] = Instance.new("TextLabel", DELTA["df"])
-DELTA["e1"]["TextWrapped"] = true;
-DELTA["e1"]["TextScaled"] = true;
-DELTA["e1"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["e1"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["e1"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["e1"]["TextSize"] = 14;
-DELTA["e1"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["e1"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["e1"]["Size"] = UDim2.new(0.18567337095737457, 0, 0.31746408343315125, 0)
-DELTA["e1"]["Text"] = [[Themes]]
-DELTA["e1"]["Name"] = [[Title]]
-DELTA["e1"]["BackgroundTransparency"] = 1;
-DELTA["e1"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["e2"] = Instance.new("UIPadding", DELTA["df"])
-DELTA["e2"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["e2"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["e3"] = Instance.new("ImageButton", DELTA["df"])
-DELTA["e3"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["e3"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["e3"]["Image"] = [[rbxassetid://0]]
-DELTA["e3"]["Size"] = UDim2.new(0.12388666719198227, 0, 0.473985493183136, 0)
-DELTA["e3"]["Name"] = [[Button]]
-DELTA["e3"]["Position"] = UDim2.new(0.9995027780532837, 0, 0.5000000596046448, 0)
-DELTA["e4"] = Instance.new("UICorner", DELTA["e3"])
-DELTA["e4"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["e5"] = Instance.new("TextLabel", DELTA["e3"])
-DELTA["e5"]["TextWrapped"] = true;
-DELTA["e5"]["ZIndex"] = 999999999;
-DELTA["e5"]["TextScaled"] = true;
-DELTA["e5"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["e5"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["e5"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["e5"]["TextSize"] = 14;
-DELTA["e5"]["TextColor3"] = Color3.fromRGB(138, 146, 167)
-DELTA["e5"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["e5"]["Size"] = UDim2.new(0.5571646094322205, 0, 0.44124072790145874, 0)
-DELTA["e5"]["Text"] = [[DEFAULT]]
-DELTA["e5"]["Name"] = [[Title]]
-DELTA["e5"]["BackgroundTransparency"] = 1;
-DELTA["e5"]["Position"] = UDim2.new(0.5609880685806274, 0, 0.5000001192092896, 0)
-DELTA["e6"] = Instance.new("ImageButton", DELTA["e3"])
-DELTA["e6"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["e6"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["e6"]["Image"] = [[rbxassetid://13441628967]]
-DELTA["e6"]["Size"] = UDim2.new(0.07741968333721161, 0, 0.473985493183136, 0)
-DELTA["e6"]["Name"] = [[Button]]
-DELTA["e6"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["e6"]["BackgroundTransparency"] = 1;
-DELTA["e7"] = Instance.new("Frame", DELTA["df"])
-DELTA["e7"]["BackgroundColor3"] = Color3.fromRGB(41, 44, 52)
-DELTA["e7"]["Size"] = UDim2.new(0.2331225425004959, 0, 1.7701293230056763, 0)
-DELTA["e7"]["Position"] = UDim2.new(0.7665446996688843, 0, 1.0931282043457031, 0)
-DELTA["e7"]["Visible"] = false;
-DELTA["e7"]["ZIndex"] = 9999999999999;
-DELTA["e7"]["Name"] = [[Dropdown]]
-DELTA["e8"] = Instance.new("UIListLayout", DELTA["e7"])
-DELTA["e8"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["e8"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["e8"]["Padding"] = UDim.new(0.029999999329447746, 0)
-DELTA["e8"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["e9"] = Instance.new("ImageButton", DELTA["e7"])
-DELTA["e9"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["e9"]["LayoutOrder"] = 1;
-DELTA["e9"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["e9"]["Image"] = [[rbxassetid://0]]
-DELTA["e9"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.22047372162342072, 0)
-DELTA["e9"]["Name"] = [[Option2]]
-DELTA["e9"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.5364913940429688, 0)
-DELTA["e9"]["BackgroundTransparency"] = 1;
-DELTA["ea"] = Instance.new("UICorner", DELTA["e9"])
-DELTA["ea"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["eb"] = Instance.new("TextLabel", DELTA["e9"])
-DELTA["eb"]["TextWrapped"] = true;
-DELTA["eb"]["ZIndex"] = 999999999;
-DELTA["eb"]["TextScaled"] = true;
-DELTA["eb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["eb"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["eb"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["eb"]["TextSize"] = 14;
-DELTA["eb"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["eb"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["eb"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["eb"]["Text"] = [[Light]]
-DELTA["eb"]["Name"] = [[Title]]
-DELTA["eb"]["BackgroundTransparency"] = 1;
-DELTA["eb"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["ec"] = Instance.new("ImageButton", DELTA["e9"])
-DELTA["ec"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["ec"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["ec"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["ec"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["ec"]["Name"] = [[Checked]]
-DELTA["ec"]["Visible"] = false;
-DELTA["ec"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["ec"]["BackgroundTransparency"] = 1;
-DELTA["ed"] = Instance.new("UIAspectRatioConstraint", DELTA["ec"])
-DELTA["ee"] = Instance.new("Frame", DELTA["e7"])
-DELTA["ee"]["BackgroundColor3"] = Color3.fromRGB(59, 63, 74)
-DELTA["ee"]["LayoutOrder"] = 1;
-DELTA["ee"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.012410691007971764, 0)
-DELTA["ee"]["Position"] = UDim2.new(0.06975728273391724, 0, 0.6603825688362122, 0)
-DELTA["ee"]["Name"] = [[Divider]]
-DELTA["ef"] = Instance.new("UICorner", DELTA["e7"])
-DELTA["ef"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["f0"] = Instance.new("ImageButton", DELTA["e7"])
-DELTA["f0"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["f0"]["LayoutOrder"] = -1
-DELTA["f0"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["f0"]["Image"] = [[rbxassetid://0]]
-DELTA["f0"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.22047363221645355, 0)
-DELTA["f0"]["Name"] = [[Option1]]
-DELTA["f0"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.276297390460968, 0)
-DELTA["f0"]["BackgroundTransparency"] = 1;
-DELTA["f1"] = Instance.new("UICorner", DELTA["f0"])
-DELTA["f1"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["f2"] = Instance.new("TextLabel", DELTA["f0"])
-DELTA["f2"]["TextWrapped"] = true;
-DELTA["f2"]["ZIndex"] = 999999999;
-DELTA["f2"]["TextScaled"] = true;
-DELTA["f2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["f2"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["f2"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["f2"]["TextSize"] = 14;
-DELTA["f2"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["f2"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["f2"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["f2"]["Text"] = [[Default]]
-DELTA["f2"]["Name"] = [[Title]]
-DELTA["f2"]["BackgroundTransparency"] = 1;
-DELTA["f2"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["f3"] = Instance.new("ImageButton", DELTA["f0"])
-DELTA["f3"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["f3"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["f3"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["f3"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["f3"]["Name"] = [[Checked]]
-DELTA["f3"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["f3"]["BackgroundTransparency"] = 1;
-DELTA["f4"] = Instance.new("UIAspectRatioConstraint", DELTA["f3"])
-DELTA["f5"] = Instance.new("Frame", DELTA["e7"])
-DELTA["f5"]["BackgroundColor3"] = Color3.fromRGB(59, 63, 74)
-DELTA["f5"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.012410691007971764, 0)
-DELTA["f5"]["Position"] = UDim2.new(0.06975728273391724, 0, 0.4001886248588562, 0)
-DELTA["f5"]["Name"] = [[Divider]]
-DELTA["f6"] = Instance.new("ImageButton", DELTA["e7"])
-DELTA["f6"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["f6"]["LayoutOrder"] = 3;
-DELTA["f6"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["f6"]["Image"] = [[rbxassetid://0]]
-DELTA["f6"]["Size"] = UDim2.new(0.8604854345321655, 0, 0.2204737514257431, 0)
-DELTA["f6"]["Name"] = [[Option3]]
-DELTA["f6"]["Position"] = UDim2.new(0.9302427172660828, 0, 0.7966850399971008, 0)
-DELTA["f6"]["BackgroundTransparency"] = 1;
-DELTA["f7"] = Instance.new("UICorner", DELTA["f6"])
-DELTA["f7"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["f8"] = Instance.new("TextLabel", DELTA["f6"])
-DELTA["f8"]["TextWrapped"] = true;
-DELTA["f8"]["ZIndex"] = 999999999;
-DELTA["f8"]["TextScaled"] = true;
-DELTA["f8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["f8"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["f8"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["f8"]["TextSize"] = 14;
-DELTA["f8"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["f8"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["f8"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.8179191946983337, 0)
-DELTA["f8"]["Text"] = [[Amoled]]
-DELTA["f8"]["Name"] = [[Title]]
-DELTA["f8"]["BackgroundTransparency"] = 1;
-DELTA["f8"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["f9"] = Instance.new("ImageButton", DELTA["f6"])
-DELTA["f9"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["f9"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["f9"]["Image"] = [[rbxassetid://13441695981]]
-DELTA["f9"]["Size"] = UDim2.new(0.0812797099351883, 0, 0.5769613981246948, 0)
-DELTA["f9"]["Name"] = [[Checked]]
-DELTA["f9"]["Visible"] = false;
-DELTA["f9"]["Position"] = UDim2.new(1, 0, 0.5, 0)
-DELTA["f9"]["BackgroundTransparency"] = 1;
-DELTA["fa"] = Instance.new("UIAspectRatioConstraint", DELTA["f9"])
-DELTA["fb"] = Instance.new("TextLabel", DELTA["df"])
-DELTA["fb"]["TextWrapped"] = true;
-DELTA["fb"]["TextScaled"] = true;
-DELTA["fb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["fb"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["fb"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["fb"]["TextSize"] = 14;
-DELTA["fb"]["TextColor3"] = Color3.fromRGB(103, 109, 126)
-DELTA["fb"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["fb"]["Size"] = UDim2.new(0.6590386629104614, 0, 0.23099972307682037, 0)
-DELTA["fb"]["Text"] = [[select your desireable Delta theme below]]
-DELTA["fb"]["Name"] = [[Desc]]
-DELTA["fb"]["BackgroundTransparency"] = 1;
-DELTA["fb"]["Position"] = UDim2.new(0.18517163395881653, 0, 0.5, 0)
-DELTA["fc"] = Instance.new("Frame", DELTA["bf"])
-DELTA["fc"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["fc"]["LayoutOrder"] = 2;
-DELTA["fc"]["Size"] = UDim2.new(1, 0, 0.03193088620901108, 0)
-DELTA["fc"]["Position"] = UDim2.new(0, 0, 0.079827219247818, 0)
-DELTA["fc"]["Visible"] = false;
-DELTA["fc"]["Name"] = [[SettingTextbox]]
-DELTA["fd"] = Instance.new("UICorner", DELTA["fc"])
-DELTA["fd"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["fe"] = Instance.new("TextLabel", DELTA["fc"])
-DELTA["fe"]["TextWrapped"] = true;
-DELTA["fe"]["TextScaled"] = true;
-DELTA["fe"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["fe"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["fe"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["fe"]["TextSize"] = 14;
-DELTA["fe"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["fe"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["fe"]["Size"] = UDim2.new(0.18567337095737457, 0, 0.31746408343315125, 0)
-DELTA["fe"]["Text"] = [[Kill ROBLOX]]
-DELTA["fe"]["Name"] = [[Title]]
-DELTA["fe"]["BackgroundTransparency"] = 1;
-DELTA["fe"]["Position"] = UDim2.new(0, 0, 0.5, 0)
-DELTA["ff"] = Instance.new("UIPadding", DELTA["fc"])
-DELTA["ff"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["ff"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["100"] = Instance.new("TextLabel", DELTA["fc"])
-DELTA["100"]["TextWrapped"] = true;
-DELTA["100"]["TextScaled"] = true;
-DELTA["100"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["100"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["100"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["100"]["TextSize"] = 14;
-DELTA["100"]["TextColor3"] = Color3.fromRGB(103, 109, 126)
-DELTA["100"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["100"]["Size"] = UDim2.new(0.6590386629104614, 0, 0.23099972307682037, 0)
-DELTA["100"]["Text"] = [[self explanitory function right here]]
-DELTA["100"]["Name"] = [[Desc]]
-DELTA["100"]["BackgroundTransparency"] = 1;
-DELTA["100"]["Position"] = UDim2.new(0.18517163395881653, 0, 0.5, 0)
-DELTA["101"] = Instance.new("TextBox", DELTA["fc"])
-DELTA["101"]["Active"] = true;
-DELTA["101"]["BorderSizePixel"] = 0;
-DELTA["101"]["TextSize"] = 17;
-DELTA["101"]["TextWrapped"] = true;
-DELTA["101"]["TextScaled"] = true;
-DELTA["101"]["BackgroundColor3"] = Color3.fromRGB(31, 37, 47)
-DELTA["101"]["TextColor3"] = Color3.fromRGB(162, 191, 212)
-DELTA["101"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["101"]["AnchorPoint"] = Vector2.new(0, 1)
-DELTA["101"]["PlaceholderText"] = [[Input]]
-DELTA["101"]["Size"] = UDim2.new(0.19835805892944336, 0, 0.4205845594406128, 0)
-DELTA["101"]["Selectable"] = false;
-DELTA["101"]["Text"] = [[]]
-DELTA["101"]["Position"] = UDim2.new(0.7891961932182312, 0, 0.7077450752258301, 0)
-DELTA["101"]["Name"] = [[InputText]]
-DELTA["102"] = Instance.new("UICorner", DELTA["101"])
-DELTA["102"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["103"] = Instance.new("UIStroke", DELTA["101"])
-DELTA["103"]["Color"] = Color3.fromRGB(59, 71, 90)
-DELTA["103"]["Thickness"] = 2;
-DELTA["103"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-DELTA["104"] = Instance.new("ImageButton", DELTA["bf"])
-DELTA["104"]["Active"] = false;
-DELTA["104"]["ZIndex"] = 300;
-DELTA["104"]["BackgroundColor3"] = Color3.fromRGB(34, 41, 50)
-DELTA["104"]["Selectable"] = false;
-DELTA["104"]["LayoutOrder"] = 1;
-DELTA["104"]["Size"] = UDim2.new(0.23816877603530884, 0, 0.8693817853927612, 0)
-DELTA["104"]["Name"] = [[TabX]]
-DELTA["104"]["Visible"] = false;
-DELTA["104"]["Position"] = UDim2.new(0.016260094940662384, 0, 0.20600000023841858, 0)
-DELTA["104"]["BackgroundTransparency"] = 1;
-DELTA["105"] = Instance.new("UICorner", DELTA["104"])
-DELTA["105"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["106"] = Instance.new("TextLabel", DELTA["104"])
-DELTA["106"]["TextWrapped"] = true;
-DELTA["106"]["TextScaled"] = true;
-DELTA["106"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["106"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["106"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["106"]["TextTransparency"] = 0.30000001192092896;
-DELTA["106"]["TextSize"] = 14;
-DELTA["106"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["106"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["106"]["Size"] = UDim2.new(0.6458646059036255, 0, 0.4000000059604645, 0)
-DELTA["106"]["Text"] = [[script.lua]]
-DELTA["106"]["Name"] = [[Title]]
-DELTA["106"]["BackgroundTransparency"] = 1;
-DELTA["106"]["Position"] = UDim2.new(0.11627907305955887, 0, 0.5, 0)
-DELTA["107"] = Instance.new("ImageButton", DELTA["104"])
-DELTA["107"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["107"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["107"]["Image"] = [[rbxassetid://13387627918]]
-DELTA["107"]["Size"] = UDim2.new(0.06472493708133698, 0, 0.19327585399150848, 0)
-DELTA["107"]["Position"] = UDim2.new(0.9190940260887146, 0, 0.49999985098838806, 0)
-DELTA["107"]["BackgroundTransparency"] = 1;
-DELTA["108"] = Instance.new("UIAspectRatioConstraint", DELTA["107"])
-DELTA["109"] = Instance.new("ImageLabel", DELTA["bf"])
-DELTA["109"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["109"]["LayoutOrder"] = 1;
-DELTA["109"]["Size"] = UDim2.new(0.997948408126831, 0, 0.0462365560233593, 0)
-DELTA["109"]["Position"] = UDim2.new(0, 0, 1.0919346493665216e-07, 0)
-DELTA["109"]["Name"] = [[Script]]
-DELTA["109"].Active = true;
-DELTA["109"].Visible = false;
-DELTA["10a"] = Instance.new("UICorner", DELTA["109"])
-DELTA["10a"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["10b"] = Instance.new("TextLabel", DELTA["109"])
-DELTA["10b"]["TextWrapped"] = true;
-DELTA["10b"]["TextScaled"] = true;
-DELTA["10b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10b"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["10b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["10b"]["TextSize"] = 14;
-DELTA["10b"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10b"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["10b"]["Size"] = UDim2.new(0.15939868986606598, 0, 0.31746405363082886, 0)
-DELTA["10b"]["Text"] = [[Enter Your Script...]]
-DELTA["10b"]["Name"] = [[Title]]
-DELTA["10b"]["BackgroundTransparency"] = 1;
-DELTA["10b"]["Position"] = UDim2.new(-0.01293666660785675, 0, 0.5000000596046448, 0)
-DELTA["10c"] = Instance.new("UIPadding", DELTA["109"])
-DELTA["10c"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["10c"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["10d"] = Instance.new("ImageButton", DELTA["109"])
-DELTA["10d"]["BackgroundColor3"] = Color3.fromRGB(59, 64, 79)
-DELTA["10d"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["10d"]["Image"] = [[rbxassetid://0]]
-DELTA["10d"]["Size"] = UDim2.new(0.09953451156616211, 0, 0.473985493183136, 0)
-DELTA["10d"]["Name"] = [[Button]]
-DELTA["10d"]["Position"] = UDim2.new(1.0157949924468994, 0, 0.5000000596046448, 0)
-DELTA["10e"] = Instance.new("UICorner", DELTA["10d"])
-DELTA["10e"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["10f"] = Instance.new("TextLabel", DELTA["10d"])
-DELTA["10f"]["TextWrapped"] = true;
-DELTA["10f"]["ZIndex"] = 999999999;
-DELTA["10f"]["TextScaled"] = true;
-DELTA["10f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10f"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["10f"]["TextSize"] = 14;
-DELTA["10f"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10f"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["10f"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["10f"]["Text"] = [[EXECUTE]]
-DELTA["10f"]["Name"] = [[Title]]
-DELTA["10f"]["BackgroundTransparency"] = 1;
-DELTA["10f"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["10da"] = Instance.new("ImageButton", DELTA["109"])
-DELTA["10da"]["BackgroundColor3"] = Color3.fromRGB(59, 64, 79)
-DELTA["10da"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["10da"]["Image"] = [[rbxassetid://0]]
-DELTA["10da"]["Size"] = UDim2.new(0.09953451156616211, 0, 0.473985493183136, 0)
-DELTA["10da"]["Name"] = [[Button1]]
-DELTA["10da"]["Position"] = UDim2.new(0.9, 0, 0.5000000596046448, 0)
-DELTA["10ea"] = Instance.new("UICorner", DELTA["10da"])
-DELTA["10ea"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["10fa"] = Instance.new("TextLabel", DELTA["10da"])
-DELTA["10fa"]["TextWrapped"] = true;
-DELTA["10fa"]["ZIndex"] = 999999999;
-DELTA["10fa"]["TextScaled"] = true;
-DELTA["10fa"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10fa"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["10fa"]["TextSize"] = 14;
-DELTA["10fa"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["10fa"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["10fa"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["10fa"]["Text"] = [[DELETE]]
-DELTA["10fa"]["Name"] = [[Title]]
-DELTA["10fa"]["BackgroundTransparency"] = 1;
-DELTA["10fa"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["110"] = Instance.new("Frame", DELTA["109"])
-DELTA["110"]["BackgroundColor3"] = Color3.fromRGB(86, 173, 239)
-DELTA["110"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["110"]["Size"] = UDim2.new(0.08429200947284698, 0, 0.3846021890640259, 0)
-DELTA["110"]["Position"] = UDim2.new(0.14588697254657745, 0, 0.49755123257637024, 0)
-DELTA["111"] = Instance.new("UICorner", DELTA["110"])
-DELTA["111"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["112"] = Instance.new("TextLabel", DELTA["110"])
-DELTA["112"]["TextWrapped"] = true;
-DELTA["112"]["TextScaled"] = true;
-DELTA["112"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["112"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["112"]["TextSize"] = 14;
-DELTA["112"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["112"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["112"]["Size"] = UDim2.new(0.8315319418907166, 0, 0.5, 0)
-DELTA["112"]["Text"] = [[UTILITY]]
-DELTA["112"]["Name"] = [[Title]]
-DELTA["112"]["BackgroundTransparency"] = 1;
-DELTA["112"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["113"] = Instance.new("ScrollingFrame", DELTA["88"])
-DELTA["113"]["ZIndex"] = 200;
-DELTA["113"]["BorderSizePixel"] = 0;
-DELTA["113"]["CanvasSize"] = UDim2.new(0, 0, 0, 0)
-DELTA["113"]["TopImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["113"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["113"]["HorizontalScrollBarInset"] = Enum.ScrollBarInset.Always;
-DELTA["113"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["113"]["AutomaticCanvasSize"] = Enum.AutomaticSize.XY;
-DELTA["113"]["BackgroundTransparency"] = 1;
-DELTA["113"]["Size"] = UDim2.new(0.9764046669006348, 0, 0.6893500685691833, 0)
-DELTA["113"]["Selectable"] = false;
-DELTA["113"].ElasticBehavior = Enum.ElasticBehavior.Never;
-DELTA["113"]["ScrollBarThickness"] = 15;
-DELTA["113"]["Position"] = UDim2.new(0.5117977261543274, 0, 0.8393499851226807, 0)
-DELTA["113"]["Name"] = [[Code]]
-DELTA["113"]["BottomImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["114"] = Instance.new("Frame", DELTA["88"])
-DELTA["114"]["ZIndex"] = 201;
-DELTA["114"]["BorderSizePixel"] = 0;
-DELTA["114"]["BackgroundColor3"] = Color3.fromRGB(34, 41, 50)
-DELTA["114"]["Size"] = UDim2.new(1.0011208057403564, 0, 0.006693750154227018, 0)
-DELTA["114"]["Position"] = UDim2.new(5.143397530105176e-08, 0, 0.14056874811649323, 0)
-DELTA["115"] = Instance.new("UICorner", DELTA["87"])
-DELTA["115"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["116"] = Instance.new("ImageLabel", DELTA["86"])
-DELTA["116"]["BorderSizePixel"] = 0;
-DELTA["116"]["ScaleType"] = Enum.ScaleType.Crop;
-DELTA["116"]["BackgroundColor3"] = Color3.fromRGB(36, 0, 0)
-DELTA["116"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["116"]["Image"] = [[rbxassetid://0]]
-DELTA["116"]["Size"] = UDim2.new(0.3273969292640686, 0, 0.9993020296096802, 0)
-DELTA["116"]["ClipsDescendants"] = true;
-DELTA["116"]["Name"] = [[Sidemenu]]
-DELTA["116"]["BackgroundTransparency"] = 1;
-DELTA["116"]["Position"] = UDim2.new(-0.004258748609572649, 0, 0.5005565881729126, 0)
-DELTA["117"] = Instance.new("ImageLabel", DELTA["116"])
-DELTA["117"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-DELTA["117"]["Image"] = [[rbxassetid://0]]
-DELTA["117"]["Size"] = UDim2.new(1.0000001192092896, 0, 0.4340279698371887, 0)
-DELTA["117"]["ClipsDescendants"] = true;
-DELTA["117"]["Name"] = [[Script]]
-DELTA["117"]["Position"] = UDim2.new(-1.131473865711996e-07, 0, 0.09011479467153549, 0)
-DELTA["118"] = Instance.new("UICorner", DELTA["117"])
-DELTA["118"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["119"] = Instance.new("Frame", DELTA["117"])
-DELTA["119"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["119"]["BackgroundTransparency"] = 1;
-DELTA["119"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["119"]["Name"] = [[Overlay]]
-DELTA["11a"] = Instance.new("Frame", DELTA["119"])
-DELTA["11a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["11a"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["11a"]["BackgroundTransparency"] = 1;
-DELTA["11a"]["Size"] = UDim2.new(0.8012143969535828, 0, 0.7959624528884888, 0)
-DELTA["11a"]["Position"] = UDim2.new(0.5, 0, 0.49274569749832153, 0)
-DELTA["11a"]["Name"] = [[Holder]]
-DELTA["11b"] = Instance.new("Frame", DELTA["11a"])
-DELTA["11b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["11b"]["BackgroundTransparency"] = 1;
-DELTA["11b"]["Size"] = UDim2.new(1.0907094478607178, 0, 0.3451063930988312, 0)
-DELTA["11b"]["Position"] = UDim2.new(-0.045354731380939484, 0, 0.041554853320121765, 0)
-DELTA["11b"]["Name"] = [[Title]]
-DELTA["11c"] = Instance.new("TextLabel", DELTA["11b"])
-DELTA["11c"]["TextWrapped"] = true;
-DELTA["11c"]["TextScaled"] = true;
-DELTA["11c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["11c"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["11c"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["11c"]["TextSize"] = 14;
-DELTA["11c"]["TextColor3"] = Color3.fromRGB(190, 206, 232)
-DELTA["11c"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["11c"]["Size"] = UDim2.new(0.9879999756813049, 0, 0.4830000102519989, 0)
-DELTA["11c"]["Text"] = [[Check out this script!]]
-DELTA["11c"]["Name"] = [[Title]]
-DELTA["11c"]["BackgroundTransparency"] = 1;
-DELTA["11c"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["11d"] = Instance.new("TextButton", DELTA["11a"])
-DELTA["11d"]["BackgroundColor3"] = Color3.fromRGB(32, 35, 46)
-DELTA["11d"]["Selectable"] = false;
-DELTA["11d"]["Size"] = UDim2.new(1.0907094478607178, 0, 0.48145753145217896, 0)
-DELTA["11d"]["Name"] = [[Showcase]]
-DELTA["11d"]["Text"] = [[]]
-DELTA["11d"]["Position"] = UDim2.new(-0.0453546978533268, 0, 0.41410815715789795, 0)
-DELTA["11d"]["BackgroundTransparency"] = 0.4000000059604645;
-DELTA["11e"] = Instance.new("UICorner", DELTA["11d"])
-DELTA["11e"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["11f"] = Instance.new("UIListLayout", DELTA["11d"])
-DELTA["11f"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["11f"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["11f"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["120"] = Instance.new("TextLabel", DELTA["11d"])
-DELTA["120"]["TextWrapped"] = true;
-DELTA["120"]["TextScaled"] = true;
-DELTA["120"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["120"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["120"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["120"]["TextSize"] = 14;
-DELTA["120"]["TextColor3"] = Color3.fromRGB(190, 206, 232)
-DELTA["120"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["120"]["Size"] = UDim2.new(0.9109266400337219, 0, 0.2100510597229004, 0)
-DELTA["120"]["Active"] = true;
-DELTA["120"]["Text"] = [[INFINITE YIELD]]
-DELTA["120"]["Name"] = [[Title]]
-DELTA["120"]["Active"] = false;
-DELTA["120"]["BackgroundTransparency"] = 1;
-DELTA["120"]["Position"] = UDim2.new(0.5, 0, 0.24653124809265137, 0)
-DELTA["121"] = Instance.new("TextLabel", DELTA["11d"])
-DELTA["121"]["TextWrapped"] = true;
-DELTA["121"]["TextScaled"] = true;
-DELTA["121"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["121"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["121"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["121"]["TextSize"] = 14;
-DELTA["121"]["TextColor3"] = Color3.fromRGB(157, 162, 199)
-DELTA["121"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["121"]["Size"] = UDim2.new(0.9109266400337219, 0, 0.46432507038116455, 0)
-DELTA["121"]["Active"] = true;
-DELTA["121"]["Text"] = [[an admin script dedicated to provide the necessities of exploiting]]
-DELTA["121"]["Active"] = false;
-DELTA["121"]["Name"] = [[Description]]
-DELTA["121"]["BackgroundTransparency"] = 1;
-DELTA["121"]["Position"] = UDim2.new(0.5, 0, 0.9209074378013611, 0)
-DELTA["122"] = Instance.new("LocalScript", DELTA["117"])
-DELTA["122"]["Name"] = [[ScriptSuggestionHandler]]
-DELTA["123"] = Instance.new("ImageLabel", DELTA["116"])
-DELTA["123"]["ZIndex"] = 99999;
-DELTA["123"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-DELTA["123"]["Image"] = [[rbxassetid://0]]
-DELTA["123"]["Size"] = UDim2.new(1.0000001192092896, 0, 0.3936704099178314, 0)
-DELTA["123"]["ClipsDescendants"] = true;
-DELTA["123"]["Name"] = [[Network]]
-DELTA["123"]["Position"] = UDim2.new(-1.3669654208570137e-07, 0, 0.6052098870277405, 0)
-DELTA["124"] = Instance.new("UICorner", DELTA["123"])
-DELTA["124"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["125"] = Instance.new("Frame", DELTA["123"])
-DELTA["125"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["125"]["BackgroundTransparency"] = 1;
-DELTA["125"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["125"]["Name"] = [[Overlay]]
-DELTA["126"] = Instance.new("Frame", DELTA["125"])
-DELTA["126"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["126"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["126"]["BackgroundTransparency"] = 1;
-DELTA["126"]["Size"] = UDim2.new(0.8999999761581421, 0, 0.8310460448265076, 0)
-DELTA["126"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["126"]["Name"] = [[Holder]]
-DELTA["127"] = Instance.new("UIListLayout", DELTA["126"])
-DELTA["127"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["127"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["127"]["Padding"] = UDim.new(0.15000000596046448, 0)
-DELTA["127"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["128"] = Instance.new("Frame", DELTA["126"])
-DELTA["128"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["128"]["BackgroundTransparency"] = 1;
-DELTA["128"]["Size"] = UDim2.new(1, 0, 0.40413346886634827, 0)
-DELTA["128"]["Position"] = UDim2.new(0, 0, 0.027302570641040802, 0)
-DELTA["129"] = Instance.new("TextLabel", DELTA["128"])
-DELTA["129"]["TextWrapped"] = true;
-DELTA["129"]["TextScaled"] = true;
-DELTA["129"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["129"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["129"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-DELTA["129"]["TextSize"] = 14;
-DELTA["129"]["TextColor3"] = Color3.fromRGB(157, 162, 199)
-DELTA["129"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["129"]["Size"] = UDim2.new(0.9877889156341553, 0, 0.33333709836006165, 0)
-DELTA["129"]["Text"] = [[Client status information]]
-DELTA["129"]["Name"] = [[Description]]
-DELTA["129"]["BackgroundTransparency"] = 1;
-DELTA["129"]["Position"] = UDim2.new(0.5, 0, 0.9999999403953552, 0)
-DELTA["12a"] = Instance.new("TextLabel", DELTA["128"])
-DELTA["12a"]["TextWrapped"] = true;
-DELTA["12a"]["TextScaled"] = true;
-DELTA["12a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["12a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["12a"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["12a"]["TextSize"] = 14;
-DELTA["12a"]["TextColor3"] = Color3.fromRGB(190, 206, 232)
-DELTA["12a"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["12a"]["Size"] = UDim2.new(0.9877890348434448, 0, 0.482876718044281, 0)
-DELTA["12a"]["Text"] = [[Network]]
-DELTA["12a"]["Name"] = [[Title]]
-DELTA["12a"]["BackgroundTransparency"] = 1;
-DELTA["12a"]["Position"] = UDim2.new(0.5, 0, 0, 0)
-DELTA["12b"] = Instance.new("Frame", DELTA["126"])
-DELTA["12b"]["BackgroundColor3"] = Color3.fromRGB(32, 35, 46)
-DELTA["12b"]["BackgroundTransparency"] = 0.4000000059604645;
-DELTA["12b"]["Size"] = UDim2.new(1, 0, 0.3164331018924713, 0)
-DELTA["12b"]["Position"] = UDim2.new(0, 0, 0.6628726124763489, 0)
-DELTA["12b"]["Name"] = [[Information]]
-DELTA["12c"] = Instance.new("UICorner", DELTA["12b"])
-DELTA["12c"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["12d"] = Instance.new("UIListLayout", DELTA["12b"])
-DELTA["12d"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["12d"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["12d"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
-DELTA["12d"]["Padding"] = UDim.new(0.029999999329447746, 0)
-DELTA["12d"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["12e"] = Instance.new("TextLabel", DELTA["12b"])
-DELTA["12e"]["TextWrapped"] = true;
-DELTA["12e"]["RichText"] = true;
-DELTA["12e"]["TextScaled"] = true;
-DELTA["12e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["12e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["12e"]["TextSize"] = 14;
-DELTA["12e"]["TextColor3"] = Color3.fromRGB(157, 162, 199)
-DELTA["12e"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["12e"]["Size"] = UDim2.new(0.28310254216194153, 0, 0.2934793531894684, 0)
-DELTA["12e"]["Text"] = [[<font color="#4FA4F2">68</font> MB]]
-DELTA["12e"]["Name"] = [[Memory]]
-DELTA["12e"]["BackgroundTransparency"] = 1;
-DELTA["12e"]["Position"] = UDim2.new(0.05447632819414139, 0, 0.6467397809028625, 0)
-DELTA["12f"] = Instance.new("TextLabel", DELTA["12b"])
-DELTA["12f"]["TextWrapped"] = true;
-DELTA["12f"]["RichText"] = true;
-DELTA["12f"]["TextScaled"] = true;
-DELTA["12f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["12f"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["12f"]["TextSize"] = 14;
-DELTA["12f"]["TextColor3"] = Color3.fromRGB(157, 162, 199)
-DELTA["12f"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["12f"]["LayoutOrder"] = 2;
-DELTA["12f"]["Size"] = UDim2.new(0.3066037893295288, 0, 0.2934792935848236, 0)
-DELTA["12f"]["Text"] = [[<font color="#4FA4F2">68</font> MS Ping]]
-DELTA["12f"]["Name"] = [[Ping]]
-DELTA["12f"]["BackgroundTransparency"] = 1;
-DELTA["12f"]["Position"] = UDim2.new(0.2835494577884674, 0, 0.646739661693573, 0)
-DELTA["130"] = Instance.new("TextLabel", DELTA["12b"])
-DELTA["130"]["TextWrapped"] = true;
-DELTA["130"]["RichText"] = true;
-DELTA["130"]["TextScaled"] = true;
-DELTA["130"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["130"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["130"]["TextSize"] = 14;
-DELTA["130"]["TextColor3"] = Color3.fromRGB(157, 162, 199)
-DELTA["130"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["130"]["LayoutOrder"] = 3;
-DELTA["130"]["Size"] = UDim2.new(0.3066039979457855, 0, 0.2934792935848236, 0)
-DELTA["130"]["Text"] = [[<font color="#4FA4F2">11</font> players]]
-DELTA["130"]["Name"] = [[Players]]
-DELTA["130"]["BackgroundTransparency"] = 1;
-DELTA["130"]["Position"] = UDim2.new(0.6138899326324463, 0, 0.646739661693573, 0)
-DELTA["131"] = Instance.new("LocalScript", DELTA["123"])
-DELTA["131"]["Name"] = [[NetworkStatsHandler]]
-DELTA["132"] = Instance.new("UIListLayout", DELTA["116"])
-DELTA["132"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["132"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Right;
-DELTA["132"]["Padding"] = UDim.new(0.05000000074505806, 0)
-DELTA["132"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["133"] = Instance.new("StringValue", DELTA["86"])
-DELTA["133"]["Value"] = [[Menu]]
-DELTA["133"]["Name"] = [[Marker]]
-DELTA["134"] = Instance.new("Frame", DELTA["1"])
-DELTA["134"]["ZIndex"] = 100;
-DELTA["134"]["BackgroundColor3"] = Color3.fromRGB(255, 0, 0)
-DELTA["134"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["134"]["BackgroundTransparency"] = 1;
-DELTA["134"]["Size"] = UDim2.new(0.8483448028564453, 0, 0.8924814462661743, 0)
-DELTA["134"]["Position"] = UDim2.new(0.47624671459198, 0, 0.5082324147224426, 0)
-DELTA["134"]["Visible"] = false;
-DELTA["134"]["Name"] = [[Home]]
-DELTA["135"] = Instance.new("Frame", DELTA["134"])
-DELTA["135"]["ZIndex"] = 2;
-DELTA["135"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["135"]["Size"] = UDim2.new(1, 0, 0.12585513293743134, 0)
-DELTA["135"]["Name"] = [[Searchbar]]
-DELTA["136"] = Instance.new("UICorner", DELTA["135"])
-DELTA["136"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["137"] = Instance.new("ImageLabel", DELTA["135"])
-DELTA["137"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["137"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["137"]["Image"] = [[rbxassetid://13365156882]]
-DELTA["137"]["Size"] = UDim2.new(0.025552265346050262, 0, 0.40771156549453735, 0)
-DELTA["137"]["BackgroundTransparency"] = 1;
-DELTA["137"]["Position"] = UDim2.new(0.01834862306714058, 0, 0.5, 0)
-DELTA["138"] = Instance.new("UIAspectRatioConstraint", DELTA["137"])
-DELTA["139"] = Instance.new("TextBox", DELTA["135"])
-DELTA["139"]["Active"] = true;
-DELTA["139"]["TextSize"] = 14;
-DELTA["139"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["139"]["TextWrapped"] = true;
-DELTA["139"]["TextScaled"] = true;
-DELTA["139"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["139"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["139"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["139"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["139"]["BackgroundTransparency"] = 1;
-DELTA["139"]["PlaceholderText"] = [[Search for scripts...]]
-DELTA["139"]["Size"] = UDim2.new(0.8766564130783081, 0, 0.35361653566360474, 0)
-DELTA["139"]["Selectable"] = false;
-DELTA["139"]["Text"] = [[]]
-DELTA["139"]["Position"] = UDim2.new(0.061162080615758896, 0, 0.49999991059303284, 0)
-DELTA["139"]["Name"] = [[Input]]
-DELTA["13a"] = Instance.new("ImageButton", DELTA["135"])
-DELTA["13a"]["ZIndex"] = 999999999;
-DELTA["13a"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["13a"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["13a"]["Image"] = [[rbxassetid://0]]
-DELTA["13a"]["Size"] = UDim2.new(0.08857108652591705, 0, 0.572917103767395, 0)
-DELTA["13a"]["Name"] = [[Button]]
-DELTA["13a"]["Position"] = UDim2.new(0.982576847076416, 0, 0.4999999701976776, 0)
-DELTA["13b"] = Instance.new("UICorner", DELTA["13a"])
-DELTA["13b"]["CornerRadius"] = UDim.new(0.15000000596046448, 0)
-DELTA["13c"] = Instance.new("TextLabel", DELTA["13a"])
-DELTA["13c"]["TextWrapped"] = true;
-DELTA["13c"]["ZIndex"] = 999999999;
-DELTA["13c"]["TextScaled"] = true;
-DELTA["13c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["13c"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["13c"]["TextSize"] = 14;
-DELTA["13c"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["13c"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["13c"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["13c"]["Text"] = [[UPLOAD]]
-DELTA["13c"]["Name"] = [[Title]]
-DELTA["13c"]["BackgroundTransparency"] = 1;
-DELTA["13c"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["13d"] = Instance.new("ScrollingFrame", DELTA["134"])
-DELTA["13d"]["CanvasSize"] = UDim2.new(0, 0, 3, 0)
-DELTA["13d"]["ScrollBarImageTransparency"] = 1;
-DELTA["13d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["13d"]["VerticalScrollBarInset"] = Enum.ScrollBarInset.Always;
-DELTA["13d"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["13d"]["BackgroundTransparency"] = 1;
-DELTA["13d"]["Size"] = UDim2.new(1, 0, 0.8350700736045837, 0)
-DELTA["13d"]["Selectable"] = false;
-DELTA["13d"]["ScrollBarThickness"] = 0;
-DELTA["13d"]["Position"] = UDim2.new(0.5, 0, 1, 0)
-DELTA["13d"]["Name"] = [[Holder]]
-DELTA["13e"] = Instance.new("UIListLayout", DELTA["13d"])
-DELTA["13e"]["Padding"] = UDim.new(0.004999999888241291, 0)
-DELTA["13e"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["13f"] = Instance.new("Frame", DELTA["13d"])
-DELTA["13f"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 50)
-DELTA["13f"]["LayoutOrder"] = 1;
-DELTA["13f"]["Size"] = UDim2.new(0.997948408126831, 0, 0.0462365560233593, 0)
-DELTA["13f"]["Position"] = UDim2.new(0, 0, 1.0919346493665216e-07, 0)
-DELTA["13f"]["Name"] = [[Script]]
-DELTA["140"] = Instance.new("UICorner", DELTA["13f"])
-DELTA["140"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["141"] = Instance.new("TextLabel", DELTA["13f"])
-DELTA["141"]["TextWrapped"] = true;
-DELTA["141"]["TextScaled"] = true;
-DELTA["141"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["141"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["141"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["141"]["TextSize"] = 14;
-DELTA["141"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["141"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["141"]["Size"] = UDim2.new(0.15939868986606598, 0, 0.31746405363082886, 0)
-DELTA["141"]["Text"] = [[Enter Your Title...]]
-DELTA["141"]["Name"] = [[Title]]
-DELTA["141"]["BackgroundTransparency"] = 1;
-DELTA["141"]["Position"] = UDim2.new(-0.01293666660785675, 0, 0.5000000596046448, 0)
-DELTA["142"] = Instance.new("UIPadding", DELTA["13f"])
-DELTA["142"]["PaddingRight"] = UDim.new(0.029999999329447746, 0)
-DELTA["142"]["PaddingLeft"] = UDim.new(0.029999999329447746, 0)
-DELTA["143"] = Instance.new("ImageButton", DELTA["13f"])
-DELTA["143"]["BackgroundColor3"] = Color3.fromRGB(59, 64, 79)
-DELTA["143"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["143"]["Image"] = [[rbxassetid://0]]
-DELTA["143"]["Size"] = UDim2.new(0.09953451156616211, 0, 0.473985493183136, 0)
-DELTA["143"]["Name"] = [[Button]]
-DELTA["143"]["Position"] = UDim2.new(1.0157949924468994, 0, 0.5000000596046448, 0)
-DELTA["144"] = Instance.new("UICorner", DELTA["143"])
-DELTA["144"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["145"] = Instance.new("TextLabel", DELTA["143"])
-DELTA["145"]["TextWrapped"] = true;
-DELTA["145"]["ZIndex"] = 999999999;
-DELTA["145"]["TextScaled"] = true;
-DELTA["145"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["145"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["145"]["TextSize"] = 14;
-DELTA["145"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["145"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["145"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["145"]["Text"] = [[OPTIONS]]
-DELTA["145"]["Name"] = [[Title]]
-DELTA["145"]["BackgroundTransparency"] = 1;
-DELTA["145"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["146"] = Instance.new("Frame", DELTA["13f"])
-DELTA["146"]["BackgroundColor3"] = Color3.fromRGB(86, 173, 239)
-DELTA["146"]["AnchorPoint"] = Vector2.new(0, 0.5)
-DELTA["146"]["Size"] = UDim2.new(0.08429200947284698, 0, 0.3846021890640259, 0)
-DELTA["146"]["Position"] = UDim2.new(0.14588697254657745, 0, 0.49755123257637024, 0)
-DELTA["147"] = Instance.new("UICorner", DELTA["146"])
-DELTA["147"]["CornerRadius"] = UDim.new(1, 0)
-DELTA["148"] = Instance.new("TextLabel", DELTA["146"])
-DELTA["148"]["TextWrapped"] = true;
-DELTA["148"]["TextScaled"] = true;
-DELTA["148"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["148"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["148"]["TextSize"] = 14;
-DELTA["148"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["148"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["148"]["Size"] = UDim2.new(0.8315319418907166, 0, 0.5, 0)
-DELTA["148"]["Text"] = [[UTILITY]]
-DELTA["148"]["Name"] = [[Title]]
-DELTA["148"]["BackgroundTransparency"] = 1;
-DELTA["148"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["149"] = Instance.new("Frame", DELTA["134"])
-DELTA["149"]["ZIndex"] = 99999;
-DELTA["149"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
-DELTA["149"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["149"]["BackgroundTransparency"] = 0.5;
-DELTA["149"]["Size"] = UDim2.new(10, 10, 2, 0)
-DELTA["149"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["149"]["Name"] = [[DarkOverlay]]
-DELTA["14a"] = Instance.new("Frame", DELTA["134"])
-DELTA["14a"]["ZIndex"] = 100000;
-DELTA["14a"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 49)
-DELTA["14a"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["14a"]["Size"] = UDim2.new(0.4596325159072876, 0, 0.9168577194213867, 0)
-DELTA["14a"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["14a"]["Name"] = [[Popup]]
-DELTA["14a"].Active = true;
-DELTA["14b"] = Instance.new("Frame", DELTA["14a"])
-DELTA["14b"]["ZIndex"] = 999999999;
-DELTA["14b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["14b"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["14b"]["BackgroundTransparency"] = 1;
-DELTA["14b"]["Size"] = UDim2.new(0.8193565607070923, 0, 0.23179079592227936, 0)
-DELTA["14b"]["Position"] = UDim2.new(0.5, 0, 0.09408924728631973, 0)
-DELTA["14b"]["Name"] = [[Title1]]
-DELTA["14c"] = Instance.new("UIListLayout", DELTA["14b"])
-DELTA["14c"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["14c"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["14d"] = Instance.new("TextLabel", DELTA["14b"])
-DELTA["14d"]["TextWrapped"] = true;
-DELTA["14d"]["ZIndex"] = 999999999;
-DELTA["14d"]["TextScaled"] = true;
-DELTA["14d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["14d"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["14d"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["14d"]["TextSize"] = 14;
-DELTA["14d"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["14d"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["14d"]["Size"] = UDim2.new(0.7438986301422119, 0, 0.2367609590291977, 0)
-DELTA["14d"]["Text"] = [[Enter Details]]
-DELTA["14d"]["Name"] = [[Title]]
-DELTA["14d"]["BackgroundTransparency"] = 1;
-DELTA["14d"]["Position"] = UDim2.new(0.37194931507110596, 0, 0.1145174577832222, 0)
-DELTA["14e"] = Instance.new("TextLabel", DELTA["14b"])
-DELTA["14e"]["TextWrapped"] = true;
-DELTA["14e"]["ZIndex"] = 999999999;
-DELTA["14e"]["TextScaled"] = true;
-DELTA["14e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["14e"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["14e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["14e"]["TextSize"] = 14;
-DELTA["14e"]["TextColor3"] = Color3.fromRGB(161, 167, 182)
-DELTA["14e"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["14e"]["Size"] = UDim2.new(0.7438986897468567, 0, 0.5482637882232666, 0)
-DELTA["14e"]["Text"] = [[Complete the necessary parameters to upload your client script]]
-DELTA["14e"]["Name"] = [[Paragraph]]
-DELTA["14e"]["BackgroundTransparency"] = 1;
-DELTA["14e"]["Position"] = UDim2.new(0.37194934487342834, 0, 1.0482637882232666, 0)
-DELTA["14f"] = Instance.new("UICorner", DELTA["14a"])
-DELTA["14f"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["150"] = Instance.new("ImageButton", DELTA["14a"])
-DELTA["150"]["ZIndex"] = 999999999;
-DELTA["150"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["150"]["AnchorPoint"] = Vector2.new(1, 0.5)
-DELTA["150"]["Image"] = [[rbxassetid://13363121645]]
-DELTA["150"]["Size"] = UDim2.new(0.04585733264684677, 0, 0.04716602712869644, 0)
-DELTA["150"]["Name"] = [[Close]]
-DELTA["150"]["Position"] = UDim2.new(0.8981863260269165, 0, 0.15145258605480194, 0)
-DELTA["150"]["BackgroundTransparency"] = 1;
-DELTA["151"] = Instance.new("UIAspectRatioConstraint", DELTA["150"])
-DELTA["152"] = Instance.new("Frame", DELTA["14a"])
-DELTA["152"]["ZIndex"] = 999999999;
-DELTA["152"]["BackgroundColor3"] = Color3.fromRGB(45, 50, 62)
-DELTA["152"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["152"]["Size"] = UDim2.new(0.8156777620315552, 0, 0.14276885986328125, 0)
-DELTA["152"]["Position"] = UDim2.new(0.4967409074306488, 0, 0.4563864767551422, 0)
-DELTA["152"]["Name"] = [[Title]]
-DELTA["153"] = Instance.new("UICorner", DELTA["152"])
-DELTA["153"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["154"] = Instance.new("UIStroke", DELTA["152"])
-DELTA["154"]["Color"] = Color3.fromRGB(81, 92, 121)
-DELTA["155"] = Instance.new("TextLabel", DELTA["152"])
-DELTA["155"]["TextWrapped"] = true;
-DELTA["155"]["ZIndex"] = 999999999;
-DELTA["155"]["TextScaled"] = true;
-DELTA["155"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["155"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["155"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["155"]["TextSize"] = 14;
-DELTA["155"]["TextColor3"] = Color3.fromRGB(129, 143, 164)
-DELTA["155"]["Size"] = UDim2.new(0.9756902456283569, 0, 0.29466089606285095, 0)
-DELTA["155"]["Text"] = [[Title]]
-DELTA["155"]["BackgroundTransparency"] = 1;
-DELTA["155"]["Position"] = UDim2.new(0.02430974505841732, 0, 0.09480518102645874, 0)
-DELTA["156"] = Instance.new("TextBox", DELTA["152"])
-DELTA["156"]["Active"] = true;
-DELTA["156"]["ZIndex"] = 999999999;
-DELTA["156"]["TextSize"] = 14;
-DELTA["156"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["156"]["TextWrapped"] = true;
-DELTA["156"]["TextScaled"] = true;
-DELTA["156"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["156"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["156"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["156"]["BackgroundTransparency"] = 1;
-DELTA["156"]["Size"] = UDim2.new(0.9756902456283569, 0, 0.3262626826763153, 0)
-DELTA["156"]["Selectable"] = false;
-DELTA["156"]["Text"] = [[Enter Your Title...]]
-DELTA["156"]["Position"] = UDim2.new(0.02430974505841732, 0, 0.4845598340034485, 0)
-DELTA["156"]["Name"] = [[TextBox]]
-DELTA["157"] = Instance.new("Frame", DELTA["14a"])
-DELTA["157"]["ZIndex"] = 999999999;
-DELTA["157"]["BackgroundColor3"] = Color3.fromRGB(45, 50, 62)
-DELTA["157"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["157"]["Size"] = UDim2.new(0.8156777620315552, 0, 0.14276885986328125, 0)
-DELTA["157"]["Position"] = UDim2.new(0.4967409074306488, 0, 0.6323444843292236, 0)
-DELTA["157"]["Name"] = [[Source]]
-DELTA["158"] = Instance.new("UICorner", DELTA["157"])
-DELTA["158"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-DELTA["159"] = Instance.new("UIStroke", DELTA["157"])
-DELTA["159"]["Color"] = Color3.fromRGB(81, 92, 121)
-DELTA["15a"] = Instance.new("TextLabel", DELTA["157"])
-DELTA["15a"]["TextWrapped"] = true;
-DELTA["15a"]["ZIndex"] = 999999999;
-DELTA["15a"]["TextScaled"] = true;
-DELTA["15a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["15a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["15a"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-DELTA["15a"]["TextSize"] = 14;
-DELTA["15a"]["TextColor3"] = Color3.fromRGB(129, 143, 164)
-DELTA["15a"]["Size"] = UDim2.new(0.9756902456283569, 0, 0.29466089606285095, 0)
-DELTA["15a"]["Text"] = [[Script]]
-DELTA["15a"]["BackgroundTransparency"] = 1;
-DELTA["15a"]["Position"] = UDim2.new(0.02430974505841732, 0, 0.09480518102645874, 0)
-DELTA["15b"] = Instance.new("TextBox", DELTA["157"])
-DELTA["15b"]["Active"] = true;
-DELTA["15b"]["ZIndex"] = 999999999;
-DELTA["15b"]["TextSize"] = 14;
-DELTA["15b"]["MultiLine"] = true;
-DELTA["15b"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["15b"]["TextWrapped"] = true;
-DELTA["15b"]["TextScaled"] = true;
-DELTA["15b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["15b"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["15b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["15b"]["BackgroundTransparency"] = 1;
-DELTA["15b"]["Size"] = UDim2.new(0.9756902456283569, 0, 0.3262626528739929, 0)
-DELTA["15b"]["Selectable"] = false;
-DELTA["15b"]["Text"] = [[Enter Your Script...]]
-DELTA["15b"]["Position"] = UDim2.new(0.02430974505841732, 0, 0.4845598340034485, 0)
-DELTA["15b"]["Name"] = [[TextBox]]
-DELTA["15c"] = Instance.new("ImageButton", DELTA["14a"])
-DELTA["15c"]["ZIndex"] = 999999999;
-DELTA["15c"]["BackgroundColor3"] = Color3.fromRGB(59, 139, 254)
-DELTA["15c"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["15c"]["Image"] = [[rbxassetid://0]]
-DELTA["15c"]["Size"] = UDim2.new(0.8161376714706421, 0, 0.10715237259864807, 0)
-DELTA["15c"]["Name"] = [[Add]]
-DELTA["15c"]["Position"] = UDim2.new(0.4954189956188202, 0, 0.888956606388092, 0)
-DELTA["15d"] = Instance.new("UICorner", DELTA["15c"])
-DELTA["15d"]["CornerRadius"] = UDim.new(0.15000000596046448, 0)
-DELTA["15e"] = Instance.new("TextLabel", DELTA["15c"])
-DELTA["15e"]["TextWrapped"] = true;
-DELTA["15e"]["ZIndex"] = 999999999;
-DELTA["15e"]["TextScaled"] = true;
-DELTA["15e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["15e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["15e"]["TextSize"] = 14;
-DELTA["15e"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["15e"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["15e"]["Size"] = UDim2.new(0.7953082323074341, 0, 0.44124072790145874, 0)
-DELTA["15e"]["Text"] = [[Add Script]]
-DELTA["15e"]["Name"] = [[Title]]
-DELTA["15e"]["BackgroundTransparency"] = 1;
-DELTA["15e"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["15f"] = Instance.new("StringValue", DELTA["134"])
-DELTA["15f"]["Value"] = [[Menu]]
-DELTA["15f"]["Name"] = [[Marker]]
-DELTA["160"] = Instance.new("ModuleScript", DELTA["1"])
-DELTA["160"]["Name"] = [[UILibrary]]
-DELTA["161"] = Instance.new("BoolValue", DELTA["1"])
-DELTA["161"]["Value"] = true;
-DELTA["161"]["Name"] = [[IsTween]]
-DELTA["162"] = Instance.new("Frame", DELTA["1"])
-DELTA["162"]["ZIndex"] = 100;
-DELTA["162"]["BackgroundColor3"] = Color3.fromRGB(255, 0, 0)
-DELTA["162"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["162"]["BackgroundTransparency"] = 1;
-DELTA["162"]["Size"] = UDim2.new(0.8483448028564453, 0, 0.8924814462661743, 0)
-DELTA["162"]["Position"] = UDim2.new(0.47624671459198, 0, 0.5082324147224426, 0)
-DELTA["162"]["Visible"] = false;
-DELTA["162"]["Name"] = [[Console]]
-DELTA["163"] = Instance.new("Frame", DELTA["162"])
-DELTA["163"]["ZIndex"] = 100000;
-DELTA["163"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 49)
-DELTA["163"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["163"]["Size"] = UDim2.new(0.49088254570961, 0, 1.051314353942871, 0)
-DELTA["163"]["Position"] = UDim2.new(0.20692352950572968, 0, 0.49035412073135376, 0)
-DELTA["163"]["Name"] = [[RobloxConsole]]
-DELTA["164"] = Instance.new("Frame", DELTA["163"])
-DELTA["164"]["ZIndex"] = 999999999;
-DELTA["164"]["BorderSizePixel"] = 0;
-DELTA["164"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["164"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["164"]["BackgroundTransparency"] = 0.8999999761581421;
-DELTA["164"]["Size"] = UDim2.new(0.9072632789611816, 0, 0.06977342814207077, 0)
-DELTA["164"]["Position"] = UDim2.new(0.4903126060962677, 0, 0.9698548316955566, 0)
-DELTA["164"]["Name"] = [[Buttons]]
-DELTA["165"] = Instance.new("UIListLayout", DELTA["164"])
-DELTA["165"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["165"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["165"]["Padding"] = UDim.new(0.05000000074505806, 0)
-DELTA["166"] = Instance.new("ImageButton", DELTA["164"])
-DELTA["166"]["Active"] = false;
-DELTA["166"]["ZIndex"] = 999999999;
-DELTA["166"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["166"]["Selectable"] = false;
-DELTA["166"]["Size"] = UDim2.new(0.29185107350349426, 0, 0.8751184344291687, 0)
-DELTA["166"]["Name"] = [[Clear]]
-DELTA["166"]["Position"] = UDim2.new(0, 0, -0.3320552110671997, 0)
-DELTA["166"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["167"] = Instance.new("UICorner", DELTA["166"])
-DELTA["167"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["168"] = Instance.new("TextLabel", DELTA["166"])
-DELTA["168"]["TextWrapped"] = true;
-DELTA["168"]["ZIndex"] = 999999999;
-DELTA["168"]["TextScaled"] = true;
-DELTA["168"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["168"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["168"]["TextSize"] = 14;
-DELTA["168"]["TextColor3"] = Color3.fromRGB(140, 206, 255)
-DELTA["168"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["168"]["Size"] = UDim2.new(0.8766257762908936, 0, 0.3993089199066162, 0)
-DELTA["168"]["Text"] = [[CLEAR]]
-DELTA["168"]["Name"] = [[Title]]
-DELTA["168"]["BackgroundTransparency"] = 1;
-DELTA["168"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["169"] = Instance.new("UIStroke", DELTA["166"])
-DELTA["169"]["Color"] = Color3.fromRGB(60, 137, 196)
-DELTA["169"]["Thickness"] = 2;
-DELTA["16a"] = Instance.new("UICorner", DELTA["163"])
-DELTA["16a"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["16b"] = Instance.new("Frame", DELTA["163"])
-DELTA["16b"]["ZIndex"] = 100000;
-DELTA["16b"]["BackgroundColor3"] = Color3.fromRGB(24, 25, 33)
-DELTA["16b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["16b"]["Size"] = UDim2.new(0.9083685874938965, 0, 0.6696294546127319, 0)
-DELTA["16b"]["Position"] = UDim2.new(0.49789950251579285, 0, 0.5417348742485046, 0)
-DELTA["16b"]["Name"] = [[Console]]
-DELTA["16c"] = Instance.new("UICorner", DELTA["16b"])
-DELTA["16c"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["16d"] = Instance.new("ScrollingFrame", DELTA["16b"])
-DELTA["16d"]["Active"] = true;
-DELTA["16d"]["BorderSizePixel"] = 0;
-DELTA["16d"]["CanvasSize"] = UDim2.new(0, 0, 0, 0)
-DELTA["16d"]["TopImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["16d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["16d"]["AutomaticCanvasSize"] = Enum.AutomaticSize.Y;
-DELTA["16d"]["BackgroundTransparency"] = 1;
-DELTA["16d"].ElasticBehavior = Enum.ElasticBehavior.Never;
-DELTA["16d"]["Size"] = UDim2.new(0.9835176467895508, 0, 0.9677625298500061, 0)
-DELTA["16d"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-DELTA["16d"]["Position"] = UDim2.new(0.014219495467841625, 0, 0.016284499317407608, 0)
-DELTA["16d"]["BottomImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["16e"] = Instance.new("Frame", DELTA["16d"])
-DELTA["16e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["16e"]["BackgroundTransparency"] = 1;
-DELTA["16e"]["Size"] = UDim2.new(0.9686747193336487, 0, 2.066622734069824, 0)
-DELTA["16e"]["BorderColor3"] = Color3.fromRGB(28, 43, 54)
-DELTA["16e"]["Position"] = UDim2.new(0, 0, 3.6679779213955044e-08, 0)
-DELTA["16e"]["Name"] = [[Header]]
-DELTA["16f"] = Instance.new("UIListLayout", DELTA["16e"])
-DELTA["16f"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["170"] = Instance.new("Frame", DELTA["163"])
-DELTA["170"]["ZIndex"] = 999999999;
-DELTA["170"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["170"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["170"]["BackgroundTransparency"] = 1;
-DELTA["170"]["Size"] = UDim2.new(1.0044941902160645, 0, 0.15659764409065247, 0)
-DELTA["170"]["Position"] = UDim2.new(0.5043055415153503, 0, 0.0041843606159091, 0)
-DELTA["170"]["Name"] = [[Title]]
-DELTA["171"] = Instance.new("TextLabel", DELTA["170"])
-DELTA["171"]["TextWrapped"] = true;
-DELTA["171"]["ZIndex"] = 999999999;
-DELTA["171"]["TextScaled"] = true;
-DELTA["171"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["171"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["171"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["171"]["TextSize"] = 14;
-DELTA["171"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["171"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["171"]["Size"] = UDim2.new(0.7438986897468567, 0, 0.3096470236778259, 0)
-DELTA["171"]["Text"] = [[Roblox Console]]
-DELTA["171"]["Name"] = [[Title]]
-DELTA["171"]["BackgroundTransparency"] = 1;
-DELTA["171"]["Position"] = UDim2.new(0.4120405614376068, 0, 0.19299590587615967, 0)
-DELTA["172"] = Instance.new("TextLabel", DELTA["170"])
-DELTA["172"]["TextWrapped"] = true;
-DELTA["172"]["ZIndex"] = 999999999;
-DELTA["172"]["TextScaled"] = true;
-DELTA["172"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["172"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["172"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["172"]["TextSize"] = 14;
-DELTA["172"]["TextColor3"] = Color3.fromRGB(161, 167, 182)
-DELTA["172"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["172"]["Size"] = UDim2.new(0.9046008586883545, 0, 0.2446010410785675, 0)
-DELTA["172"]["Text"] = [[Console that get outputs from ROBLOX console and display it in this menu.]]
-DELTA["172"]["Name"] = [[Paragraph]]
-DELTA["172"]["BackgroundTransparency"] = 1;
-DELTA["172"]["Position"] = UDim2.new(0.4923916459083557, 0, 0.7393273115158081, 0)
-DELTA["173"] = Instance.new("TextBox", DELTA["163"])
-DELTA["173"]["Active"] = true;
-DELTA["173"]["ZIndex"] = 999999999;
-DELTA["173"]["TextWrapped"] = true;
-DELTA["173"]["TextScaled"] = true;
-DELTA["173"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["173"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["173"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["173"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["173"]["Size"] = UDim2.new(0.3225496709346771, 0, 0.025502502918243408, 0)
-DELTA["173"]["Selectable"] = false;
-DELTA["173"]["Text"] = [[]]
-DELTA["173"]["Position"] = UDim2.new(0.6109463572502136, 0, 0.16887244582176208, 0)
-DELTA["173"]["Name"] = [[Searchbar]]
-DELTA["174"] = Instance.new("UICorner", DELTA["173"])
-DELTA["174"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["175"] = Instance.new("UIStroke", DELTA["173"])
-DELTA["175"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["175"]["Thickness"] = 2;
-DELTA["175"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-DELTA["176"] = Instance.new("TextLabel", DELTA["173"])
-DELTA["176"]["TextWrapped"] = true;
-DELTA["176"]["ZIndex"] = 999999999;
-DELTA["176"]["TextScaled"] = true;
-DELTA["176"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["176"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["176"]["TextSize"] = 14;
-DELTA["176"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["176"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["176"]["Size"] = UDim2.new(0.2933172583580017, 0, 1.001572847366333, 0)
-DELTA["176"]["Text"] = [[Search:]]
-DELTA["176"]["Name"] = [[Title]]
-DELTA["176"]["BackgroundTransparency"] = 1;
-DELTA["176"]["Position"] = UDim2.new(-0.17850913107395172, 0, 0.11472053080797195, 0)
-DELTA["177"] = Instance.new("LocalScript", DELTA["173"])
-DELTA["178"] = Instance.new("LocalScript", DELTA["163"])
-DELTA["179"] = Instance.new("StringValue", DELTA["162"])
-DELTA["179"]["Value"] = [[Menu]]
-DELTA["179"]["Name"] = [[Marker]]
-DELTA["17a"] = Instance.new("Folder", DELTA["162"])
-DELTA["17a"]["Name"] = [[ConsoleElements]]
-DELTA["17b"] = Instance.new("Frame", DELTA["17a"])
-DELTA["17b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17b"]["BackgroundTransparency"] = 1;
-DELTA["17b"]["Size"] = UDim2.new(1, 0, 0, 20)
-DELTA["17b"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["17b"]["Visible"] = false;
-DELTA["17b"]["Name"] = [[Error]]
-DELTA["17c"] = Instance.new("TextLabel", DELTA["17b"])
-DELTA["17c"]["TextWrapped"] = true;
-DELTA["17c"]["RichText"] = true;
-DELTA["17c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17c"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["17c"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["17c"]["TextSize"] = 14;
-DELTA["17c"]["TextColor3"] = Color3.fromRGB(221, 42, 45)
-DELTA["17c"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["17c"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["17c"]["Text"] = [[[Error] Oh No! Error Happened!]]
-DELTA["17c"]["Name"] = [[Content]]
-DELTA["17c"]["BackgroundTransparency"] = 1;
-DELTA["17c"]["Position"] = UDim2.new(0.01421956717967987, 0, 0, 0)
-DELTA["17d"] = Instance.new("Frame", DELTA["17a"])
-DELTA["17d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17d"]["BackgroundTransparency"] = 1;
-DELTA["17d"]["Size"] = UDim2.new(1, 0, 0, 20)
-DELTA["17d"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["17d"]["Visible"] = false;
-DELTA["17d"]["Name"] = [[Warn]]
-DELTA["17e"] = Instance.new("TextLabel", DELTA["17d"])
-DELTA["17e"]["TextWrapped"] = true;
-DELTA["17e"]["RichText"] = true;
-DELTA["17e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17e"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["17e"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["17e"]["TextSize"] = 14;
-DELTA["17e"]["TextColor3"] = Color3.fromRGB(210, 221, 0)
-DELTA["17e"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["17e"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["17e"]["Text"] = [[[Warn] You got warning!]]
-DELTA["17e"]["Name"] = [[Content]]
-DELTA["17e"]["BackgroundTransparency"] = 1;
-DELTA["17e"]["Position"] = UDim2.new(0.01421956717967987, 0, 0, 0)
-DELTA["17f"] = Instance.new("Frame", DELTA["17a"])
-DELTA["17f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["17f"]["BackgroundTransparency"] = 1;
-DELTA["17f"]["Size"] = UDim2.new(1, 0, 0, 20)
-DELTA["17f"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["17f"]["Visible"] = false;
-DELTA["17f"]["Name"] = [[Output]]
-DELTA["180"] = Instance.new("TextLabel", DELTA["17f"])
-DELTA["180"]["TextWrapped"] = true;
-DELTA["180"]["RichText"] = true;
-DELTA["180"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["180"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["180"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["180"]["TextSize"] = 14;
-DELTA["180"]["TextColor3"] = Color3.fromRGB(221, 221, 221)
-DELTA["180"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["180"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["180"]["Text"] = [[[Output] Hello World!]]
-DELTA["180"]["Name"] = [[Content]]
-DELTA["180"]["BackgroundTransparency"] = 1;
-DELTA["180"]["Position"] = UDim2.new(0.01421956717967987, 0, 0, 0)
-DELTA["181"] = Instance.new("Frame", DELTA["17a"])
-DELTA["181"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["181"]["BackgroundTransparency"] = 1;
-DELTA["181"]["Size"] = UDim2.new(1, 0, 0, 20)
-DELTA["181"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["181"]["Visible"] = false;
-DELTA["181"]["Name"] = [[Info]]
-DELTA["182"] = Instance.new("TextLabel", DELTA["181"])
-DELTA["182"]["TextWrapped"] = true;
-DELTA["182"]["RichText"] = true;
-DELTA["182"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["182"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["182"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["182"]["TextSize"] = 14;
-DELTA["182"]["TextColor3"] = Color3.fromRGB(0, 118, 221)
-DELTA["182"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["182"]["Size"] = UDim2.new(1, 0, 1, 0)
-DELTA["182"]["Text"] = [[[Info] Information.]]
-DELTA["182"]["Name"] = [[Content]]
-DELTA["182"]["BackgroundTransparency"] = 1;
-DELTA["182"]["Position"] = UDim2.new(0.01421956717967987, 0, 0, 0)
-DELTA["183"] = Instance.new("Frame", DELTA["17a"])
-DELTA["183"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["183"]["BackgroundTransparency"] = 1;
-DELTA["183"]["Size"] = UDim2.new(1, 0, 0, 20)
-DELTA["183"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["183"]["Visible"] = false;
-DELTA["183"]["Name"] = [[Input]]
-DELTA["184"] = Instance.new("TextLabel", DELTA["183"])
-DELTA["184"]["TextWrapped"] = true;
-DELTA["184"]["RichText"] = true;
-DELTA["184"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["184"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["184"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["184"]["TextSize"] = 16;
-DELTA["184"]["TextColor3"] = Color3.fromRGB(221, 221, 221)
-DELTA["184"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["184"]["Size"] = UDim2.new(0.03482586517930031, 0, 1, 0)
-DELTA["184"]["Text"] = [[>]]
-DELTA["184"]["Name"] = [[Arrow]]
-DELTA["184"]["BackgroundTransparency"] = 1;
-DELTA["184"]["Position"] = UDim2.new(0, 7, 0, 0)
-DELTA["185"] = Instance.new("TextBox", DELTA["183"])
-DELTA["185"]["Active"] = true;
-DELTA["185"]["RichText"] = true;
-DELTA["185"]["TextSize"] = 14;
-DELTA["185"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["185"]["TextWrapped"] = true;
-DELTA["185"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["185"]["TextColor3"] = Color3.fromRGB(221, 221, 221)
-DELTA["185"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["185"]["MultiLine"] = true;
-DELTA["185"]["BackgroundTransparency"] = 1;
-DELTA["185"]["Size"] = UDim2.new(0.9676616787910461, 0, 1, 0)
-DELTA["185"]["Selectable"] = false;
-DELTA["185"]["Text"] = [[]]
-DELTA["185"]["Position"] = UDim2.new(0.04655786231160164, 0, 0, 0)
-DELTA["185"]["AutomaticSize"] = Enum.AutomaticSize.Y;
-DELTA["185"]["Name"] = [[Content]]
-DELTA["186"] = Instance.new("Frame", DELTA["162"])
-DELTA["186"]["ZIndex"] = 100000;
-DELTA["186"]["BackgroundColor3"] = Color3.fromRGB(38, 41, 49)
-DELTA["186"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["186"]["Size"] = UDim2.new(0.49088254570961, 0, 1.051314353942871, 0)
-DELTA["186"]["Position"] = UDim2.new(0.7404356598854065, 0, 0.49035412073135376, 0)
-DELTA["186"]["Name"] = [[RConsole]]
-DELTA["187"] = Instance.new("Frame", DELTA["186"])
-DELTA["187"]["ZIndex"] = 999999999;
-DELTA["187"]["BorderSizePixel"] = 0;
-DELTA["187"]["BackgroundColor3"] = Color3.fromRGB(22, 22, 30)
-DELTA["187"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["187"]["BackgroundTransparency"] = 0.8999999761581421;
-DELTA["187"]["Size"] = UDim2.new(0.9072632789611816, 0, 0.06977342814207077, 0)
-DELTA["187"]["Position"] = UDim2.new(0.4903126060962677, 0, 0.9698548316955566, 0)
-DELTA["187"]["Name"] = [[Buttons]]
-DELTA["188"] = Instance.new("UIListLayout", DELTA["187"])
-DELTA["188"]["VerticalAlignment"] = Enum.VerticalAlignment.Center;
-DELTA["188"]["FillDirection"] = Enum.FillDirection.Horizontal;
-DELTA["188"]["Padding"] = UDim.new(0.05000000074505806, 0)
-DELTA["189"] = Instance.new("ImageButton", DELTA["187"])
-DELTA["189"]["Active"] = false;
-DELTA["189"]["ZIndex"] = 999999999;
-DELTA["189"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["189"]["Selectable"] = false;
-DELTA["189"]["Size"] = UDim2.new(0.29185107350349426, 0, 0.8751184344291687, 0)
-DELTA["189"]["Name"] = [[Clear]]
-DELTA["189"]["Position"] = UDim2.new(0, 0, -0.3320552110671997, 0)
-DELTA["189"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["18a"] = Instance.new("UICorner", DELTA["189"])
-DELTA["18a"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["18b"] = Instance.new("TextLabel", DELTA["189"])
-DELTA["18b"]["TextWrapped"] = true;
-DELTA["18b"]["ZIndex"] = 999999999;
-DELTA["18b"]["TextScaled"] = true;
-DELTA["18b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["18b"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["18b"]["TextSize"] = 14;
-DELTA["18b"]["TextColor3"] = Color3.fromRGB(140, 206, 255)
-DELTA["18b"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["18b"]["Size"] = UDim2.new(0.8766257762908936, 0, 0.3993089199066162, 0)
-DELTA["18b"]["Text"] = [[CLEAR]]
-DELTA["18b"]["Name"] = [[Title]]
-DELTA["18b"]["BackgroundTransparency"] = 1;
-DELTA["18b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-DELTA["18c"] = Instance.new("UIStroke", DELTA["189"])
-DELTA["18c"]["Color"] = Color3.fromRGB(60, 137, 196)
-DELTA["18c"]["Thickness"] = 2;
-DELTA["18d"] = Instance.new("UICorner", DELTA["186"])
-DELTA["18d"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["18e"] = Instance.new("Frame", DELTA["186"])
-DELTA["18e"]["ZIndex"] = 100000;
-DELTA["18e"]["BackgroundColor3"] = Color3.fromRGB(24, 25, 33)
-DELTA["18e"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-DELTA["18e"]["Size"] = UDim2.new(0.9083685874938965, 0, 0.6696294546127319, 0)
-DELTA["18e"]["Position"] = UDim2.new(0.49789950251579285, 0, 0.5417348742485046, 0)
-DELTA["18e"]["Name"] = [[Console]]
-DELTA["18f"] = Instance.new("UICorner", DELTA["18e"])
-DELTA["18f"]["CornerRadius"] = UDim.new(0.05000000074505806, 0)
-DELTA["190"] = Instance.new("ScrollingFrame", DELTA["18e"])
-DELTA["190"]["Active"] = true;
-DELTA["190"]["BorderSizePixel"] = 0;
-DELTA["190"]["CanvasSize"] = UDim2.new(0, 0, 0, 0)
-DELTA["190"].ElasticBehavior = Enum.ElasticBehavior.Never;
-DELTA["190"]["TopImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["190"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["190"]["AutomaticCanvasSize"] = Enum.AutomaticSize.Y;
-DELTA["190"]["BackgroundTransparency"] = 1;
-DELTA["190"]["Size"] = UDim2.new(0.9835176467895508, 0, 0.9677625298500061, 0)
-DELTA["190"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-DELTA["190"]["Position"] = UDim2.new(0.014219495467841625, 0, 0.016284499317407608, 0)
-DELTA["190"]["BottomImage"] = [[rbxasset://textures/ui/Scroll/scroll-middle.png]]
-DELTA["191"] = Instance.new("Frame", DELTA["190"])
-DELTA["191"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["191"]["BackgroundTransparency"] = 1;
-DELTA["191"]["Size"] = UDim2.new(0.9686747193336487, 0, 2.066622734069824, 0)
-DELTA["191"]["BorderColor3"] = Color3.fromRGB(28, 43, 54)
-DELTA["191"]["Position"] = UDim2.new(0, 0, 3.6679779213955044e-08, 0)
-DELTA["191"]["Name"] = [[Header]]
-DELTA["192"] = Instance.new("UIListLayout", DELTA["191"])
-DELTA["192"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-DELTA["193"] = Instance.new("Frame", DELTA["186"])
-DELTA["193"]["ZIndex"] = 999999999;
-DELTA["193"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["193"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["193"]["BackgroundTransparency"] = 1;
-DELTA["193"]["Size"] = UDim2.new(1.0044941902160645, 0, 0.15659764409065247, 0)
-DELTA["193"]["Position"] = UDim2.new(0.5043055415153503, 0, 0.0041843606159091, 0)
-DELTA["193"]["Name"] = [[Title]]
-DELTA["194"] = Instance.new("TextLabel", DELTA["193"])
-DELTA["194"]["TextWrapped"] = true;
-DELTA["194"]["ZIndex"] = 999999999;
-DELTA["194"]["TextScaled"] = true;
-DELTA["194"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["194"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["194"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["194"]["TextSize"] = 14;
-DELTA["194"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["194"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["194"]["Size"] = UDim2.new(0.7438986897468567, 0, 0.3096470236778259, 0)
-DELTA["194"]["Text"] = [[Delta Console]]
-DELTA["194"]["Name"] = [[Title]]
-DELTA["194"]["BackgroundTransparency"] = 1;
-DELTA["194"]["Position"] = UDim2.new(0.4120405614376068, 0, 0.19299590587615967, 0)
-DELTA["195"] = Instance.new("TextLabel", DELTA["193"])
-DELTA["195"]["TextWrapped"] = true;
-DELTA["195"]["ZIndex"] = 999999999;
-DELTA["195"]["TextScaled"] = true;
-DELTA["195"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["195"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-DELTA["195"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["195"]["TextSize"] = 14;
-DELTA["195"]["TextColor3"] = Color3.fromRGB(161, 167, 182)
-DELTA["195"]["AnchorPoint"] = Vector2.new(0.5, 1)
-DELTA["195"]["Size"] = UDim2.new(0.849057674407959, 0, 0.17429254949092865, 0)
-DELTA["195"]["Text"] = [[Console that provides output, input from Delta API.]]
-DELTA["195"]["Name"] = [[Paragraph]]
-DELTA["195"]["BackgroundTransparency"] = 1;
-DELTA["195"]["Position"] = UDim2.new(0.46462011337280273, 0, 0.7041730880737305, 0)
-DELTA["196"] = Instance.new("TextBox", DELTA["186"])
-DELTA["196"]["Active"] = true;
-DELTA["196"]["ZIndex"] = 999999999;
-DELTA["196"]["TextWrapped"] = true;
-DELTA["196"]["TextScaled"] = true;
-DELTA["196"]["BackgroundColor3"] = Color3.fromRGB(60, 137, 196)
-DELTA["196"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["196"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-DELTA["196"]["BackgroundTransparency"] = 0.8899999856948853;
-DELTA["196"]["Size"] = UDim2.new(0.3225496709346771, 0, 0.025502502918243408, 0)
-DELTA["196"]["Selectable"] = false;
-DELTA["196"]["Text"] = [[]]
-DELTA["196"]["Position"] = UDim2.new(0.6109463572502136, 0, 0.16887244582176208, 0)
-DELTA["196"]["Name"] = [[Searchbar]]
-DELTA["197"] = Instance.new("UICorner", DELTA["196"])
-DELTA["197"]["CornerRadius"] = UDim.new(0.30000001192092896, 0)
-DELTA["198"] = Instance.new("UIStroke", DELTA["196"])
-DELTA["198"]["Color"] = Color3.fromRGB(69, 97, 119)
-DELTA["198"]["Thickness"] = 2;
-DELTA["198"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-DELTA["199"] = Instance.new("TextLabel", DELTA["196"])
-DELTA["199"]["TextWrapped"] = true;
-DELTA["199"]["ZIndex"] = 999999999;
-DELTA["199"]["TextScaled"] = true;
-DELTA["199"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["199"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-DELTA["199"]["TextSize"] = 14;
-DELTA["199"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-DELTA["199"]["AnchorPoint"] = Vector2.new(0.5, 0)
-DELTA["199"]["Size"] = UDim2.new(0.2933172583580017, 0, 1.001572847366333, 0)
-DELTA["199"]["Text"] = [[Search:]]
-DELTA["199"]["Name"] = [[Title]]
-DELTA["199"]["BackgroundTransparency"] = 1;
-DELTA["199"]["Position"] = UDim2.new(-0.17850913107395172, 0, 0.11472053080797195, 0)
-DELTA["19a"] = Instance.new("LocalScript", DELTA["196"])
-DELTA["19b"] = Instance.new("LocalScript", DELTA["186"])
-DELTA["19c"] = Instance.new("LocalScript", DELTA["1"])
-DELTA["19c"]["Name"] = [[MainScript]]
-local DELTA_REQUIRE = require;
-local DELTA_MODULES = {}
-local function require(Module)
-	local ModuleState = DELTA_MODULES[Module]
-	if ModuleState then
-		if not ModuleState.Required then
-			ModuleState.Required = true;
-			ModuleState.Value = ModuleState.Closure()
-		end;
-		return ModuleState.Value
-	end;
-	return DELTA_REQUIRE(Module)
-end;
-getgenv().total_tabs = 0;
-DELTA_MODULES[DELTA["160"]] = {
-	Closure = function()
-		local script = DELTA["160"]
-		local module = {}
-		module.Console = {}
-		module.Settings = {}
-		module.SavedScripts = {}
-		local reserved = script.Parent.Executor.Executor.Overlay.Reserved;
-		local ts = game:GetService("TweenService")
-		local isTween = script.Parent.IsTween;
-		module.ScriptSearch = {}
-		local executor = script.Parent.Executor.Executor.Overlay;
-		local function GetTotalTabs()
-			return total_tabs
-		end;
-		function module:AddTab(name, source)
-			total_tabs = total_tabs + 1;
-			local newTab = script.Parent.Executor.Executor.Overlay.Reserved.TabX:Clone()
-			local newTextbox = script.Parent.Executor.Executor.Overlay.Reserved.Textbox:Clone()
-			newTextbox.Parent = script.Parent.Executor.Executor.Overlay.Code;
-			newTab.Parent = script.Parent.Executor.Executor.Overlay.Tabs;
-			newTab.Visible = true;
-			if type(name) == "string" then
-				newTab.Title.Text = name;
-				newTab.Name = name;
-				newTextbox.Name = name
-			else
-				newTab.Title.Text = "script" .. (GetTotalTabs()) .. '.lua'
-				newTab.Name = "script" .. (GetTotalTabs()) .. '.lua'
-				newTextbox.Name = "script" .. (GetTotalTabs()) .. '.lua'
-			end;
-			if type(source) == "string" then
-				newTextbox.Text = source
-			end;
-			newTab.MouseButton1Click:Connect(function()
-				for i, v in pairs(script.Parent.Executor.Executor.Overlay.Tabs:GetChildren()) do
-					if v.Name ~= "AddTab" and v.Name ~= newTab.Name and v:IsA("ImageButton") then
-						v.Transparency = 1
-					elseif v.Name ~= "AddTab" and v.Name == newTab.Name and v:IsA("ImageButton") then
-						v.Transparency = 0
-					end
-				end;
-				for i, v in pairs(script.Parent.Executor.Executor.Overlay.Code:GetChildren()) do
-					if v.Name ~= "AddTab" and v.Name ~= newTab.Name and v:IsA("TextBox") then
-						v.Visible = false
-					elseif v.Name ~= "AddTab" and v.Name == newTab.Name and v:IsA("TextBox") then
-						v.Visible = true
-					end
-				end;
-				newTextbox.Visible = true;
-				newTab.Visible = true
-			end)
-			newTab.ImageButton.MouseButton1Click:Connect(function()
-				newTextbox:Destroy()
-				newTab:Destroy()
-			end)
-			for i, v in pairs(executor.Code:GetChildren()) do
-				if v.Name ~= newTextbox.Name then
-					v.Visible = false
-				end
-			end;
-			for i, v in pairs(script.Parent.Executor.Executor.Overlay.Code:GetChildren()) do
-				if v:IsA("TextBox") then
-					if v.Name ~= newTab.Name then
-						v.Visible = false
-					elseif v.Name == newTab.Name then
-						v.Visible = true
-					end
-				end
-			end;
-			for i, v in pairs(script.Parent.Executor.Executor.Overlay.Tabs:GetChildren()) do
-				if v.Name ~= "AddTab" and v.Name ~= newTab.Name and v:IsA("ImageButton") then
-					v.Transparency = 1
-				elseif v.Name ~= "AddTab" and v.Name == newTab.Name and v:IsA("ImageButton") then
-					v.Transparency = 0
-				end
-			end
-		end;
-		function module:SetCurrentSuggestionScript(title, desc, source)
-			script.Parent.Executor.Sidemenu.Script.Overlay.Holder.Showcase.Title.Text = title;
-			script.Parent.Executor.Sidemenu.Script.Overlay.Holder.Showcase.Description.Text = desc;
-			getgenv().ExecuteSuggestedScript = function()
-				loadstring(source)()
-			end
-		end;
-		function module.Console:GoToConsole()
-			for i, v in pairs(script.Parent:GetChildren()) do
-				if v:IsA("Frame") then
-					if v:FindFirstChild("Menu") then
-						if v.Name ~= "Console" then
-							v.Visible = false
-						end
-					end
-				end
-			end;
-			script.Parent.Console.Visible = true
-		end;
-		function module.Settings:AddSwitch(title, description, enabled, func, ...)
-			if enabled == false then
-				local newSwitch = reserved.SettingSwitch:Clone()
-				local args = {
-					...
-				}
-				newSwitch.Parent = script.Parent.Settings.Holder;
-				newSwitch.Title.Text = title;
-				newSwitch.Desc.Text = description;
-				newSwitch.Visible = true;
-				newSwitch.Switch.MouseButton1Click:Connect(function()
-					if enabled == true then
-						ts:Create(newSwitch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(37, 40, 49)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(135, 139, 150)
-						}):Play()
-						ts:Create(newSwitch.Switch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(60, 65, 80)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							Position = UDim2.new(0.112, 0, 0.5, 0)
-						}):Play()
-						ts:Create(newSwitch.Desc, TweenInfo.new(.2), {
-							TextColor3 = Color3.fromRGB(102, 108, 125)
-						}):Play()
-					elseif enabled == false then
-						ts:Create(newSwitch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(30, 50, 79)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-						}):Play()
-						ts:Create(newSwitch.Switch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(58, 138, 253)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							Position = UDim2.new(0.55, 0, 0.5, 0)
-						}):Play()
-						ts:Create(newSwitch.Desc, TweenInfo.new(.2), {
-							TextColor3 = Color3.fromRGB(125, 138, 175)
-						}):Play()
-					end;
-					enabled = not enabled;
-					newSwitch.Enabled.Value = enabled;
-					func(enabled, unpack(args))
-				end)
-			elseif enabled == true then
-				local newSwitch = reserved.SettingSwitchOn:Clone()
-				local args = {
-					...
-				}
-				newSwitch.Parent = script.Parent.Settings.Holder;
-				newSwitch.Visible = true;
-				newSwitch.Title.Text = title;
-				newSwitch.Desc.Text = description;
-				newSwitch.Switch.MouseButton1Click:Connect(function()
-					if enabled == true then
-						ts:Create(newSwitch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(37, 40, 49)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(135, 139, 150)
-						}):Play()
-						ts:Create(newSwitch.Switch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(60, 65, 80)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							Position = UDim2.new(0.46, 0, 0.5, 0)
-						}):Play()
-						ts:Create(newSwitch.Desc, TweenInfo.new(.2), {
-							TextColor3 = Color3.fromRGB(102, 108, 125)
-						}):Play()
-					elseif enabled == false then
-						ts:Create(newSwitch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(30, 50, 79)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-						}):Play()
-						ts:Create(newSwitch.Switch, TweenInfo.new(.2), {
-							BackgroundColor3 = Color3.fromRGB(58, 138, 253)
-						}):Play()
-						ts:Create(newSwitch.Switch.ImageButton, TweenInfo.new(.2), {
-							Position = UDim2.new(0.888, 0, 0.5, 0)
-						}):Play()
-						ts:Create(newSwitch.Desc, TweenInfo.new(.2), {
-							TextColor3 = Color3.fromRGB(125, 138, 175)
-						}):Play()
-					end;
-					enabled = not enabled;
-					newSwitch.Enabled.Value = enabled;
-					func(enabled, unpack(args))
-				end)
-			end
-		end;
-		function module.Settings:AddButton(title, description, func)
-			local newButton = reserved.Button:Clone()
-			newButton.Parent = script.Parent.Settings.Holder;
-			newButton.Visible = true;
-			newButton.Title.Text = title;
-			newButton.Desc.Text = description;
-			newButton.Button.MouseButton1Click:Connect(function()
-				func()
-				local color = ts:Create(newButton, TweenInfo.new(.13), {
-					BackgroundColor3 = Color3.fromRGB(30, 50, 79)
-				})
-				color:Play()
-				color.Completed:Wait()
-				ts:Create(newButton, TweenInfo.new(.13), {
-					BackgroundColor3 = Color3.fromRGB(37, 40, 49)
-				}):Play()
-			end)
-		end;
-		function module.Settings:AddDropdown(title, description, defaulttext, options, func, ...)
-			if #options > 3 then
-				error("Please add 3 options (err: more than 3, expected 3)")
-			elseif #options < 3 then
-				error("Please add 3 options (err: below 3, expected 3)")
-			end;
-			local newDropdown = reserved.SettingDropdown:Clone()
-			local args = {
-				...
-			}
-			newDropdown.Visible = true;
-			newDropdown.Parent = script.Parent.Settings.Holder;
-			newDropdown.Title.Text = title;
-			newDropdown.Desc.Text = description;
-			newDropdown.Button.Title.Text = defaulttext;
-			local objLists = {}
-			local function visible()
-				for i, item in pairs(script.Parent.Settings.Holder:GetChildren()) do
-					if not item:IsA("UIListLayout") and objLists[item.Title.Text] == true and item.Visible == false then
-						objLists[item.Title.Text] = false;
-						item.Visible = true
-					end
-				end
-			end;
-			local function hide()
-				for i, item in pairs(script.Parent.Settings.Holder:GetChildren()) do
-					if not item:IsA("UIListLayout") then
-						if item.AbsolutePosition.Y > newDropdown.AbsolutePosition.Y and item.Visible == true then
-							objLists[item.Title.Text] = true;
-							item.Visible = false
-						end
-					end
-				end
-			end;
-			newDropdown.Button.MouseButton1Click:Connect(function()
-				if newDropdown.Dropdown.Visible == true then
-					visible()
-					newDropdown.Dropdown.Visible = false
-				elseif newDropdown.Dropdown.Visible == false then
-					hide()
-					newDropdown.Dropdown.Visible = true
-				end
-			end)
-			for i, v in ipairs(options) do
-				if i == 1 then
-					newDropdown.Dropdown.Option1.Title.Text = v
-				elseif i == 2 then
-					newDropdown.Dropdown.Option2.Title.Text = v
-				elseif i == 3 then
-					newDropdown.Dropdown.Option3.Title.Text = v
-				end
-			end;
-			newDropdown.Dropdown.Option1.MouseButton1Click:Connect(function()
-				newDropdown.Dropdown.Option1.Checked.Visible = true;
-				newDropdown.Dropdown.Option2.Checked.Visible = false;
-				newDropdown.Dropdown.Option3.Checked.Visible = false;
-				newDropdown.Dropdown.Visible = false;
-				newDropdown.Button.Title.Text = newDropdown.Dropdown.Option1.Title.Text;
-				visible()
-				func(newDropdown.Dropdown.Option1.Title.Text, unpack(args))
-			end)
-			newDropdown.Dropdown.Option2.MouseButton1Click:Connect(function()
-				newDropdown.Dropdown.Option1.Checked.Visible = false;
-				newDropdown.Dropdown.Option2.Checked.Visible = true;
-				newDropdown.Dropdown.Option3.Checked.Visible = false;
-				newDropdown.Dropdown.Visible = false;
-				newDropdown.Button.Title.Text = newDropdown.Dropdown.Option2.Title.Text;
-				visible()
-				func(newDropdown.Dropdown.Option2.Title.Text, unpack(args))
-			end)
-			newDropdown.Dropdown.Option3.MouseButton1Click:Connect(function()
-				newDropdown.Dropdown.Option1.Checked.Visible = false;
-				newDropdown.Dropdown.Option2.Checked.Visible = false;
-				newDropdown.Dropdown.Option3.Checked.Visible = true;
-				newDropdown.Dropdown.Visible = false;
-				newDropdown.Button.Title.Text = newDropdown.Dropdown.Option3.Title.Text;
-				visible()
-				func(newDropdown.Dropdown.Option3.Title.Text, unpack(args))
-			end)
-		end;
-		function module.Settings:AddTextbox(title, description, func, ...)
-			local newTextbox = reserved.SettingTextbox:Clone()
-			local args = {
-				...
-			}
-			newTextbox.Title.Text = title;
-			newTextbox.Desc.Text = description;
-			newTextbox.Visible = true;
-			newTextbox.Parent = script.Parent.Settings.Holder;
-			newTextbox.InputText.FocusLost:Connect(function()
-				func(newTextbox.InputText.Text, unpack(args))
-			end)
-		end;
-		function module.ScriptSearch:OpenPopup()
-			script.Parent.Scripthub.Popup.Visible = true;
-			script.Parent.Scripthub.DarkOverlay.Visible = true;
-			script.Parent.Scripthub.DarkOverlay.Transparency = 1;
-			if isTween.Value == true then
-				script.Parent.Scripthub.Popup.Position = UDim2.new(0.5, 0, 1.58, 0)
-				ts:Create(script.Parent.Scripthub.Popup, TweenInfo.new(.2), {
-					Position = UDim2.new(0.5, 0, 0.5, 0)
-				}):Play()
-			end;
-			ts:Create(script.Parent.Scripthub.DarkOverlay, TweenInfo.new(.15), {
-				Transparency = 0.5
-			}):Play()
-		end;
-		local Script = ''
-		function module.ScriptSearch:Add(title, description, source, image, isverified, views)
-			local newSc = script.Parent.Scripthub.Holder.Reserved.OldThumbnail:Clone()
-			newSc.Parent = script.Parent.Scripthub.Holder;
-			newSc.Visible = true;
-			newSc.Overlay.Title.Title.Text = title;
-			newSc.Overlay.Title.Paragraph.Text = description;
-			newSc.Image = image;
-			newSc.Overlay.Title.Verified.Visible = isverified;
-			newSc.Overlay.Views.Title.Text = tostring(views) .. " Views"
-			newSc.MouseButton1Click:Connect(function()
-				module.ScriptSearch:OpenPopup()
-				Script = source;
-				Title = title
-			end)
-		end;
-		function module:GetSelectedScript()
-			return Script
-		end;
-		function module:GetSelectedScriptTitle()
-			return Title
-		end;
-		function module:GoToExecutor()
-			for i, v in pairs(script.Parent:GetChildren()) do
-				if v:IsA("Frame") then
-					if v:FindFirstChild("Marker") then
-						if v.Marker.Value == "Menu" then
-							v.Visible = false
-						end
-					end
-				end
-			end;
-			script.Parent.Executor.Visible = true;
-			script.Parent.Executor.Position = UDim2.new(0.4824247360229492, 0, 0.524213433265686, 0)
-		end;
-		function module.SavedScripts:OpenPopup()
-			script.Parent.Home.Popup.Visible = true;
-			script.Parent.Home.DarkOverlay.Visible = true;
-			script.Parent.Home.DarkOverlay.Transparency = 1;
-			if isTween.Value == true then
-				script.Parent.Home.Popup.Position = UDim2.new(0.5, 0, 1.58, 0)
-				ts:Create(script.Parent.Home.Popup, TweenInfo.new(.2), {
-					Position = UDim2.new(0.5, 0, 0.5, 0)
-				}):Play()
-			end;
-			ts:Create(script.Parent.Home.DarkOverlay, TweenInfo.new(.15), {
-				Transparency = 0.5
-			}):Play()
-		end;
-		function module.SavedScripts:Add(title, source, tag)
-			local newscript = reserved.Script:Clone()
-			newscript.Visible = true;
-			newscript.Parent = script.Parent.Home.Holder;
-			newscript.Title.Text = title;
-			if type(tag) == "string" then
-				newscript.Frame.Title.Text = tag;
-				if tag == "Built-In" then
-					newscript.LayoutOrder = 999999999
-				end
-			else
-				newscript.Frame.Visible = false
-			end;
-			newscript.Button.MouseButton1Click:Connect(function()
-				loadstring(source)()
-			end)
-			newscript.Button1.MouseButton1Click:Connect(function()
-				newscript:Destroy()
-				if isfile("d_android_script_dir/" .. title) then
-					delfile("d_android_script_dir/" .. title)
-				end
-			end)
-		end;
-		return module
-	end
+local a={cache={},load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
+local b=game:GetService"RunService"local d=
+b.Heartbeat
+local e=game:GetService"UserInputService"
+local f=game:GetService"TweenService"
+local g=game:GetService"LocalizationService"
+local h=loadstring(game:HttpGetAsync"https://raw.githubusercontent.com/KingScriptAE/No-sirve-nada./refs/heads/main/mian%20f%20Yuan.lua")()
+h.SetIconsType"lucide"
+local i
+local j={
+Font="rbxassetid://12187365364",
+Localization=nil,
+CanDraggable=true,
+Theme=nil,
+Themes=nil,
+Signals={},
+Objects={},
+LocalizationObjects={},
+FontObjects={},
+Language=string.match(g.SystemLocaleId,"^[a-z]+"),
+Request=http_request or(syn and syn.request)or request,
+DefaultProperties={
+ScreenGui={
+ResetOnSpawn=false,
+ZIndexBehavior="Sibling",
+},
+CanvasGroup={
+BorderSizePixel=0,
+BackgroundColor3=Color3.new(1,1,1),
+},
+Frame={
+BorderSizePixel=0,
+BackgroundColor3=Color3.new(1,1,1),
+},
+TextLabel={
+BackgroundColor3=Color3.new(1,1,1),
+BorderSizePixel=0,
+Text="",
+RichText=true,
+TextColor3=Color3.new(1,1,1),
+TextSize=14,
+},TextButton={
+BackgroundColor3=Color3.new(1,1,1),
+BorderSizePixel=0,
+Text="",
+AutoButtonColor=false,
+TextColor3=Color3.new(1,1,1),
+TextSize=14,
+},
+TextBox={
+BackgroundColor3=Color3.new(1,1,1),
+BorderColor3=Color3.new(0,0,0),
+ClearTextOnFocus=false,
+Text="",
+TextColor3=Color3.new(0,0,0),
+TextSize=14,
+},
+ImageLabel={
+BackgroundTransparency=1,
+BackgroundColor3=Color3.new(1,1,1),
+BorderSizePixel=0,
+},
+ImageButton={
+BackgroundColor3=Color3.new(1,1,1),
+BorderSizePixel=0,
+AutoButtonColor=false,
+},
+UIListLayout={
+SortOrder="LayoutOrder",
+},
+ScrollingFrame={
+ScrollBarImageTransparency=1,
+BorderSizePixel=0,
+},
+VideoFrame={
+BorderSizePixel=0,
 }
-local function C_21()
-	local script = DELTA["21"]
-	local buttons = script.Parent.Holder;
-	local KeyInput = buttons.Input.TextBox.Input;
-	local tweenserv = game:GetService("TweenService")
-	local istween = script.Parent.Parent.IsTween;
-	repeat
-	until game:IsLoaded()
-	getgenv().StartUp = function()
-		script.Parent.Visible = true;
-		local twinfo = TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		if istween.Value == true then
-			script.Parent.Position = UDim2.new(1.3, 0, 0.5, 0)
-			local tween = tweenserv:Create(script.Parent, twinfo, {
-				Position = UDim2.new(1, 0, .5, 0)
-			})
-			tween:Play()
-		end
-	end;
-	StartUp()
-	getgenv().is_unlocked = false;
-	getgenv().GrantAccess = function()
-		getgenv().rLib:End()
-		DELTA["Ui"].Enabled = false;
-		if (not isfile("is_versx_beta")) then
-			writefile("is_versx_beta", "true")
-			wait()
-		end;
-		getgenv().is_unlocked = true;
-		if istween.Value == true then
-			local twinfo = TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			local tween = tweenserv:Create(script.Parent, twinfo, {
-				Position = UDim2.new(1.3, 0, 0.5, 0)
-			})
-			tween:Play()
-			tween.Completed:Wait()
-			script.Parent.Visible = false;
-			task.wait(.1)
-			script.Parent.Parent.Sidebar.Position = UDim2.new(1.078, 0, 0.474, 0)
-			script.Parent.Parent.Sidebar.Visible = true;
-			local twinfo2 = TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			local tween2 = tweenserv:Create(script.Parent.Parent.Sidebar, twinfo2, {
-				Position = UDim2.new(1, 0, 0.474, 0)
-			})
-			tween2:Play()
-		else
-			script.Parent.Visible = false;
-			script.Parent.Parent.Sidebar.Visible = true
-		end;
-		if (not isfile("disableautoexec")) then
-			runautoexec()
-		end
-	end;
-	local visiblelists = {}
-	visiblelists.Home = false;
-	visiblelists.Executor = false;
-	visiblelists.Scripthub = false;
-	visiblelists.Settings = false;
-	visiblelists.Console = false;
-	function OpenDelta()
-		for i, v in pairs(script.Parent.Parent:GetChildren()) do
-			if v:FindFirstChild("Marker") then
-				if v.Marker.Value == "Menu" then
-					v.Visible = visiblelists[v.Name]
-				end
-			end
-		end;
-		script.Parent.Parent.Sidebar.Position = UDim2.new(1.078, 0, 0.474, 0)
-		script.Parent.Parent.Sidebar.Visible = true;
-		local twinfo = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local tweenMenu = tweenserv:Create(script.Parent.Parent.Sidebar, twinfo, {
-			Position = UDim2.new(1, 0, 0.474, 0)
-		})
-		script.Parent.Parent.DarkOverlay.Transparency = 1;
-		script.Parent.Parent.DarkOverlay.Visible = true;
-		local tweenBg = tweenserv:Create(script.Parent.Parent.DarkOverlay, TweenInfo.new(.25), {
-			Transparency = .5
-		})
-		tweenMenu:Play()
-		tweenBg:Play()
-	end;
-	function CloseDelta()
-		for i, v in pairs(script.Parent.Parent:GetChildren()) do
-			if v:FindFirstChild("Marker") then
-				if v.Marker.Value == "Menu" then
-					visiblelists[v.Name] = v.Visible;
-					v.Visible = false
-				end
-			end
-		end;
-		script.Parent.Parent.Sidebar.Position = UDim2.new(1, 0, 0.474, 0)
-		script.Parent.Parent.Sidebar.Visible = true;
-		local twinfo = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local tweenMenu = tweenserv:Create(script.Parent.Parent.Sidebar, twinfo, {
-			Position = UDim2.new(1.078, 0, 0.474, 0)
-		})
-		script.Parent.Parent.DarkOverlay.Transparency = .5;
-		script.Parent.Parent.DarkOverlay.Visible = true;
-		local tweenBg = tweenserv:Create(script.Parent.Parent.DarkOverlay, TweenInfo.new(.25), {
-			Transparency = 1
-		})
-		tweenMenu:Play()
-		tweenBg:Play()
-		tweenBg.Completed:Wait()
-		DELTA["Ui"].Enabled = true
-	end;
-	buttons.Button2.MouseButton1Click:Connect(function()
-		setclipboard("https://discord.gg/Wu9tFvVFaB")
-	end)
-	if gethui():FindFirstChild("DeltaGui") then
-		gethui():FindFirstChild("DeltaGui"):Destroy()
-	end;
-	local AccountId = 8;
-	function GetLink()
-		return string.format("https://gateway.platoboost.com/a/%i?id=%i", AccountId, game:GetService("Players").LocalPlayer.UserId)
-	end;
-	local rateLimit = false;
-	local rateLimitCountdown = 0;
-	local errorWait = false;
-	function Verify()
-		local key = KeyInput.Text;
-		if errorWait or rateLimit then
-			return false
-		end;
-		DELTA["18"]["Text"] = "Checking key..."
-		local response = request({
-			Url = "https://api1.platoboost.com/v1/public/whitelist/8/" .. game:GetService("Players").LocalPlayer.UserId .. "?s",
-			Method = "GET"
-		})
-		if response.StatusCode == 200 then
-			if string.find(response.Body, "true") then
-				DELTA["18"]["Text"] = "Successfully whitelisted key!"
-				return true
-			else
-				if (#key > 0) then
-					local redeemResponse = request({
-						Url = "https://api1.platoboost.com/v1/authenticators/redeem/8/" .. game:GetService("Players").LocalPlayer.UserId .. "/" .. key,
-						Method = "POST"
-					})
-					if redeemResponse.StatusCode == 200 then
-						if string.find(redeemResponse.Body, "true") then
-							DELTA["18"]["Text"] = "Successfully redeemed key!"
-							return true
-						end
-					end
-				end;
-				DELTA["18"]["Text"] = "Invalid key detected, please try again!"
-				return false
-			end
-		elseif response.StatusCode == 204 then
-			DELTA["18"]["Text"] = "Invalid key detected, please try again!"
-			return false
-		elseif response.StatusCode == 429 then
-			if not rateLimit then
-				rateLimit = true;
-				rateLimitCountdown = 10;
-				task.spawn(function()
-					while rateLimit do
-						DELTA["18"]["Text"] = "You are being rate-limited, please slow down. Try again in " .. rateLimitCountdown .. " seconds."
-						wait(1)
-						rateLimitCountdown = rateLimitCountdown - 1;
-						if rateLimitCountdown < 0 then
-							rateLimit = false;
-							rateLimitCountdown = 0;
-							DELTA["18"]["Text"] = "Rate limit is over, please try again."
-						end
-					end
-				end)
-			end
-		elseif response.StatusCode == 500 then
-			errorWait = true;
-			task.spawn(function()
-				DELTA["18"]["Text"] = "An error has occured in the server, please wait 3 seconds and try again."
-				wait(3)
-				errorWait = false
-			end)
-		end
-	end;
-	buttons.Buttons.Button1.MouseButton1Click:Connect(function()
-		local key = KeyInput.Text;
-		if key == "WHITELIST" then
-			whitelist()
-		elseif string.find(key, "BOOST") then
-			boost_whitelist()
-		end;
-		if Verify() then
-			getgenv().GrantAccess()
-		end
-	end)
-	buttons.Buttons.Button2.MouseButton1Click:Connect(function()
-		setclipboard(GetLink())
-		buttons.Buttons.Button2.Input.Text = "Copied Link"
-	end)
-	script.Parent.ImageButton.MouseButton1Click:Connect(function()
-		gethui().Delta.Enabled = false
-	end)
-end;
-task.spawn(C_21)
-local function C_39()
-	local script = DELTA["39"]
-	local buttons = script.Parent;
-	local inactivecolor = buttons.InactiveColor;
-	local activecolor = buttons.ActiveColor;
-	local ts = game.TweenService;
-	local isTween = script.Parent.Parent.IsTween;
-	for i, v in pairs(buttons:GetChildren()) do
-		if v:IsA("ImageButton") then
-			if v.Name ~= "ToggleUI" then
-				originalPos = script.Parent.Parent[v.Name].Position
-			end;
-			v.MouseButton1Click:Connect(function()
-				if v.Name == "ToggleUI" then
-					CloseDelta()
-				elseif v.Name ~= "ToggleUI" then
-					for _, btns in pairs(buttons:GetChildren()) do
-						if btns:IsA("ImageButton") and btns.Name ~= "ToggleUI" then
-							if btns.Name ~= v.Name then
-								ts:Create(btns.ImageLabel, TweenInfo.new(.3), {
-									ImageColor3 = Color3.fromRGB(137, 144, 163)
-								}):Play()
-								ts:Create(btns, TweenInfo.new(.3), {
-									BackgroundColor3 = inactivecolor.Value
-								}):Play()
-								script.Parent.Parent[btns.Name].Visible = false;
-								if isTween.Value == true then
-									ts:Create(script.Parent.Parent[btns.Name], TweenInfo.new(.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-										Position = UDim2.new(.4, originalPos.X.Offset, originalPos.Y.Scale, originalPos.Y.Offset)
-									}):Play()
-								end
-							else
-								ts:Create(btns.ImageLabel, TweenInfo.new(.3), {
-									ImageColor3 = Color3.fromRGB(255, 255, 255)
-								}):Play()
-								ts:Create(btns, TweenInfo.new(.3), {
-									BackgroundColor3 = activecolor.Value
-								}):Play()
-								script.Parent.Parent[btns.Name].Visible = true;
-								if isTween.Value == true then
-									script.Parent.Parent[btns.Name].Position = UDim2.new(.4, originalPos.X.Offset, originalPos.Y.Scale, originalPos.Y.Offset)
-									ts:Create(script.Parent.Parent[btns.Name], TweenInfo.new(.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-										Position = originalPos
-									}):Play()
-								end
-							end
-						end
-					end
-				end
-			end)
-		end
-	end
-end;
-task.spawn(C_39)
-DELTA["DaIcon"].MouseButton1Click:Connect(function()
-	if (getgenv().is_unlocked) then
-		OpenDelta()
-	end;
-	DELTA["1"].Enabled = true;
-	DELTA["Ui"].Enabled = false
-end)
-DELTA["1e"].MouseButton1Click:Connect(function()
-	DELTA["1"].Enabled = false;
-	DELTA["Ui"].Enabled = true
-end)
-local function C_50()
-	local script = DELTA["50"]
-	local textbox = script.Parent.Parent.Searchbar.Input;
-	local uilib = require(script.Parent.Parent.Parent.UILibrary)
-	makefolder("ImageCache")
-	textbox.FocusLost:Connect(function()
-		for i, v in pairs(script.Parent:GetChildren()) do
-			if v:IsA("ImageButton") then
-				v:Destroy()
-			end
-		end;
-		local KeyWordSearch = textbox.Text;
-		local url = "https://scriptblox.com/api/script/search?q=" .. string.gsub(KeyWordSearch, " ", "%%20")
-		local response = game:HttpGetAsync(url)
-		local http = game:GetService("HttpService")
-		local decoded = http:JSONDecode(response)
-		for _, script in pairs(decoded.result.scripts) do
-			if script.scriptType == "free" and script.isPatched == false then
-				if (script.isUniversal == true) then
-					local random = math.random(0, 10000)
-					local randomname = "ImageCache/image" .. tostring(random) .. ".png"
-					pcall(function()
-					end)
-					wait(0.1)
-					if isfile(randomname) then
-						uilib.ScriptSearch:Add(script.title, script.game.name, script.script, randomname, script.verified, script.views)
-					else
-						uilib.ScriptSearch:Add(script.title, script.game.name, script.script, "", script.verified, script.views)
-					end
-				else
-					uilib.ScriptSearch:Add(script.title, script.game.name, script.script, "https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=" .. script.game.gameId .. "&fmt=png&wd=420&ht=420", script.verified, script.views)
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_50)
-local function C_69()
-	local script = DELTA["69"]
-	local lib = require(script.Parent.Parent.Parent.Parent.UILibrary)
-	local btns = script.Parent;
-	btns.Parent.Parent.Visible = false;
-	btns.Button1.MouseButton1Click:Connect(function()
-		loadstring(lib:GetSelectedScript())()
-		if (not isfile("preventautoclose")) then
-			btns.Parent.Visible = false;
-			btns.Parent.Parent.DarkOverlay.Visible = false
-		end
-	end)
-	btns.Button2.MouseButton1Click:Connect(function()
-		lib:GoToExecutor()
-		lib:AddTab(lib:GetSelectedScriptTitle(), lib:GetSelectedScript())
-		if (not isfile("preventautoclose")) then
-			btns.Parent.Visible = false;
-			btns.Parent.Parent.DarkOverlay.Visible = false
-		end
-	end)
-	btns.Button3.MouseButton1Click:Connect(function()
-		lib.SavedScripts:Add(lib:GetSelectedScriptTitle(), lib:GetSelectedScript())
-		writefile("d_android_script_dir/" .. lib:GetSelectedScriptTitle(), lib:GetSelectedScript())
-		if (not isfile("preventautoclose")) then
-			btns.Parent.Visible = false;
-			btns.Parent.Parent.DarkOverlay.Visible = false
-		end
-	end)
-	btns.Button4.MouseButton1Click:Connect(function()
-		setclipboard(lib:GetSelectedScript())
-		if (not isfile("preventautoclose")) then
-			btns.Parent.Visible = false;
-			btns.Parent.Parent.DarkOverlay.Visible = false
-		end
-	end)
-	btns.Parent.ImageButton.MouseButton1Click:Connect(function()
-		btns.Parent.Visible = false;
-		btns.Parent.Parent.DarkOverlay.Visible = false
-	end)
-end;
-task.spawn(C_69)
-local function C_74()
-	local script = DELTA["74"]
-	local textbox = script.Parent.Input;
-	textbox:GetPropertyChangedSignal("Text"):Connect(function()
-		local matched = textbox.Text;
-		if matched ~= '' then
-			for _, v in pairs(script.Parent.Parent.Holder:GetChildren()) do
-				if v:IsA("Frame") then
-					if v:FindFirstChild("Title") and v:FindFirstChild("Desc") then
-						if string.find(string.lower(v.Title.Text), string.lower(matched)) or string.find(string.lower(v.Desc.Text), string.lower(matched)) then
-							v.Visible = true
-						else
-							v.Visible = false
-						end
-					end
-				end
-			end
-		else
-			for _, v in pairs(script.Parent.Parent.Holder:GetChildren()) do
-				if v:IsA("Frame") then
-					v.Visible = true
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_74)
-local function C_81()
-	local script = DELTA["81"]
-	local btns = script.Parent;
-	local reserved = script.Parent.Parent.Parent.Executor.Executor.Overlay.Reserved;
-	local ts = game:GetService("TweenService")
-	btns.All.MouseButton1Click:Connect(function()
-		ts:Create(btns.Disabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		ts:Create(btns.Enabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		ts:Create(btns.All, TweenInfo.new(.15), {
-			BackgroundTransparency = 0
-		}):Play()
-		for i, v in pairs(btns.Parent.Holder:GetChildren()) do
-			if v:IsA("Frame") then
-				v.Visible = true
-			end
-		end
-	end)
-	btns.Enabled.MouseButton1Click:Connect(function()
-		ts:Create(btns.Disabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		ts:Create(btns.Enabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 0
-		}):Play()
-		ts:Create(btns.All, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		for i, v in pairs(btns.Parent.Holder:GetChildren()) do
-			if v:IsA("Frame") then
-				if v:FindFirstChild("Enabled") then
-					if v.Enabled.value == true then
-						v.Visible = true
-					else
-						v.Visible = false
-					end
-				else
-					v.Visible = false
-				end
-			end
-		end
-	end)
-	btns.Disabled.MouseButton1Click:Connect(function()
-		ts:Create(btns.Disabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 0
-		}):Play()
-		ts:Create(btns.Enabled, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		ts:Create(btns.All, TweenInfo.new(.15), {
-			BackgroundTransparency = 1
-		}):Play()
-		for i, v in pairs(btns.Parent.Holder:GetChildren()) do
-			if v:IsA("Frame") then
-				if v:FindFirstChild("Enabled") then
-					if v.Enabled.value == false then
-						v.Visible = true
-					else
-						v.Visible = false
-					end
-				else
-					v.Visible = false
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_81)
-local function C_a2()
-	local script = DELTA["a2"]
-	local btns = script.Parent.Dropdown;
-	btns.Option1.MouseButton1Click:Connect(function()
-		btns.Option1.Checked.Visible = true;
-		btns.Option2.Checked.Visible = false;
-		btns.Option3.Checked.Visible = false;
-		btns.Visible = false
-	end)
-	btns.Option2.MouseButton1Click:Connect(function()
-		btns.Option1.Checked.Visible = false;
-		btns.Option2.Checked.Visible = true;
-		btns.Option3.Checked.Visible = false;
-		btns.Visible = false
-	end)
-	btns.Option3.MouseButton1Click:Connect(function()
-		btns.Option1.Checked.Visible = false;
-		btns.Option2.Checked.Visible = false;
-		btns.Option3.Checked.Visible = true;
-		btns.Visible = false
-	end)
-	script.Parent.MouseButton1Click:Connect(function()
-		if btns.Visible == true then
-			btns.Visible = false
-		elseif btns.Visible == false then
-			btns.Visible = true
-		end
-	end)
-end;
-task.spawn(C_a2)
-local function C_b2()
-	local script = DELTA["b2"]
-	local btns = script.Parent;
-	local function getsize()
-		for i, v in pairs(script.Parent.Parent.Code:GetChildren()) do
-			if v:IsA("TextBox") then
-				return v.TextSize
-			end
-		end
-	end;
-	btns.Execute.MouseButton1Click:Connect(function()
-		for i, v in pairs(btns.Parent.Code:GetChildren()) do
-			if v:IsA("TextBox") then
-				if v.Visible == true then
-					loadstring(v.Text)()
-				end
-			end
-		end
-	end)
-	btns.Clear.MouseButton1Click:Connect(function()
-		for i, v in pairs(btns.Parent.Code:GetChildren()) do
-			if v:IsA("TextBox") then
-				if v.Visible == true then
-					v.Text = ""
-				end
-			end
-		end
-	end)
-	btns.ExecuteClipboard.MouseButton1Click:Connect(function()
-		executeclipboard()
-	end)
-end;
-task.spawn(C_b2)
-local function C_bd()
-	local script = DELTA["bd"]
-	local module = require(script.Parent.Parent.Parent.Parent.Parent.Parent.UILibrary)
-	script.Parent.MouseButton1Click:Connect(function()
-		module:AddTab()
-	end)
-end;
-task.spawn(C_bd)
-local function C_122()
-	local script = DELTA["122"]
-	local ScriptSuggestion = script.Parent;
-	local uilib = require(script.Parent.Parent.Parent.Parent.UILibrary)
-	getgenv().is_iy = false;
-	ScriptSuggestion.Overlay.Holder.Showcase.MouseButton1Click:Connect(function()
-		print("showcase clicked")
-		loadstring(game:HttpGet("https://gist.githubusercontent.com/lxnnydev/c533c374ca4c1dcef4e1e10e33fa4a0c/raw/03e74f184f801dad77d3ebe1e2f18c6ac87ca612/delta___IY.gistfile1.txt.lua", true))()
-	end)
-end;
-task.spawn(C_122)
-local function C_131()
-	local script = DELTA["131"]
-	local Network = script.Parent;
-	local localplr = game:GetService("Players").LocalPlayer;
-	local function GetPlrs()
-		return #game.Players:GetPlayers()
-	end;
-	local function SetTextForPlr()
-		Network.Overlay.Holder.Information.Players.Text = "<font color=\"#4FA4F2\">" .. tostring(GetPlrs()) .. "</font> players"
-	end;
-	SetTextForPlr()
-	game.Players.PlayerAdded:Connect(function()
-		SetTextForPlr()
-	end)
-	game.Players.PlayerAdded:Connect(function()
-		SetTextForPlr()
-	end)
-	local function GetPing()
-		return localplr:GetNetworkPing()
-	end;
-	local RunService = game:GetService("RunService")
-	local FpsLabel = Network.Overlay.Holder.Information.Memory;
-	local TimeFunction = RunService:IsRunning() and time or os.clock;
-	local LastIteration, Start;
-	local FrameUpdateTable = {}
-	local function HeartbeatUpdate()
-		LastIteration = TimeFunction()
-		for Index = #FrameUpdateTable, 1, -1 do
-			FrameUpdateTable[Index + 1] = FrameUpdateTable[Index] >= LastIteration - 1 and FrameUpdateTable[Index] or nil
-		end;
-		FrameUpdateTable[1] = LastIteration;
-		local elapsedTime = TimeFunction() - Start;
-		local updateInterval = 1;
-		if elapsedTime >= updateInterval then
-			FpsLabel.Text = "<font color=\"#4FA4F2\">" .. tostring(math.floor(#FrameUpdateTable / elapsedTime)) .. "</font> FPS"
-			Start = TimeFunction()
-		end
-	end;
-	Start = TimeFunction()
-	RunService.Heartbeat:Connect(HeartbeatUpdate)
-end;
-task.spawn(C_131)
-local function C_177()
-	local script = DELTA["177"]
-	script.Parent:GetPropertyChangedSignal("Text"):Connect(function()
-		if script.Parent.Text ~= '' then
-			for i, v in pairs(script.Parent.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-				if v:IsA("Frame") then
-					local lowered = string.lower(v.Content.Text)
-					local lowered1 = string.lower(script.Parent.Text)
-					local matched = string.find(lowered, lowered1)
-					if matched then
-						v.Visible = true
-					else
-						v.Visible = false
-					end
-				end
-			end
-		else
-			for i, v in pairs(script.Parent.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-				if v:IsA("Frame") then
-					v.Visible = true
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_177)
-local function C_178()
-	if not isfile("useconsole") then
-		return
-	end;
-	local script = DELTA["178"]
-	local logserv = game:GetService("LogService")
-	local elements = script.Parent.Parent.ConsoleElements;
-	local function GetTotalOutputs()
-		local total = 0;
-		for i, _ in pairs(script.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-			if _:IsA("Frame") then
-				total = total + 1
-			end
-		end;
-		return total
-	end;
-	logserv.MessageOut:Connect(function(output, OutputType)
-		if OutputType == Enum.MessageType.MessageOutput then
-			local msg = elements.Output:Clone()
-			msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-			msg.Name = tostring(GetTotalOutputs()) .. msg.Name;
-			msg.Visible = true;
-			msg.Content.Text = output
-		elseif OutputType == Enum.MessageType.MessageError then
-			local msg = elements.Error:Clone()
-			msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-			msg.Name = tostring(GetTotalOutputs()) .. msg.Name;
-			msg.Visible = true;
-			msg.Content.Text = output
-		elseif OutputType == Enum.MessageType.MessageWarning then
-			local msg = elements.Warn:Clone()
-			msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-			msg.Name = tostring(GetTotalOutputs()) .. msg.Name;
-			msg.Visible = true;
-			msg.Content.Text = output
-		elseif OutputType == Enum.MessageType.MessageInfo then
-			local msg = elements.Info:Clone()
-			msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-			msg.Name = tostring(GetTotalOutputs()) .. msg.Name;
-			msg.Visible = true;
-			msg.Content.Text = output
-		end
-	end)
-	script.Parent.Buttons.Clear.MouseButton1Click:Connect(function()
-		for i, v in pairs(script.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-			if v:IsA("Frame") then
-				v:Destroy()
-			end
-		end
-	end)
-end;
-task.spawn(C_178)
-local function C_19a()
-	local script = DELTA["19a"]
-	script.Parent:GetPropertyChangedSignal("Text"):Connect(function()
-		if script.Parent.Text ~= '' then
-			for i, v in pairs(script.Parent.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-				if v:IsA("Frame") then
-					local lowered = string.lower(v.Content.Text)
-					local lowered1 = string.lower(script.Parent.Text)
-					local matched = string.find(lowered, lowered1)
-					if matched then
-						v.Visible = true
-					else
-						v.Visible = false
-					end
-				end
-			end
-		else
-			for i, v in pairs(script.Parent.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-				if v:IsA("Frame") then
-					v.Visible = true
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_19a)
-local function C_19b()
-	local script = DELTA["19b"]
-	local elements = script.Parent.Parent.ConsoleElements;
-	local lib = require(script.Parent.Parent.Parent.UILibrary)
-	local function rprint(text)
-		local msg = elements.Output:Clone()
-		msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-		msg.Visible = true;
-		msg.Content.Text = text
-	end;
-	local function rerror(text)
-		local msg = elements.Error:Clone()
-		msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-		msg.Visible = true;
-		msg.Content.Text = text
-	end;
-	local function rwarn(text)
-		local msg = elements.Warn:Clone()
-		msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-		msg.Visible = true;
-		msg.Content.Text = text
-	end;
-	local function rinfo(text)
-		local msg = elements.Info:Clone()
-		msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-		msg.Visible = true;
-		msg.Content.Text = text
-	end;
-	local function rinput()
-		local msg = elements.Input:Clone()
-		msg.Parent = script.Parent.Console.ScrollingFrame.Header;
-		msg.Visible = true;
-		msg.Content:CaptureFocus()
-		lib.Console:GoToConsole()
-		msg.Content.FocusLost:Wait()
-		msg.Content.TextEditable = false;
-		return msg.Content.Text
-	end;
-	getgenv().rconsoleprint = rprint;
-	getgenv().rconsoleerror = rerror;
-	getgenv().rconsolewarn = rwarn;
-	getgenv().rconsoleinfo = rinfo;
-	getgenv().consoleprint = rprint;
-	getgenv().consoleerror = rerror;
-	getgenv().consolewarn = rwarn;
-	getgenv().consoleinfo = rinfo;
-	getgenv().rconsoleinput = rinput;
-	getgenv().consoleinput = rinput;
-	getgenv().rconsoleclear = function()
-		for i, v in pairs(script.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-			if v:IsA("Frame") then
-				v:Destroy()
-			end
-		end
-	end;
-	getgenv().consoleclear = function()
-		for i, v in pairs(script.Parent.Console.ScrollingFrame.Header:GetChildren()) do
-			if v:IsA("Frame") then
-				v:Destroy()
-			end
-		end
-	end
-end;
-task.spawn(C_19b)
-local function C_19c()
-	local script = DELTA["19c"]
-	local ts = game:GetService("TweenService")
-	local isTween = script.Parent.IsTween;
-	script.Parent.Home.Holder.Script:Destroy()
-	script.Parent.Scripthub.Popup.Visible = false;
-	script.Parent.Scripthub.DarkOverlay.Visible = true;
-	script.Parent.Scripthub.DarkOverlay.Transparency = 1;
-	local UILib = require(script.Parent.UILibrary)
-	game.Players.LocalPlayer.Chatted:Connect(function(msg)
-		if msg:match("/e sd") then
-			if DELTA["1"].Enabled == true then
-				DELTA["1"].Enabled = false
-			elseif DELTA["Ui"] == true then
-				DELTA["Ui"].Enabled = false
-			end
-		elseif msg:match("/e hd") then
-			DELTA["1"].Enabled = false
-		end
-	end)
-	pcall(function()
-		makefolder("DeltaConfigs")
-	end)
-	UILib:AddTab()
-	UILib.Settings:AddSwitch("Auto Execute", "Toggle auto-execution of scripts in the autoexec folder", not isfile("disableautoexec"), function(state)
-		if (state) then
-			if (isfile("disableautoexec")) then
-				delfile("disableautoexec")
-			end
-		else
-			writefile("disableautoexec", "hi")
-		end
-	end)
-	UILib.Settings:AddSwitch("Auto Close", "Toggle X button requirement to close popups", not isfile("preventautoclose"), function(state)
-		if (state) then
-			if (isfile("preventautoclose")) then
-				delfile("preventautoclose")
-			end
-		else
-			writefile("preventautoclose", "hi")
-		end
-	end)
-	UILib.Settings:AddSwitch("Syn Env", "Uses Synapse X' naming standard", isfile("uses_syn"), function(state)
-		if (state) then
-			writefile("uses_syn", "hi")
-			getgenv().syn = syn_backup
-		else
-			if (isfile("uses_syn")) then
-				delfile("uses_syn")
-				getgenv().syn = nil
-			end
-		end
-	end)
-	UILib.Settings:AddSwitch("Console", "Toggle roblox console logs in the GUI", isfile("useconsole"), function(state)
-		if (state) then
-			if (isfile("useconsole")) then
-				delfile("useconsole")
-			end
-		else
-			writefile("useconsole", "hi")
-		end
-	end)
-	UILib.Settings:AddDropdown("FPS Cap", "Change the FPS cap for a smoother experience", "60 FPS", {
-		"60 FPS",
-		"120 FPS",
-		"Max FPS"
-	}, function(selection)
-		if selection == "60 FPS" then
-			setfpscap(60)
-		elseif selection == "120 FPS" then
-			setfpscap(120)
-		elseif selection == "Max FPS" then
-			setfpscap(getfpsmax())
-		end
-	end)
-	UILib.Settings:AddDropdown("Icon Size", "Change the floating Icon's size", readfile("iconsize"), {
-		"Medium",
-		"Small",
-		"Large"
-	}, function(selection)
-		if selection == "Small" then
-			DELTA["DaIcon"].Size = UDim2.new(0, 30, 0, 30)
-			writefile("iconsize", "Small")
-		elseif selection == "Medium" then
-			DELTA["DaIcon"].Size = UDim2.new(0, 45, 0, 45)
-			writefile("iconsize", "Medium")
-		elseif selection == "Large" then
-			DELTA["DaIcon"].Size = UDim2.new(0, 60, 0, 60)
-			writefile("iconsize", "Large")
-		end
-	end)
-	UILib.Settings:AddDropdown("Icon Shape", "Change the floating Icon's shape", readfile("iconshape"), {
-		"Squircle",
-		"Circle",
-		"Square"
-	}, function(selection)
-		if selection == "Squircle" then
-			DELTA["das"]["CornerRadius"] = UDim.new(0.20000000298023224, 0)
-			writefile("iconshape", "Squircle")
-		elseif selection == "Circle" then
-			DELTA["das"]["CornerRadius"] = UDim.new(0.50000000298023224, 0)
-			writefile("iconshape", "Circle")
-		elseif selection == "Square" then
-			DELTA["das"]["CornerRadius"] = UDim.new(0, 0)
-			writefile("iconshape", "Square")
-		end
-	end)
-	UILib.Settings:AddDropdown("Icon Color", "Change the floating Icon's color", readfile("iconcolor"), {
-		"Blue",
-		"Green",
-		"Purple"
-	}, function(selection)
-		if selection == "Blue" then
-			DELTA["daStroke"].Color = Color3.fromRGB(65, 169, 255)
-			writefile("iconcolor", "Blue")
-		elseif selection == "Green" then
-			DELTA["daStroke"].Color = Color3.fromRGB(55, 219, 69)
-			writefile("iconcolor", "Green")
-		elseif selection == "Purple" then
-			DELTA["daStroke"].Color = Color3.fromRGB(125, 65, 255)
-			writefile("iconcolor", "Purple")
-		end
-	end)
-	UILib.Settings:AddButton("Join Discord", "Copies our discord invite", function()
-		setclipboard("https://discord.gg/deltaexploits")
-	end)
-	UILib.Settings:AddButton("Rejoin", "Rejoins your current server", function()
-		game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
-	end)
-	UILib.Settings:AddButton("Small Server", "Joins a server with a low playercount", function()
-		local Http = game:GetService("HttpService")
-		local TPS = game:GetService("TeleportService")
-		local Api = "https://games.roblox.com/v1/games/"
-		local _place = game.PlaceId;
-		local _servers = Api .. _place .. "/servers/Public?sortOrder=Asc&limit=100"
-		function ListServers(cursor)
-			local Raw = game:HttpGet(_servers .. ((cursor and "&cursor=" .. cursor) or ""))
-			return Http:JSONDecode(Raw)
-		end;
-		local Server, Next;
-		repeat
-			local Servers = ListServers(Next)
-			Server = Servers.data[1]
-			Next = Servers.nextPageCursor
-		until Server;
-		TPS:TeleportToPlaceInstance(_place, Server.id, game.Players.LocalPlayer)
-	end)
-	UILib.Settings:AddButton("Serverhop", "Teleport to a new server", function()
-		local PlaceID = game.PlaceId;
-		local AllIDs = {}
-		local foundAnything = ""
-		local actualHour = os.date("!*t").hour;
-		local Deleted = false;
-		local File = pcall(function()
-			AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
-		end)
-		if not File then
-			table.insert(AllIDs, actualHour)
-			writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
-		end;
-		function TPReturner()
-			local Site;
-			if foundAnything == "" then
-				Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
-			else
-				Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
-			end;
-			local ID = ""
-			if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
-				foundAnything = Site.nextPageCursor
-			end;
-			local num = 0;
-			for i, v in pairs(Site.data) do
-				local Possible = true;
-				ID = tostring(v.id)
-				if tonumber(v.maxPlayers) > tonumber(v.playing) then
-					for _, Existing in pairs(AllIDs) do
-						if num ~= 0 then
-							if ID == tostring(Existing) then
-								Possible = false
-							end
-						else
-							if tonumber(actualHour) ~= tonumber(Existing) then
-								local delFile = pcall(function()
-									delfile("NotSameServers.json")
-									AllIDs = {}
-									table.insert(AllIDs, actualHour)
-								end)
-							end
-						end;
-						num = num + 1
-					end;
-					if Possible == true then
-						table.insert(AllIDs, ID)
-						wait()
-						pcall(function()
-							writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
-							wait()
-							game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
-						end)
-						wait(4)
-					end
-				end
-			end
-		end;
-		function Teleport()
-			while wait() do
-				pcall(function()
-					TPReturner()
-					if foundAnything ~= "" then
-						TPReturner()
-					end
-				end)
-			end
-		end;
-		Teleport()
-	end)
-	UILib.SavedScripts:Add("Keyboard", "loadstring(game:HttpGet('https://raw.githubusercontent.com/AZYsGithub/Delta-Scripts/main/MobileKeyboard.txt'))()", "Built-In")
-	UILib.SavedScripts:Add("HoHo Hub", "loadstring(game:HttpGet('https://raw.githubusercontent.com/acsu123/HOHO_H/main/Loading_UI'))()", "Featured")
-	for _, file in ipairs(listfiles("d_android_script_dir")) do
-		UILib.SavedScripts:Add(file:sub(22, #file), readfile(file))
-	end;
-	getgenv().delta = {}
-	function delta:AddTab(a, b)
-		UILib:AddTab(a, b)
-	end;
-	function delta:SetCurrentSuggestionScript(a, b)
-		UILib:SetCurrentSuggestionScript(a, b)
-	end;
-	delta.SavedScripts = {}
-	function delta:SaveScript(a, b, c)
-		UILib.SavedScripts:Add(a, b, c)
-	end;
-	delta.Settings = {}
-	function delta.Settings:AddButton(a, b, c)
-		UILib.Settings:AddButton(a, b, c)
-	end;
-	function delta.Settings:AddSwitch(a, b, c, d)
-		UILib.Settings:AddSwitch(a, b, c, d)
-	end;
-	function delta.Settings:AddInput(a, b, c)
-		UILib.Settings:AddTextbox(a, b, c)
-	end;
-	function delta.Settings:AddDropdown(a, b, c, d)
-		UILib.Settings:AddDropdown(a, b, c, d)
-	end;
-	makefolder("DeltaPlugins")
-	for _, file in pairs(listfiles("DeltaPlugins")) do
-		loadstring(readfile(file))()
-	end;
-	script.Parent.Home.Popup.Visible = false;
-	script.Parent.Home.DarkOverlay.Visible = false;
-	script.Parent.Home.Popup.Close.MouseButton1Click:Connect(function()
-		if isTween.Value == true then
-			script.Parent.Home.Popup.Visible = false
-		else
-			script.Parent.Home.Popup.Visible = false
-		end;
-		local tw2 = ts:Create(script.Parent.Home.DarkOverlay, TweenInfo.new(.15), {
-			Transparency = 1
-		})
-		tw2:Play()
-		tw2.Completed:Wait()
-		script.Parent.Home.DarkOverlay.Visible = false
-	end)
-	script.Parent.Home.Popup.Add.MouseButton1Click:Connect(function()
-		UILib.SavedScripts:Add(script.Parent.Home.Popup.Title.TextBox.Text, script.Parent.Home.Popup.Source.TextBox.Text)
-		writefile("d_android_script_dir/" .. script.Parent.Home.Popup.Title.TextBox.Text, script.Parent.Home.Popup.Source.TextBox.Text)
-		if (not isfile("preventautoclose")) then
-			script.Parent.Home.DarkOverlay.Visible = false;
-			script.Parent.Home.Popup.Visible = false
-		end
-	end)
-	script.Parent.Home.Searchbar.Button.MouseButton1Click:Connect(function()
-		UILib.SavedScripts:OpenPopup()
-	end)
-	script.Parent.Home.Searchbar.Input:GetPropertyChangedSignal("Text"):Connect(function()
-		for i, v in pairs(script.Parent.Home.Holder:GetChildren()) do
-			if v:IsA("ImageLabel") then
-				if string.find(string.lower(v.Title.Text), string.lower(script.Parent.Home.Searchbar.Input.Text)) then
-					v.Visible = true
-				else
-					v.Visible = false
-				end
-			end
-		end;
-		if script.Parent.Home.Searchbar.Input.Text == "" then
-			for i, v in pairs(script.Parent.Home.Holder:GetChildren()) do
-				if v:IsA("ImageLabel") then
-					v.Visible = true
-				end
-			end
-		end
-	end)
-end;
-task.spawn(C_19c)
-local LOADER = {}
-local GuiService2 = game:GetService("GuiService")
-LOADER["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
-LOADER["1"]["IgnoreGuiInset"] = true;
-LOADER["1"]["Enabled"] = false;
-LOADER["1"]["ScreenInsets"] = Enum.ScreenInsets.DeviceSafeInsets;
-LOADER["1"]["Name"] = [[LOADERLoadingScreen]]
-LOADER["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
-LOADER["1"]["ResetOnSpawn"] = false;
-LOADER["2"] = Instance.new("Frame", LOADER["1"])
-LOADER["2"]["ZIndex"] = -100
-LOADER["2"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
-LOADER["2"]["BackgroundTransparency"] = 0.6600000262260437;
-LOADER["2"]["Size"] = UDim2.new(2, 0, 2, 0)
-LOADER["2"]["Position"] = UDim2.new(-1, 0, -1, 0)
-LOADER["2"]["Name"] = [[DarkOverlay]]
-LOADER["3"] = Instance.new("ImageLabel", LOADER["1"])
-LOADER["3"].BorderSizePixel = 0;
-LOADER["3"].ScaleType = Enum.ScaleType.Crop;
-LOADER["3"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LOADER["3"].Image = "rbxassetid://13387419794"
-LOADER["3"].LayoutOrder = 10;
-LOADER["3"].Size = UDim2.new(0.32863849401474, 0, 0.31259891390800476, 0)
-LOADER["3"].BorderColor3 = Color3.fromRGB(0, 0, 0)
-LOADER["3"].Name = "MainFrame"
-local DaIconSize = LOADER["3"].Size;
-local ScreenCenterX = GuiService2:GetScreenResolution().X / 2;
-local ScreenCenterY = GuiService2:GetScreenResolution().Y / 2;
-local DaIconPositionX = ScreenCenterX - DaIconSize.X.Offset / 2;
-local DaIconPositionY = ScreenCenterY - DaIconSize.Y.Offset / 2;
-LOADER["3"].Position = UDim2.new(0, DaIconPositionX, 0, DaIconPositionY / 20)
-LOADER["4"] = Instance.new("UICorner", LOADER["3"])
-LOADER["4"]["CornerRadius"] = UDim.new(0.07000000029802322, 0)
-LOADER["5"] = Instance.new("ImageLabel", LOADER["3"])
-LOADER["5"]["BackgroundColor3"] = Color3.fromRGB(26, 27, 36)
-LOADER["5"]["Image"] = [[rbxassetid://13387657138]]
-LOADER["5"]["LayoutOrder"] = 10;
-LOADER["5"]["Size"] = UDim2.new(1, 0, 1, 0)
-LOADER["5"]["Name"] = [[Overlay]]
-LOADER["5"]["BackgroundTransparency"] = 0.800000011920929;
-LOADER["6"] = Instance.new("UICorner", LOADER["5"])
-LOADER["6"]["CornerRadius"] = UDim.new(0.07000000029802322, 0)
-LOADER["7"] = Instance.new("TextLabel", LOADER["5"])
-LOADER["7"]["TextWrapped"] = true;
-LOADER["7"]["TextScaled"] = true;
-LOADER["7"]["BackgroundColor3"] = Color3.fromRGB(118, 192, 255)
-LOADER["7"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-LOADER["7"]["TextSize"] = 14;
-LOADER["7"]["TextColor3"] = Color3.fromRGB(203, 244, 255)
-LOADER["7"]["AnchorPoint"] = Vector2.new(0, 0.5)
-LOADER["7"]["Size"] = UDim2.new(0.6451469659805298, 0, 0.1418459564447403, 0)
-LOADER["7"]["Text"] = [[Please wait a while!]]
-LOADER["7"]["Name"] = [[Title]]
-LOADER["7"]["BackgroundTransparency"] = 1;
-LOADER["7"]["Position"] = UDim2.new(0.1773512363433838, 0, 0.4073548913002014, 0)
-LOADER["8"] = Instance.new("TextLabel", LOADER["5"])
-LOADER["8"]["TextWrapped"] = true;
-LOADER["8"]["TextScaled"] = true;
-LOADER["8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-LOADER["8"]["FontFace"] = Font.new([[rbxassetid://11702779517]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-LOADER["8"]["TextSize"] = 14;
-LOADER["8"]["TextColor3"] = Color3.fromRGB(196, 220, 255)
-LOADER["8"]["AnchorPoint"] = Vector2.new(0, 0.5)
-LOADER["8"]["Size"] = UDim2.new(0.8879498243331909, 0, 0.1277613639831543, 0)
-LOADER["8"]["Text"] = [[We are currently setting everything up for you]]
-LOADER["8"]["Name"] = [[Desc]]
-LOADER["8"]["BackgroundTransparency"] = 1;
-LOADER["8"]["Position"] = UDim2.new(0.06185942143201828, 0, 0.5393086075782776, 0)
-LOADER["9"] = Instance.new("Frame", LOADER["3"])
-LOADER["9"]["ZIndex"] = 0;
-LOADER["9"]["BorderSizePixel"] = 0;
-LOADER["9"]["BackgroundTransparency"] = 1;
-LOADER["9"]["Size"] = UDim2.new(1, 0, 1, 0)
-LOADER["9"]["Name"] = [[DropShadowHolder]]
-LOADER["a"] = Instance.new("ImageLabel", LOADER["9"])
-LOADER["a"]["ZIndex"] = 0;
-LOADER["a"]["BorderSizePixel"] = 0;
-LOADER["a"]["SliceCenter"] = Rect.new(49, 49, 450, 450)
-LOADER["a"]["ScaleType"] = Enum.ScaleType.Slice;
-LOADER["a"]["ImageColor3"] = Color3.fromRGB(0, 0, 0)
-LOADER["a"]["ImageTransparency"] = 0.699999988079071;
-LOADER["a"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
-LOADER["a"]["Image"] = [[rbxassetid://6014261993]]
-LOADER["a"]["Size"] = UDim2.new(1, 47, 1, 47)
-LOADER["a"]["Name"] = [[DropShadow]]
-LOADER["a"]["BackgroundTransparency"] = 1;
-LOADER["a"]["Position"] = UDim2.new(0.5, 0, 0.5, 0)
-LOADER["b"] = Instance.new("UIAspectRatioConstraint", LOADER["3"])
-LOADER["b"]["AspectRatio"] = 1.8712739944458008;
-LOADER["c"] = Instance.new("ModuleScript", LOADER["1"])
-LOADER["c"]["Name"] = [[LoadingModule]]
-local LOADER_REQUIRE = require;
-local LOADER_MODULES = {}
-local function require(Module)
-	local ModuleState = LOADER_MODULES[Module]
-	if ModuleState then
-		if not ModuleState.Required then
-			ModuleState.Required = true;
-			ModuleState.Value = ModuleState.Closure()
-		end;
-		return ModuleState.Value
-	end;
-	return LOADER_REQUIRE(Module)
-end;
-LOADER_MODULES[LOADER["c"]] = {
-	Closure = function()
-		local script = LOADER["c"]
-		local lib = {}
-		local tweenserv = game:GetService("TweenService")
-		local frame = script.Parent.MainFrame;
-		local DarkOverlay = script.Parent.DarkOverlay;
-		local isLoading = false;
-		local delayz = 0.6;
-		local function TextFadeLoop()
-			local title = frame.Overlay.Title;
-			local desc = frame.Overlay.Desc;
-			local timeToFade = 1;
-			local titleStart = tweenserv:Create(title, TweenInfo.new(timeToFade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				TextTransparency = 0.8
-			})
-			local titleEnd = tweenserv:Create(title, TweenInfo.new(timeToFade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				TextTransparency = 0
-			})
-			local descStart = tweenserv:Create(desc, TweenInfo.new(timeToFade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				TextTransparency = 0.8
-			})
-			local descEnd = tweenserv:Create(desc, TweenInfo.new(timeToFade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				TextTransparency = 0
-			})
-			while isLoading == true do
-				titleStart:Play()
-				descStart:Play()
-				titleStart.Completed:Wait()
-				titleEnd:Play()
-				descEnd:Play()
-				titleEnd.Completed:Wait()
-			end
-		end;
-		function lib:Start()
-			isLoading = true;
-			script.Parent.Enabled = true;
-			frame.Position = UDim2.new(0.336, 0, -0.372, 0)
-			DarkOverlay.Transparency = 1;
-			local tw1 = tweenserv:Create(frame, TweenInfo.new(delayz, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				Position = UDim2.new(0.336, 0, 0.322, 0)
-			})
-			local tw2 = tweenserv:Create(DarkOverlay, TweenInfo.new(delayz, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				Transparency = 0.66
-			})
-			tw1:Play()
-			tw2:Play()
-			tw2.Completed:Wait()
-			TextFadeLoop()
-		end;
-		function lib:End()
-			isLoading = false;
-			DarkOverlay.Transparency = 1;
-			local tw1 = tweenserv:Create(frame, TweenInfo.new(delayz, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				Position = UDim2.new(0.336, 0, -0.372, 0)
-			})
-			local tw2 = tweenserv:Create(DarkOverlay, TweenInfo.new(delayz, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				Transparency = 1
-			})
-			tw1:Play()
-			tw2:Play()
-		end;
-		return lib
-	end
+},
+Colors={
+Red="#e53935",
+Orange="#f57c00",
+Green="#43a047",
+Blue="#039be5",
+White="#ffffff",
+Grey="#484848",
+},
 }
-getgenv().rLib = require(LOADER["c"])
-coroutine.wrap(function()
-	getgenv().rLib:Start()
-end)()
-function whitelist()
-	return true
-end;
-function boost_whitelist()
-	return true
-end;
-if not isfile("dsigfiureikuger.txt") then
-	writefile("dsigfiureikuger.txt", "hi")
-end;
-function checkkey()
-	local savedkey = readfile("dsigfiureikuger.txt")
-	local keyless = "true"
-	if string.find(keyless, "true") then
-		getgenv().GrantAccess()
-		return true
-	end;
-	if Verify() then
-		getgenv().GrantAccess()
-		return true
-	end;
-	if (savedkey == "WHITELIST") then
-		if whitelist() then
-			getgenv().GrantAccess()
-			return true
-		end
-	end;
-	if (savedkey == "ALYSSE") then
-		getgenv().GrantAccess()
-		return true
-	end;
-	if (savedkey == "BOOST") then
-		if boost_whitelist() then
-			getgenv().GrantAccess()
-			return true
-		end
-	end
-end;
-coroutine.wrap(function()
-	local bool = checkkey()
-	if not bool then
-		wait(1)
-		getgenv().rLib:End()
-		DELTA["1"].Enabled = true;
-		StartUp()
-	else
-		DELTA["1"].Enabled = true
-	end
-end)()
-return DELTA["1"], require
+function j.Init(l)
+i=l
+end
+function j.AddSignal(l,m)
+table.insert(j.Signals,l:Connect(m))
+end
+function j.DisconnectAll()
+for l,m in next,j.Signals do
+local p=table.remove(j.Signals,l)
+p:Disconnect()
+end
+end
+function j.SafeCallback(l,...)
+if not l then
+return
+end
+local m,p=pcall(l,...)
+if not m then local
+r, u=p:find":%d+: "
+warn("[ WindUI: DEBUG Mode ] "..p)
+return i:Notify{
+Title="DEBUG Mode: Error",
+Content=not u and p or p:sub(u+1),
+Duration=8,
+}
+end
+end
+function j.SetTheme(l)
+j.Theme=l
+j.UpdateTheme(nil,true)
+end
+function j.AddFontObject(l)
+table.insert(j.FontObjects,l)
+j.UpdateFont(j.Font)
+end
+function j.UpdateFont(l)
+j.Font=l
+for m,p in next,j.FontObjects do
+p.FontFace=Font.new(l,p.FontFace.Weight,p.FontFace.Style)
+end
+end
+function j.GetThemeProperty(l,m)
+return m[l]or j.Themes.Dark[l]
+end
+function j.AddThemeObject(l,m)
+j.Objects[l]={Object=l,Properties=m}
+j.UpdateTheme(l,false)
+return l
+end
+function j.AddLangObject(l)
+local m=j.LocalizationObjects[l]
+local p=m.Object
+local r=currentObjTranslationId
+j.UpdateLang(p,r)
+return p
+end
+function j.UpdateTheme(l,m)
+local function ApplyTheme(p)
+for r,u in pairs(p.Properties or{})do
+local v=j.GetThemeProperty(u,j.Theme)
+if v then
+if not m then
+p.Object[r]=Color3.fromHex(v)
+else
+j.Tween(p.Object,0.08,{[r]=Color3.fromHex(v)}):Play()
+end
+end
+end
+end
+if l then
+local p=j.Objects[l]
+if p then
+ApplyTheme(p)
+end
+else
+for p,r in pairs(j.Objects)do
+ApplyTheme(r)
+end
+end
+end
+function j.SetLangForObject(l)
+if j.Localization and j.Localization.Enabled then
+local m=j.LocalizationObjects[l]
+if not m then return end
+local p=m.Object
+local r=m.TranslationId
+local u=j.Localization.Translations[j.Language]
+if u and u[r]then
+p.Text=u[r]
+else
+local v=j.Localization and j.Localization.Translations and j.Localization.Translations.en or nil
+if v and v[r]then
+p.Text=v[r]
+else
+p.Text="["..r.."]"
+end
+end
+end
+end
+function j.ChangeTranslationKey(l,m,p)
+if j.Localization and j.Localization.Enabled then
+local r=string.match(p,"^"..j.Localization.Prefix.."(.+)")
+if r then
+for u,v in ipairs(j.LocalizationObjects)do
+if v.Object==m then
+v.TranslationId=r
+j.SetLangForObject(u)
+return
+end
+end
+table.insert(j.LocalizationObjects,{
+TranslationId=r,
+Object=m
+})
+j.SetLangForObject(#j.LocalizationObjects)
+end
+end
+end
+function j.UpdateLang(l)
+if l then
+j.Language=l
+end
+for m=1,#j.LocalizationObjects do
+local p=j.LocalizationObjects[m]
+if p.Object and p.Object.Parent~=nil then
+j.SetLangForObject(m)
+else
+j.LocalizationObjects[m]=nil
+end
+end
+end
+function j.SetLanguage(l)
+j.Language=l
+j.UpdateLang()
+end
+function j.Icon(l)
+return h.Icon(l)
+end
+function j.New(l,m,p)
+local r=Instance.new(l)
+for u,v in next,j.DefaultProperties[l]or{}do
+r[u]=v
+end
+for x,z in next,m or{}do
+if x~="ThemeTag"then
+r[x]=z
+end
+if j.Localization and j.Localization.Enabled and x=="Text"then
+local A=string.match(z,"^"..j.Localization.Prefix.."(.+)")
+if A then
+local B=#j.LocalizationObjects+1
+j.LocalizationObjects[B]={TranslationId=A,Object=r}
+j.SetLangForObject(B)
+end
+end
+end
+for A,B in next,p or{}do
+B.Parent=r
+end
+if m and m.ThemeTag then
+j.AddThemeObject(r,m.ThemeTag)
+end
+if m and m.FontFace then
+j.AddFontObject(r)
+end
+return r
+end
+function j.Tween(l,m,p,...)
+return f:Create(l,TweenInfo.new(m,...),p)
+end
+function j.NewRoundFrame(l,m,p,r,x)
+local z=j.New(x and"ImageButton"or"ImageLabel",{
+Image=m=="Squircle"and"rbxassetid://80999662900595"
+or m=="SquircleOutline"and"rbxassetid://117788349049947"
+or m=="SquircleOutline2"and"rbxassetid://117817408534198"
+or m=="Shadow-sm"and"rbxassetid://84825982946844"
+or m=="Squircle-TL-TR"and"rbxassetid://73569156276236",
+ScaleType="Slice",
+SliceCenter=m~="Shadow-sm"and Rect.new(256
+,256
+,256
+,256
+)or Rect.new(512,512,512,512),
+SliceScale=1,
+BackgroundTransparency=1,
+ThemeTag=p.ThemeTag and p.ThemeTag
+},r)
+for A,B in pairs(p or{})do
+if A~="ThemeTag"then
+z[A]=B
+end
+end
+local function UpdateSliceScale(C)
+local F=m~="Shadow-sm"and(C/(256))or(C/512)
+z.SliceScale=math.max(F,0.0001)
+end
+UpdateSliceScale(l)
+return z
+end
+local l=j.New local m=
+j.Tween
+function j.SetDraggable(p)
+j.CanDraggable=p
+end
+function j.Drag(p,r,x)
+local z
+local A,B,C,F
+local G={
+CanDraggable=true
+}
+if not r or type(r)~="table"then
+r={p}
+end
+local function update(H)
+local J=H.Position-C
+j.Tween(p,0.02,{Position=UDim2.new(
+F.X.Scale,F.X.Offset+J.X,
+F.Y.Scale,F.Y.Offset+J.Y
+)}):Play()
+end
+for H,J in pairs(r)do
+J.InputBegan:Connect(function(L)
+if(L.UserInputType==Enum.UserInputType.MouseButton1 or L.UserInputType==Enum.UserInputType.Touch)and G.CanDraggable then
+if z==nil then
+z=J
+A=true
+C=L.Position
+F=p.Position
+if x and type(x)=="function"then
+x(true,z)
+end
+L.Changed:Connect(function()
+if L.UserInputState==Enum.UserInputState.End then
+A=false
+z=nil
+if x and type(x)=="function"then
+x(false,z)
+end
+end
+end)
+end
+end
+end)
+J.InputChanged:Connect(function(L)
+if z==J and A then
+if L.UserInputType==Enum.UserInputType.MouseMovement or L.UserInputType==Enum.UserInputType.Touch then
+B=L
+end
+end
+end)
+end
+e.InputChanged:Connect(function(L)
+if L==B and A and z~=nil then
+if G.CanDraggable then
+update(L)
+end
+end
+end)
+function G.Set(L,M)
+G.CanDraggable=M
+end
+return G
+end
+h.Init(l,"Icon")
+function j.Image(p,r,x,z,A,B,C)
+local function SanitizeFilename(F)
+F=F:gsub("[%s/\\:*?\"<>|]+","-")
+F=F:gsub("[^%w%-_%.]","")
+return F
+end
+z=z or"Temp"
+r=SanitizeFilename(r)
+local F=l("Frame",{
+Size=UDim2.new(0,0,0,0),
+BackgroundTransparency=1,
+},{
+l("ImageLabel",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+ScaleType="Crop",
+ThemeTag=(j.Icon(p)or C)and{
+ImageColor3=B and"Icon"or nil
+}or nil,
+},{
+l("UICorner",{
+CornerRadius=UDim.new(0,x)
+})
+})
+})
+if j.Icon(p)then
+F.ImageLabel:Destroy()
+local G=h.Image{
+Icon=p,
+Size=UDim2.new(1,0,1,0),
+Colors={
+(B and"Icon"or false),
+"Button"
+}
+}.IconFrame
+G.Parent=F
+elseif string.find(p,"http")then
+local G="WindUI/"..z.."/Assets/."..A.."-"..r..".png"
+local H,J=pcall(function()
+task.spawn(function()
+if not isfile(G)then
+local H=j.Request{
+Url=p,
+Method="GET",
+}.Body
+writefile(G,H)
+end
+F.ImageLabel.Image=getcustomasset(G)
+end)
+end)
+if not H then
+warn("[ WindUI.Creator ]  '"..identifyexecutor().."' doesnt support the URL Images. Error: "..J)
+F:Destroy()
+end
+else
+F.ImageLabel.Image=p
+end
+return F
+end
+return j end function a.b()
+local b={}
+function b.New(e,f,g)
+local h={
+Enabled=f.Enabled or false,
+Translations=f.Translations or{},
+Prefix=f.Prefix or"loc:",
+DefaultLanguage=f.DefaultLanguage or"en"
+}
+g.Localization=h
+return h
+end
+return b end function a.c()
+local b=a.load'a'
+local e=b.New
+local f=b.Tween
+local g={
+Size=UDim2.new(0,300,1,-156),
+SizeLower=UDim2.new(0,300,1,-56),
+UICorner=13,
+UIPadding=14,
+Holder=nil,
+NotificationIndex=0,
+Notifications={}
+}
+function g.Init(h)
+local i={
+Lower=false
+}
+function i.SetLower(j)
+i.Lower=j
+i.Frame.Size=j and g.SizeLower or g.Size
+end
+i.Frame=e("Frame",{
+Position=UDim2.new(1,-29,0,56),
+AnchorPoint=Vector2.new(1,0),
+Size=g.Size,
+Parent=h,
+BackgroundTransparency=1,
+},{
+e("UIListLayout",{
+HorizontalAlignment="Center",
+SortOrder="LayoutOrder",
+VerticalAlignment="Bottom",
+Padding=UDim.new(0,8),
+}),
+e("UIPadding",{
+PaddingBottom=UDim.new(0,29)
+})
+})
+return i
+end
+function g.New(h)
+local i={
+Title=h.Title or"Notification",
+Content=h.Content or nil,
+Icon=h.Icon or nil,
+IconThemed=h.IconThemed,
+Background=h.Background,
+BackgroundImageTransparency=h.BackgroundImageTransparency,
+Duration=h.Duration or 5,
+Buttons=h.Buttons or{},
+CanClose=true,
+UIElements={},
+Closed=false,
+}
+if i.CanClose==nil then
+i.CanClose=true
+end
+g.NotificationIndex=g.NotificationIndex+1
+g.Notifications[g.NotificationIndex]=i
+local j
+if i.Icon then
+j=b.Image(
+i.Icon,
+i.Title..":"..i.Icon,
+0,
+h.Window,
+"Notification",
+i.IconThemed
+)
+j.Size=UDim2.new(0,26,0,26)
+j.Position=UDim2.new(0,g.UIPadding,0,g.UIPadding)
+end
+local l
+if i.CanClose then
+l=e("ImageButton",{
+Image=b.Icon"x"[1],
+ImageRectSize=b.Icon"x"[2].ImageRectSize,
+ImageRectOffset=b.Icon"x"[2].ImageRectPosition,
+BackgroundTransparency=1,
+Size=UDim2.new(0,16,0,16),
+Position=UDim2.new(1,-g.UIPadding,0,g.UIPadding),
+AnchorPoint=Vector2.new(1,0),
+ThemeTag={
+ImageColor3="Text"
+},
+ImageTransparency=.4,
+},{
+e("TextButton",{
+Size=UDim2.new(1,8,1,8),
+BackgroundTransparency=1,
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+Text="",
+})
+})
+end
+local m=e("Frame",{
+Size=UDim2.new(0,0,1,0),
+BackgroundTransparency=.95,
+ThemeTag={
+BackgroundColor3="Text",
+},
+})
+local p=e("Frame",{
+Size=UDim2.new(1,
+i.Icon and-28-g.UIPadding or 0,
+1,0),
+Position=UDim2.new(1,0,0,0),
+AnchorPoint=Vector2.new(1,0),
+BackgroundTransparency=1,
+AutomaticSize="Y",
+},{
+e("UIPadding",{
+PaddingTop=UDim.new(0,g.UIPadding),
+PaddingLeft=UDim.new(0,g.UIPadding),
+PaddingRight=UDim.new(0,g.UIPadding),
+PaddingBottom=UDim.new(0,g.UIPadding),
+}),
+e("TextLabel",{
+AutomaticSize="Y",
+Size=UDim2.new(1,-30-g.UIPadding,0,0),
+TextWrapped=true,
+TextXAlignment="Left",
+RichText=true,
+BackgroundTransparency=1,
+TextSize=16,
+ThemeTag={
+TextColor3="Text"
+},
+Text=i.Title,
+FontFace=Font.new(b.Font,Enum.FontWeight.Medium)
+}),
+e("UIListLayout",{
+Padding=UDim.new(0,g.UIPadding/3)
+})
+})
+if i.Content then
+e("TextLabel",{
+AutomaticSize="Y",
+Size=UDim2.new(1,0,0,0),
+TextWrapped=true,
+TextXAlignment="Left",
+RichText=true,
+BackgroundTransparency=1,
+TextTransparency=.4,
+TextSize=15,
+ThemeTag={
+TextColor3="Text"
+},
+Text=i.Content,
+FontFace=Font.new(b.Font,Enum.FontWeight.Medium),
+Parent=p
+})
+end
+local r=b.NewRoundFrame(g.UICorner,"Squircle",{
+Size=UDim2.new(1,0,0,0),
+Position=UDim2.new(2,0,1,0),
+AnchorPoint=Vector2.new(0,1),
+AutomaticSize="Y",
+ImageTransparency=.05,
+ThemeTag={
+ImageColor3="Background"
+},
+},{
+e("CanvasGroup",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+m,
+e("UICorner",{
+CornerRadius=UDim.new(0,g.UICorner),
+})
+}),
+e("ImageLabel",{
+Name="Background",
+Image=i.Background,
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,1,0),
+ScaleType="Crop",
+ImageTransparency=i.BackgroundImageTransparency
+},{
+e("UICorner",{
+CornerRadius=UDim.new(0,g.UICorner),
+})
+}),
+p,
+j,l,
+})
+local x=e("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,0,0),
+Parent=h.Holder
+},{
+r
+})
+function i.Close(z)
+if not i.Closed then
+i.Closed=true
+f(x,0.45,{Size=UDim2.new(1,0,0,-8)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+f(r,0.55,{Position=UDim2.new(2,0,1,0)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+task.wait(.45)
+x:Destroy()
+end
+end
+task.spawn(function()
+task.wait()
+f(x,0.45,{Size=UDim2.new(
+1,
+0,
+0,
+r.AbsoluteSize.Y
+)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+f(r,0.45,{Position=UDim2.new(0,0,1,0)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if i.Duration then
+f(m,i.Duration,{Size=UDim2.new(1,0,1,0)},Enum.EasingStyle.Linear,Enum.EasingDirection.InOut):Play()
+task.wait(i.Duration)
+i:Close()
+end
+end)
+if l then
+b.AddSignal(l.TextButton.MouseButton1Click,function()
+i:Close()
+end)
+end
+return i
+end
+return g end function a.d()
+return{
+Dark={
+Name="Dark",
+Accent="#18181b",
+Dialog="#161616",
+Outline="#FFFFFF",
+Text="#FFFFFF",
+Placeholder="#999999",
+Background="#101010",
+Button="#52525b",
+Icon="#a1a1aa",
+},
+Light={
+Name="Light",
+Accent="#FFFFFF",
+Dialog="#f4f4f5",
+Outline="#09090b",
+Text="#000000",
+Placeholder="#777777",
+Background="#e4e4e7",
+Button="#18181b",
+Icon="#52525b",
+},
+Rose={
+Name="Rose",
+Accent="#f43f5e",
+Outline="#ffe4e6",
+Text="#ffe4e6",
+Placeholder="#fda4af",
+Background="#881337",
+Button="#e11d48",
+Icon="#fecdd3",
+},
+Plant={
+Name="Plant",
+Accent="#22c55e",
+Outline="#dcfce7",
+Text="#dcfce7",
+Placeholder="#bbf7d0",
+Background="#14532d",
+Button="#22c55e",
+Icon="#86efac",
+},
+Red={
+Name="Red",
+Accent="#ef4444",
+Outline="#fee2e2",
+Text="#ffe4e6",
+Placeholder="#fca5a5",
+Background="#7f1d1d",
+Button="#ef4444",
+Icon="#fecaca",
+},
+Indigo={
+Name="Indigo",
+Accent="#6366f1",
+Outline="#e0e7ff",
+Text="#e0e7ff",
+Placeholder="#a5b4fc",
+Background="#312e81",
+Button="#6366f1",
+Icon="#c7d2fe",
+},
+Sky={
+Name="Sky",
+Accent="#0ea5e9",
+Outline="#e0f2fe",
+Text="#e0f2fe",
+Placeholder="#7dd3fc",
+Background="#075985",
+Button="#0ea5e9",
+Icon="#bae6fd",
+},
+Violet={
+Name="Violet",
+Accent="#8b5cf6",
+Outline="#ede9fe",
+Text="#ede9fe",
+Placeholder="#c4b5fd",
+Background="#4c1d95",
+Button="#8b5cf6",
+Icon="#ddd6fe",
+},
+Amber={
+Name="Amber",
+Accent="#f59e0b",
+Outline="#fef3c7",
+Text="#fef3c7",
+Placeholder="#fcd34d",
+Background="#78350f",
+Button="#f59e0b",
+Icon="#fde68a",
+},
+Emerald={
+Name="Emerald",
+Accent="#10b981",
+Outline="#d1fae5",
+Text="#d1fae5",
+Placeholder="#6ee7b7",
+Background="#064e3b",
+Button="#10b981",
+Icon="#a7f3d0",
+},
+Midnight={
+Name="Midnight",
+Accent="#1e3a8a",
+Outline="#93c5fd",
+Text="#bfdbfe",
+Placeholder="#60a5fa",
+Background="#0f172a",
+Button="#2563eb",
+Icon="#3b82f6",
+},
+Crimson={
+Name="Crimson",
+Accent="#d32f2f",
+Outline="#ff5252",
+Text="#f5f5f5",
+Placeholder="#9e9e9e",
+Background="#121212",
+Button="#b71c1c",
+Icon="#e53935",
+},
+MonokaiPro={
+Name="Monokai Pro",
+Accent="#fc9867",
+Outline="#727072",
+Text="#f5f4f1",
+Placeholder="#939293",
+Background="#2d2a2e",
+Button="#ab9df2",
+Icon="#78dce8",
+},
+CottonCandy={
+Name="Cotton Candy",
+Accent="#FF95B3",
+Outline="#A98CF6",
+Text="#f6d5e1",
+Placeholder="#87D7FF",
+Background="#492C37",
+Button="#F5B0DE",
+Icon="#78E0E8",
+},
+}end function a.e()
+local b=4294967296;local e=b-1;local function c(f,g)local h,i=0,1;while f~=0 or g~=0 do local j,l=f%2,g%2;local m=(j+l)%2;h=h+m*i;f=math.floor(f/2)g=math.floor(g/2)i=i*2 end;return h%b end;local function k(f,g,h,...)local i;if g then f=f%b;g=g%b;i=c(f,g)if h then i=k(i,h,...)end;return i elseif f then return f%b else return 0 end end;local function n(f,g,h,...)local i;if g then f=f%b;g=g%b;i=(f+g-c(f,g))/2;if h then i=n(i,h,...)end;return i elseif f then return f%b else return e end end;local function o(f)return e-f end;local function q(f,g)if g<0 then return lshift(f,-g)end;return math.floor(f%4294967296/2^g)end;local function s(f,g)if g>31 or g<-31 then return 0 end;return q(f%b,g)end;local function lshift(f,g)if g<0 then return s(f,-g)end;return f*2^g%4294967296 end;local function t(f,g)f=f%b;g=g%32;local h=n(f,2^g-1)return s(f,g)+lshift(h,32-g)end;local f={0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2}local function w(g)return string.gsub(g,".",function(h)return string.format("%02x",string.byte(h))end)end;local function y(g,h)local i=""for j=1,h do local l=g%256;i=string.char(l)..i;g=(g-l)/256 end;return i end;local function D(g,h)local i=0;for j=h,h+3 do i=i*256+string.byte(g,j)end;return i end;local function E(g,h)local i=64-(h+9)%64;h=y(8*h,8)g=g.."\128"..string.rep("\0",i)..h;assert(#g%64==0)return g end;local function I(g)g[1]=0x6a09e667;g[2]=0xbb67ae85;g[3]=0x3c6ef372;g[4]=0xa54ff53a;g[5]=0x510e527f;g[6]=0x9b05688c;g[7]=0x1f83d9ab;g[8]=0x5be0cd19;return g end;local function K(g,h,i)local j={}for l=1,16 do j[l]=D(g,h+(l-1)*4)end;for l=17,64 do local m=j[l-15]local p=k(t(m,7),t(m,18),s(m,3))m=j[l-2]j[l]=(j[l-16]+p+j[l-7]+k(t(m,17),t(m,19),s(m,10)))%b end;local l,m,p,r,x,z,A,B=i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8]for C=1,64 do local F=k(t(l,2),t(l,13),t(l,22))local G=k(n(l,m),n(l,p),n(m,p))local H=(F+G)%b;local J=k(t(x,6),t(x,11),t(x,25))local L=k(n(x,z),n(o(x),A))local M=(B+J+L+f[C]+j[C])%b;B=A;A=z;z=x;x=(r+M)%b;r=p;p=m;m=l;l=(M+H)%b end;i[1]=(i[1]+l)%b;i[2]=(i[2]+m)%b;i[3]=(i[3]+p)%b;i[4]=(i[4]+r)%b;i[5]=(i[5]+x)%b;i[6]=(i[6]+z)%b;i[7]=(i[7]+A)%b;i[8]=(i[8]+B)%b end;local function Z(g)g=E(g,#g)local h=I{}for i=1,#g,64 do K(g,i,h)end;return w(y(h[1],4)..y(h[2],4)..y(h[3],4)..y(h[4],4)..y(h[5],4)..y(h[6],4)..y(h[7],4)..y(h[8],4))end;local g;local h={["\\"]="\\",["\""]="\"",["\b"]="b",["\f"]="f",["\n"]="n",["\r"]="r",["\t"]="t"}local i={["/"]="/"}for j,l in pairs(h)do i[l]=j end;local m=function(m)return"\\"..(h[m]or string.format("u%04x",m:byte()))end;local p=function(p)return"null"end;local r=function(r,x)local z={}x=x or{}if x[r]then error"circular reference"end;x[r]=true;if rawget(r,1)~=nil or next(r)==nil then local A=0;for B in pairs(r)do if type(B)~="number"then error"invalid table: mixed or invalid key types"end;A=A+1 end;if A~=#r then error"invalid table: sparse array"end;for C,F in ipairs(r)do table.insert(z,g(F,x))end;x[r]=nil;return"["..table.concat(z,",").."]"else for A,B in pairs(r)do if type(A)~="string"then error"invalid table: mixed or invalid key types"end;table.insert(z,g(A,x)..":"..g(B,x))end;x[r]=nil;return"{"..table.concat(z,",").."}"end end;local x=function(x)return'"'..x:gsub('[%z\1-\31\\"]',m)..'"'end;local z=function(z)if z~=z or z<=-math.huge or z>=math.huge then error("unexpected number value '"..tostring(z).."'")end;return string.format("%.14g",z)end;local A={["nil"]=p,table=r,string=x,number=z,boolean=tostring}g=function(B,C)local F=type(B)local G=A[F]if G then return G(B,C)end;error("unexpected type '"..F.."'")end;local B=function(B)return g(B)end;local C;local F=function(...)local F={}for G=1,select("#",...)do F[select(G,...)]=true end;return F end;local G=F(" ","\t","\r","\n")local H=F(" ","\t","\r","\n","]","}",",")local J=F("\\","/",'"',"b","f","n","r","t","u")local L=F("true","false","null")local M={["true"]=true,["false"]=false,null=nil}local N=function(N,O,P,Q)for R=O,#N do if P[N:sub(R,R)]~=Q then return R end end;return#N+1 end;local O=function(O,P,Q)local R=1;local S=1;for T=1,P-1 do S=S+1;if O:sub(T,T)=="\n"then R=R+1;S=1 end end;error(string.format("%s at line %d col %d",Q,R,S))end;local P=function(P)local Q=math.floor;if P<=0x7f then return string.char(P)elseif P<=0x7ff then return string.char(Q(P/64)+192,P%64+128)elseif P<=0xffff then return string.char(Q(P/4096)+224,Q(P%4096/64)+128,P%64+128)elseif P<=0x10ffff then return string.char(Q(P/262144)+240,Q(P%262144/4096)+128,Q(P%4096/64)+128,P%64+128)end;error(string.format("invalid unicode codepoint '%x'",P))end;local Q=function(Q)local R=tonumber(Q:sub(1,4),16)local S=tonumber(Q:sub(7,10),16)if S then return P((R-0xd800)*0x400+S-0xdc00+0x10000)else return P(R)end end;local R=function(R,S)local T=""local U=S+1;local V=U;while U<=#R do local W=R:byte(U)if W<32 then O(R,U,"control character in string")elseif W==92 then T=T..R:sub(V,U-1)U=U+1;local X=R:sub(U,U)if X=="u"then local Y=R:match("^[dD][89aAbB]%x%x\\u%x%x%x%x",U+1)or R:match("^%x%x%x%x",U+1)or O(R,U-1,"invalid unicode escape in string")T=T..Q(Y)U=U+#Y else if not J[X]then O(R,U-1,"invalid escape char '"..X.."' in string")end;T=T..i[X]end;V=U+1 elseif W==34 then T=T..R:sub(V,U-1)return T,U+1 end;U=U+1 end;O(R,S,"expected closing quote for string")end;local S=function(S,T)local U=N(S,T,H)local V=S:sub(T,U-1)local W=tonumber(V)if not W then O(S,T,"invalid number '"..V.."'")end;return W,U end;local T=function(T,U)local V=N(T,U,H)local W=T:sub(U,V-1)if not L[W]then O(T,U,"invalid literal '"..W.."'")end;return M[W],V end;local U=function(U,V)local W={}local X=1;V=V+1;while 1 do local Y;V=N(U,V,G,true)if U:sub(V,V)=="]"then V=V+1;break end;Y,V=C(U,V)W[X]=Y;X=X+1;V=N(U,V,G,true)local _=U:sub(V,V)V=V+1;if _=="]"then break end;if _~=","then O(U,V,"expected ']' or ','")end end;return W,V end;local aa=function(V,W)local X={}W=W+1;while 1 do local Y,_;W=N(V,W,G,true)if V:sub(W,W)=="}"then W=W+1;break end;if V:sub(W,W)~='"'then O(V,W,"expected string for key")end;Y,W=C(V,W)W=N(V,W,G,true)if V:sub(W,W)~=":"then O(V,W,"expected ':' after key")end;W=N(V,W+1,G,true)_,W=C(V,W)X[Y]=_;W=N(V,W,G,true)local aa=V:sub(W,W)W=W+1;if aa=="}"then break end;if aa~=","then O(V,W,"expected '}' or ','")end end;return X,W end;local V={['"']=R,["0"]=S,["1"]=S,["2"]=S,["3"]=S,["4"]=S,["5"]=S,["6"]=S,["7"]=S,["8"]=S,["9"]=S,["-"]=S,t=T,f=T,n=T,["["]=U,["{"]=aa}C=function(W,X)local Y=W:sub(X,X)local _=V[Y]if _ then return _(W,X)end;O(W,X,"unexpected character '"..Y.."'")end;local W=function(W)if type(W)~="string"then error("expected argument of type string, got "..type(W))end;local X,Y=C(W,N(W,1,G,true))Y=N(W,Y,G,true)if Y<=#W then O(W,Y,"trailing garbage")end;return X end;
+local X,Y,_=B,W,Z;
+local ab={}
+function ab.New(ac,ad)
+local ae=ac;
+local af=ad;
+local ag=true;
+local ah=function(ah)end;
+repeat task.wait(1)until game:IsLoaded();
+local ai=false;
+local aj,ak,al,am,an,ao,ap,aq,ar=setclipboard or toclipboard,request or http_request or syn_request,string.char,tostring,string.sub,os.time,math.random,math.floor,gethwid or function()return game:GetService"Players".LocalPlayer.UserId end
+local as,at="",0;
+local au="https://api.platoboost.com";
+local av=ak{
+Url=au.."/public/connectivity",
+Method="GET"
+};
+if av.StatusCode~=200 or av.StatusCode~=429 then
+au="https://api.platoboost.net";
+end
+function cacheLink()
+if at+(600)<ao()then
+local aw=ak{
+Url=au.."/public/start",
+Method="POST",
+Body=X{
+service=ae,
+identifier=_(ar())
+},
+Headers={
+["Content-Type"]="application/json"
+}
+};
+if aw.StatusCode==200 then
+local ax=Y(aw.Body);
+if ax.success==true then
+as=ax.data.url;
+at=ao();
+return true,as
+else
+ah(ax.message);
+return false,ax.message
+end
+elseif aw.StatusCode==429 then
+local ax="you are being rate limited, please wait 20 seconds and try again.";
+ah(ax);
+return false,ax
+end
+local ax="Failed to cache link.";
+ah(ax);
+return false,ax
+else
+return true,as
+end
+end
+cacheLink();
+local aw=function()
+local aw=""
+for ax=1,16 do
+aw=aw..al(aq(ap()*(26))+97)
+end
+return aw
+end
+for ax=1,5 do
+local ay=aw();
+task.wait(0.2)
+if aw()==ay then
+local az="platoboost nonce error.";
+ah(az);
+error(az);
+end
+end
+local ax=function()
+local ax,ay=cacheLink();
+if ax then
+aj(ay);
+end
+end
+local ay=function(ay)
+local az=aw();
+local aA=au.."/public/redeem/"..am(ae);
+local aB={
+identifier=_(ar()),
+key=ay
+}
+if ag then
+aB.nonce=az;
+end
+local aC=ak{
+Url=aA,
+Method="POST",
+Body=X(aB),
+Headers={
+["Content-Type"]="application/json"
+}
+};
+if aC.StatusCode==200 then
+local aD=Y(aC.Body);
+if aD.success==true then
+if aD.data.valid==true then
+if ag then
+if aD.data.hash==_("true".."-"..az.."-"..af)then
+return true
+else
+ah"failed to verify integrity.";
+return false
+end
+else
+return true
+end
+else
+ah"key is invalid.";
+return false
+end
+else
+if an(aD.message,1,27)=="unique constraint violation"then
+ah"you already have an active key, please wait for it to expire before redeeming it.";
+return false
+else
+ah(aD.message);
+return false
+end
+end
+elseif aC.StatusCode==429 then
+ah"you are being rate limited, please wait 20 seconds and try again.";
+return false
+else
+ah"server returned an invalid status code, please try again later.";
+return false
+end
+end
+local az=function(az)
+if ai==true then
+return false,("A request is already being sent, please slow down.")
+else
+ai=true;
+end
+local aA=aw();
+local aB=au.."/public/whitelist/"..am(ae).."?identifier=".._(ar()).."&key="..az;
+if ag then
+aB=aB.."&nonce="..aA;
+end
+local aC=ak{
+Url=aB,
+Method="GET",
+};
+ai=false;
+if aC.StatusCode==200 then
+local aD=Y(aC.Body);
+if aD.success==true then
+if aD.data.valid==true then
+if ag then
+if aD.data.hash==_("true".."-"..aA.."-"..af)then
+return true,""
+else
+return false,("failed to verify integrity.")
+end
+else
+return true
+end
+else
+if an(az,1,4)=="KEY_"then
+return true,ay(az)
+else
+return false,("Key is invalid.")
+end
+end
+else
+return false,(aD.message)
+end
+elseif aC.StatusCode==429 then
+return false,("You are being rate limited, please wait 20 seconds and try again.")
+else
+return false,("Server returned an invalid status code, please try again later.")
+end
+end
+local aA=function(aA)
+local aB=aw();
+local aC=au.."/public/flag/"..am(ae).."?name="..aA;
+if ag then
+aC=aC.."&nonce="..aB;
+end
+local aD=ak{
+Url=aC,
+Method="GET",
+};
+if aD.StatusCode==200 then
+local aE=Y(aD.Body);
+if aE.success==true then
+if ag then
+if aE.data.hash==_(am(aE.data.value).."-"..aB.."-"..af)then
+return aE.data.value
+else
+ah"failed to verify integrity.";
+return nil
+end
+else
+return aE.data.value
+end
+else
+ah(aE.message);
+return nil
+end
+else
+return nil
+end
+end
+return{
+Verify=az,
+GetFlag=aA,
+Copy=ax,
+}
+end
+return ab end function a.f()
+local aa=game:GetService"HttpService"
+local ab={}
+function ab.New(ac)
+local ad=gethwid or function()return game:GetService"Players".LocalPlayer.UserId end
+local ae,af=request or http_request or syn_request,setclipboard or toclipboard
+function ValidateKey(ag)
+local ah="https://pandadevelopment.net/v2_validation?key="..tostring(ag).."&service="..tostring(ac).."&hwid="..tostring(ad())
+local ai,aj=pcall(function()
+return ae{
+Url=ah,
+Method="GET",
+Headers={["User-Agent"]="Roblox/Exploit"}
+}
+end)
+if ai and aj then
+if aj.Success then
+local ak,al=pcall(function()
+return aa:JSONDecode(aj.Body)
+end)
+if ak and al then
+if al.V2_Authentication and al.V2_Authentication=="success"then
+return true,"Authenticated"
+else
+local am=al.Key_Information.Notes or"Unknown reason"
+return false,"Authentication failed: "..am
+end
+else
+return false,"JSON decode error"
+end
+else
+warn("[Pelinda Ov2.5] HTTP request was not successful. Code: "..tostring(aj.StatusCode).." Message: "..aj.StatusMessage)
+return false,"HTTP request failed: "..aj.StatusMessage
+end
+else
+return false,"Request pcall error"
+end
+end
+function GetKeyLink()
+return"https://pandadevelopment.net/getkey?service="..tostring(ac).."&hwid="..tostring(ad)
+end
+function CopyLink()
+return af(GetKeyLink())
+end
+return{
+Verify=ValidateKey,
+Copy=CopyLink
+}
+end
+return ab end function a.g()
+local aa={}
+function aa.New(ab,ac)
+local ad=loadstring(game:HttpGet"https://sdkapi-public.luarmor.net/library.lua")()
+local ae=setclipboard or toclipboard
+ad.script_id=ab
+function ValidateKey(af)
+local ag=ad.check_key(af);
+print(ag)
+if(ag.code=="KEY_VALID")then
+return true,"Whitelisted!"
+elseif(ag.code=="KEY_HWID_LOCKED")then
+return false,"Key linked to a different HWID. Please reset it using our bot"
+elseif(ag.code=="KEY_INCORRECT")then
+return false,"Key is wrong or deleted!"
+else
+return false,"Key check failed:"..ag.message.." Code: "..ag.code
+end
+end
+function CopyLink()
+ae(tostring(ac))
+end
+return{
+Verify=ValidateKey,
+Copy=CopyLink
+}
+end
+return aa end function a.h()
+return{
+platoboost={
+Name="Platoboost",
+Icon="rbxassetid://75920162824531",
+Args={"ServiceId","Secret"},
+New=a.load'e'.New
+},
+pandadevelopment={
+Name="Panda Development",
+Icon="panda",
+Args={"ServiceId"},
+New=a.load'f'.New
+},
+luarmor={
+Name="Luarmor",
+Icon="rbxassetid://130918283130165",
+Args={"ScriptId","Discord"},
+New=a.load'g'.New
+},
+}end function a.i()
+return[[{
+    "name": "<制作者霖溺>",
+    "version": "霖溺脚本-版本:免费",
+    "main": "./dist/main.lua",
+    "repository": "https://github.com/Footagesus/WindUI",
+    "discord": "not",
+    "author": "Footagesus",
+    "description": "Roblox UI Library for scripts",
+    "license": "MIT"
+}]]end function a.j()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah,ai,aj,ak)
+ah=ah or"Primary"
+local al=not ak and 10 or 99
+local am
+if af and af~=""then
+am=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local an=ac("TextButton",{
+Size=UDim2.new(0,0,1,0),
+AutomaticSize="X",
+Parent=ai,
+BackgroundTransparency=1
+},{
+ab.NewRoundFrame(al,"Squircle",{
+ThemeTag={
+ImageColor3=ah~="White"and"Button"or nil,
+},
+ImageColor3=ah=="White"and Color3.new(1,1,1)or nil,
+Size=UDim2.new(1,0,1,0),
+Name="Squircle",
+ImageTransparency=ah=="Primary"and 0 or ah=="White"and 0 or 1
+}),
+ab.NewRoundFrame(al,"Squircle",{
+ImageColor3=Color3.new(1,1,1),
+Size=UDim2.new(1,0,1,0),
+Name="Special",
+ImageTransparency=ah=="Secondary"and 0.95 or 1
+}),
+ab.NewRoundFrame(al,"Shadow-sm",{
+ImageColor3=Color3.new(0,0,0),
+Size=UDim2.new(1,3,1,3),
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+Name="Shadow",
+ImageTransparency=1,
+Visible=not ak
+}),
+ab.NewRoundFrame(al,not ak and"SquircleOutline"or"SquircleOutline2",{
+ThemeTag={
+ImageColor3=ah~="White"and"Outline"or nil,
+},
+Size=UDim2.new(1,0,1,0),
+ImageColor3=ah=="White"and Color3.new(0,0,0)or nil,
+ImageTransparency=ah=="Primary"and.95 or.85,
+Name="SquircleOutline",
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(al,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ThemeTag={
+ImageColor3=ah~="White"and"Text"or nil
+},
+ImageColor3=ah=="White"and Color3.new(0,0,0)or nil,
+ImageTransparency=1
+},{
+ac("UIPadding",{
+PaddingLeft=UDim.new(0,16),
+PaddingRight=UDim.new(0,16),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment="Center",
+HorizontalAlignment="Center",
+}),
+am,
+ac("TextLabel",{
+BackgroundTransparency=1,
+FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
+Text=ae or"Button",
+ThemeTag={
+TextColor3=(ah~="Primary"and ah~="White")and"Text",
+},
+TextColor3=ah=="Primary"and Color3.new(1,1,1)or ah=="White"and Color3.new(0,0,0)or nil,
+AutomaticSize="XY",
+TextSize=18,
+})
+})
+})
+ab.AddSignal(an.MouseEnter,function()
+ad(an.Frame,.047,{ImageTransparency=.95}):Play()
+end)
+ab.AddSignal(an.MouseLeave,function()
+ad(an.Frame,.047,{ImageTransparency=1}):Play()
+end)
+ab.AddSignal(an.MouseButton1Up,function()
+if aj then
+aj:Close()()
+end
+if ag then
+ab.SafeCallback(ag)
+end
+end)
+return an
+end
+return aa end function a.k()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New local ad=
+ab.Tween
+function aa.New(ae,af,ag,ah,ai)
+ah=ah or"Input"
+local aj=10
+local ak
+if af and af~=""then
+ak=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local al=ah~="Input"
+local am=ac("TextBox",{
+BackgroundTransparency=1,
+TextSize=17,
+FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
+Size=UDim2.new(1,ak and-29 or 0,1,0),
+PlaceholderText=ae,
+ClearTextOnFocus=false,
+ClipsDescendants=true,
+TextWrapped=al,
+MultiLine=al,
+TextXAlignment="Left",
+TextYAlignment=ah=="Input"and"Center"or"Top",
+ThemeTag={
+PlaceholderColor3="PlaceholderText",
+TextColor3="Text",
+},
+})
+local an=ac("Frame",{
+Size=UDim2.new(1,0,0,42),
+Parent=ag,
+BackgroundTransparency=1
+},{
+ac("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ab.NewRoundFrame(aj,"Squircle",{
+ThemeTag={
+ImageColor3="Accent",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.85,
+}),
+ab.NewRoundFrame(aj,"SquircleOutline",{
+ThemeTag={
+ImageColor3="Outline",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.9,
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=.95
+},{
+ac("UIPadding",{
+PaddingTop=UDim.new(0,ah=="Input"and 0 or 12),
+PaddingLeft=UDim.new(0,12),
+PaddingRight=UDim.new(0,12),
+PaddingBottom=UDim.new(0,ah=="Input"and 0 or 12),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment=ah=="Input"and"Center"or"Top",
+HorizontalAlignment="Left",
+}),
+ak,
+am,
+})
+})
+})
+ab.AddSignal(am.FocusLost,function()
+if ai then
+ab.SafeCallback(ai,am.Text)
+end
+end)
+return an
+end
+return aa end function a.l()
+local aa=a.load'a'
+local ab=aa.New
+local ac=aa.NewRoundFrame
+local ad=aa.Tween
+game:GetService"UserInputService"
+local function Color3ToHSB(ae)
+local af,ag,ah=ae.R,ae.G,ae.B
+local ai=math.max(af,ag,ah)
+local aj=math.min(af,ag,ah)
+local ak=ai-aj
+local al=0
+if ak~=0 then
+if ai==af then
+al=(ag-ah)/ak%6
+elseif ai==ag then
+al=(ah-af)/ak+2
+else
+al=(af-ag)/ak+4
+end
+al=al*60
+else
+al=0
+end
+local am=(ai==0)and 0 or(ak/ai)
+local an=ai
+return{
+h=math.floor(al+0.5),
+s=am,
+b=an
+}
+end
+local function GetPerceivedBrightness(ae)
+local af=ae.R
+local ag=ae.G
+local ah=ae.B
+return 0.299*af+0.587*ag+0.114*ah
+end
+local function GetTextColorForHSB(ae)
+local af=Color3ToHSB(ae)local
+ag, ah, ai=af.h, af.s, af.b
+if GetPerceivedBrightness(ae)>0.5 then
+return Color3.fromHSV(ag/360,0,0.05)
+else
+return Color3.fromHSV(ag/360,0,0.98)
+end
+end
+return function(ae)
+local af={
+Title=ae.Title,
+Desc=ae.Desc or nil,
+Hover=ae.Hover,
+Thumbnail=ae.Thumbnail,
+ThumbnailSize=ae.ThumbnailSize or 80,
+Image=ae.Image,
+IconThemed=ae.IconThemed or false,
+ImageSize=ae.ImageSize or 30,
+Color=ae.Color,
+Scalable=ae.Scalable,
+Parent=ae.Parent,
+UIPadding=13,
+UICorner=12,
+UIElements={}
+}
+local ag=af.ImageSize
+local ah=af.ThumbnailSize
+local ai=true
+local aj=0
+local ak
+local al
+if af.Thumbnail then
+ak=aa.Image(
+af.Thumbnail,
+af.Title,
+af.UICorner-3,
+ae.Window.Folder,
+"Thumbnail",
+false,
+af.IconThemed
+)
+ak.Size=UDim2.new(1,0,0,ah)
+end
+if af.Image then
+al=aa.Image(
+af.Image,
+af.Title,
+af.UICorner-3,
+ae.Window.Folder,
+"Image",
+not af.Color and true or false
+)
+if typeof(af.Color)=="string"then
+al.ImageLabel.ImageColor3=GetTextColorForHSB(Color3.fromHex(aa.Colors[af.Color]))
+elseif typeof(af.Color)=="Color3"then
+al.ImageLabel.ImageColor3=GetTextColorForHSB(af.Color)
+end
+al.Size=UDim2.new(0,ag,0,ag)
+aj=ag
+end
+local function CreateText(am,an)
+local ao=typeof(af.Color)=="string"
+and GetTextColorForHSB(Color3.fromHex(aa.Colors[af.Color]))
+or typeof(af.Color)=="Color3"
+and GetTextColorForHSB(af.Color)
+return ab("TextLabel",{
+BackgroundTransparency=1,
+Text=am or"",
+TextSize=an=="Desc"and 14 or 16,
+TextXAlignment="Left",
+ThemeTag={
+TextColor3=not af.Color and"Text"or nil,
+},
+TextColor3=af.Color and ao or nil,
+TextTransparency=an=="Desc"and.25 or 0,
+TextWrapped=true,
+Size=UDim2.new(1,0,0,0),
+AutomaticSize="Y",
+FontFace=Font.new(aa.Font,Enum.FontWeight.Medium)
+})
+end
+local am=CreateText(af.Title,"Title")
+local an=CreateText(af.Desc,"Desc")
+if not af.Desc or af.Desc==""then
+an.Visible=false
+end
+af.UIElements.Container=ab("Frame",{
+Size=UDim2.new(1,0,0,0),
+AutomaticSize="Y",
+BackgroundTransparency=1,
+},{
+ab("UIListLayout",{
+Padding=UDim.new(0,af.UIPadding),
+FillDirection="Vertical",
+VerticalAlignment="Top",
+HorizontalAlignment="Left",
+}),
+ak,
+ab("Frame",{
+Size=UDim2.new(1,-ae.TextOffset,0,0),
+AutomaticSize="Y",
+BackgroundTransparency=1,
+},{
+ab("UIListLayout",{
+Padding=UDim.new(0,af.UIPadding),
+FillDirection="Horizontal",
+VerticalAlignment="Top",
+HorizontalAlignment="Left",
+}),
+al,
+ab("Frame",{
+BackgroundTransparency=1,
+AutomaticSize="Y",
+Size=UDim2.new(1,-aj,0,(50-(af.UIPadding*2)))
+},{
+ab("UIListLayout",{
+Padding=UDim.new(0,6),
+FillDirection="Vertical",
+VerticalAlignment="Center",
+HorizontalAlignment="Left",
+}),
+am,
+an
+}),
+})
+})
+af.UIElements.Locked=ac(af.UICorner,"Squircle",{
+Size=UDim2.new(1,af.UIPadding*2,1,af.UIPadding*2),
+ImageTransparency=.4,
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+ImageColor3=Color3.new(0,0,0),
+Visible=false,
+Active=false,
+ZIndex=9999999,
+})
+af.UIElements.Main=ac(af.UICorner,"Squircle",{
+Size=UDim2.new(1,0,0,50),
+AutomaticSize="Y",
+ImageTransparency=af.Color and.05 or.95,
+Parent=ae.Parent,
+ThemeTag={
+ImageColor3=not af.Color and"Text"or nil
+},
+ImageColor3=af.Color and
+(
+typeof(af.Color)=="string"
+and Color3.fromHex(aa.Colors[af.Color])
+or typeof(af.Color)=="Color3"
+and af.Color
+)or nil
+},{
+af.UIElements.Container,
+af.UIElements.Locked,
+ab("UIPadding",{
+PaddingTop=UDim.new(0,af.UIPadding),
+PaddingLeft=UDim.new(0,af.UIPadding),
+PaddingRight=UDim.new(0,af.UIPadding),
+PaddingBottom=UDim.new(0,af.UIPadding),
+}),
+},true)
+if af.Hover then
+aa.AddSignal(af.UIElements.Main.MouseEnter,function()
+if ai then
+ad(af.UIElements.Main,.05,{ImageTransparency=af.Color and.15 or.9}):Play()
+end
+end)
+aa.AddSignal(af.UIElements.Main.InputEnded,function()
+if ai then
+ad(af.UIElements.Main,.05,{ImageTransparency=af.Color and.05 or.95}):Play()
+end
+end)
+end
+function af.SetTitle(ao,ap)
+am.Text=ap
+end
+function af.SetDesc(ao,ap)
+an.Text=ap or""
+if not ap then
+an.Visible=false
+elseif not an.Visible then
+an.Visible=true
+end
+end
+function af.Destroy(ao)
+af.UIElements.Main:Destroy()
+end
+function af.Lock(ao)
+ai=false
+af.UIElements.Locked.Active=true
+af.UIElements.Locked.Visible=true
+end
+function af.Unlock(ao)
+ai=true
+af.UIElements.Locked.Active=false
+af.UIElements.Locked.Visible=false
+end
+return af
+end end function a.z()
+local aa=a.load'a'
+local ab=aa.New
+local ac={}
+local ad=a.load'j'.New
+function ac.New(ae,af)
+af.Hover=false
+af.TextOffset=0
+af.IsButtons=af.Buttons and#af.Buttons>0 and true or false
+local ag={
+__type="Paragraph",
+Title=af.Title or"Paragraph",
+Desc=af.Desc or nil,
+Locked=af.Locked or false,
+}
+local ah=a.load'y'(af)
+ag.ParagraphFrame=ah
+if af.Buttons and#af.Buttons>0 then
+local ai=ab("Frame",{
+Size=UDim2.new(1,0,0,38),
+BackgroundTransparency=1,
+AutomaticSize="Y",
+Parent=ah.UIElements.Container
+},{
+ab("UIListLayout",{
+Padding=UDim.new(0,10),
+FillDirection="Vertical",
+})
+})
+for aj,ak in next,af.Buttons do
+local al=ad(ak.Title,ak.Icon,ak.Callback,"White",ai)
+al.Size=UDim2.new(1,0,0,38)
+end
+end
+return ag.__type,ag
+end
+return ac end function a.A()
+local aa=a.load'a'
+local ab=aa.New
+local ac={}
+function ac.New(ad,ae)
+local af={
+__type="Button",
+Title=ae.Title or"Button",
+Desc=ae.Desc or nil,
+Locked=ae.Locked or false,
+Callback=ae.Callback or function()end,
+UIElements={}
+}
+local ag=true
+af.ButtonFrame=a.load'y'{
+Title=af.Title,
+Desc=af.Desc,
+Parent=ae.Parent,
+Window=ae.Window,
+TextOffset=20,
+Hover=true,
+Scalable=true,
+}
+af.UIElements.ButtonIcon=ab("ImageLabel",{
+Image=aa.Icon"mouse-pointer-click"[1],
+ImageRectOffset=aa.Icon"mouse-pointer-click"[2].ImageRectPosition,
+ImageRectSize=aa.Icon"mouse-pointer-click"[2].ImageRectSize,
+BackgroundTransparency=1,
+Parent=af.ButtonFrame.UIElements.Main,
+Size=UDim2.new(0,20,0,20),
+AnchorPoint=Vector2.new(1,0.5),
+Position=UDim2.new(1,0,0.5,0),
+ThemeTag={
+ImageColor3="Text"
+}
+})
+function af.Lock(ah)
+ag=false
+return af.ButtonFrame:Lock()
+end
+function af.Unlock(ah)
+ag=true
+return af.ButtonFrame:Unlock()
+end
+if af.Locked then
+af:Lock()
+end
+aa.AddSignal(af.ButtonFrame.UIElements.Main.MouseButton1Click,function()
+if ag then
+task.spawn(function()
+aa.SafeCallback(af.Callback)
+end)
+end
+end)
+return af.__type,af
+end
+return ac end function a.B()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah)
+local ai={}
+local aj=13
+local ak
+if af and af~=""then
+ak=ac("ImageLabel",{
+Size=UDim2.new(1,-7,1,-7),
+BackgroundTransparency=1,
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+Image=ab.Icon(af)[1],
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageTransparency=1,
+ImageColor3=Color3.new(0,0,0),
+})
+end
+local al=ab.NewRoundFrame(aj,"Squircle",{
+ImageTransparency=.95,
+ThemeTag={
+ImageColor3="Text"
+},
+Parent=ag,
+Size=UDim2.new(0,42,0,26),
+},{
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Layer",
+ThemeTag={
+ImageColor3="Button",
+},
+ImageTransparency=1,
+}),
+ab.NewRoundFrame(aj,"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+Name="Stroke",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=1,
+},{
+ac("UIGradient",{
+Rotation=90,
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0,0),
+NumberSequenceKeypoint.new(1,1),
+}
+})
+}),
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(0,18,0,18),
+Position=UDim2.new(0,3,0.5,0),
+AnchorPoint=Vector2.new(0,0.5),
+ImageTransparency=0,
+ImageColor3=Color3.new(1,1,1),
+Name="Frame",
+},{
+ak,
+})
+})
+function ai.Set(am,an)
+if an then
+ad(al.Frame,0.1,{
+Position=UDim2.new(1,-22,0.5,0),
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ad(al.Layer,0.1,{
+ImageTransparency=0,
+}):Play()
+ad(al.Stroke,0.1,{
+ImageTransparency=0.95,
+}):Play()
+if ak then
+ad(ak,0.1,{
+ImageTransparency=0,
+}):Play()
+end
+else
+ad(al.Frame,0.1,{
+Position=UDim2.new(0,4,0.5,0),
+Size=UDim2.new(0,18,0,18),
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ad(al.Layer,0.1,{
+ImageTransparency=1,
+}):Play()
+ad(al.Stroke,0.1,{
+ImageTransparency=1,
+}):Play()
+if ak then
+ad(ak,0.1,{
+ImageTransparency=1,
+}):Play()
+end
+end
+task.spawn(function()
+if ah then
+ab.SafeCallback(ah,an)
+end
+end)
+end
+return al,ai
+end
+return aa end function a.C()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New
+local ad=ab.Tween
+function aa.New(ae,af,ag,ah)
+local ai={}
+af=af or"check"
+local aj=10
+local ak=ac("ImageLabel",{
+Size=UDim2.new(1,-10,1,-10),
+BackgroundTransparency=1,
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+Image=ab.Icon(af)[1],
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageTransparency=1,
+ImageColor3=Color3.new(1,1,1),
+})
+local al=ab.NewRoundFrame(aj,"Squircle",{
+ImageTransparency=.95,
+ThemeTag={
+ImageColor3="Text"
+},
+Parent=ag,
+Size=UDim2.new(0,27,0,27),
+},{
+ab.NewRoundFrame(aj,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Layer",
+ThemeTag={
+ImageColor3="Button",
+},
+ImageTransparency=1,
+}),
+ab.NewRoundFrame(aj,"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+Name="Stroke",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=1,
+},{
+ac("UIGradient",{
+Rotation=90,
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0,0),
+NumberSequenceKeypoint.new(1,1),
+}
+})
+}),
+ak,
+})
+function ai.Set(am,an)
+if an then
+ad(al.Layer,0.06,{
+ImageTransparency=0,
+}):Play()
+ad(al.Stroke,0.06,{
+ImageTransparency=0.95,
+}):Play()
+ad(ak,0.06,{
+ImageTransparency=0,
+}):Play()
+else
+ad(al.Layer,0.05,{
+ImageTransparency=1,
+}):Play()
+ad(al.Stroke,0.05,{
+ImageTransparency=1,
+}):Play()
+ad(ak,0.06,{
+ImageTransparency=1,
+}):Play()
+end
+task.spawn(function()
+if ah then
+ab.SafeCallback(ah,an)
+end
+end)
+end
+return al,ai
+end
+return aa end function a.D()
+local aa=a.load'a'local ab=
+aa.New local ac=
+aa.Tween
+local ad=a.load'B'.New
+local ae=a.load'C'.New
+local af={}
+function af.New(ag,ah)
+local ai={
+__type="Toggle",
+Title=ah.Title or"Toggle",
+Desc=ah.Desc or nil,
+Value=ah.Value,
+Icon=ah.Icon or nil,
+Type=ah.Type or"Toggle",
+Callback=ah.Callback or function()end,
+UIElements={}
+}
+ai.ToggleFrame=a.load'y'{
+Title=ai.Title,
+Desc=ai.Desc,
+Window=ah.Window,
+Parent=ah.Parent,
+TextOffset=44,
+Hover=false,
+}
+local aj=true
+if ai.Value==nil then
+ai.Value=false
+end
+function ai.Lock(ak)
+aj=false
+return ai.ToggleFrame:Lock()
+end
+function ai.Unlock(ak)
+aj=true
+return ai.ToggleFrame:Unlock()
+end
+if ai.Locked then
+ai:Lock()
+end
+local ak=ai.Value
+local al,am
+if ai.Type=="Toggle"then
+al,am=ad(ak,ai.Icon,ai.ToggleFrame.UIElements.Main,ai.Callback)
+elseif ai.Type=="Checkbox"then
+al,am=ae(ak,ai.Icon,ai.ToggleFrame.UIElements.Main,ai.Callback)
+else
+error("Unknown Toggle Type: "..tostring(ai.Type))
+end
+al.AnchorPoint=Vector2.new(1,0.5)
+al.Position=UDim2.new(1,0,0.5,0)
+function ai.Set(an,ao)
+if aj then
+am:Set(ao)
+ak=ao
+ai.Value=ao
+end
+end
+ai:Set(ak)
+aa.AddSignal(ai.ToggleFrame.UIElements.Main.MouseButton1Click,function()
+ai:Set(not ak)
+end)
+return ai.__type,ai
+end
+return af end function a.E()
+local aa=a.load'a'
+local ac=aa.New
+local ad=aa.Tween
+local ae={}
+local af=false
+function ae.New(ag,ah)
+local ai={
+__type="Slider",
+Title=ah.Title or"Slider",
+Desc=ah.Desc or nil,
+Locked=ah.Locked or nil,
+Value=ah.Value or{},
+Step=ah.Step or 1,
+Callback=ah.Callback or function()end,
+UIElements={},
+IsFocusing=false,
+Width=130,
+TextBoxWidth=30,
+}
+local aj
+local ak
+local al
+local am=ai.Value.Default or ai.Value.Min or 0
+local an=am
+local ao=(am-(ai.Value.Min or 0))/((ai.Value.Max or 100)-(ai.Value.Min or 0))
+local ap=true
+local aq=ai.Step%1~=0
+local function FormatValue(ar)
+if aq then
+return string.format("%.2f",ar)
+else
+return tostring(math.floor(ar+0.5))
+end
+end
+local function CalculateValue(ar)
+if aq then
+return math.floor(ar/ai.Step+0.5)*ai.Step
+else
+return math.floor(ar/ai.Step+0.5)*ai.Step
+end
+end
+ai.SliderFrame=a.load'y'{
+Title=ai.Title,
+Desc=ai.Desc,
+Parent=ah.Parent,
+TextOffset=ai.Width,
+Hover=false,
+}
+ai.UIElements.SliderIcon=aa.NewRoundFrame(99,"Squircle",{
+ImageTransparency=.95,
+Size=UDim2.new(1,-ai.TextBoxWidth-8,0,4),
+Name="Frame",
+ThemeTag={
+ImageColor3="Text",
+},
+},{
+aa.NewRoundFrame(99,"Squircle",{
+Name="Frame",
+Size=UDim2.new(ao,0,1,0),
+ImageTransparency=.1,
+ThemeTag={
+ImageColor3="Button",
+},
+},{
+aa.NewRoundFrame(99,"Squircle",{
+Size=UDim2.new(0,13,0,13),
+Position=UDim2.new(1,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+ThemeTag={
+ImageColor3="Text",
+},
+})
+})
+})
+ai.UIElements.SliderContainer=ac("Frame",{
+Size=UDim2.new(0,ai.Width,0,0),
+AutomaticSize="Y",
+Position=UDim2.new(1,0,.5,0),
+AnchorPoint=Vector2.new(1,0.5),
+BackgroundTransparency=1,
+Parent=ai.SliderFrame.UIElements.Main,
+},{
+ac("UIListLayout",{
+Padding=UDim.new(0,8),
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+}),
+ai.UIElements.SliderIcon,
+ac("TextBox",{
+Size=UDim2.new(0,ai.TextBoxWidth,0,0),
+TextXAlignment="Left",
+Text=FormatValue(am),
+ThemeTag={
+TextColor3="Text"
+},
+TextTransparency=.4,
+AutomaticSize="Y",
+TextSize=15,
+FontFace=Font.new(aa.Font,Enum.FontWeight.Medium),
+BackgroundTransparency=1,
+LayoutOrder=-1,
+})
+})
+function ai.Lock(ar)
+ap=false
+return ai.SliderFrame:Lock()
+end
+function ai.Unlock(ar)
+ap=true
+return ai.SliderFrame:Unlock()
+end
+if ai.Locked then
+ai:Lock()
+end
+local ar=ai.SliderFrame.Parent:IsA"ScrollingFrame"and ai.SliderFrame.Parent or ai.SliderFrame.Parent.Parent.Parent
+function ai.Set(as,at,au)
+if ap then
+if not ai.IsFocusing and not af and(not au or(au.UserInputType==Enum.UserInputType.MouseButton1 or au.UserInputType==Enum.UserInputType.Touch))then
+at=math.clamp(at,ai.Value.Min or 0,ai.Value.Max or 100)
+local av=math.clamp((at-(ai.Value.Min or 0))/((ai.Value.Max or 100)-(ai.Value.Min or 0)),0,1)
+at=CalculateValue(ai.Value.Min+av*(ai.Value.Max-ai.Value.Min))
+if at~=an then
+ad(ai.UIElements.SliderIcon.Frame,0.08,{Size=UDim2.new(av,0,1,0)}):Play()
+ai.UIElements.SliderContainer.TextBox.Text=FormatValue(at)
+ai.Value.Default=FormatValue(at)
+an=at
+aa.SafeCallback(ai.Callback,FormatValue(at))
+end
+if au then
+aj=(au.UserInputType==Enum.UserInputType.Touch)
+ar.ScrollingEnabled=false
+af=true
+ak=game:GetService"RunService".RenderStepped:Connect(function()
+local aw=aj and au.Position.X or game:GetService"UserInputService":GetMouseLocation().X
+local ax=math.clamp((aw-ai.UIElements.SliderIcon.AbsolutePosition.X)/ai.UIElements.SliderIcon.AbsoluteSize.X,0,1)
+at=CalculateValue(ai.Value.Min+ax*(ai.Value.Max-ai.Value.Min))
+if at~=an then
+ad(ai.UIElements.SliderIcon.Frame,0.08,{Size=UDim2.new(ax,0,1,0)}):Play()
+ai.UIElements.SliderContainer.TextBox.Text=FormatValue(at)
+ai.Value.Default=FormatValue(at)
+an=at
+aa.SafeCallback(ai.Callback,FormatValue(at))
+end
+end)
+al=game:GetService"UserInputService".InputEnded:Connect(function(aw)
+if(aw.UserInputType==Enum.UserInputType.MouseButton1 or aw.UserInputType==Enum.UserInputType.Touch)and au==aw then
+ak:Disconnect()
+al:Disconnect()
+af=false
+ar.ScrollingEnabled=true
+end
+end)
+end
+end
+end
+end
+aa.AddSignal(ai.UIElements.SliderContainer.TextBox.FocusLost,function(as)
+if as then
+local at=tonumber(ai.UIElements.SliderContainer.TextBox.Text)
+if at then
+ai:Set(at)
+else
+ai.UIElements.SliderContainer.TextBox.Text=FormatValue(an)
+end
+end
+end)
+aa.AddSignal(ai.UIElements.SliderContainer.InputBegan,function(as)
+ai:Set(am,as)
+end)
+return ai.__type,ai
+end
+return ae end function a.F()
+local aa=game:GetService"UserInputService"
+local ac=a.load'a'
+local ad=ac.New local ae=
+ac.Tween
+local af={
+UICorner=6,
+UIPadding=8,
+}
+local ag=a.load's'.New
+function af.New(ah,ai)
+local aj={
+__type="Keybind",
+Title=ai.Title or"Keybind",
+Desc=ai.Desc or nil,
+Locked=ai.Locked or false,
+Value=ai.Value or"F",
+Callback=ai.Callback or function()end,
+CanChange=ai.CanChange or true,
+Picking=false,
+UIElements={},
+}
+local ak=true
+aj.KeybindFrame=a.load'y'{
+Title=aj.Title,
+Desc=aj.Desc,
+Parent=ai.Parent,
+TextOffset=85,
+Hover=aj.CanChange,
+}
+aj.UIElements.Keybind=ag(aj.Value,nil,aj.KeybindFrame.UIElements.Main)
+aj.UIElements.Keybind.Size=UDim2.new(
+0,24
++aj.UIElements.Keybind.Frame.Frame.TextLabel.TextBounds.X,
+0,
+42
+)
+aj.UIElements.Keybind.AnchorPoint=Vector2.new(1,0.5)
+aj.UIElements.Keybind.Position=UDim2.new(1,0,0.5,0)
+ad("UIScale",{
+Parent=aj.UIElements.Keybind,
+Scale=.85,
+})
+ac.AddSignal(aj.UIElements.Keybind.Frame.Frame.TextLabel:GetPropertyChangedSignal"TextBounds",function()
+aj.UIElements.Keybind.Size=UDim2.new(
+0,24
++aj.UIElements.Keybind.Frame.Frame.TextLabel.TextBounds.X,
+0,
+42
+)
+end)
+function aj.Lock(al)
+ak=false
+return aj.KeybindFrame:Lock()
+end
+function aj.Unlock(al)
+ak=true
+return aj.KeybindFrame:Unlock()
+end
+function aj.Set(al,am)
+aj.Value=am
+aj.UIElements.Keybind.Frame.Frame.TextLabel.Text=am
+end
+if aj.Locked then
+aj:Lock()
+end
+ac.AddSignal(aj.KeybindFrame.UIElements.Main.MouseButton1Click,function()
+if ak then
+if aj.CanChange then
+aj.Picking=true
+aj.UIElements.Keybind.Frame.Frame.TextLabel.Text="..."
+task.wait(0.2)
+local al
+al=aa.InputBegan:Connect(function(am)
+local an
+if am.UserInputType==Enum.UserInputType.Keyboard then
+an=am.KeyCode.Name
+elseif am.UserInputType==Enum.UserInputType.MouseButton1 then
+an="MouseLeft"
+elseif am.UserInputType==Enum.UserInputType.MouseButton2 then
+an="MouseRight"
+end
+local ao
+ao=aa.InputEnded:Connect(function(ap)
+if ap.KeyCode.Name==an or an=="MouseLeft"and ap.UserInputType==Enum.UserInputType.MouseButton1 or an=="MouseRight"and ap.UserInputType==Enum.UserInputType.MouseButton2 then
+aj.Picking=false
+aj.UIElements.Keybind.Frame.Frame.TextLabel.Text=an
+aj.Value=an
+al:Disconnect()
+ao:Disconnect()
+end
+end)
+end)
+end
+end
+end)
+ac.AddSignal(aa.InputBegan,function(al)
+if ak then
+if al.KeyCode.Name==aj.Value then
+ac.SafeCallback(aj.Callback,al.KeyCode.Name)
+end
+end
+end)
+return aj.__type,aj
+end
+return af end function a.G()
+local aa=a.load'a'
+local ac=aa.New local ad=
+aa.Tween
+local ae={
+UICorner=8,
+UIPadding=8,
+}local af=a.load'j'
+.New
+local ag=a.load'k'.New
+function ae.New(ah,ai)
+local aj={
+__type="Input",
+Title=ai.Title or"Input",
+Desc=ai.Desc or nil,
+Type=ai.Type or"Input",
+Locked=ai.Locked or false,
+InputIcon=ai.InputIcon or false,
+Placeholder=ai.Placeholder or"Enter Text...",
+Value=ai.Value or"",
+Callback=ai.Callback or function()end,
+ClearTextOnFocus=ai.ClearTextOnFocus or false,
+UIElements={},
+Width=150,
+}
+local ak=true
+aj.InputFrame=a.load'y'{
+Title=aj.Title,
+Desc=aj.Desc,
+Parent=ai.Parent,
+TextOffset=aj.Width,
+Hover=false,
+}
+local al=ag(aj.Placeholder,aj.InputIcon,not aj.Type=="Input"and aj.InputFrame.UIElements.Container or aj.InputFrame.UIElements.Main,aj.Type,function(al)
+aj:Set(al)
+end)
+if aj.Type=="Input"then
+al.Size=UDim2.new(0,aj.Width,0,36)
+al.Position=UDim2.new(1,0,0.5,0)
+al.AnchorPoint=Vector2.new(1,0.5)
+else
+al.Size=UDim2.new(1,0,0,148)
+end
+ac("UIScale",{
+Parent=al,
+Scale=1,
+})
+function aj.Lock(am)
+ak=false
+return aj.InputFrame:Lock()
+end
+function aj.Unlock(am)
+ak=true
+return aj.InputFrame:Unlock()
+end
+function aj.Set(am,an)
+if ak then
+aa.SafeCallback(aj.Callback,an)
+al.Frame.Frame.TextBox.Text=an
+aj.Value=an
+end
+end
+function aj.SetPlaceholder(am,an)
+al.Frame.Frame.TextBox.PlaceholderText=an
+aj.Placeholder=an
+end
+aj:Set(aj.Value)
+if aj.Locked then
+aj:Lock()
+end
+return aj.__type,aj
+end
+return ae end function a.H()
+local aa=game:GetService"UserInputService"
+local ac=game:GetService"Players".LocalPlayer:GetMouse()
+local ae=game:GetService"Workspace".CurrentCamera
+local af=a.load'a'
+local ag=af.New
+local ah=af.Tween
+local ai={
+UICorner=8,
+UIPadding=8,
+MenuCorner=15,
+MenuPadding=5,
+TabPadding=10,
+}
+function ai.New(aj,ak)
+local al={
+__type="Dropdown",
+Title=ak.Title or"Dropdown",
+Desc=ak.Desc or nil,
+Locked=ak.Locked or false,
+Values=ak.Values or{},
+MenuWidth=ak.MenuWidth or 170,
+Value=ak.Value,
+AllowNone=ak.AllowNone,
+Multi=ak.Multi,
+Callback=ak.Callback or function()end,
+UIElements={},
+Opened=false,
+Tabs={},
+Width=150,
+}
+if al.Multi and not al.Value then
+al.Value={}
+end
+local an=true
+al.DropdownFrame=a.load'y'{
+Title=al.Title,
+Desc=al.Desc,
+Parent=ak.Parent,
+TextOffset=al.Width,
+Hover=false,
+}
+al.UIElements.Dropdown=a.load's'.New("",nil,al.DropdownFrame.UIElements.Main)
+al.UIElements.Dropdown.Frame.Frame.TextLabel.TextTruncate="AtEnd"
+al.UIElements.Dropdown.Frame.Frame.TextLabel.Size=UDim2.new(1,al.UIElements.Dropdown.Frame.Frame.TextLabel.Size.X.Offset-18-12-12,0,0)
+al.UIElements.Dropdown.Size=UDim2.new(0,al.Width,0,36)
+al.UIElements.Dropdown.Position=UDim2.new(1,0,0.5,0)
+al.UIElements.Dropdown.AnchorPoint=Vector2.new(1,0.5)
+ag("ImageLabel",{
+Image=af.Icon"chevrons-up-down"[1],
+ImageRectOffset=af.Icon"chevrons-up-down"[2].ImageRectPosition,
+ImageRectSize=af.Icon"chevrons-up-down"[2].ImageRectSize,
+Size=UDim2.new(0,18,0,18),
+Position=UDim2.new(1,-12,0.5,0),
+ThemeTag={
+ImageColor3="Icon"
+},
+AnchorPoint=Vector2.new(1,0.5),
+Parent=al.UIElements.Dropdown.Frame
+})
+al.UIElements.UIListLayout=ag("UIListLayout",{
+Padding=UDim.new(0,ai.MenuPadding),
+FillDirection="Vertical"
+})
+al.UIElements.Menu=af.NewRoundFrame(ai.MenuCorner,"Squircle",{
+ThemeTag={
+ImageColor3="Background",
+},
+ImageTransparency=1,
+Size=UDim2.new(1,0,1,0),
+AnchorPoint=Vector2.new(1,0),
+Position=UDim2.new(1,0,0,0),
+},{
+ag("UIPadding",{
+PaddingTop=UDim.new(0,ai.MenuPadding),
+PaddingLeft=UDim.new(0,ai.MenuPadding),
+PaddingRight=UDim.new(0,ai.MenuPadding),
+PaddingBottom=UDim.new(0,ai.MenuPadding),
+}),
+ag("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,1,0),
+ClipsDescendants=true
+},{
+ag("UICorner",{
+CornerRadius=UDim.new(0,ai.MenuCorner-ai.MenuPadding),
+}),
+ag("ScrollingFrame",{
+Size=UDim2.new(1,0,1,0),
+ScrollBarThickness=0,
+ScrollingDirection="Y",
+AutomaticCanvasSize="Y",
+CanvasSize=UDim2.new(0,0,0,0),
+BackgroundTransparency=1,
+ScrollBarImageTransparency=1,
+},{
+al.UIElements.UIListLayout,
+})
+})
+})
+al.UIElements.MenuCanvas=ag("Frame",{
+Size=UDim2.new(0,al.MenuWidth,0,300),
+BackgroundTransparency=1,
+Position=UDim2.new(-10,0,-10,0),
+Visible=false,
+Active=false,
+Parent=ak.WindUI.DropdownGui,
+AnchorPoint=Vector2.new(1,0),
+},{
+al.UIElements.Menu,
+ag("UISizeConstraint",{
+MinSize=Vector2.new(170,0)
+})
+})
+function al.Lock(ao)
+an=false
+return al.DropdownFrame:Lock()
+end
+function al.Unlock(ao)
+an=true
+return al.DropdownFrame:Unlock()
+end
+if al.Locked then
+al:Lock()
+end
+local function RecalculateCanvasSize()
+al.UIElements.Menu.Frame.ScrollingFrame.CanvasSize=UDim2.fromOffset(0,al.UIElements.UIListLayout.AbsoluteContentSize.Y)
+end
+local function RecalculateListSize()
+if#al.Values>10 then
+al.UIElements.MenuCanvas.Size=UDim2.fromOffset(al.UIElements.MenuCanvas.AbsoluteSize.X,392)
+else
+al.UIElements.MenuCanvas.Size=UDim2.fromOffset(al.UIElements.MenuCanvas.AbsoluteSize.X,al.UIElements.UIListLayout.AbsoluteContentSize.Y+(ai.MenuPadding*2))
+end
+end
+function UpdatePosition()
+local ao=al.UIElements.Dropdown
+local ap=al.UIElements.MenuCanvas
+local aq=ae.ViewportSize.Y-(ao.AbsolutePosition.Y+ao.AbsoluteSize.Y)-ai.MenuPadding-54
+local ar=ap.AbsoluteSize.Y+ai.MenuPadding
+local as=-54
+if aq<ar then
+as=ar-aq-54
+end
+ap.Position=UDim2.new(
+0,
+ao.AbsolutePosition.X+ao.AbsoluteSize.X,
+0,
+ao.AbsolutePosition.Y+ao.AbsoluteSize.Y-as+ai.MenuPadding
+)
+end
+function al.Display(ao)
+local ap=al.Values
+local aq=""
+if al.Multi then
+for ar,as in next,ap do
+if table.find(al.Value,as)then
+aq=aq..as..", "
+end
+end
+aq=aq:sub(1,#aq-2)
+else
+aq=al.Value or""
+end
+al.UIElements.Dropdown.Frame.Frame.TextLabel.Text=(aq==""and"--"or aq)
+end
+function al.Refresh(ao,ap)
+for aq,ar in next,al.UIElements.Menu.Frame.ScrollingFrame:GetChildren()do
+if not ar:IsA"UIListLayout"then
+ar:Destroy()
+end
+end
+al.Tabs={}
+for as,at in next,ap do
+local au={
+Name=at,
+Selected=false,
+UIElements={},
+}
+au.UIElements.TabItem=af.NewRoundFrame(ai.MenuCorner-ai.MenuPadding,"Squircle",{
+Size=UDim2.new(1,0,0,36),
+ImageTransparency=1,
+Parent=al.UIElements.Menu.Frame.ScrollingFrame,
+ImageColor3=Color3.new(1,1,1),
+},{
+af.NewRoundFrame(ai.MenuCorner-ai.MenuPadding,"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=1,
+Name="Highlight",
+},{
+ag("UIGradient",{
+Rotation=80,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+}),
+}),
+ag("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ag("UIPadding",{
+PaddingLeft=UDim.new(0,ai.TabPadding),
+PaddingRight=UDim.new(0,ai.TabPadding),
+}),
+ag("UICorner",{
+CornerRadius=UDim.new(0,ai.MenuCorner-ai.MenuPadding)
+}),
+ag("TextLabel",{
+Text=at,
+TextXAlignment="Left",
+FontFace=Font.new(af.Font,Enum.FontWeight.Regular),
+ThemeTag={
+TextColor3="Text",
+BackgroundColor3="Text"
+},
+TextSize=15,
+BackgroundTransparency=1,
+TextTransparency=.4,
+AutomaticSize="Y",
+Size=UDim2.new(1,0,0,0),
+AnchorPoint=Vector2.new(0,0.5),
+Position=UDim2.new(0,0,0.5,0),
+})
+})
+},true)
+if al.Multi then
+au.Selected=table.find(al.Value or{},au.Name)
+else
+au.Selected=al.Value==au.Name
+end
+if au.Selected then
+au.UIElements.TabItem.ImageTransparency=.95
+au.UIElements.TabItem.Highlight.ImageTransparency=.75
+au.UIElements.TabItem.Frame.TextLabel.TextTransparency=0.05
+end
+al.Tabs[as]=au
+al:Display()
+local function Callback()
+al:Display()
+task.spawn(function()
+af.SafeCallback(al.Callback,al.Value)
+end)
+end
+af.AddSignal(au.UIElements.TabItem.MouseButton1Click,function()
+if al.Multi then
+if not au.Selected then
+au.Selected=true
+ah(au.UIElements.TabItem,0.1,{ImageTransparency=.95}):Play()
+ah(au.UIElements.TabItem.Highlight,0.1,{ImageTransparency=.75}):Play()
+ah(au.UIElements.TabItem.Frame.TextLabel,0.1,{TextTransparency=0}):Play()
+table.insert(al.Value,au.Name)
+else
+if not al.AllowNone and#al.Value==1 then
+return
+end
+au.Selected=false
+ah(au.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
+ah(au.UIElements.TabItem.Highlight,0.1,{ImageTransparency=1}):Play()
+ah(au.UIElements.TabItem.Frame.TextLabel,0.1,{TextTransparency=.4}):Play()
+for av,aw in ipairs(al.Value)do
+if aw==au.Name then
+table.remove(al.Value,av)
+break
+end
+end
+end
+else
+for av,aw in next,al.Tabs do
+ah(aw.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
+ah(aw.UIElements.TabItem.Highlight,0.1,{ImageTransparency=1}):Play()
+ah(aw.UIElements.TabItem.Frame.TextLabel,0.1,{TextTransparency=.5}):Play()
+aw.Selected=false
+end
+au.Selected=true
+ah(au.UIElements.TabItem,0.1,{ImageTransparency=.95}):Play()
+ah(au.UIElements.TabItem.Highlight,0.1,{ImageTransparency=.75}):Play()
+ah(au.UIElements.TabItem.Frame.TextLabel,0.1,{TextTransparency=0.05}):Play()
+al.Value=au.Name
+end
+Callback()
+end)
+RecalculateCanvasSize()
+RecalculateListSize()
+end
+local au=0
+for av,aw in next,al.Tabs do
+if aw.UIElements.TabItem.Frame.TextLabel then
+local ax=aw.UIElements.TabItem.Frame.TextLabel.TextBounds.X
+au=math.max(au,ax)
+end
+end
+al.UIElements.MenuCanvas.Size=UDim2.new(0,au+6+6+5+5+18+6+6,al.UIElements.MenuCanvas.Size.Y.Scale,al.UIElements.MenuCanvas.Size.Y.Offset)
+end
+al:Refresh(al.Values)
+RecalculateListSize()
+function al.Select(ao,ap)
+if ap then
+al.Value=ap
+else
+if al.Multi then
+al.Value={}
+else
+al.Value=nil
+end
+end
+al:Refresh(al.Values)
+end
+function al.Open(ao)
+if an then
+al.UIElements.Menu.Visible=true
+al.UIElements.MenuCanvas.Visible=true
+al.UIElements.MenuCanvas.Active=true
+al.UIElements.Menu.Size=UDim2.new(
+1,0,
+0,0
+)
+ah(al.UIElements.Menu,0.1,{
+Size=UDim2.new(
+1,0,
+1,0
+),
+ImageTransparency=0.05
+},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
+task.spawn(function()
+task.wait(.1)
+al.Opened=true
+end)
+UpdatePosition()
+end
+end
+function al.Close(ao)
+al.Opened=false
+ah(al.UIElements.Menu,0.25,{
+Size=UDim2.new(
+1,0,
+0,0
+),
+ImageTransparency=1,
+},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
+task.spawn(function()
+task.wait(.1)
+al.UIElements.Menu.Visible=false
+end)
+task.spawn(function()
+task.wait(.25)
+al.UIElements.MenuCanvas.Visible=false
+al.UIElements.MenuCanvas.Active=false
+end)
+end
+af.AddSignal(al.UIElements.Dropdown.MouseButton1Click,function()
+al:Open()
+end)
+af.AddSignal(aa.InputBegan,function(ao)
+if
+ao.UserInputType==Enum.UserInputType.MouseButton1
+or ao.UserInputType==Enum.UserInputType.Touch
+then
+local ap,ar=al.UIElements.MenuCanvas.AbsolutePosition,al.UIElements.MenuCanvas.AbsoluteSize
+if
+ak.Window.CanDropdown
+and al.Opened
+and(ac.X<ap.X
+or ac.X>ap.X+ar.X
+or ac.Y<(ap.Y-20-1)
+or ac.Y>ap.Y+ar.Y
+)
+then
+al:Close()
+end
+end
+end)
+af.AddSignal(al.UIElements.Dropdown:GetPropertyChangedSignal"AbsolutePosition",UpdatePosition)
+return al.__type,al
+end
+return ai end function a.M()
+local aa=a.load'a'
+local ac=aa.New
+local ad=aa.Tween
+local ae={}
+function ae.New(af,ag)
+local ah={
+__type="Section",
+Title=ag.Title or"Section",
+Icon=ag.Icon,
+TextXAlignment=ag.TextXAlignment or"Left",
+TextSize=ag.TextSize or 19,
+UIElements={},
+HeaderSize=42,
+IconSize=24,
+Elements={},
+Expandable=false,
+}
+local ai
+function ah.SetIcon(ak,al)
+ah.Icon=al or nil
+if ai then ai:Destroy()end
+if al then
+ai=aa.Image(
+al,
+al..":"..ah.Title,
+0,
+ag.Window.Folder,
+ah.__type,
+true
+)
+ai.Size=UDim2.new(0,ah.IconSize,0,ah.IconSize)
+end
+end
+local ak=ac("Frame",{
+Size=UDim2.new(0,ai.IconSize,0,ai.IconSize),
+BackgroundTransparency=1,
+Visible=false
+},{
+ac("ImageLabel",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+Image=aa.Icon"chevron-down"[1],
+ImageRectSize=aa.Icon"chevron-down"[2].ImageRectSize,
+ImageRectOffset=aa.Icon"chevron-down"[2].ImageRectPosition,
+ThemeTag={
+ImageColor3="Icon",
+},
+ImageTransparency=.7,
+})
+})
+if ah.Icon then
+ah:SetIcon(ah.Icon)
+end
+local al=ac("TextLabel",{
+BackgroundTransparency=1,
+TextXAlignment="Left",
+AutomaticSize="Y",
+TextSize=ah.TextSize,
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(aa.Font,Enum.FontWeight.SemiBold),
+Text=ah.Title,
+Size=UDim2.new(
+1,
+ai and(-ah.IconSize-8)*2
+or(-ah.IconSize-8),
+1,
+0
+),
+TextWrapped=true,
+})
+local am=ac("Frame",{
+Size=UDim2.new(1,0,0,ah.HeaderSize),
+BackgroundTransparency=1,
+Parent=ag.Parent,
+ClipsDescendants=true,
+},{
+ac("TextButton",{
+Size=UDim2.new(1,0,0,ah.HeaderSize),
+BackgroundTransparency=1,
+Text="",
+},{
+ai,
+al,
+ac("UIListLayout",{
+Padding=UDim.new(0,8),
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+HorizontalAlignment=not ai and ah.TextXAlignment or"Left",
+}),
+ac("UIPadding",{
+PaddingTop=UDim.new(0,4),
+PaddingBottom=UDim.new(0,2),
+}),
+ak,
+}),
+ac("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,0,0),
+AutomaticSize="Y",
+Name="Content",
+Visible=true,
+Position=UDim2.new(0,0,0,ah.HeaderSize)
+},{
+ac("UIListLayout",{
+FillDirection="Vertical",
+Padding=UDim.new(0,6),
+VerticalAlignment="Bottom",
+}),
+})
+})
+local an=ag.ElementsModule
+an.Load(ah,am.Content,an.Elements,ag.Window,ag.WindUI,function()
+if not ah.Expandable then
+ah.Expandable=true
+ak.Visible=true
+end
+end)
+function ah.SetTitle(ao,ap)
+al.Text=ap
+end
+function ah.Destroy(ao)
+for ap,ar in next,ah.Elements do
+ar:Destroy()
+end
+am:Destroy()
+end
+function ah.Open(ao)
+if ah.Expandable then
+ah.Opened=true
+ad(am,0.33,{
+Size=UDim2.new(1,0,0,ah.HeaderSize+(am.Content.AbsoluteSize.Y/ag.UIScale))
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ad(ak.ImageLabel,0.1,{Rotation=180},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+end
+function ah.Close(ao)
+if ah.Expandable then
+ah.Opened=false
+ad(am,0.26,{
+Size=UDim2.new(1,0,0,ah.HeaderSize)
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ad(ak.ImageLabel,0.1,{Rotation=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+end
+aa.AddSignal(am.TextButton.MouseButton1Click,function()
+if ah.Expandable then
+if ah.Opened then
+ah:Close()
+else
+ah:Open()
+end
+end
+end)
+if ah.Opened then
+task.spawn(function()
+task.wait()
+ah:Open()
+end)
+end
+return ah.__type,ah
+end
+return ae end function a.N()
+local aa=a.load'a'
+local ac=aa.New
+local ae={}
+function ae.New(af,ag)
+local ah=ac("Frame",{
+Size=UDim2.new(1,0,0,1),
+Position=UDim2.new(0.5,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+BackgroundTransparency=.9,
+ThemeTag={
+BackgroundColor3="Text"
+}
+})
+ac("Frame",{
+Parent=ag.Parent,
+Size=UDim2.new(1,-7,0,5),
+BackgroundTransparency=1,
+},{
+ah
+})
+return"Divider",{}
+end
+return ae end function a.O()
+return{
+Elements={
+Paragraph=a.load'z',
+Button=a.load'A',
+Toggle=a.load'D',
+Slider=a.load'E',
+Keybind=a.load'F',
+Input=a.load'G',
+Dropdown=a.load'H',
+Section=a.load'M',
+Divider=a.load'N',
+},
+Load=function(aa,ac,ae,af,ag,ah,ai,aj)
+for ak,al in pairs(ae)do
+aa[ak]=function(am,an)
+an=an or{}
+an.Parent=ac
+an.Window=af
+an.WindUI=ag
+an.UIScale=aj
+an.ElementsModule=ai local
+ao, ap=al:New(an)
+table.insert(aa.Elements,ap)
+local ar
+for as,at in pairs(ap)do
+if typeof(at)=="table"and as:match"Frame$"then
+ar=at
+break
+end
+end
+if ar then
+function ap.SetTitle(au,av)
+ar:SetTitle(av)
+end
+function ap.SetDesc(au,av)
+ar:SetDesc(av)
+end
+function ap.Destroy(au)
+ar:Destroy()
+end
+end
+if ah then
+ah()
+end
+return ap
+end
+end
+end
+}end function a.P()
+game:GetService"UserInputService"
+local aa=game.Players.LocalPlayer:GetMouse()
+local ac=a.load'a'
+local ae=ac.New
+local af=ac.Tween
+local ag=a.load'x'.New
+local ah=a.load't'.New
+local ai={
+Tabs={},
+Containers={},
+SelectedTab=nil,
+TabCount=0,
+ToolTipParent=nil,
+TabHighlight=nil,
+OnChangeFunc=function(ai)end
+}
+function ai.Init(aj,ak,al,am)
+Window=aj
+WindUI=ak
+ai.ToolTipParent=al
+ai.TabHighlight=am
+return ai
+end
+function ai.New(aj,ak)
+local al={
+__type="Tab",
+Title=aj.Title or"Tab",
+Desc=aj.Desc,
+Icon=aj.Icon,
+IconThemed=aj.IconThemed,
+Locked=aj.Locked,
+ShowTabTitle=aj.ShowTabTitle,
+Selected=false,
+Index=nil,
+Parent=aj.Parent,
+UIElements={},
+Elements={},
+ContainerFrame=nil,
+UICorner=Window.UICorner-(Window.UIPadding/2),
+}
+ai.TabCount=ai.TabCount+1
+local am=ai.TabCount
+al.Index=am
+al.UIElements.Main=ac.NewRoundFrame(al.UICorner,"Squircle",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,-7,0,0),
+AutomaticSize="Y",
+Parent=aj.Parent,
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+},{
+ac.NewRoundFrame(al.UICorner,"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+Name="Outline"
+},{
+ae("UIGradient",{
+Rotation=80,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+}),
+}),
+ac.NewRoundFrame(al.UICorner,"Squircle",{
+Size=UDim2.new(1,0,0,0),
+AutomaticSize="Y",
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+Name="Frame",
+},{
+ae("UIListLayout",{
+SortOrder="LayoutOrder",
+Padding=UDim.new(0,10),
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+}),
+ae("TextLabel",{
+Text=al.Title,
+ThemeTag={
+TextColor3="Text"
+},
+TextTransparency=not al.Locked and 0.4 or.7,
+TextSize=15,
+Size=UDim2.new(1,0,0,0),
+FontFace=Font.new(ac.Font,Enum.FontWeight.Medium),
+TextWrapped=true,
+RichText=true,
+AutomaticSize="Y",
+LayoutOrder=2,
+TextXAlignment="Left",
+BackgroundTransparency=1,
+}),
+ae("UIPadding",{
+PaddingTop=UDim.new(0,2+(Window.UIPadding/2)),
+PaddingLeft=UDim.new(0,4+(Window.UIPadding/2)),
+PaddingRight=UDim.new(0,4+(Window.UIPadding/2)),
+PaddingBottom=UDim.new(0,2+(Window.UIPadding/2)),
+})
+}),
+},true)
+local an=0
+local ao
+local ap
+if al.Icon then
+ao=ac.Image(
+al.Icon,
+al.Icon..":"..al.Title,
+0,
+Window.Folder,
+al.__type,
+true,
+al.IconThemed
+)
+ao.Size=UDim2.new(0,16,0,16)
+ao.Parent=al.UIElements.Main.Frame
+ao.ImageLabel.ImageTransparency=not al.Locked and 0 or.7
+al.UIElements.Main.Frame.TextLabel.Size=UDim2.new(1,-30,0,0)
+an=-30
+al.UIElements.Icon=ao
+ap=ac.Image(
+al.Icon,
+al.Icon..":"..al.Title,
+0,
+Window.Folder,
+al.__type,
+true,
+al.IconThemed
+)
+ap.Size=UDim2.new(0,16,0,16)
+ap.ImageLabel.ImageTransparency=not al.Locked and 0 or.7
+an=-30
+end
+al.UIElements.ContainerFrame=ae("ScrollingFrame",{
+Size=UDim2.new(1,0,1,al.ShowTabTitle and-((Window.UIPadding*2.4)+12)or 0),
+BackgroundTransparency=1,
+ScrollBarThickness=0,
+ElasticBehavior="Never",
+CanvasSize=UDim2.new(0,0,0,0),
+AnchorPoint=Vector2.new(0,1),
+Position=UDim2.new(0,0,1,0),
+AutomaticCanvasSize="Y",
+ScrollingDirection="Y",
+},{
+ae("UIPadding",{
+PaddingTop=UDim.new(0,20),
+PaddingLeft=UDim.new(0,20),
+PaddingRight=UDim.new(0,20),
+PaddingBottom=UDim.new(0,20),
+}),
+ae("UIListLayout",{
+SortOrder="LayoutOrder",
+Padding=UDim.new(0,6),
+HorizontalAlignment="Center",
+})
+})
+al.UIElements.ContainerFrameCanvas=ae("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+Visible=false,
+Parent=Window.UIElements.MainBar,
+ZIndex=5,
+},{
+al.UIElements.ContainerFrame,
+ae("Frame",{
+Size=UDim2.new(1,0,0,((Window.UIPadding*2.4)+12)),
+BackgroundTransparency=1,
+Visible=al.ShowTabTitle or false,
+Name="TabTitle"
+},{
+ap,
+ae("TextLabel",{
+Text=al.Title,
+ThemeTag={
+TextColor3="Text"
+},
+TextSize=20,
+TextTransparency=.1,
+Size=UDim2.new(1,-an,1,0),
+FontFace=Font.new(ac.Font,Enum.FontWeight.SemiBold),
+TextTruncate="AtEnd",
+RichText=true,
+LayoutOrder=2,
+TextXAlignment="Left",
+BackgroundTransparency=1,
+}),
+ae("UIPadding",{
+PaddingTop=UDim.new(0,20),
+PaddingLeft=UDim.new(0,20),
+PaddingRight=UDim.new(0,20),
+PaddingBottom=UDim.new(0,20),
+}),
+ae("UIListLayout",{
+SortOrder="LayoutOrder",
+Padding=UDim.new(0,10),
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+})
+}),
+ae("Frame",{
+Size=UDim2.new(1,0,0,1),
+BackgroundTransparency=.9,
+ThemeTag={
+BackgroundColor3="Text"
+},
+Position=UDim2.new(0,0,0,((Window.UIPadding*2.4)+12)),
+Visible=al.ShowTabTitle or false,
+})
+})
+ai.Containers[am]=al.UIElements.ContainerFrameCanvas
+ai.Tabs[am]=al
+al.ContainerFrame=ContainerFrameCanvas
+ac.AddSignal(al.UIElements.Main.MouseButton1Click,function()
+if not al.Locked then
+ai:SelectTab(am)
+end
+end)
+ah(al.UIElements.ContainerFrame,al.UIElements.ContainerFrameCanvas,Window,3)
+local ar
+local as
+local at
+local au=false
+if al.Desc then
+ac.AddSignal(al.UIElements.Main.InputBegan,function()
+au=true
+as=task.spawn(function()
+task.wait(0.35)
+if au and not ar then
+ar=ag(al.Desc,ai.ToolTipParent)
+local function updatePosition()
+if ar then
+ar.Container.Position=UDim2.new(0,aa.X,0,aa.Y-20)
+end
+end
+updatePosition()
+at=aa.Move:Connect(updatePosition)
+ar:Open()
+end
+end)
+end)
+end
+ac.AddSignal(al.UIElements.Main.MouseEnter,function()
+if not al.Locked then
+af(al.UIElements.Main.Frame,0.08,{ImageTransparency=.97}):Play()
+end
+end)
+ac.AddSignal(al.UIElements.Main.InputEnded,function()
+if al.Desc then
+au=false
+if as then
+task.cancel(as)
+as=nil
+end
+if at then
+at:Disconnect()
+at=nil
+end
+if ar then
+ar:Close()
+ar=nil
+end
+end
+if not al.Locked then
+af(al.UIElements.Main.Frame,0.08,{ImageTransparency=1}):Play()
+end
+end)
+local av=a.load'O'
+av.Load(al,al.UIElements.ContainerFrame,av.Elements,Window,WindUI,nil,av,ak)
+task.spawn(function()
+local aw=ae("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,1,-Window.UIElements.Main.Main.Topbar.AbsoluteSize.Y),
+Parent=al.UIElements.ContainerFrame
+},{
+ae("UIListLayout",{
+Padding=UDim.new(0,8),
+SortOrder="LayoutOrder",
+VerticalAlignment="Center",
+HorizontalAlignment="Center",
+FillDirection="Vertical",
+}),
+ae("ImageLabel",{
+Size=UDim2.new(0,48,0,48),
+Image=ac.Icon"frown"[1],
+ImageRectOffset=ac.Icon"frown"[2].ImageRectPosition,
+ImageRectSize=ac.Icon"frown"[2].ImageRectSize,
+ThemeTag={
+ImageColor3="Icon"
+},
+BackgroundTransparency=1,
+ImageTransparency=.6,
+}),
+ae("TextLabel",{
+AutomaticSize="XY",
+Text="This tab is empty",
+ThemeTag={
+TextColor3="Text"
+},
+TextSize=18,
+TextTransparency=.5,
+BackgroundTransparency=1,
+FontFace=Font.new(ac.Font,Enum.FontWeight.Medium),
+})
+})
+ac.AddSignal(al.UIElements.ContainerFrame.ChildAdded,function()
+aw.Visible=false
+end)
+end)
+return al
+end
+function ai.OnChange(aj,ak)
+ai.OnChangeFunc=ak
+end
+function ai.SelectTab(aj,ak)
+if not ai.Tabs[ak].Locked then
+ai.SelectedTab=ak
+for al,am in next,ai.Tabs do
+if not am.Locked then
+af(am.UIElements.Main,0.15,{ImageTransparency=1}):Play()
+af(am.UIElements.Main.Outline,0.15,{ImageTransparency=1}):Play()
+af(am.UIElements.Main.Frame.TextLabel,0.15,{TextTransparency=0.3}):Play()
+if am.UIElements.Icon then
+af(am.UIElements.Icon.ImageLabel,0.15,{ImageTransparency=0.4}):Play()
+end
+am.Selected=false
+end
+end
+af(ai.Tabs[ak].UIElements.Main,0.15,{ImageTransparency=0.95}):Play()
+af(ai.Tabs[ak].UIElements.Main.Outline,0.15,{ImageTransparency=0.85}):Play()
+af(ai.Tabs[ak].UIElements.Main.Frame.TextLabel,0.15,{TextTransparency=0}):Play()
+if ai.Tabs[ak].UIElements.Icon then
+af(ai.Tabs[ak].UIElements.Icon.ImageLabel,0.15,{ImageTransparency=0.1}):Play()
+end
+ai.Tabs[ak].Selected=true
+task.spawn(function()
+for an,ao in next,ai.Containers do
+ao.AnchorPoint=Vector2.new(0,0.05)
+ao.Visible=false
+end
+ai.Containers[ak].Visible=true
+af(ai.Containers[ak],0.15,{AnchorPoint=Vector2.new(0,0)},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
+end)
+ai.OnChangeFunc(ak)
+end
+end
+return ai end function a.Q()
+local aa={}
+local ac=a.load'a'
+local ae=ac.New
+local af=ac.Tween
+local ag=a.load'P'
+function aa.New(ah,ai,aj,ak)
+local al={
+Title=ah.Title or"Section",
+Icon=ah.Icon,
+IconThemed=ah.IconThemed,
+Opened=ah.Opened or false,
+HeaderSize=42,
+IconSize=18,
+Expandable=false,
+}
+local am
+if al.Icon then
+am=ac.Image(
+al.Icon,
+al.Icon,
+0,
+aj,
+"Section",
+true,
+al.IconThemed
+)
+am.Size=UDim2.new(0,al.IconSize,0,al.IconSize)
+am.ImageLabel.ImageTransparency=.25
+end
+local an=ae("Frame",{
+Size=UDim2.new(0,al.IconSize,0,al.IconSize),
+BackgroundTransparency=1,
+Visible=false
+},{
+ae("ImageLabel",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+Image=ac.Icon"chevron-down"[1],
+ImageRectSize=ac.Icon"chevron-down"[2].ImageRectSize,
+ImageRectOffset=ac.Icon"chevron-down"[2].ImageRectPosition,
+ThemeTag={
+ImageColor3="Icon",
+},
+ImageTransparency=.7,
+})
+})
+local ao=ae("Frame",{
+Size=UDim2.new(1,0,0,al.HeaderSize),
+BackgroundTransparency=1,
+Parent=ai,
+ClipsDescendants=true,
+},{
+ae("TextButton",{
+Size=UDim2.new(1,0,0,al.HeaderSize),
+BackgroundTransparency=1,
+Text="",
+},{
+am,
+ae("TextLabel",{
+Text=al.Title,
+TextXAlignment="Left",
+Size=UDim2.new(
+1,
+am and(-al.IconSize-10)*2
+or(-al.IconSize-10),
+1,
+0
+),
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(ac.Font,Enum.FontWeight.SemiBold),
+TextSize=14,
+BackgroundTransparency=1,
+TextTransparency=.7,
+TextWrapped=true
+}),
+ae("UIListLayout",{
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+Padding=UDim.new(0,10)
+}),
+an,
+ae("UIPadding",{
+PaddingLeft=UDim.new(0,11),
+PaddingRight=UDim.new(0,11),
+})
+}),
+ae("Frame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,0,0),
+AutomaticSize="Y",
+Name="Content",
+Visible=true,
+Position=UDim2.new(0,0,0,al.HeaderSize)
+},{
+ae("UIListLayout",{
+FillDirection="Vertical",
+Padding=UDim.new(0,0),
+VerticalAlignment="Bottom",
+}),
+})
+})
+function al.Tab(ap,ar)
+if not al.Expandable then
+al.Expandable=true
+an.Visible=true
+end
+ar.Parent=ao.Content
+return ag.New(ar,ak)
+end
+function al.Open(ap)
+if al.Expandable then
+al.Opened=true
+af(ao,0.33,{
+Size=UDim2.new(1,0,0,al.HeaderSize+(ao.Content.AbsoluteSize.Y/ak))
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+af(an.ImageLabel,0.1,{Rotation=180},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+end
+function al.Close(ap)
+if al.Expandable then
+al.Opened=false
+af(ao,0.26,{
+Size=UDim2.new(1,0,0,al.HeaderSize)
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+af(an.ImageLabel,0.1,{Rotation=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+end
+ac.AddSignal(ao.TextButton.MouseButton1Click,function()
+if al.Expandable then
+if al.Opened then
+al:Close()
+else
+al:Open()
+end
+end
+end)
+if al.Opened then
+task.spawn(function()
+task.wait()
+al:Open()
+end)
+end
+return al
+end
+return aa end function a.R()
+return{
+Tab="table-of-contents",
+Paragraph="type",
+Button="square-mouse-pointer",
+Toggle="toggle-right",
+Slider="sliders-horizontal",
+Keybind="command",
+Input="text-cursor-input",
+Dropdown="chevrons-up-down",
+}end function a.s()
+local aa={}
+local ab=a.load'a'
+local ac=ab.New local ad=
+ab.Tween
+function aa.New(ae,af,ag)
+local ah=10
+local ai
+if af and af~=""then
+ai=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ThemeTag={
+ImageColor3="Icon",
+}
+})
+end
+local aj=ac("TextLabel",{
+BackgroundTransparency=1,
+TextSize=17,
+FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
+Size=UDim2.new(1,ai and-29 or 0,1,0),
+TextXAlignment="Left",
+ThemeTag={
+TextColor3="Text",
+},
+Text=ae,
+})
+local ak=ac("TextButton",{
+Size=UDim2.new(1,0,0,42),
+Parent=ag,
+BackgroundTransparency=1,
+Text="",
+},{
+ac("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+},{
+ab.NewRoundFrame(ah,"Squircle",{
+ThemeTag={
+ImageColor3="Accent",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.85,
+}),
+ab.NewRoundFrame(ah,"SquircleOutline",{
+ThemeTag={
+ImageColor3="Outline",
+},
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=.9,
+},{
+ac("UIGradient",{
+Rotation=70,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+})
+}),
+ab.NewRoundFrame(ah,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Name="Frame",
+ImageColor3=Color3.new(1,1,1),
+ImageTransparency=.95
+},{
+ac("UIPadding",{
+PaddingLeft=UDim.new(0,12),
+PaddingRight=UDim.new(0,12),
+}),
+ac("UIListLayout",{
+FillDirection="Horizontal",
+Padding=UDim.new(0,8),
+VerticalAlignment="Center",
+HorizontalAlignment="Left",
+}),
+ai,
+aj,
+})
+})
+})
+return ak
+end
+return aa end function a.t()
+local aa={}
+local ab=game:GetService"UserInputService"
+local ac=a.load'a'
+local ad=ac.New local ae=
+ac.Tween
+function aa.New(af,ag,ah,ai)
+local aj=ad("Frame",{
+Size=UDim2.new(0,ai,1,0),
+BackgroundTransparency=1,
+Position=UDim2.new(1,0,0,0),
+AnchorPoint=Vector2.new(1,0),
+Parent=ag,
+ZIndex=999,
+Active=true,
+})
+local ak=ac.NewRoundFrame(ai/2,"Squircle",{
+Size=UDim2.new(1,0,0,0),
+ImageTransparency=0.85,
+ThemeTag={ImageColor3="Text"},
+Parent=aj,
+})
+local al=ad("Frame",{
+Size=UDim2.new(1,12,1,12),
+Position=UDim2.new(0.5,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+BackgroundTransparency=1,
+Active=true,
+ZIndex=999,
+Parent=ak,
+})
+local am=false
+local an=0
+local function updateSliderSize()
+local ao=af
+local ap=ao.AbsoluteCanvasSize.Y
+local aq=ao.AbsoluteWindowSize.Y
+if ap<=aq then
+ak.Visible=false
+return
+end
+local ar=math.clamp(aq/ap,0.1,1)
+ak.Size=UDim2.new(1,0,ar,0)
+ak.Visible=true
+end
+local function updateScrollingFramePosition()
+local ao=ak.Position.Y.Scale
+local ap=af.AbsoluteCanvasSize.Y
+local aq=af.AbsoluteWindowSize.Y
+local ar=math.max(ap-aq,0)
+if ar<=0 then return end
+local as=math.max(1-ak.Size.Y.Scale,0)
+if as<=0 then return end
+local at=ao/as
+af.CanvasPosition=Vector2.new(
+af.CanvasPosition.X,
+at*ar
+)
+end
+local function updateThumbPosition()
+if am then return end
+local ao=af.CanvasPosition.Y
+local ap=af.AbsoluteCanvasSize.Y
+local aq=af.AbsoluteWindowSize.Y
+local ar=math.max(ap-aq,0)
+if ar<=0 then
+ak.Position=UDim2.new(0,0,0,0)
+return
+end
+local as=ao/ar
+local at=math.max(1-ak.Size.Y.Scale,0)
+local au=math.clamp(as*at,0,at)
+ak.Position=UDim2.new(0,0,au,0)
+end
+ac.AddSignal(aj.InputBegan,function(ao)
+if(ao.UserInputType==Enum.UserInputType.MouseButton1 or ao.UserInputType==Enum.UserInputType.Touch)then
+local ap=ak.AbsolutePosition.Y
+local aq=ap+ak.AbsoluteSize.Y
+if not(ao.Position.Y>=ap and ao.Position.Y<=aq)then
+local ar=aj.AbsolutePosition.Y
+local as=aj.AbsoluteSize.Y
+local at=ak.AbsoluteSize.Y
+local au=ao.Position.Y-ar-at/2
+local av=as-at
+local aw=math.clamp(au/av,0,1-ak.Size.Y.Scale)
+ak.Position=UDim2.new(0,0,aw,0)
+updateScrollingFramePosition()
+end
+end
+end)
+ac.AddSignal(al.InputBegan,function(ao)
+if ao.UserInputType==Enum.UserInputType.MouseButton1 or ao.UserInputType==Enum.UserInputType.Touch then
+am=true
+an=ao.Position.Y-ak.AbsolutePosition.Y
+local ap
+local aq
+ap=ab.InputChanged:Connect(function(ar)
+if ar.UserInputType==Enum.UserInputType.MouseMovement or ar.UserInputType==Enum.UserInputType.Touch then
+local as=aj.AbsolutePosition.Y
+local at=aj.AbsoluteSize.Y
+local au=ak.AbsoluteSize.Y
+local av=ar.Position.Y-as-an
+local aw=at-au
+local ax=math.clamp(av/aw,0,1-ak.Size.Y.Scale)
+ak.Position=UDim2.new(0,0,ax,0)
+updateScrollingFramePosition()
+end
+end)
+aq=ab.InputEnded:Connect(function(ar)
+if ar.UserInputType==Enum.UserInputType.MouseButton1 or ar.UserInputType==Enum.UserInputType.Touch then
+am=false
+if ap then ap:Disconnect()end
+if aq then aq:Disconnect()end
+end
+end)
+end
+end)
+ac.AddSignal(af:GetPropertyChangedSignal"AbsoluteWindowSize",function()
+updateSliderSize()
+updateThumbPosition()
+end)
+ac.AddSignal(af:GetPropertyChangedSignal"AbsoluteCanvasSize",function()
+updateSliderSize()
+updateThumbPosition()
+end)
+ac.AddSignal(af:GetPropertyChangedSignal"CanvasPosition",function()
+if not am then
+updateThumbPosition()
+end
+end)
+updateSliderSize()
+updateThumbPosition()
+return aj
+end
+return aa end function a.T()
+local aa=game:GetService"UserInputService"
+game:GetService"RunService"
+local ac=workspace.CurrentCamera
+local ae=a.load'q'
+local af=a.load'a'
+local ag=af.New
+local ah=af.Tween
+local ai={
+UICorner=8,
+UIPadding=8,
+}
+local aj=a.load'j'.New
+local ak=a.load'k'.New
+local al=a.load't'.New
+local am=a.load'u'
+local an=a.load'v'
+return function(ao)
+local ap={
+Title=ao.Title or"UI Library",
+Author=ao.Author,
+Icon=ao.Icon,
+IconThemed=ao.IconThemed,
+Folder=ao.Folder,
+Resizable=ao.Resizable,
+Background=ao.Background,
+BackgroundImageTransparency=ao.BackgroundImageTransparency or 0,
+User=ao.User or{},
+Size=ao.Size and UDim2.new(
+0,math.clamp(ao.Size.X.Offset,560,700),
+0,math.clamp(ao.Size.Y.Offset,350,520))or UDim2.new(0,580,0,460),
+ToggleKey=ao.ToggleKey or Enum.KeyCode.G,
+Transparent=ao.Transparent or false,
+HideSearchBar=ao.HideSearchBar,
+ScrollBarEnabled=ao.ScrollBarEnabled or false,
+SideBarWidth=ao.SideBarWidth or 200,
+Acrylic=ao.Acrylic or false,
+Position=UDim2.new(0.5,0,0.5,0),
+IconSize=22,
+UICorner=16,
+UIPadding=14,
+UIElements={},
+CanDropdown=true,
+Closed=false,
+Parent=ao.Parent,
+Destroyed=false,
+IsFullscreen=false,
+CanResize=false,
+IsOpenButtonEnabled=true,
+ConfigManager=nil,
+AcrylicPaint=nil,
+CurrentTab=nil,
+TabModule=nil,
+OnCloseCallback=nil,
+OnDestroyCallback=nil,
+TopBarButtons={},
+}
+if ap.HideSearchBar~=false then
+ap.HideSearchBar=true
+end
+if ap.Resizable~=false then
+ap.CanResize=true
+ap.Resizable=true
+end
+if ap.Folder then
+makefolder("WindUI/"..ap.Folder)
+end local
+ar, as=ae.AcrylicPaint{UseAcrylic=ap.Acrylic}
+ap.AcrylicPaint=ar
+local at=ag("UICorner",{
+CornerRadius=UDim.new(0,ap.UICorner)
+})
+if ap.Folder then
+ap.ConfigManager=an:Init(ap)
+end
+local au=ag("Frame",{
+Size=UDim2.new(0,32,0,32),
+Position=UDim2.new(1,0,1,0),
+AnchorPoint=Vector2.new(.5,.5),
+BackgroundTransparency=1,
+ZIndex=99,
+Active=true
+},{
+ag("ImageLabel",{
+Size=UDim2.new(0,96,0,96),
+BackgroundTransparency=1,
+Image="rbxassetid://120997033468887",
+Position=UDim2.new(0.5,-16,0.5,-16),
+AnchorPoint=Vector2.new(0.5,0.5),
+ImageTransparency=1,
+})
+})
+local av=af.NewRoundFrame(ap.UICorner,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=1,
+ImageColor3=Color3.new(0,0,0),
+ZIndex=98,
+Active=false,
+},{
+ag("ImageLabel",{
+Size=UDim2.new(0,70,0,70),
+Image=af.Icon"expand"[1],
+ImageRectOffset=af.Icon"expand"[2].ImageRectPosition,
+ImageRectSize=af.Icon"expand"[2].ImageRectSize,
+BackgroundTransparency=1,
+Position=UDim2.new(0.5,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+ImageTransparency=1,
+}),
+})
+local aw=af.NewRoundFrame(ap.UICorner,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+ImageTransparency=1,
+ImageColor3=Color3.new(0,0,0),
+ZIndex=999,
+Active=false,
+})
+ap.UIElements.SideBar=ag("ScrollingFrame",{
+Size=UDim2.new(
+1,
+ap.ScrollBarEnabled and-3-(ap.UIPadding/2)or 0,
+1,
+not ap.HideSearchBar and-45 or 0
+),
+Position=UDim2.new(0,0,1,0),
+AnchorPoint=Vector2.new(0,1),
+BackgroundTransparency=1,
+ScrollBarThickness=0,
+ElasticBehavior="Never",
+CanvasSize=UDim2.new(0,0,0,0),
+AutomaticCanvasSize="Y",
+ScrollingDirection="Y",
+ClipsDescendants=true,
+VerticalScrollBarPosition="Left",
+},{
+ag("Frame",{
+BackgroundTransparency=1,
+AutomaticSize="Y",
+Size=UDim2.new(1,0,0,0),
+Name="Frame",
+},{
+ag("UIPadding",{
+PaddingTop=UDim.new(0,ap.UIPadding/2),
+PaddingBottom=UDim.new(0,ap.UIPadding/2),
+}),
+ag("UIListLayout",{
+SortOrder="LayoutOrder",
+Padding=UDim.new(0,0)
+})
+}),
+ag("UIPadding",{
+PaddingLeft=UDim.new(0,ap.UIPadding/2),
+PaddingRight=UDim.new(0,ap.UIPadding/2),
+}),
+})
+ap.UIElements.SideBarContainer=ag("Frame",{
+Size=UDim2.new(0,ap.SideBarWidth,1,ap.User.Enabled and-94-(ap.UIPadding*2)or-52),
+Position=UDim2.new(0,0,0,52),
+BackgroundTransparency=1,
+Visible=true,
+},{
+ag("Frame",{
+Name="Content",
+BackgroundTransparency=1,
+Size=UDim2.new(
+1,
+0,
+1,
+not ap.HideSearchBar and-45-ap.UIPadding/2 or 0
+),
+Position=UDim2.new(0,0,1,0),
+AnchorPoint=Vector2.new(0,1),
+}),
+ap.UIElements.SideBar,
+})
+if ap.ScrollBarEnabled then
+al(ap.UIElements.SideBar,ap.UIElements.SideBarContainer.Content,ap,3)
+end
+ap.UIElements.MainBar=ag("Frame",{
+Size=UDim2.new(1,-ap.UIElements.SideBarContainer.AbsoluteSize.X,1,-52),
+Position=UDim2.new(1,0,1,0),
+AnchorPoint=Vector2.new(1,1),
+BackgroundTransparency=1,
+},{
+af.NewRoundFrame(ap.UICorner-(ap.UIPadding/2),"Squircle",{
+Size=UDim2.new(1,0,1,0),
+ImageColor3=Color3.new(1,1,1),
+ZIndex=3,
+ImageTransparency=.95,
+Name="Background",
+}),
+ag("UIPadding",{
+PaddingTop=UDim.new(0,ap.UIPadding/2),
+PaddingLeft=UDim.new(0,ap.UIPadding/2),
+PaddingRight=UDim.new(0,ap.UIPadding/2),
+PaddingBottom=UDim.new(0,ap.UIPadding/2),
+})
+})
+local ax=ag("ImageLabel",{
+Image="rbxassetid://8992230677",
+ImageColor3=Color3.new(0,0,0),
+ImageTransparency=1,
+Size=UDim2.new(1,120,1,116),
+Position=UDim2.new(0,-60,0,-58),
+ScaleType="Slice",
+SliceCenter=Rect.new(99,99,99,99),
+BackgroundTransparency=1,
+ZIndex=-999999999999999,
+Name="Blur",
+})
+local ay
+if aa.TouchEnabled and not aa.KeyboardEnabled then
+ay=false
+elseif aa.KeyboardEnabled then
+ay=true
+else
+ay=nil
+end
+local az
+local aA
+if ap.User.Enabled then local
+aB, aC=game.Players:GetUserThumbnailAsync(
+ap.User.Anonymous and 1 or game.Players.LocalPlayer.UserId,
+Enum.ThumbnailType.HeadShot,
+Enum.ThumbnailSize.Size420x420
+)
+aA=ag("TextButton",{
+Size=UDim2.new(0,
+(ap.UIElements.SideBarContainer.AbsoluteSize.X)-(ap.UIPadding/2),
+0,
+42+(ap.UIPadding)
+),
+Position=UDim2.new(0,ap.UIPadding/2,1,-(ap.UIPadding/2)),
+AnchorPoint=Vector2.new(0,1),
+BackgroundTransparency=1,
+},{
+af.NewRoundFrame(ap.UICorner-(ap.UIPadding/2),"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+Name="Outline"
+},{
+ag("UIGradient",{
+Rotation=78,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+}),
+}),
+af.NewRoundFrame(ap.UICorner-(ap.UIPadding/2),"Squircle",{
+Size=UDim2.new(1,0,1,0),
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+Name="UserIcon",
+},{
+ag("ImageLabel",{
+Image=aB,
+BackgroundTransparency=1,
+Size=UDim2.new(0,42,0,42),
+ThemeTag={
+BackgroundColor3="Text",
+},
+BackgroundTransparency=.93,
+},{
+ag("UICorner",{
+CornerRadius=UDim.new(1,0)
+})
+}),
+ag("Frame",{
+AutomaticSize="XY",
+BackgroundTransparency=1,
+},{
+ag("TextLabel",{
+Text=ap.User.Anonymous and"Anonymous"or game.Players.LocalPlayer.DisplayName,
+TextSize=17,
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(af.Font,Enum.FontWeight.SemiBold),
+AutomaticSize="Y",
+BackgroundTransparency=1,
+Size=UDim2.new(1,-27,0,0),
+TextTruncate="AtEnd",
+TextXAlignment="Left",
+}),
+ag("TextLabel",{
+Text=ap.User.Anonymous and"@anonymous"or"@"..game.Players.LocalPlayer.Name,
+TextSize=15,
+TextTransparency=.6,
+ThemeTag={
+TextColor3="Text",
+},
+FontFace=Font.new(af.Font,Enum.FontWeight.Medium),
+AutomaticSize="Y",
+BackgroundTransparency=1,
+Size=UDim2.new(1,-27,0,0),
+TextTruncate="AtEnd",
+TextXAlignment="Left",
+}),
+ag("UIListLayout",{
+Padding=UDim.new(0,4),
+HorizontalAlignment="Left",
+})
+}),
+ag("UIListLayout",{
+Padding=UDim.new(0,ap.UIPadding),
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+}),
+ag("UIPadding",{
+PaddingLeft=UDim.new(0,ap.UIPadding/2),
+PaddingRight=UDim.new(0,ap.UIPadding/2),
+})
+})
+})
+if ap.User.Callback then
+af.AddSignal(aA.MouseButton1Click,function()
+ap.User.Callback()
+end)
+af.AddSignal(aA.MouseEnter,function()
+ah(aA.UserIcon,0.04,{ImageTransparency=.95}):Play()
+ah(aA.Outline,0.04,{ImageTransparency=.85}):Play()
+end)
+af.AddSignal(aA.InputEnded,function()
+ah(aA.UserIcon,0.04,{ImageTransparency=1}):Play()
+ah(aA.Outline,0.04,{ImageTransparency=1}):Play()
+end)
+end
+end
+local aB
+local aC=false
+local aD=typeof(ap.Background)=="string"and string.match(ap.Background,"^video:(.+)")or nil
+if typeof(ap.Background)=="string"and aD then
+aC=true
+if string.find(aD,"http")then
+local function SanitizeFilename(aE)
+aE=aE:gsub("[%s/\\:*?\"<>|]+","-")
+aE=aE:gsub("[^%w%-_%.]","")
+return aE
+end
+local aE=ap.Folder.."/Assets/."..SanitizeFilename(aD)..".webm"
+if not isfile(aE)then
+local b,e=pcall(function()
+local b=game:HttpGet(aD)
+writefile(aE,b)
+end)
+if not b then
+warn("[ WindUI.Background ]  Failed to download video: "..tostring(e))
+return
+end
+end
+aD=getcustomasset(aE)
+end
+aB=ag("VideoFrame",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,1,0),
+Video=aD,
+Looped=true,
+Volume=0,
+},{
+ag("UICorner",{
+CornerRadius=UDim.new(0,ap.UICorner)
+}),
+})
+aB:Play()
+elseif ap.Background then
+aB=ag("ImageLabel",{
+BackgroundTransparency=1,
+Size=UDim2.new(1,0,1,0),
+Image=typeof(ap.Background)=="string"and ap.Background or"",
+ImageTransparency=1,
+ScaleType="Crop",
+},{
+ag("UICorner",{
+CornerRadius=UDim.new(0,ap.UICorner)
+}),
+})
+end
+local aE=af.NewRoundFrame(99,"Squircle",{
+ImageTransparency=.8,
+ImageColor3=Color3.new(1,1,1),
+Size=UDim2.new(0,0,0,4),
+Position=UDim2.new(0.5,0,1,4),
+AnchorPoint=Vector2.new(0.5,0),
+},{
+ag("Frame",{
+Size=UDim2.new(1,12,1,12),
+BackgroundTransparency=1,
+Position=UDim2.new(0.5,0,0.5,0),
+AnchorPoint=Vector2.new(0.5,0.5),
+Active=true,
+ZIndex=99,
+})
+})
+function createAuthor(b)
+return ag("TextLabel",{
+Text=b,
+FontFace=Font.new(af.Font,Enum.FontWeight.Medium),
+BackgroundTransparency=1,
+TextTransparency=0.35,
+AutomaticSize="XY",
+Parent=ap.UIElements.Main and ap.UIElements.Main.Main.Topbar.Left.Title,
+TextXAlignment="Left",
+TextSize=13,
+LayoutOrder=2,
+ThemeTag={
+TextColor3="Text"
+},
+Name="Author",
+})
+end
+local b
+local e
+if ap.Author then
+b=createAuthor(ap.Author)
+end
+local g=ag("TextLabel",{
+Text=ap.Title,
+FontFace=Font.new(af.Font,Enum.FontWeight.SemiBold),
+BackgroundTransparency=1,
+AutomaticSize="XY",
+Name="Title",
+TextXAlignment="Left",
+TextSize=16,
+ThemeTag={
+TextColor3="Text"
+}
+})
+ap.UIElements.Main=ag("Frame",{
+Size=ap.Size,
+Position=ap.Position,
+BackgroundTransparency=1,
+Parent=ao.Parent,
+AnchorPoint=Vector2.new(0.5,0.5),
+Active=true,
+},{
+ap.AcrylicPaint.Frame,
+ax,
+af.NewRoundFrame(ap.UICorner,"Squircle",{
+ImageTransparency=1,
+Size=UDim2.new(1,0,1,-240),
+AnchorPoint=Vector2.new(0.5,0.5),
+Position=UDim2.new(0.5,0,0.5,0),
+Name="Background",
+ThemeTag={
+ImageColor3="Background"
+},
+},{
+aB,
+aE,
+at,
+}),
+UIStroke,
+au,
+av,
+aw,
+ag("Frame",{
+Size=UDim2.new(1,0,1,0),
+BackgroundTransparency=1,
+Name="Main",
+Visible=false,
+ZIndex=97,
+},{
+ag("UICorner",{
+CornerRadius=UDim.new(0,ap.UICorner)
+}),
+ap.UIElements.SideBarContainer,
+ap.UIElements.MainBar,
+aA,
+ag("Frame",{
+Size=UDim2.new(1,0,0,52),
+BackgroundTransparency=1,
+Name="Topbar"
+},{
+ag("Frame",{
+AutomaticSize="X",
+Size=UDim2.new(0,0,1,0),
+BackgroundTransparency=1,
+Name="Left"
+},{
+ag("UIListLayout",{
+Padding=UDim.new(0,ap.UIPadding+4),
+SortOrder="LayoutOrder",
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+}),
+ag("Frame",{
+AutomaticSize="XY",
+BackgroundTransparency=1,
+Name="Title",
+Size=UDim2.new(0,0,1,0),
+LayoutOrder=2,
+},{
+ag("UIListLayout",{
+Padding=UDim.new(0,0),
+SortOrder="LayoutOrder",
+FillDirection="Vertical",
+VerticalAlignment="Center",
+}),
+g,
+b,
+}),
+ag("UIPadding",{
+PaddingLeft=UDim.new(0,4)
+})
+}),
+ag("ScrollingFrame",{
+Name="Center",
+BackgroundTransparency=1,
+AutomaticSize="Y",
+ScrollBarThickness=0,
+ScrollingDirection="X",
+AutomaticCanvasSize="X",
+CanvasSize=UDim2.new(0,0,0,0),
+Size=UDim2.new(0,0,1,0),
+AnchorPoint=Vector2.new(0,0.5),
+Position=UDim2.new(0,0,0.5,0),
+Visible=false,
+},{
+ag("UIListLayout",{
+FillDirection="Horizontal",
+VerticalAlignment="Center",
+HorizontalAlignment="Left",
+Padding=UDim.new(0,ap.UIPadding/2)
+})
+}),
+ag("Frame",{
+AutomaticSize="XY",
+BackgroundTransparency=1,
+Position=UDim2.new(1,0,0.5,0),
+AnchorPoint=Vector2.new(1,0.5),
+Name="Right",
+},{
+ag("UIListLayout",{
+Padding=UDim.new(0,9),
+FillDirection="Horizontal",
+SortOrder="LayoutOrder",
+}),
+}),
+ag("UIPadding",{
+PaddingTop=UDim.new(0,ap.UIPadding),
+PaddingLeft=UDim.new(0,ap.UIPadding),
+PaddingRight=UDim.new(0,8),
+PaddingBottom=UDim.new(0,ap.UIPadding),
+})
+})
+})
+})
+af.AddSignal(ap.UIElements.Main.Main.Topbar.Left:GetPropertyChangedSignal"AbsoluteSize",function()
+local h=0
+local i=ap.UIElements.Main.Main.Topbar.Right.UIListLayout.AbsoluteContentSize.X
+if g and b then
+h=math.max(g.TextBounds.X,b.TextBounds.X)
+else
+h=g.TextBounds.X
+end
+if e then
+h=h+ap.IconSize+ap.UIPadding+4
+end
+ap.UIElements.Main.Main.Topbar.Center.Position=UDim2.new(0,h+ap.UIPadding,0.5,0)
+ap.UIElements.Main.Main.Topbar.Center.Size=UDim2.new(
+1,
+-h-i-(ap.UIPadding*2),
+1,
+0
+)
+end)
+function ap.CreateTopbarButton(h,i,j,l,m,p)
+local r=af.Image(
+j,
+j,
+0,
+ap.Folder,
+"TopbarIcon",
+true,
+p
+)
+r.Size=UDim2.new(0,16,0,16)
+r.AnchorPoint=Vector2.new(0.5,0.5)
+r.Position=UDim2.new(0.5,0,0.5,0)
+local x=af.NewRoundFrame(9,"Squircle",{
+Size=UDim2.new(0,36,0,36),
+LayoutOrder=m or 999,
+Parent=ap.UIElements.Main.Main.Topbar.Right,
+ZIndex=9999,
+ThemeTag={
+ImageColor3="Text"
+},
+ImageTransparency=1
+},{
+af.NewRoundFrame(9,"SquircleOutline",{
+Size=UDim2.new(1,0,1,0),
+ThemeTag={
+ImageColor3="Text",
+},
+ImageTransparency=1,
+Name="Outline"
+},{
+ag("UIGradient",{
+Rotation=45,
+Color=ColorSequence.new{
+ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
+ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
+},
+Transparency=NumberSequence.new{
+NumberSequenceKeypoint.new(0.0,0.1),
+NumberSequenceKeypoint.new(0.5,1),
+NumberSequenceKeypoint.new(1.0,0.1),
+}
+}),
+}),
+r
+},true)
+ap.TopBarButtons[100-m]={
+Name=i,
+Object=x
+}
+af.AddSignal(x.MouseButton1Click,function()
+l()
+end)
+af.AddSignal(x.MouseEnter,function()
+ah(x,.15,{ImageTransparency=.93}):Play()
+ah(x.Outline,.15,{ImageTransparency=.75}):Play()
+end)
+af.AddSignal(x.MouseLeave,function()
+ah(x,.1,{ImageTransparency=1}):Play()
+ah(x.Outline,.1,{ImageTransparency=1}):Play()
+end)
+return x
+end
+local h=af.Drag(
+ap.UIElements.Main,
+{ap.UIElements.Main.Main.Topbar,aE.Frame},
+function(h,i)
+if not ap.Closed then
+if h and i==aE.Frame then
+ah(aE,.1,{ImageTransparency=.35}):Play()
+else
+ah(aE,.2,{ImageTransparency=.8}):Play()
+end
+end
+end
+)
+if not aC and ap.Background and typeof(ap.Background)=="table"then
+local i=ag"UIGradient"
+for j,l in next,ap.Background do
+i[j]=l
+end
+ap.UIElements.BackgroundGradient=af.NewRoundFrame(ap.UICorner,"Squircle",{
+Size=UDim2.new(1,0,1,0),
+Parent=ap.UIElements.Main.Background,
+ImageTransparency=ap.Transparent and an.WindUI.TransparencyValue or 0
+},{
+i
+})
+end
+local i=a.load'w'.New(ap)
+task.spawn(function()
+if ap.Icon then
+e=af.Image(
+ap.Icon,
+ap.Title,
+0,
+ap.Folder,
+"Window",
+true,
+ap.IconThemed
+)
+e.Parent=ap.UIElements.Main.Main.Topbar.Left
+e.Size=UDim2.new(0,ap.IconSize,0,ap.IconSize)
+i:SetIcon(ap.Icon)
+else
+i:SetIcon(ap.Icon)
+end
+end)
+function ap.SetToggleKey(j,l)
+ap.ToggleKey=l
+end
+function ap.SetTitle(j,l)
+ap.Title=l
+g.Text=l
+end
+function ap.SetAuthor(j,l)
+ap.Author=l
+if not b then
+b=createAuthor(ap.Author)
+end
+b.Text=l
+end
+function ap.SetBackgroundImage(j,l)
+ap.UIElements.Main.Background.ImageLabel.Image=l
+end
+function ap.SetBackgroundImageTransparency(j,l)
+ap.UIElements.Main.Background.ImageLabel.ImageTransparency=l
+ap.BackgroundImageTransparency=l
+end
+local j
+local l
+af.Icon"minimize"
+af.Icon"maximize"
+ap:CreateTopbarButton("Fullscreen","maximize",function()
+ap:ToggleFullscreen()
+end,998)
+function ap.ToggleFullscreen(m)
+local p=ap.IsFullscreen
+h:Set(p)
+if not p then
+j=ap.UIElements.Main.Position
+l=ap.UIElements.Main.Size
+ap.CanResize=false
+else
+if ap.Resizable then
+ap.CanResize=true
+end
+end
+ah(ap.UIElements.Main,0.45,{Size=p and l or UDim2.new(1,-20,1,-72)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ah(ap.UIElements.Main,0.45,{Position=p and j or UDim2.new(0.5,0,0.5,26)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+ap.IsFullscreen=not p
+end
+ap:CreateTopbarButton("Minimize","minus",function()
+ap:Close()
+task.spawn(function()
+task.wait(.3)
+if not ay and ap.IsOpenButtonEnabled then
+i:Visible(true)
+end
+end)
+end,997)
+function ap.OnClose(m,p)
+ap.OnCloseCallback=p
+end
+function ap.OnDestroy(m,p)
+ap.OnDestroyCallback=p
+end
+function ap.Open(m)
+task.spawn(function()
+task.wait(.06)
+ap.Closed=false
+ah(ap.UIElements.Main.Background,0.2,{
+ImageTransparency=ap.Transparent and an.WindUI.TransparencyValue or 0,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if ap.UIElements.BackgroundGradient then
+ah(ap.UIElements.BackgroundGradient,0.2,{
+ImageTransparency=0,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+ah(ap.UIElements.Main.Background,0.4,{
+Size=UDim2.new(1,0,1,0),
+},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
+if aB then
+if aB:IsA"VideoFrame"then
+aB.Visible=true
+end
+ah(aB,0.2,{
+ImageTransparency=aB:IsA"ImageLabel"and 0 or nil,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+ah(ax,0.25,{ImageTransparency=.7},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if UIStroke then
+ah(UIStroke,0.25,{Transparency=.8},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+task.spawn(function()
+task.wait(.5)
+ah(aE,.45,{Size=UDim2.new(0,200,0,4),ImageTransparency=.8},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
+h:Set(true)
+task.wait(.45)
+if ap.Resizable then
+ah(av.ImageLabel,.45,{ImageTransparency=.8},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
+ap.CanResize=true
+end
+end)
+ap.CanDropdown=true
+ap.UIElements.Main.Visible=true
+task.spawn(function()
+task.wait(.05)
+ap.UIElements.Main:WaitForChild"Main".Visible=true
+an.WindUI:ToggleAcrylic(true)
+end)
+end)
+end
+function ap.Close(m)
+local p={}
+if ap.OnCloseCallback then
+task.spawn(function()
+af.SafeCallback(ap.OnCloseCallback)
+end)
+end
+an.WindUI:ToggleAcrylic(false)
+ap.UIElements.Main:WaitForChild"Main".Visible=false
+ap.CanDropdown=false
+ap.Closed=true
+ah(ap.UIElements.Main.Background,0.32,{
+ImageTransparency=1,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
+if ap.UIElements.BackgroundGradient then
+ah(ap.UIElements.BackgroundGradient,0.32,{
+ImageTransparency=1,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
+end
+ah(ap.UIElements.Main.Background,0.4,{
+Size=UDim2.new(1,0,1,-240),
+},Enum.EasingStyle.Exponential,Enum.EasingDirection.InOut):Play()
+if aB then
+if aB:IsA"VideoFrame"then
+aB.Visible=false
+end
+ah(aB,0.2,{
+ImageTransparency=aB:IsA"ImageLabel"and 1 or nil,
+},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+ah(ax,0.25,{ImageTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+if UIStroke then
+ah(UIStroke,0.25,{Transparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+ah(aE,.3,{Size=UDim2.new(0,0,0,4),ImageTransparency=1},Enum.EasingStyle.Exponential,Enum.EasingDirection.InOut):Play()
+ah(av.ImageLabel,.3,{ImageTransparency=1},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
+h:Set(false)
+ap.CanResize=false
+task.spawn(function()
+task.wait(0.4)
+ap.UIElements.Main.Visible=false
+end)
+function p.Destroy(r)
+if ap.OnDestroyCallback then
+task.spawn(function()
+af.SafeCallback(ap.OnDestroyCallback)
+end)
+end
+if ap.AcrylicPaint.Model then
+ap.AcrylicPaint.Model:Destroy()
+end
+ap.Destroyed=true
+task.wait(0.4)
+ao.Parent.Parent:Destroy()
+end
+return p
+end
+function ap.Destroy(m)
+ap:Close():Destroy()
+end
+function ap.ToggleTransparency(m,p)
+ap.Transparent=p
+an.WindUI.Transparent=p
+ap.UIElements.Main.Background.ImageTransparency=p and an.WindUI.TransparencyValue or 0
+ap.UIElements.MainBar.Background.ImageTransparency=p and 0.97 or 0.95
+end
+function ap.SetUIScale(m,p)
+an.WindUI.UIScale=p
+ah(an.WindUI.ScreenGui.UIScale,.2,{Scale=p},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
+end
+do
+if(ac.ViewportSize.X-40<ap.UIElements.Main.AbsoluteSize.X)
+or(ac.ViewportSize.Y-40<ap.UIElements.Main.AbsoluteSize.Y)then
+if not ap.IsFullscreen then
+ap:SetUIScale(.9)
+end
+end
+end
+if not ay and ap.IsOpenButtonEnabled then
+af.AddSignal(i.Button.TextButton.MouseButton1Click,function()
+i:Visible(false)
+ap:Open()
+end)
+end
+af.AddSignal(aa.InputBegan,function(m,p)
+if p then return end
+if m.KeyCode==ap.ToggleKey then
+if ap.Closed then
+ap:Open()
+else
+ap:Close()
+end
+end
+end)
+task.spawn(function()
+ap:Open()
+end)
+function ap.EditOpenButton(m,p)
+return i:Edit(p)
+end
+local m=a.load'P'
+local p=a.load'Q'
+local r=m.Init(ap,an.WindUI,an.Parent.Parent.ToolTips)
+r:OnChange(function(x)ap.CurrentTab=x end)
+ap.TabModule=m
+function ap.Tab(x,z)
+z.Parent=ap.UIElements.SideBar.Frame
+return r.New(z,an.WindUI.UIScale)
+end
+function ap.SelectTab(x,z)
+r:SelectTab(z)
+end
+function ap.Section(x,z)
+return p.New(z,ap.UIElements.SideBar.Frame,ap.Folder,an.WindUI.UIScale)
+end
+function ap.IsResizable(x,z)
+ap.Resizable=z
+ap.CanResize=z
+end
+function ap.Divider(x)
+local z=ag("Frame",{
+Size=UDim2.new(1,0,0,1),
+Position=UDim2.new(0.5,0,0,0),
+AnchorPoint=Vector2.new(0.5,0),
+BackgroundTransparency=.9,
+ThemeTag={
+BackgroundColor3="Text"
+}
+})
+local A=ag("Frame",{
+Parent=ap.UIElements.SideBar.Frame,
+Size=UDim2.new(1,-7,0,5),
+BackgroundTransparency=1,
+},{
+z
+})
+return A
+end
+return ap
+end end end
+local aa={
+Window=nil,
+Theme=nil,
+Creator=a.load'a',
+LocalizationModule=a.load'b',
+NotificationModule=a.load'c',
+Themes=a.load'd',
+Transparent=false,
+TransparencyValue=.15,
+UIScale=1,
+Version="1.6.45",
+Services=a.load'h',
+OnThemeChangeFunction=nil,
+}
+local ac=game:GetService"HttpService"
+local ae=ac:JSONDecode(a.load'i')
+if ae then
+aa.Version=ae.version
+end
+local af=a.load'm'local ag=
+aa.Services
+local ah=aa.Themes
+local ai=aa.Creator
+local aj=ai.New local ak=
+ai.Tween
+ai.Themes=ah
+local al=a.load'q'local am=
+game:GetService"Players"and game:GetService"Players".LocalPlayer or nil
+local an=protectgui or(syn and syn.protect_gui)or function()end
+local ao=gethui and gethui()or game.CoreGui
+aa.ScreenGui=aj("ScreenGui",{
+Name="WindUI",
+Parent=ao,
+IgnoreGuiInset=true,
+ScreenInsets="None",
+},{
+aj("UIScale",{
+Scale=aa.Scale,
+}),
+aj("Folder",{
+Name="Window"
+}),
+aj("Folder",{
+Name="KeySystem"
+}),
+aj("Folder",{
+Name="Popups"
+}),
+aj("Folder",{
+Name="ToolTips"
+})
+})
+aa.NotificationGui=aj("ScreenGui",{
+Name="WindUI/Notifications",
+Parent=ao,
+IgnoreGuiInset=true,
+})
+aa.DropdownGui=aj("ScreenGui",{
+Name="WindUI/Dropdowns",
+Parent=ao,
+IgnoreGuiInset=true,
+})
+an(aa.ScreenGui)
+an(aa.NotificationGui)
+an(aa.DropdownGui)
+ai.Init(aa)
+math.clamp(aa.TransparencyValue,0,1)
+local ap=aa.NotificationModule.Init(aa.NotificationGui)
+function aa.Notify(ar,as)
+as.Holder=ap.Frame
+as.Window=aa.Window
+return aa.NotificationModule.New(as)
+end
+function aa.SetNotificationLower(ar,as)
+ap.SetLower(as)
+end
+function aa.SetFont(ar,as)
+ai.UpdateFont(as)
+end
+function aa.OnThemeChange(ar,as)
+aa.OnThemeChangeFunction=as
+end
+function aa.AddTheme(ar,as)
+ah[as.Name]=as
+return as
+end
+function aa.SetTheme(ar,as)
+if ah[as]then
+aa.Theme=ah[as]
+ai.SetTheme(ah[as])
+if aa.OnThemeChangeFunction then
+aa.OnThemeChangeFunction(as)
+end
+return ah[as]
+end
+return nil
+end
+function aa.GetThemes(ar)
+return ah
+end
+function aa.GetCurrentTheme(ar)
+return aa.Theme.Name
+end
+function aa.GetTransparency(ar)
+return aa.Transparent or false
+end
+function aa.GetWindowSize(ar)
+return Window.UIElements.Main.Size
+end
+function aa.Localization(ar,as)
+return aa.LocalizationModule:New(as,ai)
+end
+function aa.SetLanguage(ar,as)
+if ai.Localization then
+return ai.SetLanguage(as)
+end
+return false
+end
+function aa.ToggleAcrylic(ar,as)
+if aa.Window and aa.Window.AcrylicPaint and aa.Window.AcrylicPaint.Model then
+aa.Window.Acrylic=as
+aa.Window.AcrylicPaint.Model.Transparency=as and 0.98 or 1
+if as then
+al.Enable()
+else
+al.Disable()
+end
+end
+end
+aa:SetTheme"Dark"
+aa:SetLanguage(ai.Language)
+function aa.Gradient(ar,as,at)
+local au={}
+local av={}
+for aw,ax in next,as do
+local ay=tonumber(aw)
+if ay then
+ay=math.clamp(ay/100,0,1)
+table.insert(au,ColorSequenceKeypoint.new(ay,ax.Color))
+table.insert(av,NumberSequenceKeypoint.new(ay,ax.Transparency or 0))
+end
+end
+table.sort(au,function(ay,az)return ay.Time<az.Time end)
+table.sort(av,function(ay,az)return ay.Time<az.Time end)
+if#au<2 then
+error"ColorSequence requires at least 2 keypoints"
+end
+local ay={
+Color=ColorSequence.new(au),
+Transparency=NumberSequence.new(av),
+}
+if at then
+for az,aA in pairs(at)do
+ay[az]=aA
+end
+end
+return ay
+end
+function aa.Popup(ar,as)
+as.WindUI=aa
+return a.load'r'.new(as)
+end
+function aa.CreateWindow(ar,as)
+local at=a.load'T'
+if not isfolder"WindUI"then
+makefolder"WindUI"
+end
+if as.Folder then
+makefolder(as.Folder)
+else
+makefolder(as.Title)
+end
+as.WindUI=aa
+as.Parent=aa.ScreenGui.Window
+if aa.Window then
+warn"You cannot create more than one window"
+return
+end
+local au=true
+local av=ah[as.Theme or"Dark"]
+ai.SetTheme(av)
+local aw=gethwid or function()
+return game:GetService"Players".LocalPlayer.UserId
+end
+local ax=aw()
+if as.KeySystem then
+au=false
+local function loadKeysystem()
+af.new(as,ax,function(ay)au=ay end)
+end
+local ay=as.Folder.."/"..ax..".key"
+if not as.KeySystem.API then
+if as.KeySystem.SaveKey and isfile(ay)then
+local az=readfile(ay)
+local aA=(type(as.KeySystem.Key)=="table")
+and table.find(as.KeySystem.Key,az)
+or tostring(as.KeySystem.Key)==tostring(az)
+if aA then
+au=true
+else
+loadKeysystem()
+end
+else
+loadKeysystem()
+end
+else
+if isfile(ay)then
+local az=readfile(ay)
+local aA=false
+for aB,aC in next,as.KeySystem.API do
+local aD=aa.Services[aC.Type]
+if aD then
+local aE={}
+for b,e in next,aD.Args do
+table.insert(aE,aC[e])
+end
+local g=aD.New(table.unpack(aE))
+local h=g.Verify(az)
+if h then
+aA=true
+break
+end
+end
+end
+au=aA
+if not aA then loadKeysystem()end
+else
+loadKeysystem()
+end
+end
+repeat task.wait()until au
+end
+local ay=at(as)
+aa.Transparent=as.Transparent
+aa.Window=ay
+if as.Acrylic then
+al.init()
+end
+return ay
+end
+
+local library = {
+    flags = {},
+    _window = nil,
+    _tabs = {},
+    _sections = {}
+}
+
+function library:new(title, theme)
+    local window = aa.CreateWindow(nil, {
+        Title = title,
+        Theme = theme or "Dark",
+        Size = UDim2.new(0, 700, 0, 500),
+        Folder = "BlackHoleCenter"
+    })
+    self._window = window
+    self.flags = setmetatable({}, {
+        __index = function(t, k)
+            return rawget(t, k)
+        end,
+        __newindex = function(t, k, v)
+            rawset(t, k, v)
+        end
+    })
+    return window
+end
+
+function library:ToggleUILib()
+    if self._window then
+        if self._window.Closed then
+            self._window:Open()
+        else
+            self._window:Close()
+        end
+    end
+end
+
+function library:UiDestroy()
+    if self._window then
+        self._window:Destroy()
+    end
+end
+
+local ElementsModule = a.load'O'
+
+local function wrapElement(element, flag, elementType)
+    if flag then
+        library.flags[flag] = element.Value or false
+        local originalCallback = element.Callback
+        element.Callback = function(...)
+            local args = {...}
+            if elementType == "Toggle" then
+                library.flags[flag] = args[1]
+            elseif elementType == "Slider" then
+                library.flags[flag] = args[1]
+            elseif elementType == "Dropdown" then
+                library.flags[flag] = args[1]
+            elseif elementType == "Input" then
+                library.flags[flag] = args[1]
+            elseif elementType == "Keybind" then
+                library.flags[flag] = args[1]
+            end
+            if originalCallback then
+                originalCallback(...)
+            end
+        end
+    end
+    return element
+end
+
+local function createSectionMethods(section, window, tab)
+    function section:Label(text)
+        local label = section.Paragraph({
+            Title = text,
+            Desc = ""
+        })
+        local wrapped = {}
+        setmetatable(wrapped, {
+            __index = function(t, k)
+                if k == "Text" then
+                    return label.ParagraphFrame.UIElements.Container.Frame.TextLabel.Text
+                end
+                return label[k]
+            end,
+            __newindex = function(t, k, v)
+                if k == "Text" then
+                    label:SetTitle(v)
+                elseif k == "TextColor3" then
+                    label.ParagraphFrame.UIElements.Container.Frame.TextLabel.TextColor3 = v
+                end
+            end
+        })
+        return wrapped
+    end
+    
+    function section:Button(text, callback)
+        return section.Button({
+            Title = text,
+            Callback = callback
+        })
+    end
+    
+    function section:Toggle(text, flag, default, callback)
+        local toggle = section.Toggle({
+            Title = text,
+            Value = default or false,
+            Callback = callback
+        })
+        local wrapped = wrapElement(toggle, flag, "Toggle")
+        function wrapped:SetState(state)
+            if state == nil then
+                state = not toggle.Value
+            end
+            toggle:Set(state)
+            library.flags[flag] = state
+        end
+        return wrapped
+    end
+    
+    function section:Slider(text, flag, default, min, max, isFloat, callback)
+        local sliderData = {
+            Title = text,
+            Value = {
+                Min = min or 0,
+                Max = max or 100,
+                Default = default or min or 0
+            },
+            Step = isFloat and 0.01 or 1,
+            Callback = callback
+        }
+        local slider = section.Slider(sliderData)
+        local wrapped = wrapElement(slider, flag, "Slider")
+        function wrapped:SetValue(val)
+            slider:Set(val)
+            library.flags[flag] = val
+        end
+        return wrapped
+    end
+    
+    function section:Keybind(text, default, callback)
+        local keybind = section.Keybind({
+            Title = text,
+            Value = default or "F",
+            Callback = callback
+        })
+        return wrapElement(keybind, nil, "Keybind")
+    end
+    
+    function section:Dropdown(text, flag, options, callback)
+        local dropdown = section.Dropdown({
+            Title = text,
+            Values = options or {},
+            Value = options and options[1] or nil,
+            Callback = callback
+        })
+        local wrapped = wrapElement(dropdown, flag, "Dropdown")
+        function wrapped:AddOption(opt)
+            local newValues = dropdown.Values
+            table.insert(newValues, opt)
+            dropdown:Refresh(newValues)
+        end
+        function wrapped:RemoveOption(opt)
+            local newValues = {}
+            for _, v in ipairs(dropdown.Values) do
+                if v ~= opt then
+                    table.insert(newValues, v)
+                end
+            end
+            dropdown:Refresh(newValues)
+        end
+        function wrapped:SetOptions(opts)
+            dropdown:Refresh(opts)
+        end
+        return wrapped
+    end
+    
+    function section:Textbox(text, flag, placeholder, callback)
+        local input = section.Input({
+            Title = text,
+            Placeholder = placeholder or "Enter text...",
+            Value = "",
+            Callback = callback
+        })
+        local wrapped = wrapElement(input, flag, "Input")
+        function wrapped:Set(text)
+            input:Set(text)
+            library.flags[flag] = text
+        end
+        return wrapped
+    end
+end
+
+local function wrapSection(sectionObj, window, tab)
+    createSectionMethods(sectionObj, window, tab)
+    return sectionObj
+end
+
+local function wrapTab(tabObj, window)
+    function tabObj:section(title, isOpen)
+        local section = tabObj.Section({
+            Title = title,
+            Opened = isOpen or false
+        })
+        return wrapSection(section, window, tabObj)
+    end
+    return tabObj
+end
+
+local originalCreateWindow = aa.CreateWindow
+function aa.CreateWindow(ar, as)
+    local window = originalCreateWindow(ar, as)
+    library._window = window
+    function window:Tab(name, icon)
+        local tab = window.Tab({
+            Title = name,
+            Icon = icon and "rbxassetid://"..icon or nil
+        })
+        library._tabs[name] = tab
+        return wrapTab(tab, window)
+    end
+    return window
+end
+
+return library
