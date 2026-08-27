@@ -18125,7 +18125,7 @@ local function CreateFloatingButton(config)
     local parent = config.Parent or player.PlayerGui
     local title = config.Title or "至尊版"
     local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen  -- 左侧圆形按钮单击 → 打开主面板
+    local onOpen = config.OnOpen  -- 右侧标题文字单击 → 打开主面板
 
     local button = {}
 
@@ -18550,36 +18550,16 @@ local function CreateFloatingButton(config)
     end)
 
     -- ============================================================
-    -- 7. 右侧标题双击 → 向外扩散（展开/收起功能面板）
+    -- 7. 右侧标题文字 → 单击打开/关闭主面板（WindUI 主面板）
     -- ============================================================
-    local textLastClick = 0
-    local textDoubleClickThreshold = 0.5
-
-    local function toggleManualExpand()
+    local function toggleManualExpand()  -- 保留：手动吸附（胶囊 padding 展开）
         if not state.manualSnapEnabled then return end
         state.manualExpanded = not state.manualExpanded
         applyLayout()
     end
 
-    local function togglePopupPanel()  -- 向外扩散：展开/收起功能面板（4个开关）
-        popupPanel:Toggle()
-        if popupPanel.isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
-    end
-
     Creator.AddSignal(textButton.MouseButton1Click, function()
-        local now = tick()
-        if now - textLastClick <= textDoubleClickThreshold then
-            togglePopupPanel()
-            textLastClick = 0
-        else
-            textLastClick = now
-        end
+        if onOpen then onOpen() end  -- 单击 → 打开/关闭主面板
     end)
 
     -- ============================================================
@@ -18607,7 +18587,7 @@ local function CreateFloatingButton(config)
     -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
 
     -- ============================================================
-    -- 9. 左侧圆形按钮点击事件（单击 → 打开/关闭主面板）
+    -- 9. 左侧圆形按钮点击事件（单击 → 弹出/收起功能面板）
     -- ============================================================
     Creator.AddSignal(aj.MouseButton1Click, function()
         local scaleDown = Creator.Tween(ajScale, 0.12, { Scale = 0.75 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -18628,7 +18608,14 @@ local function CreateFloatingButton(config)
             resetColor:Play()
         end)
 
-        if onOpen then onOpen() end
+        popupPanel:Toggle()
+        if popupPanel.isOpen then
+            aj.Image = ICON_ACTIVE
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
+        else
+            aj.Image = ICON_DEFAULT
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
+        end
     end)
 
     -- ============================================================
@@ -18701,7 +18688,7 @@ local btn = CreateFloatingButton({
     Title = "至尊版",
     UIPadding = 9,
     OnOpen = function()
-        Window:Toggle()  -- 左侧圆形按钮单击 → 打开/关闭主面板
+        Window:Toggle()  -- 右侧标题文字单击 → 打开/关闭主面板
     end,
 })
 
