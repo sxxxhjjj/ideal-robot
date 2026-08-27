@@ -18125,7 +18125,7 @@ local function CreateFloatingButton(config)
     local parent = config.Parent or player.PlayerGui
     local title = config.Title or "至尊版"
     local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen  -- 右侧标题文字单击 → 打开主面板
+    local onOpen = config.OnOpen  -- 右侧标题单点 → 打开主面板（再点不关闭）
 
     local button = {}
 
@@ -18550,16 +18550,36 @@ local function CreateFloatingButton(config)
     end)
 
     -- ============================================================
-    -- 7. 右侧标题文字 → 单击打开/关闭主面板（WindUI 主面板）
+    -- 7. 右侧标题文字 → 单点打开主面板 / 双击触发手动吸附
+    --    单点：仅打开主面板（再点不关闭）
+    --    双击：触发手动吸附（胶囊 padding 展开）
     -- ============================================================
-    local function toggleManualExpand()  -- 保留：手动吸附（胶囊 padding 展开）
+    local textLastClick = 0
+    local textDoubleClickThreshold = 0.5
+    local pendingSingle = false
+
+    local function toggleManualExpand()  -- 手动吸附：胶囊 padding 展开
         if not state.manualSnapEnabled then return end
         state.manualExpanded = not state.manualExpanded
         applyLayout()
     end
 
     Creator.AddSignal(textButton.MouseButton1Click, function()
-        if onOpen then onOpen() end  -- 单击 → 打开/关闭主面板
+        local now = tick()
+        if now - textLastClick <= textDoubleClickThreshold then
+            pendingSingle = false
+            toggleManualExpand()   -- 双击 → 手动吸附
+            textLastClick = 0
+        else
+            textLastClick = now
+            pendingSingle = true
+            task.delay(textDoubleClickThreshold + 0.05, function()
+                if pendingSingle then
+                    pendingSingle = false
+                    if onOpen then onOpen() end  -- 单点 → 打开主面板
+                end
+            end)
+        end
     end)
 
     -- ============================================================
@@ -18688,7 +18708,7 @@ local btn = CreateFloatingButton({
     Title = "至尊版",
     UIPadding = 9,
     OnOpen = function()
-        Window:Toggle()  -- 右侧标题文字单击 → 打开/关闭主面板
+        Window:Open()  -- 右侧标题单点 → 打开主面板（再点不关闭）
     end,
 })
 
