@@ -18708,7 +18708,9 @@ local btn = CreateFloatingButton({
     Title = "至尊版",
     UIPadding = 9,
     OnOpen = function()
-        Window:Open()  -- 右侧标题单点 → 打开主面板（再点不关闭）
+        if Window.Closed then
+            Window:Open()  -- 右侧标题单点 → 仅当主面板关闭时才打开，避免重复打开导致闪烁
+        end
     end,
 })
 
