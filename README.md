@@ -17414,7 +17414,7 @@ local Window = WindUI:CreateWindow({
     Radius        = 16,       -- 圆角
     ElementsRadius = 16,
 
-    OpenButton = { Enabled = false },  -- 内置开关按钮关闭，改用下方“第二代自定义悬浮窗”
+    OpenButton = { Enabled = false },  -- 内置右下角按钮关闭，改用下方内嵌「悬浮窗」
 
     -- 说明：KeySystem 不传、Services 不加载、Localization 不调用 -> 等效移除/关闭
 })
@@ -17463,13 +17463,28 @@ local ActionBtn = Settings:Button({
 })
 
 print("[WindUI融合脚本] 已加载 · 无外部链接 · 密钥系统已关闭 · 仅保存开关状态")
+
+
 -- ============================================================
--- 📌 第二代 · 自定义悬浮窗（替换内置 OpenButton · 与主面板一起创建）
---    · 位置：原版默认 = UDim2.new(0.5, 0, 0, 28) = 水平居中、顶部 28px
---    · 点击标题文字 → 打开/关闭主面板
---    · 点击左侧图标 → 弹出 4 开关面板
---    · 纯黑背景 + 彩虹标题 + 拖拽/边缘吸附 + 自动保存
+-- ▼▼ 内嵌自定义悬浮窗（替换内置 OpenButton）▼▼
 -- ============================================================
+
+--[[
+    ================================================================
+    独立悬浮窗（最终版 - 自动清理 + 自动保存）
+    - 主悬浮窗：纯黑色背景 + 彩虹文字 + 左侧按钮（保持不变）
+    - 弹出面板：4个开关（自动吸附 / 手动吸附 / 自动换图 / 单点互动）
+      - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）
+      - 自动换图关闭：背景根据当前时间自动切换（6张时段图）
+      - 单点互动开启：鼠标悬停扩张（仅鼠标）
+    - 左侧按钮：亮度调高（透明度 0.3→0.05），尺寸略大（50→56）
+    - 弹出面板：左右毛玻璃子面板（开关 / 时间 + 问候语）
+    - 右边子面板所有文字：白色（时间/星期/问候语）
+    - 所有功能：拖拽、边缘检测、双击展开、Toggle控制、按钮动画
+    - 启动时自动删除旧的同名悬浮窗，保证只有一个
+    - 每10秒自动保存状态，下次启动自动恢复
+    ================================================================
+]]
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -18110,7 +18125,7 @@ local function CreateFloatingButton(config)
     local parent = config.Parent or player.PlayerGui
     local title = config.Title or "至尊版"
     local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen
+    local onOpen = config.OnOpen  -- 左侧圆形按钮单击 → 打开主面板
 
     local button = {}
 
@@ -18382,13 +18397,10 @@ local function CreateFloatingButton(config)
     end
 
     -- 加载保存的状态
-    local stateLoaded = loadState()
+    loadState()
 
     -- 应用加载的状态到 UI
-    if stateLoaded then
-        al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
-    end
-    -- 未保存时保持原版默认位置（水平居中 · 顶部 28px）
+    al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
     am.Scale = state.scale
     toggles[1]:SetState(state.autoSnapEnabled)
     toggles[2]:SetState(state.manualSnapEnabled)
@@ -18538,7 +18550,7 @@ local function CreateFloatingButton(config)
     end)
 
     -- ============================================================
-    -- 7. 双击展开（标题文字 · 双击展开/收起胶囊）
+    -- 7. 右侧标题双击 → 向外扩散（展开/收起功能面板）
     -- ============================================================
     local textLastClick = 0
     local textDoubleClickThreshold = 0.5
@@ -18549,10 +18561,21 @@ local function CreateFloatingButton(config)
         applyLayout()
     end
 
+    local function togglePopupPanel()  -- 向外扩散：展开/收起功能面板（4个开关）
+        popupPanel:Toggle()
+        if popupPanel.isOpen then
+            aj.Image = ICON_ACTIVE
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
+        else
+            aj.Image = ICON_DEFAULT
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
+        end
+    end
+
     Creator.AddSignal(textButton.MouseButton1Click, function()
         local now = tick()
         if now - textLastClick <= textDoubleClickThreshold then
-            toggleManualExpand()
+            togglePopupPanel()
             textLastClick = 0
         else
             textLastClick = now
@@ -18584,25 +18607,9 @@ local function CreateFloatingButton(config)
     -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
 
     -- ============================================================
-    -- 9. 左侧按钮点击事件
-    --    单点 → 打开/关闭主面板（WindUI 主面板）
-    --    双击 → 展开/收起功能面板（4个开关，向外展开）
+    -- 9. 左侧圆形按钮点击事件（单击 → 打开/关闭主面板）
     -- ============================================================
-    local ajLastClick = 0
-    local ajDoubleClickThreshold = 0.5
-    local ajPendingSingle = false
-
-    local function setIconState(isOpen)
-        if isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
-    end
-
-    local function playIconPulse()
+    Creator.AddSignal(aj.MouseButton1Click, function()
         local scaleDown = Creator.Tween(ajScale, 0.12, { Scale = 0.75 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         local rotateLeft = Creator.Tween(aj, 0.12, { Rotation = -15 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         local pulseColor = Creator.Tween(aj, 0.1, { ImageColor3 = Color3.fromRGB(255, 255, 255) })
@@ -18620,26 +18627,8 @@ local function CreateFloatingButton(config)
             rotateBack:Play()
             resetColor:Play()
         end)
-    end
 
-    Creator.AddSignal(aj.MouseButton1Click, function()
-        playIconPulse()
-        local now = tick()
-        if now - ajLastClick <= ajDoubleClickThreshold then
-            ajPendingSingle = false
-            ajLastClick = 0
-            popupPanel:Toggle()
-            setIconState(popupPanel.isOpen)
-        else
-            ajLastClick = now
-            ajPendingSingle = true
-            task.delay(ajDoubleClickThreshold + 0.05, function()
-                if ajPendingSingle then
-                    ajPendingSingle = false
-                    if onOpen then onOpen() end
-                end
-            end)
-        end
+        if onOpen then onOpen() end
     end)
 
     -- ============================================================
@@ -18695,20 +18684,33 @@ local function CreateFloatingButton(config)
 end
 
 -- ============================================================
--- 与主面板一起创建（替换内置 OpenButton）
+-- ★★★ 启动（自动清理多余的悬浮窗） ★★★
 -- ============================================================
-local FloatGui = Instance.new("ScreenGui")
-FloatGui.Name = "FloatingButton_SecondGen"
-FloatGui.ResetOnSpawn = false
-FloatGui.Parent = player.PlayerGui
+local existingGui = player.PlayerGui:FindFirstChild("FloatingButton")
+if existingGui then
+    existingGui:Destroy()
+end
 
-local FloatingButton = CreateFloatingButton({
-    Parent    = FloatGui,
-    Title     = "至尊版",       -- 【可改】悬浮窗标题
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FloatingButton"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local btn = CreateFloatingButton({
+    Parent = screenGui,
+    Title = "至尊版",
     UIPadding = 9,
-    OnOpen    = function()
-        Window:Toggle()          -- 左键单点 → 打开/关闭主面板
+    OnOpen = function()
+        Window:Toggle()  -- 左侧圆形按钮单击 → 打开/关闭主面板
     end,
 })
 
-print("[第二代] 自定义悬浮窗已创建 · 原版默认位置(水平居中 · 顶部28px) · 左键单点开主面板 · 双击展开功能面板")
+print("✅ 加载完成")
+print("   - 悬浮窗本体：纯黑色背景")
+print("   - 弹出面板：4个开关（自动吸附 / 手动吸附 / 自动换图 / 单点互动）")
+print("   - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）")
+print("   - 自动换图关闭：背景根据当前时间自动切换（6张时段图）")
+print("   - 单点互动开启：鼠标悬停扩张（仅鼠标）")
+print("   - 左侧按钮：亮度调高，尺寸 56")
+print("   - 右边子面板所有文字为白色")
+print("   - 自动清理、自动保存状态")
