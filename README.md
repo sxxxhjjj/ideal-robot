@@ -13487,10 +13487,12 @@ al("UIListLayout",{
 SortOrder="LayoutOrder",
 Padding=UDim.new(0,2+(Window.UIPadding/2)),
 FillDirection="Horizontal",
+HorizontalAlignment="Center",
 VerticalAlignment="Center",
 }),
 al("TextLabel",{
 Text=ar.Title,
+Visible=false,
 ThemeTag={
 TextColor3="TabTitle",
 },
@@ -13536,7 +13538,7 @@ ar.IconColor and false or true,
 ar.IconThemed,
 "TabIcon"
 )
-au.Size=UDim2.new(0,16,0,16)
+au.Size=UDim2.new(0,26,0,26)
 if ar.IconColor then
 au.ImageLabel.ImageColor3=ar.IconColor
 end
@@ -13704,6 +13706,14 @@ ar.ContainerFrame=ar.UIElements.ContainerFrameCanvas
 
 ak.AddSignal(ar.UIElements.Main.MouseButton1Click,function()
 if not ar.Locked then
+local icon=ar.UIElements.Icon
+if icon then
+ak.Tween(icon,0.08,{Size=UDim2.new(0,34,0,34)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out):Play()
+task.spawn(function()
+task.wait(0.08)
+ak.Tween(icon,0.18,{Size=UDim2.new(0,26,0,26)},Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
+end)
+end
 ao:SelectTab(as)
 end
 end)
@@ -17397,7 +17407,7 @@ local WindUI = aa
 
 local Window = WindUI:CreateWindow({
     Title    = "我的脚本",            -- 【可改】窗口标题
-    Icon     = "home",                -- 【可改】Lucide 图标名，或 "rbxassetid://数字ID"
+    Icon     = "house",                -- 【可改】Lucide 图标名，或 "rbxassetid://数字ID"
     Author   = "WindUI",              -- 【可改】作者名
     Folder   = "MyScript",            -- 配置保存目录（Toggle 状态保存在这里）
 
@@ -17409,7 +17419,7 @@ local Window = WindUI:CreateWindow({
     AutoScale = true,     -- 自动缩放（保留默认开启）
     Acrylic   = false,    -- 关闭亚克力毛玻璃
 
-    SideBarWidth  = 210,      -- 侧边栏宽度
+    SideBarWidth  = 72,       -- 侧边栏宽度（图标栏）
     HideSearchBar = false,    -- 显示搜索栏
     Radius        = 16,       -- 圆角
     ElementsRadius = 16,
@@ -17424,10 +17434,34 @@ local Window = WindUI:CreateWindow({
 -- 配置系统：仅保存带 Flag 的 Toggle 状态（第二个参数 true = 下次启动自动恢复）
 local Config = (Window.ConfigManager and Window.ConfigManager:Config("Setting", true)) or nil
 
--- 标签页
-local Main = Window:Tab({ Title = "主界面", Icon = "home" })
+-- ============================================================
+-- 10 个标签页（左侧只显示图标，不显示文字）
+-- ============================================================
+local TabList = {
+    { Title = "首页",   Icon = "house"    },
+    { Title = "设置",   Icon = "settings" },
+    { Title = "用户",   Icon = "user"     },
+    { Title = "搜索",   Icon = "search"   },
+    { Title = "收藏",   Icon = "heart"    },
+    { Title = "星标",   Icon = "star"     },
+    { Title = "通知",   Icon = "bell"     },
+    { Title = "文件夹", Icon = "folder"   },
+    { Title = "图片",   Icon = "image"    },
+    { Title = "游戏",   Icon = "gamepad"  },
+}
 
--- 分组
+local Main
+for i, def in ipairs(TabList) do
+    local tab = Window:Tab({ Title = def.Title, Icon = def.Icon })
+    if i == 1 then
+        Main = tab
+    else
+        -- 其它标签页：放一个分组，避免显示空页占位符
+        tab:Section({ Title = def.Title, Desc = def.Title .. " 页面", Icon = def.Icon })
+    end
+end
+
+-- 分组（首页 Tab 的内容）
 local Settings = Main:Section({
     Title = "设置",
     Desc  = "开关状态会自动保存",
@@ -17475,7 +17509,7 @@ print("[WindUI融合脚本] 已加载 · 无外部链接 · 密钥系统已关�
     ================================================================
     独立悬浮窗（最终版 - 自动清理 + 自动保存）
     - 主悬浮窗：纯黑色背景 + 彩虹文字 + 左侧按钮（保持不变）
-    - 弹出面板：4个开关（自动吸附 / 手动吸附 / 自动换图 / 单点互动）
+    - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）
       - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）
       - 自动换图关闭：背景根据当前时间自动切换（6张时段图）
       - 单点互动开启：鼠标悬停扩张（仅鼠标）
@@ -17840,12 +17874,11 @@ local function CreatePopupPanel(parent)
         }),
     })
 
-    -- ★★★ 4个开关 ★★★
+    -- ★★★ 3个开关（已移除手动吸附） ★★★
     local toggle1 = CreateToggle(leftContent, "自动吸附", true)
-    local toggle2 = CreateToggle(leftContent, "手动吸附", false)
     local toggle3 = CreateToggle(leftContent, "自动换图", false)   -- 默认关闭 = 时间控制
     local toggle4 = CreateToggle(leftContent, "单点互动", false)
-    panelObj.toggles = { toggle1, toggle2, toggle3, toggle4 }
+    panelObj.toggles = { toggle1, toggle3, toggle4 }
 
     -- ★★★ 自动换图开关控制（逻辑完全照抄你的脚本） ★★★
     panelObj.autoSwitchEnabled = false
@@ -18326,13 +18359,13 @@ local function CreateFloatingButton(config)
     -- 弹出面板
     local popupPanel = CreatePopupPanel(al)
     local toggles = popupPanel.toggles
-    -- toggles[1]=自动吸附, [2]=手动吸附, [3]=自动换图, [4]=单点互动
+    -- toggles[1]=自动吸附, [2]=自动换图, [3]=单点互动
 
     -- ★★★ 创建悬停效果（单点互动） ★★★
     local hoverEffect = CreateHoverEffect(textButton, al, 1.1)
 
     -- ★★★ 单点互动开关控制 ★★★
-    toggles[4]:OnChanged(function(v)
+    toggles[3]:OnChanged(function(v)
         if v then
             hoverEffect:Enable()
         else
@@ -18356,7 +18389,6 @@ local function CreateFloatingButton(config)
     -- ============================================================
     local state = {
         autoSnapEnabled = true,
-        manualSnapEnabled = false,
         autoSwitchEnabled = false,   -- ★★★ 自动换图开关状态 ★★★
         singleClickEnabled = false,  -- ★★★ 单点互动开关状态 ★★★
         edgeActive = false,
@@ -18375,12 +18407,11 @@ local function CreateFloatingButton(config)
         state.positionX = al.Position.X.Offset
         state.positionY = al.Position.Y.Offset
         state.scale = am.Scale
-        state.autoSwitchEnabled = toggles[3]:GetState()
-        state.singleClickEnabled = toggles[4]:GetState()
+        state.autoSwitchEnabled = toggles[2]:GetState()
+        state.singleClickEnabled = toggles[3]:GetState()
 
         local data = {
             autoSnapEnabled = state.autoSnapEnabled,
-            manualSnapEnabled = state.manualSnapEnabled,
             autoSwitchEnabled = state.autoSwitchEnabled,
             singleClickEnabled = state.singleClickEnabled,
             positionX = state.positionX,
@@ -18404,7 +18435,6 @@ local function CreateFloatingButton(config)
             end)
             if success and data then
                 state.autoSnapEnabled = data.autoSnapEnabled ~= false
-                state.manualSnapEnabled = data.manualSnapEnabled == true
                 state.autoSwitchEnabled = data.autoSwitchEnabled == true
                 state.singleClickEnabled = data.singleClickEnabled == true
                 state.positionX = data.positionX or 0
@@ -18423,9 +18453,8 @@ local function CreateFloatingButton(config)
     al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
     am.Scale = state.scale
     toggles[1]:SetState(state.autoSnapEnabled)
-    toggles[2]:SetState(state.manualSnapEnabled)
-    toggles[3]:SetState(state.autoSwitchEnabled)
-    toggles[4]:SetState(state.singleClickEnabled)
+    toggles[2]:SetState(state.autoSwitchEnabled)
+    toggles[3]:SetState(state.singleClickEnabled)
     popupPanel.autoSwitchEnabled = state.autoSwitchEnabled
 
     -- 恢复悬停效果
@@ -18441,9 +18470,6 @@ local function CreateFloatingButton(config)
     local function applyLayout()
         local targetPadding = 50
         if state.autoSnapEnabled and state.edgeActive then
-            targetPadding = 120
-        end
-        if state.manualSnapEnabled then
             targetPadding = 120
         end
         if targetPadding ~= state.currentPadding then
@@ -18686,11 +18712,6 @@ local function CreateFloatingButton(config)
         applyLayout()
     end)
 
-    toggles[2]:OnChanged(function(v)
-        state.manualSnapEnabled = v
-        applyLayout()  -- 手动吸附：直接控制胶囊 padding 展开/收起
-    end)
-
     -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
 
     -- ============================================================
@@ -18810,7 +18831,7 @@ btn:Visible(true)
 
 print("✅ 加载完成")
 print("   - 悬浮窗本体：纯黑色背景")
-print("   - 弹出面板：4个开关（自动吸附 / 手动吸附 / 自动换图 / 单点互动）")
+print("   - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）")
 print("   - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）")
 print("   - 自动换图关闭：背景根据当前时间自动切换（6张时段图）")
 print("   - 单点互动开启：鼠标悬停 / 手机触摸按下时扩张")
