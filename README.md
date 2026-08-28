@@ -17414,6 +17414,8 @@ local Window = WindUI:CreateWindow({
     Radius        = 16,       -- 圆角
     ElementsRadius = 16,
 
+    Background = "rbxassetid://90331823252393",  -- 主面板背景图（原版主面板背景层）
+
     OpenButton = { Enabled = false },  -- 内置右下角按钮关闭，改用下方内嵌「悬浮窗」
 
     -- 说明：KeySystem 不传、Services 不加载、Localization 不调用 -> 等效移除/关闭
@@ -18550,36 +18552,17 @@ local function CreateFloatingButton(config)
     end)
 
     -- ============================================================
-    -- 7. 右侧标题文字 → 单点打开主面板 / 双击触发手动吸附
-    --    单点：仅打开主面板（再点不关闭）
-    --    双击：触发手动吸附（胶囊 padding 展开）
+    -- 7. 右侧标题文字 → 单点立即打开主面板（无延迟）
+    --    双击不会触发任何操作（连点也不会二次打开）
     -- ============================================================
-    local textLastClick = 0
-    local textDoubleClickThreshold = 0.5
-    local pendingSingle = false
-
-    local function toggleManualExpand()  -- 手动吸附：胶囊 padding 展开
+    local function toggleManualExpand()  -- 保留：手动吸附（胶囊 padding 展开）
         if not state.manualSnapEnabled then return end
         state.manualExpanded = not state.manualExpanded
         applyLayout()
     end
 
     Creator.AddSignal(textButton.MouseButton1Click, function()
-        local now = tick()
-        if now - textLastClick <= textDoubleClickThreshold then
-            pendingSingle = false
-            toggleManualExpand()   -- 双击 → 手动吸附
-            textLastClick = 0
-        else
-            textLastClick = now
-            pendingSingle = true
-            task.delay(textDoubleClickThreshold + 0.05, function()
-                if pendingSingle then
-                    pendingSingle = false
-                    if onOpen then onOpen() end  -- 单点 → 打开主面板
-                end
-            end)
-        end
+        if onOpen then onOpen() end  -- 单点 → 立即打开主面板
     end)
 
     -- ============================================================
@@ -18680,11 +18663,10 @@ local function CreateFloatingButton(config)
     button.Popup = al
     button.Panel = popupPanel
 
-    -- 启动
+    -- 启动（可见性由外部「一体化联动」统一控制，避免与主面板冲突）
     task.spawn(function()
         task.wait(0.1)
         updateEdgeState()
-        button:Visible(true)
     end)
 
     return button
@@ -18703,16 +18685,45 @@ screenGui.Name = "FloatingButton"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player.PlayerGui
 
+local lastOpenTime = 0
+
 local btn = CreateFloatingButton({
     Parent = screenGui,
     Title = "至尊版",
     UIPadding = 9,
     OnOpen = function()
-        if Window.Closed then
-            Window:Open()  -- 右侧标题单点 → 仅当主面板关闭时才打开，避免重复打开导致闪烁
-        end
+        -- 单点右侧 → 立即打开原版主面板（双击 / 连点不会重复触发）
+        if not Window.Closed then return end
+        if tick() - lastOpenTime < 0.4 then return end
+        lastOpenTime = tick()
+        Window:Open()
     end,
 })
+
+-- ★★★ 一体化联动：主面板与悬浮窗绑定为一体，不会起冲突 ★★★
+-- 主面板打开 → 隐藏悬浮窗；主面板关闭 → 显示悬浮窗；主面板销毁 → 悬浮窗一起销毁
+local function syncFloating()
+    if Window.Closed then
+        btn:Visible(true)
+    else
+        btn:Visible(false)
+    end
+end
+
+Window:OnOpen(function()
+    btn:Visible(false)
+end)
+Window:OnClose(function()
+    btn:Visible(true)
+end)
+Window:OnDestroy(function()
+    if screenGui and screenGui.Parent then
+        screenGui:Destroy()
+    end
+end)
+
+-- 启动时按主面板当前状态同步（主面板默认自动打开 → 悬浮窗默认隐藏）
+syncFloating()
 
 print("✅ 加载完成")
 print("   - 悬浮窗本体：纯黑色背景")
