@@ -17842,7 +17842,7 @@ local function CreatePopupPanel(parent)
 
     -- ★★★ 4个开关 ★★★
     local toggle1 = CreateToggle(leftContent, "自动吸附", true)
-    local toggle2 = CreateToggle(leftContent, "手动吸附", true)
+    local toggle2 = CreateToggle(leftContent, "手动吸附", false)
     local toggle3 = CreateToggle(leftContent, "自动换图", false)   -- 默认关闭 = 时间控制
     local toggle4 = CreateToggle(leftContent, "单点互动", false)
     panelObj.toggles = { toggle1, toggle2, toggle3, toggle4 }
@@ -18021,7 +18021,7 @@ local function CreatePopupPanel(parent)
     local function setupGlobalClose()
         if globalConn then globalConn:Disconnect() end
         globalConn = UserInputService.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 if not panelObj.isOpen then return end
                 local mousePos = input.Position
                 local panelPos = panel.AbsolutePosition
@@ -18061,6 +18061,8 @@ local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
     local scaleObj = nil
     local enterConn = nil
     local leaveConn = nil
+    local touchBeganConn = nil
+    local touchEndedConn = nil
     local isEnabled = false
 
     local function ensureScaleObj()
@@ -18079,6 +18081,9 @@ local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
     local function bindEvents()
         if enterConn then enterConn:Disconnect() end
         if leaveConn then leaveConn:Disconnect() end
+        if touchBeganConn then touchBeganConn:Disconnect() end
+        if touchEndedConn then touchEndedConn:Disconnect() end
+
         enterConn = Creator.AddSignal(textButton.MouseEnter, function()
             if isEnabled then
                 Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
@@ -18086,6 +18091,18 @@ local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
         end)
         leaveConn = Creator.AddSignal(textButton.MouseLeave, function()
             if isEnabled then
+                Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
+            end
+        end)
+
+        -- 手机端没有鼠标悬停，用触摸按下/抬起模拟“单点互动”的扩张/回缩
+        touchBeganConn = Creator.AddSignal(textButton.InputBegan, function(input)
+            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
+                Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
+            end
+        end)
+        touchEndedConn = Creator.AddSignal(textButton.InputEnded, function(input)
+            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
                 Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
             end
         end)
@@ -18106,6 +18123,8 @@ local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
         end
         if enterConn then enterConn:Disconnect(); enterConn = nil end
         if leaveConn then leaveConn:Disconnect(); leaveConn = nil end
+        if touchBeganConn then touchBeganConn:Disconnect(); touchBeganConn = nil end
+        if touchEndedConn then touchEndedConn:Disconnect(); touchEndedConn = nil end
     end
 
     function self:Destroy()
@@ -18127,7 +18146,7 @@ local function CreateFloatingButton(config)
     local parent = config.Parent or player.PlayerGui
     local title = config.Title or "至尊版"
     local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen  -- 右侧标题单点 → 打开主面板（再点不关闭）
+    local onOpen = config.OnOpen  -- 右侧标题单击 → 打开主面板；双击不触发
 
     local button = {}
 
@@ -18161,10 +18180,11 @@ local function CreateFloatingButton(config)
         Parent = ai,
     })
 
-    Creator.AddSignal(RunService.Heartbeat, function()
-        local offset = (rainbowGrad.Offset.X or 0) + 0.3 * task.wait()
-        if offset > 1 then offset = offset - 1 end
-        rainbowGrad.Offset = Vector2.new(offset, 0)
+    local rainbowOffset = 0
+    Creator.AddSignal(RunService.Heartbeat, function(dt)
+        rainbowOffset = rainbowOffset + 0.3 * dt
+        if rainbowOffset > 1 then rainbowOffset = rainbowOffset - 1 end
+        rainbowGrad.Offset = Vector2.new(rainbowOffset, 0)
     end)
 
     local aj = Creator.New("ImageButton", {
@@ -18216,10 +18236,11 @@ local function CreateFloatingButton(config)
         Offset = Vector2.new(0, 0),
     })
 
-    Creator.AddSignal(RunService.Heartbeat, function()
-        local offset = (borderGrad.Offset.X or 0) + 0.5 * task.wait()
-        if offset > 1 then offset = offset - 1 end
-        borderGrad.Offset = Vector2.new(offset, 0)
+    local borderOffset = 0
+    Creator.AddSignal(RunService.Heartbeat, function(dt)
+        borderOffset = borderOffset + 0.5 * dt
+        if borderOffset > 1 then borderOffset = borderOffset - 1 end
+        borderGrad.Offset = Vector2.new(borderOffset, 0)
     end)
 
     -- 底层容器（纯黑色，无图片）
@@ -18335,11 +18356,10 @@ local function CreateFloatingButton(config)
     -- ============================================================
     local state = {
         autoSnapEnabled = true,
-        manualSnapEnabled = true,
+        manualSnapEnabled = false,
         autoSwitchEnabled = false,   -- ★★★ 自动换图开关状态 ★★★
         singleClickEnabled = false,  -- ★★★ 单点互动开关状态 ★★★
         edgeActive = false,
-        manualExpanded = false,
         currentPadding = 50,
         positionX = 0,
         positionY = 0,
@@ -18363,7 +18383,6 @@ local function CreateFloatingButton(config)
             manualSnapEnabled = state.manualSnapEnabled,
             autoSwitchEnabled = state.autoSwitchEnabled,
             singleClickEnabled = state.singleClickEnabled,
-            manualExpanded = state.manualExpanded,
             positionX = state.positionX,
             positionY = state.positionY,
             scale = state.scale,
@@ -18384,11 +18403,10 @@ local function CreateFloatingButton(config)
                 return game:GetService("HttpService"):JSONDecode(content)
             end)
             if success and data then
-                state.autoSnapEnabled = data.autoSnapEnabled
-                state.manualSnapEnabled = data.manualSnapEnabled
-                state.autoSwitchEnabled = data.autoSwitchEnabled
-                state.singleClickEnabled = data.singleClickEnabled
-                state.manualExpanded = data.manualExpanded
+                state.autoSnapEnabled = data.autoSnapEnabled ~= false
+                state.manualSnapEnabled = data.manualSnapEnabled == true
+                state.autoSwitchEnabled = data.autoSwitchEnabled == true
+                state.singleClickEnabled = data.singleClickEnabled == true
                 state.positionX = data.positionX or 0
                 state.positionY = data.positionY or 0
                 state.scale = data.scale or 1
@@ -18425,7 +18443,7 @@ local function CreateFloatingButton(config)
         if state.autoSnapEnabled and state.edgeActive then
             targetPadding = 120
         end
-        if state.manualSnapEnabled and state.manualExpanded then
+        if state.manualSnapEnabled then
             targetPadding = 120
         end
         if targetPadding ~= state.currentPadding then
@@ -18476,13 +18494,8 @@ local function CreateFloatingButton(config)
     end
     startEdgeDetection()
 
-    Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
-        task.wait(0.05)
-        updateEdgeState()
-    end)
-
     -- ============================================================
-    -- 6. 拖拽模块
+    -- 6. 拖拽模块（先定义位置钳制函数，供自动吸附复用）
     -- ============================================================
     local function clampPosition(offsetX, offsetY)
         local parentSize = parent.AbsoluteSize
@@ -18490,15 +18503,90 @@ local function CreateFloatingButton(config)
         if parentSize.X == 0 or parentSize.Y == 0 then
             return offsetX, offsetY
         end
-        return math.clamp(offsetX, 0, parentSize.X - alSize.X),
-               math.clamp(offsetY, 0, parentSize.Y - alSize.Y)
+        -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
+        -- 故合法范围为 [half, parent - half]，避免悬浮窗半个被拖出屏幕
+        local halfW = alSize.X / 2
+        local halfH = alSize.Y / 2
+        return math.clamp(offsetX, halfW, parentSize.X - halfW),
+               math.clamp(offsetY, halfH, parentSize.Y - halfH)
     end
+
+    -- ============================================================
+    -- 5.5 自动吸附：拖拽松手后，若距离屏幕边缘足够近，则真正吸附（移动）到该边缘
+    -- ============================================================
+    local SNAP_THRESHOLD = 60  -- 距离边缘多少像素内判定为“接近边缘”
+    local function snapToEdge(force)
+        if not state.autoSnapEnabled then return end
+        if not al or not al.Parent or al.AbsoluteSize.X <= 0 then return end
+
+        local pos = al.AbsolutePosition
+        local size = al.AbsoluteSize
+        local vp = camera.ViewportSize
+        if vp.X <= 0 or vp.Y <= 0 then return end
+
+        -- 计算四条边距离（以悬浮窗左上角为基准）
+        local distLeft   = pos.X
+        local distRight  = vp.X - (pos.X + size.X)
+        local distTop    = pos.Y
+        local distBottom = vp.Y - (pos.Y + size.Y)
+
+        -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
+        -- 因此吸附到某条边时，要把半宽/半高加回去，让整个悬浮窗贴边而不错位
+        local halfW = size.X / 2
+        local halfH = size.Y / 2
+
+        local targetX = al.Position.X.Offset
+        local targetY = al.Position.Y.Offset
+        local moved = false
+
+        -- X 轴：吸附到更近的一侧（左/右）
+        if distLeft <= distRight then
+            if force or distLeft <= SNAP_THRESHOLD then
+                targetX = halfW
+                moved = true
+            end
+        else
+            if force or distRight <= SNAP_THRESHOLD then
+                targetX = vp.X - halfW
+                moved = true
+            end
+        end
+
+        -- Y 轴：吸附到更近的一侧（上/下）
+        if distTop <= distBottom then
+            if force or distTop <= SNAP_THRESHOLD then
+                targetY = halfH
+                moved = true
+            end
+        else
+            if force or distBottom <= SNAP_THRESHOLD then
+                targetY = vp.Y - halfH
+                moved = true
+            end
+        end
+
+        -- 只有“接近”边缘才吸附，避免远在屏幕中央也被吸走
+        if moved then
+            local clampedX, clampedY = clampPosition(targetX, targetY)
+            Creator.Tween(al, 0.2, {
+                Position = UDim2.new(0, clampedX, 0, clampedY),
+            }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out):Play()
+            updateEdgeState()
+        end
+    end
+
+    Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
+        task.wait(0.05)
+        updateEdgeState()
+        snapToEdge(true)
+    end)
 
     local pressStartPos = nil
     local isDragging = false
     local dragStartPos = nil
     local dragStartMouse = nil
     local DRAG_THRESHOLD = 5
+    local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
 
     Creator.AddSignal(an.InputBegan, function(input)
         if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
@@ -18544,25 +18632,43 @@ local function CreateFloatingButton(config)
             isDragging = false
             dragStartPos = nil
             dragStartMouse = nil
+            suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
             task.wait(0.05)
             updateEdgeState()
+            snapToEdge(false)  -- 松手后判断是否吸附到最近边缘
             return
         end
         pressStartPos = nil
     end)
 
     -- ============================================================
-    -- 7. 右侧标题文字 → 单点立即打开主面板（无延迟）
-    --    双击不会触发任何操作（连点也不会二次打开）
+    -- 7. 右侧标题文字 → 单击打开主面板；双击不触发任何操作
     -- ============================================================
-    local function toggleManualExpand()  -- 保留：手动吸附（胶囊 padding 展开）
-        if not state.manualSnapEnabled then return end
-        state.manualExpanded = not state.manualExpanded
-        applyLayout()
-    end
+    local DOUBLE_CLICK_GAP = 0.3   -- 两次点击间隔小于此值视为双击
+    local lastClickTime = 0
+    local pendingOpen = false
 
     Creator.AddSignal(textButton.MouseButton1Click, function()
-        if onOpen then onOpen() end  -- 单点 → 立即打开主面板
+        if isDragging then return end                -- 拖拽松手时不算点击
+        if tick() < suppressClickUntil then return end  -- 拖拽刚结束的短暂窗口内忽略
+
+        local now = tick()
+        if now - lastClickTime <= DOUBLE_CLICK_GAP and pendingOpen then
+            -- 第二次点击 = 双击：取消即将执行的“单击打开”，什么都不做
+            pendingOpen = false
+            lastClickTime = 0
+            return
+        end
+
+        lastClickTime = now
+        pendingOpen = true
+        task.delay(DOUBLE_CLICK_GAP, function()
+            if pendingOpen then
+                pendingOpen = false
+                lastClickTime = 0
+                if onOpen then onOpen() end
+            end
+        end)
     end)
 
     -- ============================================================
@@ -18575,16 +18681,14 @@ local function CreateFloatingButton(config)
         else
             task.wait(0.05)
             updateEdgeState()
+            snapToEdge(false)
         end
         applyLayout()
     end)
 
     toggles[2]:OnChanged(function(v)
         state.manualSnapEnabled = v
-        if not v then
-            state.manualExpanded = false
-        end
-        applyLayout()
+        applyLayout()  -- 手动吸附：直接控制胶囊 padding 展开/收起
     end)
 
     -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
@@ -18655,15 +18759,11 @@ local function CreateFloatingButton(config)
         return state
     end
 
-    function button:ToggleExpand()
-        toggleManualExpand()
-    end
-
     button.Button = an
     button.Popup = al
     button.Panel = popupPanel
 
-    -- 启动（可见性由外部「一体化联动」统一控制，避免与主面板冲突）
+    -- 启动：仅做边缘状态检测，不强制吸附，保留已保存的位置
     task.spawn(function()
         task.wait(0.1)
         updateEdgeState()
@@ -18685,52 +18785,36 @@ screenGui.Name = "FloatingButton"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player.PlayerGui
 
-local lastOpenTime = 0
-
 local btn = CreateFloatingButton({
     Parent = screenGui,
     Title = "至尊版",
     UIPadding = 9,
     OnOpen = function()
-        -- 单点右侧 → 立即打开原版主面板（双击 / 连点不会重复触发）
+        -- 右侧标题“单击”已由悬浮窗内部区分：单击打开主面板，双击不触发
+        -- 这里只负责真正打开主面板（重复点击时不再二次打开）
         if not Window.Closed then return end
-        if tick() - lastOpenTime < 0.4 then return end
-        lastOpenTime = tick()
         Window:Open()
     end,
 })
 
--- ★★★ 一体化联动：主面板与悬浮窗绑定为一体，不会起冲突 ★★★
--- 主面板打开 → 隐藏悬浮窗；主面板关闭 → 显示悬浮窗；主面板销毁 → 悬浮窗一起销毁
-local function syncFloating()
-    if Window.Closed then
-        btn:Visible(true)
-    else
-        btn:Visible(false)
-    end
-end
-
-Window:OnOpen(function()
-    btn:Visible(false)
-end)
-Window:OnClose(function()
-    btn:Visible(true)
-end)
+-- ★★★ 一体化联动：悬浮窗始终显示（无论主面板打开/关闭） ★★★
+-- 主面板销毁时，悬浮窗一起销毁
 Window:OnDestroy(function()
     if screenGui and screenGui.Parent then
         screenGui:Destroy()
     end
 end)
 
--- 启动时按主面板当前状态同步（主面板默认自动打开 → 悬浮窗默认隐藏）
-syncFloating()
+-- 悬浮窗保持可见，不再随主面板开合而隐藏
+btn:Visible(true)
 
 print("✅ 加载完成")
 print("   - 悬浮窗本体：纯黑色背景")
 print("   - 弹出面板：4个开关（自动吸附 / 手动吸附 / 自动换图 / 单点互动）")
 print("   - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）")
 print("   - 自动换图关闭：背景根据当前时间自动切换（6张时段图）")
-print("   - 单点互动开启：鼠标悬停扩张（仅鼠标）")
-print("   - 左侧按钮：亮度调高，尺寸 56")
-print("   - 右边子面板所有文字为白色")
+print("   - 单点互动开启：鼠标悬停 / 手机触摸按下时扩张")
+print("   - 右侧标题：单击打开主面板，双击不触发")
+print("   - 自动吸附：拖到边缘附近自动吸附到最近边缘")
+print("   - 悬浮窗始终显示，不随主面板开合而隐藏")
 print("   - 自动清理、自动保存状态")
