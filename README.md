@@ -18447,7 +18447,9 @@ local function CreateFloatingButton(config)
     -- ============================================================
     -- ★★★ 3. 自动保存/加载 ★★★
     -- ============================================================
-    local SAVE_FILE = "FloatingButton_" .. title .. ".json"
+    -- 独立存档：与原始悬浮窗版区分，避免读到另一套坐标体系的旧位置
+    local SAVE_FILE = "IntegralFloating_" .. title .. ".json"
+    local SAVE_VERSION = 2   -- 坐标体系版本：与旧版（左上角体系）不兼容，据此跳过旧存档的位置
 
     local function saveState()
         state.positionX = al.Position.X.Offset
@@ -18457,6 +18459,7 @@ local function CreateFloatingButton(config)
         state.singleClickEnabled = toggles[3]:GetState()
 
         local data = {
+            schemaVersion = SAVE_VERSION,
             autoSnapEnabled = state.autoSnapEnabled,
             autoSwitchEnabled = state.autoSwitchEnabled,
             singleClickEnabled = state.singleClickEnabled,
@@ -18474,19 +18477,28 @@ local function CreateFloatingButton(config)
     end
 
     local function loadState()
+        -- 返回 true 表示「位置可用，可恢复」；返回 false 表示「不恢复位置」
         if isfile and isfile(SAVE_FILE) then
             local success, data = pcall(function()
                 local content = readfile(SAVE_FILE)
                 return game:GetService("HttpService"):JSONDecode(content)
             end)
-            if success and data then
+            if success and type(data) == "table" then
+                -- 开关与缩放始终恢复（与坐标无关）
                 state.autoSnapEnabled = data.autoSnapEnabled ~= false
                 state.autoSwitchEnabled = data.autoSwitchEnabled == true
                 state.singleClickEnabled = data.singleClickEnabled == true
-                state.positionX = data.positionX or 0
-                state.positionY = data.positionY or 0
-                state.scale = data.scale or 1
-                return true
+                state.scale = (type(data.scale) == "number") and data.scale or 1
+
+                -- 位置仅当「版本一致 + 坐标是数字」才恢复，否则保持默认居中并忽略旧值
+                if data.schemaVersion == SAVE_VERSION
+                   and type(data.positionX) == "number"
+                   and type(data.positionY) == "number" then
+                    state.positionX = data.positionX
+                    state.positionY = data.positionY
+                    return true
+                end
+                return false
             end
         end
         return false
@@ -18513,6 +18525,12 @@ local function CreateFloatingButton(config)
     end
 
     -- ============================================================
+    -- 拖动/吸附共享状态（提前声明，供 updateEdgeState / snapToEdge / 拖拽模块共用）
+    -- ============================================================
+    local isDragging = false      -- 是否正在拖动：拖动期间暂停边缘检测与吸附
+    local snapTween = nil         -- 吸附动画引用：再次拖动时立即取消
+
+    -- ============================================================
     -- 4. applyLayout
     -- ============================================================
     local function applyLayout()
@@ -18533,6 +18551,7 @@ local function CreateFloatingButton(config)
     -- 5. 边缘检测
     -- ============================================================
     local function updateEdgeState()
+        if isDragging then return end   -- 拖动中不检测/不改变展开尺寸，避免与拖动抢位置
         if not state.autoSnapEnabled then
             if state.edgeActive then
                 state.edgeActive = false
@@ -18574,7 +18593,7 @@ local function CreateFloatingButton(config)
     local function clampPosition(offsetX, offsetY)
         local parentSize = parent.AbsoluteSize
         local alSize = al.AbsoluteSize
-        if parentSize.X == 0 or parentSize.Y == 0 then
+        if parentSize.X == 0 or parentSize.Y == 0 or alSize.X == 0 or alSize.Y == 0 then
             return offsetX, offsetY
         end
         -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
@@ -18590,6 +18609,7 @@ local function CreateFloatingButton(config)
     -- ============================================================
     local SNAP_THRESHOLD = 60  -- 距离边缘多少像素内判定为“接近边缘”
     local function snapToEdge(force)
+        if isDragging then return end
         if not state.autoSnapEnabled then return end
         if not al or not al.Parent or al.AbsoluteSize.X <= 0 then return end
 
@@ -18642,21 +18662,24 @@ local function CreateFloatingButton(config)
         -- 只有“接近”边缘才吸附，避免远在屏幕中央也被吸走
         if moved then
             local clampedX, clampedY = clampPosition(targetX, targetY)
-            Creator.Tween(al, 0.2, {
+            if snapTween then snapTween:Cancel() end
+            snapTween = Creator.Tween(al, 0.2, {
                 Position = UDim2.new(0, clampedX, 0, clampedY),
-            }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out):Play()
+            }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            snapTween:Play()
             updateEdgeState()
         end
     end
 
     Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
         task.wait(0.05)
+        -- 屏幕旋转/尺寸变化：只把位置钳制回屏幕内，不强制吸附到边缘
+        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
+        al.Position = UDim2.new(0, cx, 0, cy)
         updateEdgeState()
-        snapToEdge(true)
     end)
 
     local pressStartPos = nil
-    local isDragging = false
     local dragStartPos = nil
     local dragStartMouse = nil
     local DRAG_THRESHOLD = 5
@@ -18666,6 +18689,11 @@ local function CreateFloatingButton(config)
         if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
            input.UserInputType ~= Enum.UserInputType.Touch then
             return
+        end
+        -- 开始拖动：立即取消正在进行的吸附动画，位置完全交给手指
+        if snapTween then
+            snapTween:Cancel()
+            snapTween = nil
         end
         pressStartPos = input.Position
         isDragging = false
@@ -18692,7 +18720,7 @@ local function CreateFloatingButton(config)
             local newY = dragStartPos.Y.Offset + (input.Position.Y - dragStartMouse.Y)
             local clampedX, clampedY = clampPosition(newX, newY)
             al.Position = UDim2.new(0, clampedX, 0, clampedY)
-            updateEdgeState()
+            -- 拖动中不再逐帧检测边缘，避免 applyLayout 改变尺寸与拖动抢位置
         end
     end)
 
@@ -18797,11 +18825,10 @@ local function CreateFloatingButton(config)
     -- ============================================================
     -- ★★★ 10. 自动保存（每10秒） ★★★
     -- ============================================================
-    local autoSaveTimer
     local function startAutoSave()
-        if autoSaveTimer then return end
-        autoSaveTimer = RunService.Heartbeat:Connect(function()
-            if math.floor(tick() / 10) ~= math.floor((tick() - 0.1) / 10) then
+        task.spawn(function()
+            while true do
+                task.wait(10)
                 saveState()
             end
         end)
@@ -18832,9 +18859,11 @@ local function CreateFloatingButton(config)
     button.Popup = al
     button.Panel = popupPanel
 
-    -- 启动：仅做边缘状态检测，不强制吸附，保留已保存的位置
+    -- 启动：等尺寸已知后，先把（可能过期的）位置钳制回合法范围再做边缘检测
     task.spawn(function()
         task.wait(0.1)
+        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
+        al.Position = UDim2.new(0, cx, 0, cy)
         updateEdgeState()
     end)
 
