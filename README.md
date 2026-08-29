@@ -18709,12 +18709,27 @@ local function CreateFloatingButton(config)
     local DRAG_THRESHOLD = 5
     local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
 
-    Creator.AddSignal(an.InputBegan, function(input)
+    -- 改为监听 UserInputService.InputBegan + 命中检测：
+    -- 原先挂在 an.InputBegan 上，但 an 是「透明 + Active=false」的内容容器，
+    -- 命中不到它，而且子按钮(textButton/aj)会抢走输入，导致 an.InputBegan 根本不触发 → 拖不动。
+    -- 现在只要按在悬浮窗本体(al)范围内（无论按在图标还是文字上）都能启动拖动。
+    local function isPointerOnWindow(input)
+        if not al or not al.Visible then return false end
+        local p = input.Position
+        local pos = al.AbsolutePosition
+        local size = al.AbsoluteSize
+        if size.X <= 0 or size.Y <= 0 then return false end
+        return p.X >= pos.X and p.X <= pos.X + size.X
+           and p.Y >= pos.Y and p.Y <= pos.Y + size.Y
+    end
+
+    Creator.AddSignal(UserInputService.InputBegan, function(input)
         if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
            input.UserInputType ~= Enum.UserInputType.Touch then
             return
         end
         if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
+        if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
         -- 开始拖动：立即取消正在进行的吸附动画，位置完全交给手指
         if snapTween then
             snapTween:Cancel()
