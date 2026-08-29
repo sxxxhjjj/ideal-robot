@@ -18423,9 +18423,14 @@ local function CreateFloatingButton(config)
         end
     end)
 
-    -- ★★★ 已移除「an.AbsoluteSize → al.Size」实时绑定 ★★★
-    -- 原先每帧把内容自动布局尺寸写回拖动根 al，会让 al 尺寸随内容变，再叠加 AnchorPoint(0.5,0.5)
-    -- 造成位置反复重算（“歪散/闪动”的第二根因）。现改为安定点通过 syncRootSize() 校准一次。
+    -- ★★★ 恢复「an.AbsoluteSize → al.Size」实时绑定 ★★★
+    -- 靠边吸附时内容 padding 会 50↔120 自动伸缩，这里实时把内容尺寸同步给拖动根 al，
+    -- 黑色背景/边框才会跟着一起平滑展开；al 是 AnchorPoint(0.5,0.5)，以中心对称伸缩（参考版行为）。
+    Creator.AddSignal(an:GetPropertyChangedSignal("AbsoluteSize"), function()
+        if an.AbsoluteSize.X > 0 then
+            al.Size = UDim2.new(0, an.AbsoluteSize.X, 0, an.AbsoluteSize.Y)
+        end
+    end)
 
     Creator.AddSignal(textButton.MouseEnter, function()
         Creator.Tween(textButton, 0.1, { BackgroundTransparency = 0.93 }):Play()
