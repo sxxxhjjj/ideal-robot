@@ -13388,7 +13388,44 @@ Window=ap
 WindUI=aq
 ao.ToolTipParent=ar
 ao.TabHighlight=as
+ao.SidebarExpanded=false
+ao.SidebarBaseWidth=Window.SideBarWidth or 72
+ao.SidebarExpandWidth=ao.SidebarBaseWidth+88
 return ao
+end
+
+-- ★★★ 侧边栏展开/收起（仅图标 ⇄ 图标+名字） ★★★
+function ao.SetSidebarWidth(ap)
+local b=Window.UIElements.SideBarContainer
+local c=Window.UIElements.MainBar
+if not b or not c then return end
+local d=b.Size.Y
+local e=c.Size.Y
+ak.Tween(b,0.22,{Size=UDim2.new(0,ap,d.Scale,d.Offset)},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
+ak.Tween(c,0.22,{Size=UDim2.new(1,-ap,e.Scale,e.Offset)},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
+end
+
+function ao.SetTitlesVisible(ap)
+for b,c in next,ao.Tabs do
+local d=c.UIElements.Main and c.UIElements.Main.Frame and c.UIElements.Main.Frame.TextLabel
+if d then
+d.Visible=ap
+end
+end
+end
+
+function ao.ExpandSidebar(ap)
+if ao.SidebarExpanded then return end
+ao.SidebarExpanded=true
+ao.SetTitlesVisible(true)
+ao.SetSidebarWidth(ao.SidebarExpandWidth)
+end
+
+function ao.CollapseSidebar(ap)
+if not ao.SidebarExpanded then return end
+ao.SidebarExpanded=false
+ao.SetTitlesVisible(false)
+ao.SetSidebarWidth(ao.SidebarBaseWidth)
 end
 
 function ao.New(ap,aq)
@@ -13714,7 +13751,13 @@ task.wait(0.08)
 ak.Tween(icon,0.18,{Size=UDim2.new(0,26,0,26)},Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
 end)
 end
+-- ★★★ 点击已选中图标：收起侧边栏隐藏名字；否则选中并展开 ★★★
+if ar.Selected and ao.SidebarExpanded then
+ao:CollapseSidebar()
+else
 ao:SelectTab(as)
+ao:ExpandSidebar()
+end
 end
 end)
 
@@ -18051,18 +18094,21 @@ local function CreatePopupPanel(parent)
     end
 
     local globalConn = nil
+    local function isInside(frame, x, y)
+        local pos = frame.AbsolutePosition
+        local size = frame.AbsoluteSize
+        return x >= pos.X and x <= pos.X + size.X and y >= pos.Y and y <= pos.Y + size.Y
+    end
+
     local function setupGlobalClose()
         if globalConn then globalConn:Disconnect() end
         globalConn = UserInputService.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 if not panelObj.isOpen then return end
-                local mousePos = input.Position
-                local panelPos = panel.AbsolutePosition
-                local panelSize = panel.AbsoluteSize
-                if not (mousePos.X >= panelPos.X and mousePos.X <= panelPos.X + panelSize.X and
-                        mousePos.Y >= panelPos.Y and mousePos.Y <= panelPos.Y + panelSize.Y) then
-                    panelObj:Close()
-                end
+                local px, py = input.Position.X, input.Position.Y
+                if isInside(panel, px, py) then return end    -- 点在面板内部：不关闭
+                if isInside(parent, px, py) then return end   -- 点在悬浮窗本体（含左侧按钮）：不关闭，交给 Toggle 处理
+                panelObj:Close()
             end
         end)
     end
@@ -18446,11 +18492,13 @@ local function CreateFloatingButton(config)
         return false
     end
 
-    -- 加载保存的状态
-    loadState()
+    -- 加载保存的状态（有存档才覆盖位置，避免新用户悬浮窗被定到左上角）
+    local loaded = loadState()
 
     -- 应用加载的状态到 UI
-    al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
+    if loaded then
+        al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
+    end
     am.Scale = state.scale
     toggles[1]:SetState(state.autoSnapEnabled)
     toggles[2]:SetState(state.autoSwitchEnabled)
