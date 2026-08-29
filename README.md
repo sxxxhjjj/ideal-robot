@@ -18542,10 +18542,9 @@ local function CreateFloatingButton(config)
     end
 
     -- ============================================================
-    -- 拖动/吸附共享状态（提前声明，供 updateEdgeState / snapToEdge / 拖拽模块共用）
+    -- 拖动/靠边展开共享状态（提前声明，供 updateEdgeState / 拖拽模块共用）
     -- ============================================================
-    local isDragging = false      -- 是否正在拖动：拖动期间暂停边缘检测与吸附
-    local snapTween = nil         -- 吸附动画引用：再次拖动时立即取消
+    local isDragging = false      -- 是否正在拖动
 
     -- ============================================================
     -- 4. applyLayout
@@ -18571,7 +18570,6 @@ local function CreateFloatingButton(config)
     -- 5. 边缘检测
     -- ============================================================
     local function updateEdgeState()
-        if isDragging then return end   -- 拖动中不检测/不改变展开尺寸，避免与拖动抢位置
         if not state.autoSnapEnabled then
             if state.edgeActive then
                 state.edgeActive = false
@@ -18624,73 +18622,7 @@ local function CreateFloatingButton(config)
                math.clamp(offsetY, halfH, parentSize.Y - halfH)
     end
 
-    -- ============================================================
-    -- 5.5 自动吸附：拖拽松手后，若距离屏幕边缘足够近，则真正吸附（移动）到该边缘
-    -- ============================================================
-    local SNAP_THRESHOLD = 60  -- 距离边缘多少像素内判定为“接近边缘”
-    local function snapToEdge(force)
-        if isDragging then return end
-        if not state.autoSnapEnabled then return end
-        if not al or not al.Parent or al.AbsoluteSize.X <= 0 then return end
-
-        local pos = al.AbsolutePosition
-        local size = al.AbsoluteSize
-        local vp = camera.ViewportSize
-        if vp.X <= 0 or vp.Y <= 0 then return end
-
-        -- 计算四条边距离（以悬浮窗左上角为基准）
-        local distLeft   = pos.X
-        local distRight  = vp.X - (pos.X + size.X)
-        local distTop    = pos.Y
-        local distBottom = vp.Y - (pos.Y + size.Y)
-
-        -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
-        -- 因此吸附到某条边时，要把半宽/半高加回去，让整个悬浮窗贴边而不错位
-        local halfW = size.X / 2
-        local halfH = size.Y / 2
-
-        local targetX = al.Position.X.Offset
-        local targetY = al.Position.Y.Offset
-        local moved = false
-
-        -- X 轴：吸附到更近的一侧（左/右）
-        if distLeft <= distRight then
-            if force or distLeft <= SNAP_THRESHOLD then
-                targetX = halfW
-                moved = true
-            end
-        else
-            if force or distRight <= SNAP_THRESHOLD then
-                targetX = vp.X - halfW
-                moved = true
-            end
-        end
-
-        -- Y 轴：吸附到更近的一侧（上/下）
-        if distTop <= distBottom then
-            if force or distTop <= SNAP_THRESHOLD then
-                targetY = halfH
-                moved = true
-            end
-        else
-            if force or distBottom <= SNAP_THRESHOLD then
-                targetY = vp.Y - halfH
-                moved = true
-            end
-        end
-
-        -- 只有“接近”边缘才吸附，避免远在屏幕中央也被吸走
-        if moved then
-            local clampedX, clampedY = clampPosition(targetX, targetY)
-            if snapTween then snapTween:Cancel() end
-            snapTween = Creator.Tween(al, 0.2, {
-                Position = UDim2.new(0, clampedX, 0, clampedY),
-            }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            snapTween:Play()
-            -- 吸附只改 Root 坐标，不在这里触发边缘展开（Padding 变化、根尺寸同步），
-            -- 展开由 edgeHeartbeat 在吸附稳定后自然接管，避免吸附 Tween 与展开、换尺寸抢位置
-        end
-    end
+    -- （自动吸附已还原为“靠边自动展开”，物理“吸附到边缘”的 snapToEdge 已移除）
 
     Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
         task.wait(0.05)
@@ -18700,12 +18632,12 @@ local function CreateFloatingButton(config)
         updateEdgeState()
     end)
 
-    -- 拖动全程使用「屏幕绝对坐标」计算悬浮窗中心，写回时再转成相对 parent 的 Offset，
-    -- 不读取/不依赖 Position 的 Scale，从根上杜绝 Scale(居中) 与 Offset(拖动) 两套坐标系混用。
+    -- 拖拽：以按下时 al.Position(Offset) 为基准，随手指/鼠标位移移动，实时钳制 + 靠边展开。
+    -- Position 一律用 Offset（中心点坐标），不再混用 Scale 居中，避免拖动时坐标跳动。
     local dragInput = nil          -- 当前负责拖动的输入对象（鼠标左键 / 某根手指 Touch）
     local pressStartPos = nil      -- 按下瞬间手指屏幕坐标（阈值判定用）
     local dragStartMouse = nil     -- 按下瞬间手指屏幕坐标（拖动基准）
-    local dragStartCenter = nil    -- 按下瞬间悬浮窗中心的屏幕绝对坐标
+    local dragStartPos = nil       -- 按下瞬间 al.Position（拖动基准）
     local DRAG_THRESHOLD = 5
     local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
 
@@ -18730,16 +18662,11 @@ local function CreateFloatingButton(config)
         end
         if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
         if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
-        -- 开始拖动：立即取消正在进行的吸附动画，位置完全交给手指
-        if snapTween then
-            snapTween:Cancel()
-            snapTween = nil
-        end
         dragInput = input
         pressStartPos = input.Position
-        dragStartMouse = input.Position
-        dragStartCenter = al.AbsolutePosition + al.AbsoluteSize / 2
         isDragging = false
+        dragStartPos = al.Position
+        dragStartMouse = input.Position
     end)
 
     Creator.AddSignal(UserInputService.InputChanged, function(input)
@@ -18768,15 +18695,12 @@ local function CreateFloatingButton(config)
         end
 
         if isDragging then
-            -- 目标中心 = 按下时中心 + 手指移动量（全程屏幕绝对坐标）
-            local targetCenter = dragStartCenter + (input.Position - dragStartMouse)
-            local parentAbsPos = parent.AbsolutePosition
-            local cx, cy = clampPosition(
-                targetCenter.X - parentAbsPos.X,
-                targetCenter.Y - parentAbsPos.Y
-            )
-            al.Position = UDim2.new(0, cx, 0, cy)
-            -- 拖动中不再逐帧检测边缘，避免 applyLayout 改变尺寸与拖动抢位置
+            -- 以按下时 al.Position(Offset) 为基准，加上手指位移，再钳制回屏幕内
+            local newX = dragStartPos.X.Offset + (input.Position.X - dragStartMouse.X)
+            local newY = dragStartPos.Y.Offset + (input.Position.Y - dragStartMouse.Y)
+            local clampedX, clampedY = clampPosition(newX, newY)
+            al.Position = UDim2.new(0, clampedX, 0, clampedY)
+            updateEdgeState()  -- 拖动中实时靠边展开
         end
     end)
 
@@ -18794,13 +18718,12 @@ local function CreateFloatingButton(config)
             suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
             task.wait(0.05)
             updateEdgeState()
-            snapToEdge(false)  -- 松手后判断是否吸附到最近边缘
             syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
             return
         end
         pressStartPos = nil
+        dragStartPos = nil
         dragStartMouse = nil
-        dragStartCenter = nil
     end)
 
     -- ============================================================
@@ -18843,7 +18766,6 @@ local function CreateFloatingButton(config)
         else
             task.wait(0.05)
             updateEdgeState()
-            snapToEdge(false)
         end
         applyLayout()
     end)
