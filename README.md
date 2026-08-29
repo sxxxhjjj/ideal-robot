@@ -18289,13 +18289,17 @@ local function CreateFloatingButton(config)
 
     local al = Creator.New("Frame", {
         Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0.5, 0, 0, 28),
+        Position = UDim2.new(0, 0, 0, 28),
         AnchorPoint = Vector2.new(0.5, 0.5),
         BackgroundTransparency = 1,
         Active = true,
         Visible = false,
         Parent = parent,
     })
+    -- 统一坐标体系：Position 一律用 Offset（悬浮窗中心相对 parent 左上角的像素偏移）。
+    -- 不再用 X.Scale=0.5 居中——否则拖动把 Position 写回 Scale=0 时，X 会从“居中”猛地跳到
+    -- “手指移动几十像素”，再被钳到贴边，这就是“一拖就往那面闪”的根因。
+    -- X 的实际居中值在启动块里、等 parent.AbsoluteSize 已知后再设置（见文件末尾）。
 
     local am = Creator.New("UIScale", { Scale = 1, Parent = al })
 
@@ -18419,10 +18423,9 @@ local function CreateFloatingButton(config)
         end
     end)
 
-    -- ★★★ 已移除「an.AbsoluteSize → al.Size」的实时绑定 ★★★
-    -- 原先这里每帧把内容自动布局的尺寸写回拖动根 al，是“拖一下就歪歪散开”的根因：
-    -- 内容尺寸一变 → al 尺寸跟着变 → al 是 AnchorPoint(0.5,0.5) → 视觉中心被反复重算。
-    -- 现在改为在“布局安定后”通过 syncRootSize() 显式同步一次（见下方）。
+    -- ★★★ 已移除「an.AbsoluteSize → al.Size」实时绑定 ★★★
+    -- 原先每帧把内容自动布局尺寸写回拖动根 al，会让 al 尺寸随内容变，再叠加 AnchorPoint(0.5,0.5)
+    -- 造成位置反复重算（“歪散/闪动”的第二根因）。现改为安定点通过 syncRootSize() 校准一次。
 
     Creator.AddSignal(textButton.MouseEnter, function()
         Creator.Tween(textButton, 0.1, { BackgroundTransparency = 0.93 }):Play()
@@ -18446,8 +18449,7 @@ local function CreateFloatingButton(config)
     }
 
     -- ============================================================
-    -- ★★★ 根尺寸同步：只在布局真正安定后调用一次 ★★★
-    -- 绝不在拖动 / 自动布局过程中把内容尺寸实时写回拖动根（歪歪散开的根因）。
+    -- 根尺寸同步：只在布局安定后调用一次，绝不在拖动/自动布局过程中逐帧写回。
     -- 拖动根 al 只负责 Position / 拖动 / 吸附，尺寸由这里在安定点校准。
     -- ============================================================
     local function syncRootSize()
@@ -18457,7 +18459,6 @@ local function CreateFloatingButton(config)
         if w <= 0 or h <= 0 then return end
         al.Size = UDim2.new(0, w, 0, h)
     end
-    -- 先排一个延迟同步，确保内容 AutomaticSize 结算完成后再校准根尺寸
     task.defer(syncRootSize)
 
     -- ============================================================
@@ -18560,8 +18561,8 @@ local function CreateFloatingButton(config)
                 PaddingLeft = UDim.new(0, targetPadding),
                 PaddingRight = UDim.new(0, targetPadding),
             }, Enum.EasingStyle.Quad):Play()
-            -- 布局（Padding）变化后，等动画结束再同步一次根尺寸，且只同步这一次，
-            -- 避免 Padding 动画期间根尺寸被连续改写、与吸附/拖动抢位置
+            -- Padding 动画结束后再同步一次根尺寸，且只同步这一次，
+            -- 避免动画期间根尺寸被连续改写、与吸附/拖动抢位置
             task.delay(0.22, syncRootSize)
         end
     end
@@ -18687,7 +18688,7 @@ local function CreateFloatingButton(config)
             }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             snapTween:Play()
             -- 吸附只改 Root 坐标，不在这里触发边缘展开（Padding 变化、根尺寸同步），
-            -- 展开由 edgeHeartbeat 在吸附稳定后自然接管，避免吸附 Tween 与展开、换尺寸三者抢位置
+            -- 展开由 edgeHeartbeat 在吸附稳定后自然接管，避免吸附 Tween 与展开、换尺寸抢位置
         end
     end
 
@@ -18699,10 +18700,12 @@ local function CreateFloatingButton(config)
         updateEdgeState()
     end)
 
-    local dragInput = nil        -- 当前负责拖动的输入对象（MouseButton1 或某根手指 Touch）
-    local pressStartPos = nil
-    local dragStartPos = nil
-    local dragStartMouse = nil
+    -- 拖动全程使用「屏幕绝对坐标」计算悬浮窗中心，写回时再转成相对 parent 的 Offset，
+    -- 不读取/不依赖 Position 的 Scale，从根上杜绝 Scale(居中) 与 Offset(拖动) 两套坐标系混用。
+    local dragInput = nil          -- 当前负责拖动的输入对象（鼠标左键 / 某根手指 Touch）
+    local pressStartPos = nil      -- 按下瞬间手指屏幕坐标（阈值判定用）
+    local dragStartMouse = nil     -- 按下瞬间手指屏幕坐标（拖动基准）
+    local dragStartCenter = nil    -- 按下瞬间悬浮窗中心的屏幕绝对坐标
     local DRAG_THRESHOLD = 5
     local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
 
@@ -18719,9 +18722,9 @@ local function CreateFloatingButton(config)
         end
         dragInput = input
         pressStartPos = input.Position
-        isDragging = false
-        dragStartPos = al.Position
         dragStartMouse = input.Position
+        dragStartCenter = al.AbsolutePosition + al.AbsoluteSize / 2
+        isDragging = false
     end)
 
     Creator.AddSignal(UserInputService.InputChanged, function(input)
@@ -18729,8 +18732,8 @@ local function CreateFloatingButton(config)
                        input.UserInputType == Enum.UserInputType.Touch
         if not isMove then return end
 
-        -- 只响应「当前这一次按下」的输入：触屏靠同一 InputObject 引用识别，
-        -- 鼠标移动是持续的新对象，需要用“左键仍按下”来判断，避免别的输入抢拖动
+        -- 只响应「当前这一次按下」的输入：触屏靠同一 InputObject 引用识别；
+        -- 鼠标移动是持续的新对象，用“左键仍按下”判断，避免别的输入抢拖动
         local belongs
         if input.UserInputType == Enum.UserInputType.Touch then
             belongs = (dragInput ~= nil and input == dragInput)
@@ -18750,10 +18753,14 @@ local function CreateFloatingButton(config)
         end
 
         if isDragging then
-            local newX = dragStartPos.X.Offset + (input.Position.X - dragStartMouse.X)
-            local newY = dragStartPos.Y.Offset + (input.Position.Y - dragStartMouse.Y)
-            local clampedX, clampedY = clampPosition(newX, newY)
-            al.Position = UDim2.new(0, clampedX, 0, clampedY)
+            -- 目标中心 = 按下时中心 + 手指移动量（全程屏幕绝对坐标）
+            local targetCenter = dragStartCenter + (input.Position - dragStartMouse)
+            local parentAbsPos = parent.AbsolutePosition
+            local cx, cy = clampPosition(
+                targetCenter.X - parentAbsPos.X,
+                targetCenter.Y - parentAbsPos.Y
+            )
+            al.Position = UDim2.new(0, cx, 0, cy)
             -- 拖动中不再逐帧检测边缘，避免 applyLayout 改变尺寸与拖动抢位置
         end
     end)
@@ -18769,16 +18776,16 @@ local function CreateFloatingButton(config)
 
         if isDragging then
             isDragging = false
-            dragStartPos = nil
-            dragStartMouse = nil
             suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
             task.wait(0.05)
             updateEdgeState()
             snapToEdge(false)  -- 松手后判断是否吸附到最近边缘
-            syncRootSize()     -- 松手后内容若已变化（如边缘展开），同步一次根尺寸
+            syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
             return
         end
         pressStartPos = nil
+        dragStartMouse = nil
+        dragStartCenter = nil
     end)
 
     -- ============================================================
@@ -18897,10 +18904,14 @@ local function CreateFloatingButton(config)
     button.Popup = al
     button.Panel = popupPanel
 
-    -- 启动：等尺寸已知后，先把（可能过期的）位置钳制回合法范围再做边缘检测
+    -- 启动：等尺寸已知后，先同步根尺寸；无存档则 X 居中（Offset 体系）；最后钳制回合法范围再做边缘检测
     task.spawn(function()
         task.wait(0.1)
-        syncRootSize()  -- 先用内容结算出的尺寸校准根尺寸，再做钳制
+        syncRootSize()
+        -- 无有效存档位置时，X 居中（相对 parent 左上角的像素偏移），Y 保持 28
+        if not loaded then
+            al.Position = UDim2.new(0, parent.AbsoluteSize.X / 2, 0, 28)
+        end
         local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
         al.Position = UDim2.new(0, cx, 0, cy)
         updateEdgeState()
