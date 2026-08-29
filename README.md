@@ -18686,7 +18686,8 @@ local function CreateFloatingButton(config)
                 Position = UDim2.new(0, clampedX, 0, clampedY),
             }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             snapTween:Play()
-            updateEdgeState()
+            -- 吸附只改 Root 坐标，不在这里触发边缘展开（Padding 变化、根尺寸同步），
+            -- 展开由 edgeHeartbeat 在吸附稳定后自然接管，避免吸附 Tween 与展开、换尺寸三者抢位置
         end
     end
 
