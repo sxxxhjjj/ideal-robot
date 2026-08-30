@@ -5760,14 +5760,14 @@ return{
 Dark={
 Name="Dark",
 
-Accent=Color3.fromHex"#18181b",
-Dialog=Color3.fromHex"#1a1a1a",
+Accent=Color3.fromHex"#0f0f11",
+Dialog=Color3.fromHex"#121212",
 Outline=Color3.fromHex"#FFFFFF",
 Text=Color3.fromHex"#FFFFFF",
-Placeholder=Color3.fromHex"#a1a1a1",
-Background=Color3.fromHex"#101010",
-Button=Color3.fromHex"#52525b",
-Icon=Color3.fromHex"#a1a1aa",
+Placeholder=Color3.fromHex"#7d7d7d",
+Background=Color3.fromHex"#080808",
+Button=Color3.fromHex"#3f3f46",
+Icon=Color3.fromHex"#82828a",
 Toggle=Color3.fromHex"#33C759",
 Slider=Color3.fromHex"#0091FF",
 Checkbox=Color3.fromHex"#0091FF",
@@ -5782,7 +5782,7 @@ Primary=Color3.fromHex"#0091FF",
 LabelBackground=Color3.fromHex"#000000",
 LabelBackgroundTransparency=0.83,
 
-ElementBackground=Color3.fromHex"#2A2A2C",
+ElementBackground=Color3.fromHex"#1c1c1e",
 ElementBackgroundTransparency=0,
 },
 
@@ -18550,6 +18550,7 @@ local function CreateFloatingButton(config)
     -- 拖动/靠边展开共享状态（提前声明，供 updateEdgeState / 拖拽模块共用）
     -- ============================================================
     local isDragging = false      -- 是否正在拖动
+    local snapTween = nil         -- 贴到顶部吸附动画
 
     -- ============================================================
     -- 4. applyLayout
@@ -18627,7 +18628,29 @@ local function CreateFloatingButton(config)
                math.clamp(offsetY, halfH, parentSize.Y - halfH)
     end
 
-    -- （自动吸附已还原为“靠边自动展开”，物理“吸附到边缘”的 snapToEdge 已移除）
+    -- ============================================================
+    -- 6.5 贴到顶部吸附：松手时若接近屏幕顶边，平滑贴到顶部
+    -- ============================================================
+    local SNAP_TOP_THRESHOLD = 90  -- 距顶边多少像素内判定为“接近顶部”
+    local function snapToTopEdge()
+        if isDragging then return end
+        if not state.autoSnapEnabled then return end
+        if not al or not al.Parent or al.AbsoluteSize.Y <= 0 then return end
+
+        local pos = al.AbsolutePosition
+        if pos.Y > SNAP_TOP_THRESHOLD then return end  -- 不靠近顶边就不吸
+
+        local halfH = al.AbsoluteSize.Y / 2
+        local targetX = al.Position.X.Offset  -- X 保持不动
+        local targetY = halfH                 -- 贴顶：中心对齐到顶边
+        local cx, cy = clampPosition(targetX, targetY)
+        if snapTween then snapTween:Cancel() end
+        snapTween = Creator.Tween(al, 0.25, {
+            Position = UDim2.new(0, cx, 0, cy),
+        }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        snapTween:Play()
+        -- 贴顶过程中 updateEdgeState（每帧跑）检测到 pos.Y<=2，会自动触发“靠边展开”动画
+    end
 
     Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
         task.wait(0.05)
@@ -18667,6 +18690,7 @@ local function CreateFloatingButton(config)
         end
         if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
         if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
+        if snapTween then snapTween:Cancel(); snapTween = nil end  -- 中断贴顶动画
         dragInput = input
         pressStartPos = input.Position
         isDragging = false
@@ -18723,6 +18747,7 @@ local function CreateFloatingButton(config)
             suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
             task.wait(0.05)
             updateEdgeState()
+            snapToTopEdge()    -- 接近顶边 → 平滑贴到顶部
             syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
             return
         end
@@ -18771,6 +18796,7 @@ local function CreateFloatingButton(config)
         else
             task.wait(0.05)
             updateEdgeState()
+            snapToTopEdge()
         end
         applyLayout()
     end)
