@@ -18117,6 +18117,7 @@ local function CreatePopupPanel(parent)
     panelObj.Open = function(self, ...)
         oldOpen(self, ...)
         setupGlobalClose()
+        if panelObj.OnStateChanged then panelObj.OnStateChanged(true) end
     end
 
     local oldClose = panelObj.Close
@@ -18126,6 +18127,7 @@ local function CreatePopupPanel(parent)
             globalConn:Disconnect()
             globalConn = nil
         end
+        if panelObj.OnStateChanged then panelObj.OnStateChanged(false) end
     end
 
     return panelObj
@@ -18410,6 +18412,17 @@ local function CreateFloatingButton(config)
     local popupPanel = CreatePopupPanel(al)
     local toggles = popupPanel.toggles
     -- toggles[1]=自动吸附, [2]=自动换图, [3]=单点互动
+
+    -- ★★★ 面板开/合时同步左侧图标：点空白关闭也走这里，图标才回得去 ★★★
+    popupPanel.OnStateChanged = function(isOpen)
+        if isOpen then
+            aj.Image = ICON_ACTIVE
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
+        else
+            aj.Image = ICON_DEFAULT
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
+        end
+    end
 
     -- ★★★ 创建悬停效果（单点互动） ★★★
     local hoverEffect = CreateHoverEffect(textButton, al, 1.1)
@@ -18825,14 +18838,7 @@ local function CreateFloatingButton(config)
             resetColor:Play()
         end)
 
-        popupPanel:Toggle()
-        if popupPanel.isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
+        popupPanel:Toggle()  -- 开/合会触发 OnStateChanged，由它统一切换图标
     end)
 
     -- ============================================================
