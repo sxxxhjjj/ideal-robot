@@ -17467,315 +17467,162 @@ local Window = WindUI:CreateWindow({
     Radius        = 16,       -- 圆角
     ElementsRadius = 16,
 
-    Background = "rbxassetid://90331823252393",  -- 主面板背景图（原版主面板背景层）
+    Background = "rbxassetid://90331823252393",  -- 主面板背景图（已压暗）
+    BackgroundImageTransparency = 0.55,        -- 背景图透明度：越大越暗，避免刺眼
 
     OpenButton = { Enabled = false },  -- 内置右下角按钮关闭，改用下方内嵌「悬浮窗」
 
     -- 说明：KeySystem 不传、Services 不加载、Localization 不调用 -> 等效移除/关闭
 })
 
--- 配置系统：仅保存带 Flag 的 Toggle 状态（第二个参数 true = 下次启动自动恢复）
-local Config = (Window.ConfigManager and Window.ConfigManager:Config("Setting", true)) or nil
+-- 配置系统已移除：所有策略写死在脚本内部，玩家无需保存任何开关
 
 -- ============================================================
 -- 共享状态（界面与自动化引擎共用）
 -- ============================================================
+-- 内部参数：全部写死，玩家不需要配置
 local TTD = {
-    -- 流程
+    -- 流程（固定全开）
     AutoReady    = true,    -- 自动准备 / 开始
     AutoSkip     = true,    -- 自动跳波
     AutoLobby    = true,    -- 结算后自动回大厅
     AutoClose    = true,    -- 自动关弹窗 / 跳过剧情
-    -- 放置
-    AutoPlace    = true,    -- 自动放置单位
-    Strategy     = "智能",  -- 选卡策略
-    UnitName     = "",      -- 指定单位（留空 = 自动挑）
-    Priority     = "",      -- 优先级列表（逗号分隔）
-    Count        = 8,       -- 目标放置数量
-    Spacing      = 7,       -- 放置间距 / 布点密度
+    -- 放置（内部固定策略）
+    AutoPlace    = true,
+    Count        = 12,      -- 场上单位上限
+    FillCheap    = 6,       -- 前 6 个先买最便宜的铺场
+    Spacing      = 7,       -- 单位间距
     Reserve      = 0,       -- 保留现金
-    UseManual    = false,   -- 使用手动记录的原点
-    AutoReplace  = false,   -- 满员自动替换最弱单位
-    -- 升级 / 技能
-    AutoUpgrade  = true,    -- 自动升级
-    UpgradeTimes = 2,       -- 每轮每个单位升级次数
-    AutoAbility  = true,    -- 自动开启单位 Auto 技能
+    UseManual    = false,   -- 不使用手动原点
+    AutoReplace  = true,    -- 满员自动替换最弱
+    TitanWave    = 12,      -- 波数 >= 此值开始优先泰坦
+    -- 升级 / 技能（固定全开）
+    AutoUpgrade  = true,
+    UpgradeTimes = 2,
+    AutoAbility  = true,
     -- 其它
-    AntiAfk      = true,    -- 防掉线
+    AntiAfk      = true,
     -- 运行数据
-    PlaceOrigin  = nil,     -- 手动记录的原点
-    BadPoints    = {},      -- 放置失败过的点
+    PlaceOrigin  = nil,
+    BadPoints    = {},
     LastReason   = "就绪",
     LastPoint    = nil,
+    Phase        = "铺场",
     Running      = true,
-    Actions      = {},      -- 由文件末尾的引擎填充
+    Paused       = false,
+    Actions      = {},
     Logs         = {},
 }
 
-local function saveCfg()
-    if Config then pcall(function() Config:Save() end) end
-end
-
 -- ============================================================
--- 标签页
+-- 界面：只展示状态，不提供任何需要玩家调整的配置
 -- ============================================================
-local AutoTab   = Window:Tab({ Title = "自动化", Icon = "zap" })
-local StatusTab = Window:Tab({ Title = "状态",   Icon = "activity" })
-local MiscTab   = Window:Tab({ Title = "杂项",   Icon = "wrench" })
-local Main = AutoTab
+local MainTab = Window:Tab({ Title = "概览", Icon = "activity" })
+local LogTab  = Window:Tab({ Title = "日志", Icon = "scroll-text" })
+local ToolTab = Window:Tab({ Title = "工具", Icon = "wrench" })
 
--- ============================================================
--- 自动化
--- ============================================================
-local SecMain = AutoTab:Section({
-    Title = "比赛流程",
-    Desc  = "准备 / 跳波 / 结算 / 弹窗",
-    Icon  = "play",
+local SecStatus = MainTab:Section({
+    Title = "运行状态",
+    Desc  = "全自动运行中 · 无需设置",
+    Icon  = "activity",
 })
 
-SecMain:Toggle({
-    Title = "自动准备 / 开始",
-    Desc  = "准备阶段自动点击开始按钮",
-    Value = TTD.AutoReady,
-    Flag  = "TTD_AutoReady",
-    Callback = function(v) TTD.AutoReady = v; saveCfg() end,
+local StatusPara = SecStatus:Paragraph({
+    Title = "实时数据",
+    Desc  = "正在读取游戏数据...",
 })
 
-SecMain:Toggle({
-    Title = "自动跳波",
-    Desc  = "出现跳波确认时自动点 Y",
-    Value = TTD.AutoSkip,
-    Flag  = "TTD_AutoSkip",
-    Callback = function(v) TTD.AutoSkip = v; saveCfg() end,
+local SecPlan = MainTab:Section({
+    Title = "内部策略",
+    Desc  = "已固定，玩家不用改",
+    Icon  = "brain",
 })
 
-SecMain:Toggle({
-    Title = "自动返回大厅",
-    Desc  = "结算界面出现后自动点返回",
-    Value = TTD.AutoLobby,
-    Flag  = "TTD_AutoLobby",
-    Callback = function(v) TTD.AutoLobby = v; saveCfg() end,
+SecPlan:Paragraph({
+    Title = "建造顺序",
+    Desc  = "开局先买最便宜的单位铺场 → 有余钱换成更强的 → 满员自动替换最弱 → 后期优先攒钱买泰坦 → 泰坦优先升级",
 })
 
-SecMain:Toggle({
-    Title = "自动关弹窗 / 跳过剧情",
-    Desc  = "关闭阻断操作的弹窗与过场动画",
-    Value = TTD.AutoClose,
-    Flag  = "TTD_AutoClose",
-    Callback = function(v) TTD.AutoClose = v; saveCfg() end,
+SecPlan:Paragraph({
+    Title = "摆放规则",
+    Desc  = "自动扫描放置区：贴路优先 → 卡转角 → 覆盖路径 → 自动避让已占位置",
 })
 
--- ============================================================
--- 放置与选卡
--- ============================================================
-local SecPlace = AutoTab:Section({
-    Title = "放置与选卡",
-    Desc  = "自动找点 · 现金不够自动挑次优",
-    Icon  = "target",
+local SecLog = LogTab:Section({
+    Title = "运行日志",
+    Desc  = "最近 6 条",
+    Icon  = "scroll-text",
 })
 
-SecPlace:Toggle({
-    Title = "自动放置单位",
-    Desc  = "自动扫描地图找最佳位置，无需记录原点",
-    Value = TTD.AutoPlace,
-    Flag  = "TTD_AutoPlace",
-    Callback = function(v) TTD.AutoPlace = v; saveCfg() end,
+local LogPara = SecLog:Paragraph({
+    Title = "日志",
+    Desc  = "等待引擎启动...",
 })
 
-SecPlace:Dropdown({
-    Title = "选卡策略",
-    Desc  = "智能 = 优先级优先，否则买得起的里挑最贵（最强）",
-    Values = { "智能", "最贵可负担", "最便宜" },
-    Value = "智能",
-    Flag = "TTD_Strategy",
-    Callback = function(v) TTD.Strategy = tostring(v or "智能") end,
+local SecTool = ToolTab:Section({
+    Title = "工具",
+    Desc  = "平时不需要动",
+    Icon  = "wrench",
 })
 
-SecPlace:Input({
-    Title = "指定单位",
-    Desc  = "只买这个单位（留空 = 自动挑最强的）",
-    Placeholder = "例如：Titan Speakerman",
-    Value = TTD.UnitName,
-    Callback = function(t) TTD.UnitName = tostring(t or "") end,
+SecTool:Button({
+    Title = "暂停 / 继续",
+    Desc  = "暂停后不再点任何游戏按钮",
+    Icon  = "pause",
+    Callback = function()
+        if TTD.Actions.TogglePause then TTD.Actions.TogglePause() end
+    end,
 })
 
-SecPlace:Input({
-    Title = "优先级列表",
-    Desc  = "逗号分隔，靠前的优先买，买不起自动降级",
-    Placeholder = "例如：Titan TV Man, Camera Man",
-    Value = TTD.Priority,
-    Callback = function(t) TTD.Priority = tostring(t or "") end,
-})
-
-SecPlace:Slider({
-    Title = "放置数量",
-    Desc  = "地图上要保留的单位总数",
-    Value = { Min = 1, Max = 30, Default = 8 },
-    Step  = 1,
-    Callback = function(v) TTD.Count = math.floor(tonumber(v) or 8) end,
-})
-
-SecPlace:Slider({
-    Title = "放置间距",
-    Desc  = "单位之间的格距，同时决定自动布点密度",
-    Value = { Min = 3, Max = 20, Default = 7 },
-    Step  = 1,
-    Callback = function(v) TTD.Spacing = math.floor(tonumber(v) or 7) end,
-})
-
-SecPlace:Slider({
-    Title = "保留现金",
-    Desc  = "现金低于这个数就不买单位",
-    Value = { Min = 0, Max = 5000, Default = 0 },
-    Step  = 50,
-    Callback = function(v) TTD.Reserve = math.floor(tonumber(v) or 0) end,
-})
-
-SecPlace:Toggle({
-    Title = "使用手动记录的原点",
-    Desc  = "默认关闭 = 全自动找最佳放点（推荐）",
-    Value = TTD.UseManual,
-    Flag  = "TTD_UseManual",
-    Callback = function(v) TTD.UseManual = v; saveCfg() end,
-})
-
-SecPlace:Toggle({
-    Title = "满员自动替换",
-    Desc  = "钱够时卖掉最弱的单位，换成更贵的",
-    Value = TTD.AutoReplace,
-    Flag  = "TTD_AutoReplace",
-    Callback = function(v) TTD.AutoReplace = v; saveCfg() end,
-})
-
--- ============================================================
--- 升级与技能
--- ============================================================
-local SecUp = AutoTab:Section({
-    Title = "升级与技能",
-    Desc  = "选中单位后点升级 / 开启 Auto",
-    Icon  = "arrow-up-circle",
-})
-
-SecUp:Toggle({
-    Title = "自动升级",
-    Desc  = "依次选中自己的单位并升级",
-    Value = TTD.AutoUpgrade,
-    Flag  = "TTD_AutoUpgrade",
-    Callback = function(v) TTD.AutoUpgrade = v; saveCfg() end,
-})
-
-SecUp:Slider({
-    Title = "每次升级次数",
-    Desc  = "每轮对每个单位点几次升级",
-    Value = { Min = 1, Max = 5, Default = 2 },
-    Step  = 1,
-    Callback = function(v) TTD.UpgradeTimes = math.floor(tonumber(v) or 2) end,
-})
-
-SecUp:Toggle({
-    Title = "自动开启单位 Auto",
-    Desc  = "点击各单位面板里的 Auto 技能开关",
-    Value = TTD.AutoAbility,
-    Flag  = "TTD_AutoAbility",
-    Callback = function(v) TTD.AutoAbility = v; saveCfg() end,
-})
-
--- ============================================================
--- 手动操作
--- ============================================================
-local SecManual = AutoTab:Section({
-    Title = "手动操作",
-    Desc  = "立即执行一次",
-    Icon  = "zap",
-})
-
-SecManual:Button({
+SecTool:Button({
     Title = "重新扫描地图",
-    Desc  = "清空失败点并重建放置点（换图后点一下）",
+    Desc  = "换图后自动重扫，也可手动点一下",
+    Icon  = "map",
     Callback = function()
         if TTD.Actions.Rebuild then TTD.Actions.Rebuild() end
     end,
 })
 
-SecManual:Button({
+SecTool:Button({
     Title = "立即放置一轮",
-    Desc  = "按当前设置放一个单位",
+    Desc  = "按内部策略放一个单位",
+    Icon  = "target",
     Callback = function()
         if TTD.Actions.Place then TTD.Actions.Place(1) end
     end,
 })
 
-SecManual:Button({
+SecTool:Button({
     Title = "立即升级一轮",
-    Desc  = "选中自己的单位并升级",
+    Desc  = "优先升级泰坦和高价单位",
+    Icon  = "arrow-up-circle",
     Callback = function()
         if TTD.Actions.Upgrade then TTD.Actions.Upgrade() end
     end,
 })
 
-SecManual:Button({
+SecTool:Button({
     Title = "出售全部我的单位",
-    Desc  = "逐个选中并点出售",
+    Desc  = "清场重来（一般不需要）",
+    Icon  = "trash-2",
     Callback = function()
         if TTD.Actions.SellAll then TTD.Actions.SellAll() end
     end,
 })
 
-SecManual:Button({
-    Title = "记录放置原点",
-    Desc  = "可选：准星对准地面后点击，再打开上面的开关",
-    Callback = function()
-        if TTD.Actions.RecordOrigin then TTD.Actions.RecordOrigin() end
-    end,
-})
-
--- ============================================================
--- 状态
--- ============================================================
-local SecStatus = StatusTab:Section({
-    Title = "实时数据",
-    Desc  = "每秒自动刷新",
-    Icon  = "activity",
-})
-
-local StatusPara = SecStatus:Paragraph({
-    Title = "运行状态",
-    Desc  = "正在读取游戏数据...",
-})
-
-local LogPara = SecStatus:Paragraph({
-    Title = "运行日志",
-    Desc  = "等待引擎启动...",
-})
-
-SecStatus:Button({
-    Title = "刷新一次",
+SecTool:Button({
+    Title = "刷新状态",
     Desc  = "立即读取波数 / 现金 / 基地血量",
+    Icon  = "refresh-cw",
     Callback = function()
         if TTD.Actions.Refresh then TTD.Actions.Refresh() end
     end,
 })
 
--- ============================================================
--- 杂项
--- ============================================================
-local SecMisc = MiscTab:Section({
-    Title = "杂项",
-    Desc  = "账号与稳定性",
-    Icon  = "wrench",
-})
-
-SecMisc:Toggle({
-    Title = "防掉线 (Anti-AFK)",
-    Desc  = "闲置 20 分钟时自动跳一下",
-    Value = TTD.AntiAfk,
-    Flag  = "TTD_AntiAfk",
-    Callback = function(v) TTD.AntiAfk = v; saveCfg() end,
-})
-
-SecMisc:Button({
+SecTool:Button({
     Title = "重新进入当前服务器",
     Desc  = "重新传送到当前 PlaceId",
+    Icon  = "log-out",
     Callback = function()
         pcall(function()
             game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
@@ -17783,9 +17630,10 @@ SecMisc:Button({
     end,
 })
 
-SecMisc:Button({
+SecTool:Button({
     Title = "停止并卸载脚本",
     Desc  = "关闭界面与所有自动化",
+    Icon  = "power",
     Callback = function()
         TTD.Running = false
         pcall(function() Window:Destroy() end)
@@ -18003,6 +17851,7 @@ local function CreatePopupPanel(parent)
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
             Image = "rbxassetid://137413437808718",
+            ImageColor3 = Color3.fromRGB(62, 64, 76),   -- 压暗背景图，避免过亮
             ScaleType = Enum.ScaleType.Crop,
             Name = "BackgroundImage",
         }, {
@@ -18010,8 +17859,8 @@ local function CreatePopupPanel(parent)
         }),
         Creator.New("Frame", {
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(10, 10, 15),
-            BackgroundTransparency = 0.5,
+            BackgroundColor3 = Color3.fromRGB(6, 7, 12),
+            BackgroundTransparency = 0.68,               -- 再加一层深色遮罩
             BorderSizePixel = 0,
         }, {
             Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
@@ -18114,35 +17963,35 @@ local function CreatePopupPanel(parent)
 
     local leftGlass = Creator.New("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(245, 245, 250),
-        BackgroundTransparency = 0.78,
+        BackgroundColor3 = Color3.fromRGB(12, 14, 20),
+        BackgroundTransparency = 0.12,
         BorderSizePixel = 0,
         Parent = leftPanel,
     }, {
         Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         Creator.New("UIStroke", {
             Thickness = 1,
-            Color = Color3.fromRGB(255, 255, 255),
-            Transparency = 0.7,
+            Color = Color3.fromRGB(120, 130, 160),
+            Transparency = 0.6,
         }),
         Creator.New("Frame", {
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BackgroundTransparency = 0.92,
+            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 0.35,
             BorderSizePixel = 0,
         }, {
             Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         }),
         Creator.New("UIGradient", {
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 240, 248)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(14, 16, 24)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(34, 38, 52)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 16, 24)),
             }),
             Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.6),
-                NumberSequenceKeypoint.new(0.5, 0.8),
-                NumberSequenceKeypoint.new(1, 0.6),
+                NumberSequenceKeypoint.new(0, 0.15),
+                NumberSequenceKeypoint.new(0.5, 0.35),
+                NumberSequenceKeypoint.new(1, 0.15),
             }),
         }),
     })
@@ -18162,7 +18011,9 @@ local function CreatePopupPanel(parent)
             Text = "功能开关",
             TextSize = 14,
             FontFace = Font.new(Creator.Font, Enum.FontWeight.SemiBold),
-            TextColor3 = Color3.fromRGB(40, 45, 55),
+            TextColor3 = Color3.new(1, 1, 1),
+            TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
+            TextStrokeTransparency = 0.55,
             BackgroundTransparency = 1,
             AutomaticSize = "XY",
         }),
@@ -19414,64 +19265,123 @@ local function normalizeName(s)
     return tostring(s):lower():gsub("[%s%-_%./:']", "")
 end
 
-local function parsePriority()
-    local list = {}
-    for part in tostring(TTD.Priority):gmatch("[^,，]+") do
-        local n = normalizeName(part)
-        if n ~= "" then table.insert(list, n) end
-    end
-    return list
-end
-
 local function affordable(c, cash)
     if c.price <= 0 then return true end
     if cash <= 0 then return true end  -- 读不到现金时不阻塞
     return c.price <= (cash - TTD.Reserve)
 end
 
--- 智能选卡：指定单位 → 优先级 → 策略兜底（买不起自动降级）
-local function pickCard(cash)
+local function waveNumber()
+    local n = parseNumber(getWaveText())
+    return math.floor(n or 0)
+end
+
+local function isTitan(c)
+    return normalizeName(c.name):find("titan", 1, true) ~= nil
+end
+
+local function titanOwned()
+    for _, t in ipairs(myTowers()) do
+        if normalizeName(t.Name):find("titan", 1, true) then return true end
+    end
+    return false
+end
+
+local function cheapest(cards, cash, skipTitan)
+    local best
+    for _, c in ipairs(cards) do
+        if affordable(c, cash) and not (skipTitan and isTitan(c))
+            and (not best or c.price < best.price) then
+            best = c
+        end
+    end
+    return best
+end
+
+local function strongest(cards, cash, skipTitan)
+    local best
+    for _, c in ipairs(cards) do
+        if affordable(c, cash) and not (skipTitan and isTitan(c))
+            and (not best or c.price > best.price) then
+            best = c
+        end
+    end
+    return best
+end
+
+local function titanList(cards)
+    local list = {}
+    for _, c in ipairs(cards) do
+        if isTitan(c) then table.insert(list, c) end
+    end
+    table.sort(list, function(a, b) return a.price < b.price end)
+    return list
+end
+
+-- 内部固定策略（玩家不需要配置）：
+--   1) 铺场：先买买得起的最便宜单位，快速占位
+--   2) 补强：铺满后买买得起的最强单位；满员时替换最弱
+--   3) 泰坦：波数达标 / 场上缺泰坦时，优先攒钱买泰坦
+local function planCard(cash)
     local cards = getCards()
     if #cards == 0 then
         TTD.LastReason = "没有找到单位卡片（商店可能未打开）"
         return nil
     end
     cash = cash or parseNumber(getCashText())
+    local wave = waveNumber()
+    local count = countTowers()
 
-    local want = normalizeName(TTD.UnitName)
-    if want ~= "" then
-        for _, c in ipairs(cards) do
-            if normalizeName(c.name):find(want, 1, true) and affordable(c, cash) then
-                return c
-            end
+    local titans = titanList(cards)
+
+    -- 攒泰坦期：临近泰坦波次且还没有泰坦，除铺场外不再乱花钱
+    local savingForTitan = (#titans > 0 and not titanOwned()
+        and wave >= (TTD.TitanWave - 3) and count >= TTD.FillCheap)
+
+    -- 阶段 3：泰坦优先（临近泰坦波次且买得起就直接买）
+    if #titans > 0 and (wave >= (TTD.TitanWave - 3) or count >= TTD.Count - 2) then
+        local bestTitan
+        for _, t in ipairs(titans) do
+            if affordable(t, cash) then bestTitan = t end
+        end
+        if bestTitan then
+            TTD.Phase = "泰坦"
+            return bestTitan
         end
     end
 
-    for _, p in ipairs(parsePriority()) do
-        for _, c in ipairs(cards) do
-            if normalizeName(c.name):find(p, 1, true) and affordable(c, cash) then
-                return c
-            end
-        end
+    -- 阶段 1：铺场（先放小钱单位）
+    if count < TTD.FillCheap then
+        TTD.Phase = "铺场"
+        local c = cheapest(cards, cash, true) or cheapest(cards, cash, false)
+        if c then return c end
     end
 
-    local best
-    if TTD.Strategy == "最便宜" then
-        for _, c in ipairs(cards) do
-            if affordable(c, cash) and (not best or c.price < best.price) then
-                best = c
-            end
-        end
-    else
-        for _, c in ipairs(cards) do
-            if affordable(c, cash) and (not best or c.price > best.price) then
-                best = c
-            end
-        end
+    -- 阶段 2：补强（买得起的最强）
+    if count < TTD.Count and not savingForTitan then
+        TTD.Phase = "补强"
+        local c = strongest(cards, cash, true) or strongest(cards, cash, false)
+        if c then return c end
     end
 
+    if savingForTitan then
+        TTD.Phase = "攒泰坦"
+        TTD.LastReason = string.format("攒钱买泰坦（目标 %s）", tostring(titans[1].price))
+        return nil
+    end
+
+    -- 满员：返回最强卡，交由 doReplace 卖弱换强
+    TTD.Phase = "换强"
+    local best = strongest(cards, cash, false)
     if best then return best end
-    TTD.LastReason = string.format("现金不足（%s），等待攒钱", tostring(getCashText() or "?"))
+
+    -- 都买不起：攒钱（优先攒泰坦）
+    if #titans > 0 and not titanOwned() then
+        TTD.Phase = "攒泰坦"
+        TTD.LastReason = string.format("为泰坦攒钱（目标 %s）", tostring(titans[1].price))
+    else
+        TTD.LastReason = string.format("现金不足（%s），等待攒钱", tostring(getCashText() or "?"))
+    end
     return nil
 end
 
@@ -19520,6 +19430,27 @@ local function getRoadParts()
     return list
 end
 
+-- 路径点（用来判断点位是否覆盖怪走的主路线）
+local pathCache = { ref = nil, list = {} }
+local function getPathParts()
+    local map = getMap()
+    if not map then return {} end
+    local wps = map:FindFirstChild("Waypoints")
+    if pathCache.ref == wps and #pathCache.list > 0 then return pathCache.list end
+    local list = {}
+    if wps then
+        for _, d in ipairs(wps:GetDescendants()) do
+            if d:IsA("BasePart") then
+                table.insert(list, d)
+            elseif d:IsA("Attachment") and d.Parent and d.Parent:IsA("BasePart") then
+                table.insert(list, d.Parent)
+            end
+        end
+    end
+    pathCache = { ref = wps, list = list }
+    return list
+end
+
 local function distToPart(p, part)
     local localP = part.CFrame:PointToObjectSpace(p)
     local half = part.Size * 0.5
@@ -19546,6 +19477,7 @@ local function buildPoints()
     local placement = getPlacementFolder()
     if not placement then return {} end
     local roads = getRoadParts()
+    local path = getPathParts()
 
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Include
@@ -19587,6 +19519,7 @@ local function buildPoints()
                                 pos = hit.Position,
                                 key = key,
                                 road = distToRoad(hit.Position, roads),
+                                path = (#path > 0) and distToRoad(hit.Position, path) or nil,
                             })
                         end
                     end
@@ -19596,6 +19529,13 @@ local function buildPoints()
         if #pts >= MAX_POINTS then break end
     end
 
+    -- 评分：贴路 + 覆盖怪物路径，分数越高越优先
+    for _, p in ipairs(pts) do
+        local s = math.clamp(60 - p.road * 2, 0, 60)
+        if p.path then s = s + math.clamp(40 - p.path, 0, 40) * 0.8 end
+        p.score = s
+    end
+
     local map = getMap()
     local center = Vector3.new()
     if map and map:IsA("Model") then
@@ -19603,7 +19543,8 @@ local function buildPoints()
         if ok and cf then center = cf.Position end
     end
     table.sort(pts, function(a, b)
-        if math.abs(a.road - b.road) > 2 then return a.road < b.road end
+        local sa, sb = a.score or 0, b.score or 0
+        if math.abs(sa - sb) > 3 then return sa > sb end
         return (a.pos - center).Magnitude < (b.pos - center).Magnitude
     end)
     while #pts > MAX_POINTS do table.remove(pts) end
@@ -19651,8 +19592,21 @@ local function gridOffset(i, spacing)
     return Vector3.new((col - 2) * spacing, 0, (row - 2) * spacing)
 end
 
+local function towerSpreadOk(pos)
+    local folder = getTowerFolder()
+    if not folder then return true end
+    local minD = math.max(4, TTD.Spacing * 0.7)
+    for _, t in ipairs(folder:GetChildren()) do
+        if t:IsA("Model") then
+            local part = towerPart(t)
+            if part and (part.Position - pos).Magnitude < minD then return false end
+        end
+    end
+    return true
+end
+
 local function pickPoint()
-    -- 手动原点模式（可选）
+    -- 手动原点模式（可选，默认不走这里）
     if TTD.UseManual and TTD.PlaceOrigin then
         for i = 1, 25 do
             local pos = groundAt(TTD.PlaceOrigin + gridOffset(i, TTD.Spacing))
@@ -19664,13 +19618,19 @@ local function pickPoint()
         return nil
     end
 
-    -- 默认：自动布点（贴路优先）
+    -- 自动布点：在高分点里挑一个不和已有单位重叠的位置
+    local best, bestScore, scanned = nil, nil, 0
     for _, p in ipairs(getPoints(false)) do
-        if not TTD.BadPoints[p.key] and pointFree(p.pos) then
-            return p
+        scanned = scanned + 1
+        if scanned > 120 then break end
+        if not TTD.BadPoints[p.key] and pointFree(p.pos) and towerSpreadOk(p.pos) then
+            local s = (p.score or 0) + math.random() * 4
+            if not bestScore or s > bestScore then
+                best, bestScore = p, s
+            end
         end
     end
-    return nil
+    return best
 end
 
 -- ============================================================
@@ -19679,42 +19639,27 @@ end
 local placedByMe = 0
 
 local function doPlace(maxCount)
-    if not TTD.Running then return 0, "脚本已停止" end
-    maxCount = maxCount or math.max(0, TTD.Count - placedByMe)
-    if maxCount <= 0 then return 0, "已达到设置数量" end
+    if not TTD.Running or TTD.Paused then return 0, "脚本已暂停" end
 
     local actual = countTowers()
     if actual < placedByMe then placedByMe = actual end
-
-    local cash = parseNumber(getCashText())
-    local card = pickCard(cash)
-    if not card then
-        return 0, TTD.LastReason or "没有可购买的单位"
-    end
-
-    clickGui(card.obj)
-    task.wait(0.3)
+    maxCount = maxCount or math.max(0, TTD.Count - actual)
+    if maxCount <= 0 then return 0, "场上已满，转为换强" end
 
     local okCount = 0
     for _ = 1, maxCount do
-        if not TTD.Running then break end
-        cash = parseNumber(getCashText())
-        if card.price > 0 and cash > 0 and cash < card.price then
-            -- 钱不够当前单位：自动降级换成买得起的最优单位
-            local alt = pickCard(cash)
-            if alt then
-                card = alt
-                clickGui(card.obj)
-                task.wait(0.3)
-            else
-                TTD.LastReason = "现金不足，等待攒钱"
-                break
-            end
-        end
+        if not TTD.Running or TTD.Paused then break end
+
+        local cash = parseNumber(getCashText())
+        local card = planCard(cash)
+        if not card then break end
+
+        clickGui(card.obj)
+        task.wait(0.3)
 
         local pt = pickPoint()
         if not pt then
-            TTD.LastReason = "没有可用的放置点（可点「重新扫描地图」）"
+            TTD.LastReason = "没有可用的放置点（换图会自动重扫）"
             return okCount, TTD.LastReason
         end
 
@@ -19727,17 +19672,15 @@ local function doPlace(maxCount)
         local afterC = parseNumber(getCashText())
         if afterT > beforeT or (beforeC > 0 and afterC > 0 and afterC < beforeC) then
             okCount = okCount + 1
-            placedByMe = placedByMe + 1
+            placedByMe = math.max(placedByMe, afterT)
             TTD.LastPoint = pt.pos
-            TTD.LastReason = "放置成功"
+            TTD.LastReason = string.format("已放置 %s", card.name)
+            log(string.format("放置 %s（%s）", card.name, tostring(card.price)))
         else
-            -- 这个点放不下，记录下来换下一处
+            -- 这个点放不下，拉黑换下一处
             TTD.BadPoints[pt.key] = true
-            clickGui(card.obj)
-            task.wait(0.25)
+            task.wait(0.2)
         end
-
-        if placedByMe >= TTD.Count then break end
     end
 
     return okCount
@@ -19760,15 +19703,41 @@ local function findSellButton()
     return findPath(pg, { "UnitManager", "Handler", "Tower", "Sell" })
 end
 
+-- 单位强度：泰坦最高，其余用卡片价格近似
+local function towerStrength(t)
+    local nm = normalizeName(t.Name)
+    if nm:find("titan", 1, true) then return 1e12 end
+    local best = 0
+    for _, c in ipairs(getCards()) do
+        local cn = normalizeName(c.name)
+        if cn ~= "" and (nm:find(cn, 1, true) or cn:find(nm, 1, true)) then
+            if c.price > best then best = c.price end
+        end
+    end
+    return best
+end
+
 local function doUpgrade()
     local list = myTowers()
     if #list == 0 then return 0, "还没有自己的单位" end
     local cash = parseNumber(getCashText())
     if cash > 0 and cash < 50 then return 0, "现金太少，暂不升级" end
 
+    -- 后期还没泰坦：优先把钱留给泰坦，暂停升级
+    local titans = titanList(getCards())
+    if #titans > 0 and not titanOwned() and waveNumber() >= TTD.TitanWave
+        and cash > 0 and cash < titans[1].price then
+        return 0, "优先攒钱买泰坦"
+    end
+
+    -- 泰坦 / 高价单位优先升级
+    table.sort(list, function(a, b)
+        return towerStrength(a) > towerStrength(b)
+    end)
+
     local n = 0
     for _, t in ipairs(list) do
-        if not TTD.Running then break end
+        if not TTD.Running or TTD.Paused then break end
         local part = towerPart(t)
         if part then
             clickWorld(part.Position)
@@ -19808,41 +19777,36 @@ local function doSellAll()
     return n
 end
 
--- 满员替换：找到自己最弱的单位，卖掉后换更贵的
+-- 满员替换：找到自己最弱的单位，卖掉后换更强的
 local function weakestTower()
-    local prices = {}
-    for _, c in ipairs(getCards()) do
-        prices[normalizeName(c.name)] = c.price
-    end
-    local weakest, weakestPrice = nil, math.huge
+    local weakest, weakestStrength = nil, math.huge
     for _, t in ipairs(myTowers()) do
-        local nm = normalizeName(t.Name)
-        local p = nil
-        if nm ~= "" then
-            for cn, cp in pairs(prices) do
-                if cn ~= "" and (nm:find(cn, 1, true) or cn:find(nm, 1, true)) then
-                    p = cp
-                    break
-                end
-            end
-        end
-        if p and p > 0 and p < weakestPrice then
-            weakest, weakestPrice = t, p
+        local s = towerStrength(t)
+        if s > 0 and s < weakestStrength then
+            weakest, weakestStrength = t, s
         end
     end
-    return weakest, weakestPrice
+    return weakest, weakestStrength
 end
 
 local function doReplace()
-    if placedByMe < TTD.Count then return false end
+    if TTD.Paused then return false end
+    local actual = countTowers()
+    if actual < TTD.Count then return false end   -- 没满员先铺场
+
     local cash = parseNumber(getCashText())
-    local best = pickCard(cash)
-    local weak, weakPrice = weakestTower()
-    if not best or not weak or not weakPrice then return false end
-    if best.price <= weakPrice then return false end
+    local best = planCard(cash)
+    local weak, weakStrength = weakestTower()
+    if not best or not weak or not weakStrength then return false end
+
+    -- 只换“明显更强”的，避免来回卖买
+    local threshold = math.max(weakStrength * 1.25, weakStrength + 1)
+    if best.price < threshold then return false end
+
     if not sellTower(weak) then return false end
-    placedByMe = math.max(0, placedByMe - 1)
-    log(string.format("卖掉 %s 换成 %s", weak.Name, best.name))
+    placedByMe = math.max(0, countTowers())
+    TTD.Phase = "换强"
+    log(string.format("卖掉 %s，准备换 %s", weak.Name, best.name))
     return true
 end
 
@@ -19908,15 +19872,19 @@ local function refreshStatus()
     local cashText = getCashText() or "?"
     local wave = getWaveText() or "?"
     local hp = getHpText() or "?"
-    local myn = countTowers()
-    local target = pickCard(parseNumber(cashText))
+    local actual = countTowers()
     local pts = (mapCache.points and #mapCache.points) or 0
+    local titans = titanList(getCards())
+    local titanText = "未解锁"
+    if #titans > 0 then
+        titanText = titanOwned() and "已拥有" or ("攒钱买 " .. tostring(titans[1].price))
+    end
 
     local text = string.format(
-        "波数 %s ｜ 现金 %s ｜ 基地 %s\n我的单位 %d / 目标 %d ｜ 可用放置点 %d\n当前选卡：%s\n%s",
-        wave, cashText, hp, myn, TTD.Count, pts,
-        target and string.format("%s（%s）", target.name, tostring(target.price)) or "无",
-        TTD.LastReason or "就绪"
+        "波数 %s ｜ 现金 %s ｜ 基地 %s\n单位 %d / %d ｜ 阶段：%s ｜ 放置点 %d\n泰坦：%s\n状态：%s%s",
+        wave, cashText, hp, actual, TTD.Count, TTD.Phase or "-", pts,
+        titanText, TTD.LastReason or "就绪",
+        TTD.Paused and "（已暂停）" or ""
     )
     pcall(function() StatusPara:SetDesc(text) end)
     pcall(function() LogPara:SetDesc(#TTD.Logs > 0 and table.concat(TTD.Logs, "\n") or "暂无日志") end)
@@ -19945,8 +19913,19 @@ end
 TTD.Actions.Place = function(n)
     task.spawn(function()
         local okCount, msg = doPlace(n)
-        if okCount == 0 and msg then log("放置：" .. msg) end
+        if okCount > 0 then
+            log(string.format("手动放置 %d 个", okCount))
+        elseif msg then
+            log("放置：" .. msg)
+        end
     end)
+end
+
+TTD.Actions.TogglePause = function()
+    TTD.Paused = not TTD.Paused
+    if TTD.Paused then TTD.LastReason = "已暂停" else TTD.LastReason = "已继续" end
+    log(TTD.Paused and "已暂停自动化" or "已继续自动化")
+    notify("自动化", TTD.Paused and "已暂停" or "已继续")
 end
 
 TTD.Actions.Upgrade = function()
@@ -20003,25 +19982,43 @@ task.spawn(function()
         return false
     end
 
+    local wasInLobby = false
     while TTD.Running do
         local ok, err = pcall(function()
+            if TTD.Paused then return end
+
+            -- 是否在大厅（准备界面）
+            local startUi = pg:FindFirstChild("StartUI")
+            local inLobby = (startUi ~= nil and deepVisible(startUi))
+
+            -- 进入新的一局：重置本局数据
+            if inLobby and not wasInLobby then
+                placedByMe = 0
+                TTD.BadPoints = {}
+                abilityDone = {}
+                TTD.Phase = "铺场"
+                log("新对局开始，状态已重置")
+            end
+            wasInLobby = inLobby
+
+            -- 大厅流程
             if TTD.AutoReady and every("ready", 2) then doReady() end
+            if inLobby then return end
+
+            -- 已开局
             if TTD.AutoSkip and every("skip", 1) then doSkip() end
             if TTD.AutoClose and every("close", 2) then doCloseAndSkip() end
             if TTD.AutoLobby and every("lobby", 5) then doLobby() end
 
-            if TTD.AutoPlace then
-                if every("place", 1.2) then
-                    -- 新一局 / 卖掉单位后同步计数
-                    local actual = countTowers()
-                    if actual < placedByMe then placedByMe = actual end
-                    if placedByMe < TTD.Count then doPlace(1) end
-                end
+            if TTD.AutoPlace and every("place", 1.2) then
+                local actual = countTowers()
+                if actual < placedByMe then placedByMe = actual end
+                if actual < TTD.Count then doPlace(1) end
             end
 
-            if TTD.AutoReplace and every("replace", 10) then doReplace() end
+            if TTD.AutoReplace and every("replace", 8) then doReplace() end
             if TTD.AutoUpgrade and every("upgrade", 8) then doUpgrade() end
-            if TTD.AutoAbility and every("ability", 4) then doAbility() end
+            if TTD.AutoAbility and every("ability", 6) then doAbility() end
         end)
         if not ok then log("循环异常：" .. tostring(err)) end
         task.wait(0.25)
