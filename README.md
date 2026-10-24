@@ -5760,14 +5760,14 @@ return{
 Dark={
 Name="Dark",
 
-Accent=Color3.fromHex"#0f0f11",
-Dialog=Color3.fromHex"#121212",
+Accent=Color3.fromHex"#18181b",
+Dialog=Color3.fromHex"#1a1a1a",
 Outline=Color3.fromHex"#FFFFFF",
 Text=Color3.fromHex"#FFFFFF",
-Placeholder=Color3.fromHex"#8e8e8e",
-Background=Color3.fromHex"#080808",
-Button=Color3.fromHex"#6e6e6e",
-Icon=Color3.fromHex"#9a9a9c",
+Placeholder=Color3.fromHex"#a1a1a1",
+Background=Color3.fromHex"#101010",
+Button=Color3.fromHex"#52525b",
+Icon=Color3.fromHex"#a1a1aa",
 Toggle=Color3.fromHex"#33C759",
 Slider=Color3.fromHex"#0091FF",
 Checkbox=Color3.fromHex"#0091FF",
@@ -5782,7 +5782,7 @@ Primary=Color3.fromHex"#0091FF",
 LabelBackground=Color3.fromHex"#000000",
 LabelBackgroundTransparency=0.83,
 
-ElementBackground=Color3.fromHex"#3a3a3c",
+ElementBackground=Color3.fromHex"#2A2A2C",
 ElementBackgroundTransparency=0,
 },
 
@@ -17478,70 +17478,188 @@ local Window = WindUI:CreateWindow({
 local Config = (Window.ConfigManager and Window.ConfigManager:Config("Setting", true)) or nil
 
 -- ============================================================
--- 10 个标签页（左侧只显示图标，不显示文字）
+-- 共享状态（界面与自动化引擎共用）
 -- ============================================================
-local TabList = {
-    { Title = "首页",   Icon = "house"    },
-    { Title = "设置",   Icon = "settings" },
-    { Title = "用户",   Icon = "user"     },
-    { Title = "搜索",   Icon = "search"   },
-    { Title = "收藏",   Icon = "heart"    },
-    { Title = "星标",   Icon = "star"     },
-    { Title = "通知",   Icon = "bell"     },
-    { Title = "文件夹", Icon = "folder"   },
-    { Title = "图片",   Icon = "image"    },
-    { Title = "游戏",   Icon = "gamepad"  },
+local TTD = {
+    AutoReady   = true,    -- 自动准备 / 开始
+    AutoSkip    = true,    -- 自动跳波
+    AutoPlace   = false,   -- 自动放置单位
+    AutoUpgrade = false,   -- 自动升级
+    AntiAfk     = true,    -- 防掉线
+    UnitName    = "",      -- 目标单位名（留空 = 第一张卡）
+    Count       = 6,       -- 目标放置数量
+    Spacing     = 7,       -- 放置间距
+    PlaceOrigin = nil,     -- 放置原点（准星射线记录）
+    Running     = true,
+    Actions     = {},      -- 由文件末尾的引擎填充
 }
 
-local Main
-for i, def in ipairs(TabList) do
-    local tab = Window:Tab({ Title = def.Title, Icon = def.Icon })
-    if i == 1 then
-        Main = tab
-    else
-        -- 其它标签页：放一个分组，避免显示空页占位符
-        tab:Section({ Title = def.Title, Desc = def.Title .. " 页面", Icon = def.Icon })
-    end
+local function saveCfg()
+    if Config then pcall(function() Config:Save() end) end
 end
 
--- 分组（首页 Tab 的内容）
-local Settings = Main:Section({
-    Title = "设置",
-    Desc  = "开关状态会自动保存",
-    Icon  = "settings",
+-- ============================================================
+-- 标签页
+-- ============================================================
+local AutoTab   = Window:Tab({ Title = "自动化", Icon = "zap" })
+local StatusTab = Window:Tab({ Title = "状态",   Icon = "activity" })
+local MiscTab   = Window:Tab({ Title = "杂项",   Icon = "wrench" })
+local Main = AutoTab
+
+-- ============================================================
+-- 自动化
+-- ============================================================
+local SecMain = AutoTab:Section({
+    Title = "挂机主功能",
+    Desc  = "全部通过游戏内按钮 / 点击实现",
+    Icon  = "play",
 })
 
--- 开关（唯一会被保存的元素类型）
-local Toggle1 = Settings:Toggle({
-    Title = "功能开关",       -- 【可改】
-    Desc  = "开启或关闭某项功能",
-    Value = true,             -- 默认打开
-    Flag  = "FeatureToggle",  -- 唯一保存键（每个开关必须不同）
-    Callback = function(v)
-        if Config then Config:Save() end
-    end,
+SecMain:Toggle({
+    Title = "自动准备 / 开始",
+    Desc  = "准备阶段自动点击开始按钮",
+    Value = TTD.AutoReady,
+    Flag  = "TTD_AutoReady",
+    Callback = function(v) TTD.AutoReady = v; saveCfg() end,
 })
 
-local Toggle2 = Settings:Toggle({
-    Title = "模式切换",       -- 【可改】
-    Desc  = "在两种模式间切换",
-    Value = false,            -- 默认关闭
-    Flag  = "ModeToggle",
-    Callback = function(v)
-        if Config then Config:Save() end
-    end,
+SecMain:Toggle({
+    Title = "自动跳波",
+    Desc  = "出现跳波确认时自动点 Y",
+    Value = TTD.AutoSkip,
+    Flag  = "TTD_AutoSkip",
+    Callback = function(v) TTD.AutoSkip = v; saveCfg() end,
 })
 
--- 其它元素（不带 Flag，不会被保存）
-local ActionBtn = Settings:Button({
-    Title = "执行操作",
-    Desc  = "点击执行一次",
+SecMain:Toggle({
+    Title = "自动放置单位",
+    Desc  = "按下方数量 / 间距自动放置",
+    Value = TTD.AutoPlace,
+    Flag  = "TTD_AutoPlace",
+    Callback = function(v) TTD.AutoPlace = v; saveCfg() end,
+})
+
+SecMain:Input({
+    Title = "目标单位名称",
+    Desc  = "留空则使用第一张卡",
+    Placeholder = "例如：Titan Speakerman",
+    Value = TTD.UnitName,
+    Callback = function(t) TTD.UnitName = tostring(t or "") end,
+})
+
+SecMain:Slider({
+    Title = "放置数量",
+    Desc  = "自动放置的总个数",
+    Value = { Min = 1, Max = 24, Default = 6 },
+    Step  = 1,
+    Callback = function(v) TTD.Count = math.floor(tonumber(v) or 6) end,
+})
+
+SecMain:Slider({
+    Title = "放置间距",
+    Desc  = "单位之间的格距",
+    Value = { Min = 3, Max = 20, Default = 7 },
+    Step  = 1,
+    Callback = function(v) TTD.Spacing = math.floor(tonumber(v) or 7) end,
+})
+
+SecMain:Toggle({
+    Title = "自动升级",
+    Desc  = "依次选中自己的单位并点升级",
+    Value = TTD.AutoUpgrade,
+    Flag  = "TTD_AutoUpgrade",
+    Callback = function(v) TTD.AutoUpgrade = v; saveCfg() end,
+})
+
+local SecManual = AutoTab:Section({
+    Title = "手动操作",
+    Desc  = "立即执行一次",
+    Icon  = "zap",
+})
+
+SecManual:Button({
+    Title = "记录放置原点",
+    Desc  = "把准星对准地面后点击",
     Callback = function()
-        print("按钮被点击了")
+        if TTD.Actions.RecordOrigin then TTD.Actions.RecordOrigin() end
     end,
 })
 
-print("[WindUI融合脚本] 已加载 · 无外部链接 · 密钥系统已关闭 · 仅保存开关状态")
+SecManual:Button({
+    Title = "立即放置一轮",
+    Desc  = "按当前设置放一个单位",
+    Callback = function()
+        if TTD.Actions.Place then TTD.Actions.Place(1) end
+    end,
+})
+
+SecManual:Button({
+    Title = "立即升级一轮",
+    Desc  = "选中自己的单位并升级",
+    Callback = function()
+        if TTD.Actions.Upgrade then TTD.Actions.Upgrade() end
+    end,
+})
+
+-- ============================================================
+-- 状态
+-- ============================================================
+local SecStatus = StatusTab:Section({
+    Title = "实时数据",
+    Desc  = "每秒自动刷新",
+    Icon  = "activity",
+})
+
+local StatusPara = SecStatus:Paragraph({
+    Title = "运行状态",
+    Desc  = "正在读取游戏数据...",
+})
+
+SecStatus:Button({
+    Title = "刷新一次",
+    Desc  = "立即读取波数 / 现金 / 基地血量",
+    Callback = function()
+        if TTD.Actions.Refresh then TTD.Actions.Refresh() end
+    end,
+})
+
+-- ============================================================
+-- 杂项
+-- ============================================================
+local SecMisc = MiscTab:Section({
+    Title = "杂项",
+    Desc  = "账号与稳定性",
+    Icon  = "wrench",
+})
+
+SecMisc:Toggle({
+    Title = "防掉线 (Anti-AFK)",
+    Desc  = "闲置 20 分钟时自动跳一下",
+    Value = TTD.AntiAfk,
+    Flag  = "TTD_AntiAfk",
+    Callback = function(v) TTD.AntiAfk = v; saveCfg() end,
+})
+
+SecMisc:Button({
+    Title = "重新进入当前服务器",
+    Desc  = "重新传送到当前 PlaceId",
+    Callback = function()
+        pcall(function()
+            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+        end)
+    end,
+})
+
+SecMisc:Button({
+    Title = "停止并卸载脚本",
+    Desc  = "关闭界面与所有自动化",
+    Callback = function()
+        TTD.Running = false
+        pcall(function() Window:Destroy() end)
+    end,
+})
+
+print("[TTD 自动化] 界面已加载")
 
 
 -- ============================================================
@@ -18117,7 +18235,6 @@ local function CreatePopupPanel(parent)
     panelObj.Open = function(self, ...)
         oldOpen(self, ...)
         setupGlobalClose()
-        if panelObj.OnStateChanged then panelObj.OnStateChanged(true) end
     end
 
     local oldClose = panelObj.Close
@@ -18127,7 +18244,6 @@ local function CreatePopupPanel(parent)
             globalConn:Disconnect()
             globalConn = nil
         end
-        if panelObj.OnStateChanged then panelObj.OnStateChanged(false) end
     end
 
     return panelObj
@@ -18413,17 +18529,6 @@ local function CreateFloatingButton(config)
     local toggles = popupPanel.toggles
     -- toggles[1]=自动吸附, [2]=自动换图, [3]=单点互动
 
-    -- ★★★ 面板开/合时同步左侧图标：点空白关闭也走这里，图标才回得去 ★★★
-    popupPanel.OnStateChanged = function(isOpen)
-        if isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
-    end
-
     -- ★★★ 创建悬停效果（单点互动） ★★★
     local hoverEffect = CreateHoverEffect(textButton, al, 1.1)
 
@@ -18563,7 +18668,6 @@ local function CreateFloatingButton(config)
     -- 拖动/靠边展开共享状态（提前声明，供 updateEdgeState / 拖拽模块共用）
     -- ============================================================
     local isDragging = false      -- 是否正在拖动
-    local snapTween = nil         -- 贴到顶部吸附动画
 
     -- ============================================================
     -- 4. applyLayout
@@ -18641,29 +18745,7 @@ local function CreateFloatingButton(config)
                math.clamp(offsetY, halfH, parentSize.Y - halfH)
     end
 
-    -- ============================================================
-    -- 6.5 贴到顶部吸附：松手时若接近屏幕顶边，平滑贴到顶部
-    -- ============================================================
-    local SNAP_TOP_THRESHOLD = 90  -- 距顶边多少像素内判定为“接近顶部”
-    local function snapToTopEdge()
-        if isDragging then return end
-        if not state.autoSnapEnabled then return end
-        if not al or not al.Parent or al.AbsoluteSize.Y <= 0 then return end
-
-        local pos = al.AbsolutePosition
-        if pos.Y > SNAP_TOP_THRESHOLD then return end  -- 不靠近顶边就不吸
-
-        local halfH = al.AbsoluteSize.Y / 2
-        local targetX = al.Position.X.Offset  -- X 保持不动
-        local targetY = halfH                 -- 贴顶：中心对齐到顶边
-        local cx, cy = clampPosition(targetX, targetY)
-        if snapTween then snapTween:Cancel() end
-        snapTween = Creator.Tween(al, 0.25, {
-            Position = UDim2.new(0, cx, 0, cy),
-        }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        snapTween:Play()
-        -- 贴顶过程中 updateEdgeState（每帧跑）检测到 pos.Y<=2，会自动触发“靠边展开”动画
-    end
+    -- （自动吸附已还原为“靠边自动展开”，物理“吸附到边缘”的 snapToEdge 已移除）
 
     Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
         task.wait(0.05)
@@ -18703,7 +18785,6 @@ local function CreateFloatingButton(config)
         end
         if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
         if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
-        if snapTween then snapTween:Cancel(); snapTween = nil end  -- 中断贴顶动画
         dragInput = input
         pressStartPos = input.Position
         isDragging = false
@@ -18760,7 +18841,6 @@ local function CreateFloatingButton(config)
             suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
             task.wait(0.05)
             updateEdgeState()
-            snapToTopEdge()    -- 接近顶边 → 平滑贴到顶部
             syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
             return
         end
@@ -18809,7 +18889,6 @@ local function CreateFloatingButton(config)
         else
             task.wait(0.05)
             updateEdgeState()
-            snapToTopEdge()
         end
         applyLayout()
     end)
@@ -18838,7 +18917,14 @@ local function CreateFloatingButton(config)
             resetColor:Play()
         end)
 
-        popupPanel:Toggle()  -- 开/合会触发 OnStateChanged，由它统一切换图标
+        popupPanel:Toggle()
+        if popupPanel.isOpen then
+            aj.Image = ICON_ACTIVE
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
+        else
+            aj.Image = ICON_DEFAULT
+            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
+        end
     end)
 
     -- ============================================================
@@ -18940,3 +19026,478 @@ print("   - 右侧标题：单击打开主面板，双击不触发")
 print("   - 自动吸附：拖到边缘附近自动吸附到最近边缘")
 print("   - 悬浮窗始终显示，不随主面板开合而隐藏")
 print("   - 自动清理、自动保存状态")
+
+
+-- ============================================================
+-- ▼▼ TTD 自动化引擎（Toilet Tower Defense）▼▼
+-- 全部通过“点击游戏内已有按钮 / 点击地面”实现，
+-- 不直接伪造 RemoteEvent，稳定性更高。
+-- ============================================================
+local pg = player:WaitForChild("PlayerGui")
+
+local okVim, VIM = pcall(function()
+    return game:GetService("VirtualInputManager")
+end)
+if not okVim then VIM = nil end
+
+-- 控件是否真正可见（含所有父级）
+local function deepVisible(obj)
+    if not obj or not obj.Parent then return false end
+    local cur = obj
+    while cur and cur ~= game do
+        if cur:IsA("GuiObject") then
+            if cur.Visible == false then return false end
+        elseif cur:IsA("LayerCollector") then
+            if cur.Enabled == false then return false end
+        end
+        cur = cur.Parent
+    end
+    return true
+end
+
+-- 判断信号是否有监听（执行器支持 getconnections 时才判断，否则返回 nil）
+local function signalHasListener(sig)
+    if not sig or type(getconnections) ~= "function" then return nil end
+    local ok, list = pcall(getconnections, sig)
+    if ok and type(list) == "table" then return #list > 0 end
+    return nil
+end
+
+-- 点击按钮：优先 firesignal，其次真实鼠标点击
+local function clickGui(obj)
+    if not obj or not obj.Parent then return false end
+    local target = obj
+    if not target:IsA("GuiButton") then
+        for _, d in ipairs(target:GetDescendants()) do
+            if d:IsA("GuiButton") and deepVisible(d) then
+                target = d
+                break
+            end
+        end
+    end
+    if target:IsA("GuiButton") then
+        local mouseSig = target.MouseButton1Click
+        local connected = signalHasListener(mouseSig)
+        if connected ~= false and type(firesignal) == "function" then
+            if pcall(firesignal, mouseSig) then return true end
+        end
+        -- MouseButton1Click 没有监听：部分游戏用 Activated
+        if connected == false and type(firesignal) == "function" then
+            local actSig = target.Activated
+            if actSig and signalHasListener(actSig) ~= false then
+                if pcall(firesignal, actSig) then return true end
+            end
+        end
+    end
+    if VIM then
+        local pos = target.AbsolutePosition + target.AbsoluteSize * 0.5
+        local ok = pcall(function()
+            VIM:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 0)
+            task.wait(0.05)
+            VIM:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 0)
+        end)
+        return ok
+    end
+    return false
+end
+
+-- 在世界坐标处点击
+local function clickWorld(worldPos)
+    if not VIM or not worldPos then return false end
+    local cam = workspace.CurrentCamera
+    if not cam then return false end
+    local sp, onScreen = cam:WorldToViewportPoint(worldPos)
+    if not onScreen then return false end
+    local ok = pcall(function()
+        VIM:SendMouseMoveEvent(sp.X, sp.Y, 0)
+        task.wait(0.04)
+        VIM:SendMouseButtonEvent(sp.X, sp.Y, 0, true, game, 0)
+        task.wait(0.04)
+        VIM:SendMouseButtonEvent(sp.X, sp.Y, 0, false, game, 0)
+    end)
+    return ok
+end
+
+-- 解析 "$1,234" / "1.2K" 这类数字（只取第一段数字 + 末位单位）
+local function parseNumber(txt)
+    if txt == nil then return 0 end
+    local s = tostring(txt):lower():gsub(",", "")
+    local num, suffix = s:match("([%d%.]+)%s*([kmb]?)")
+    if not num then return 0 end
+    local mult = 1
+    if suffix == "k" then
+        mult = 1e3
+    elseif suffix == "m" then
+        mult = 1e6
+    elseif suffix == "b" then
+        mult = 1e9
+    end
+    return (tonumber(num) or 0) * mult
+end
+
+-- 读取界面文字（按路径逐级查找）
+local function readLabel(path)
+    local cur = pg
+    for _, name in ipairs(path) do
+        if not cur then return nil end
+        cur = cur:FindFirstChild(name)
+    end
+    if cur and cur:IsA("TextLabel") then
+        return cur.Text
+    end
+    return nil
+end
+
+local function getCashText()
+    return readLabel({ "Towers", "Cash", "Frame", "TextLabel" })
+end
+
+-- 单位是否属于自己（无法判断时按自己处理）
+local function isMyTower(t)
+    for _, attr in ipairs({ "Owner", "OwnerName", "PlacedBy", "Player", "PlayerName", "UserId", "OwnerUserId" }) do
+        local v = t:GetAttribute(attr)
+        if v ~= nil then
+            return tostring(v) == player.Name or tostring(v) == tostring(player.UserId)
+        end
+        local c = t:FindFirstChild(attr)
+        if c and c:IsA("ValueBase") then
+            return tostring(c.Value) == player.Name or tostring(c.Value) == tostring(player.UserId)
+        end
+    end
+    return true
+end
+
+local function countTowers()
+    local scripted = workspace:FindFirstChild("Scripted")
+    local folder = scripted and scripted:FindFirstChild("Towers")
+    if not folder then return 0 end
+    local n = 0
+    for _, t in ipairs(folder:GetChildren()) do
+        if t:IsA("Model") and isMyTower(t) then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+-- 读取工具栏里的单位卡片
+local function getCards()
+    local out = {}
+    local gui = pg:FindFirstChild("Towers")
+    if not gui then return out end
+    for _, d in ipairs(gui:GetDescendants()) do
+        if d:IsA("GuiObject") and d:FindFirstChild("Infos") and deepVisible(d) then
+            local name = ""
+            local infos = d:FindFirstChild("Infos")
+            for _, t in ipairs(infos:GetDescendants()) do
+                if t:IsA("TextLabel") and t.Text:gsub("%s", "") ~= "" then
+                    name = t.Text
+                    break
+                end
+            end
+            local price = 0
+            local pf = d:FindFirstChild("Price")
+            if pf then
+                if pf:IsA("TextLabel") then
+                    price = parseNumber(pf.Text)
+                else
+                    for _, t in ipairs(pf:GetDescendants()) do
+                        if t:IsA("TextLabel") then
+                            price = parseNumber(t.Text)
+                            break
+                        end
+                    end
+                end
+            end
+            table.insert(out, { obj = d, name = name, price = price })
+        end
+    end
+    return out
+end
+
+-- 当前放置原点：优先手动记录，其次准星地面，最后角色脚下
+local function currentOrigin()
+    if TTD.PlaceOrigin then return TTD.PlaceOrigin end
+    local cam = workspace.CurrentCamera
+    if cam then
+        local params = RaycastParams.new()
+        params.FilterType = Enum.RaycastFilterType.Exclude
+        params.FilterDescendantsInstances = { player.Character }
+        local ray = cam:ScreenPointToRay(cam.ViewportSize.X * 0.5, cam.ViewportSize.Y * 0.5)
+        local hit = workspace:Raycast(ray.Origin, ray.Direction * 800, params)
+        if hit then return hit.Position end
+    end
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    return hrp and hrp.Position or nil
+end
+
+-- 5x5 网格排布
+local function gridOffset(i, spacing)
+    local col = (i - 1) % 5
+    local row = math.floor((i - 1) / 5) % 5
+    return Vector3.new((col - 2) * spacing, 0, (row - 2) * spacing)
+end
+
+local function notify(title, content)
+    pcall(function()
+        WindUI:Notify({ Title = title, Content = content, Duration = 3, Icon = "check" })
+    end)
+end
+
+local function pickCard()
+    local cards = getCards()
+    if #cards == 0 then return nil end
+    if TTD.UnitName == "" then return cards[1] end
+    local want = TTD.UnitName:lower()
+    for _, c in ipairs(cards) do
+        if c.name:lower():find(want, 1, true) then
+            return c
+        end
+    end
+    return nil
+end
+
+local placedByMe = 0
+local slotIndex = 0
+
+-- 放置
+local function doPlace(maxCount)
+    if not TTD.Running then return 0, "脚本已停止" end
+    maxCount = maxCount or math.max(0, TTD.Count - placedByMe)
+    if maxCount <= 0 then return 0, "已达到设置数量" end
+
+    -- 单位被卖掉后同步计数，避免自动放置永久停摆
+    local actual = countTowers()
+    if actual < placedByMe then placedByMe = actual end
+
+    local card = pickCard()
+    if not card then
+        return 0, (TTD.UnitName == "" and "未找到单位卡片" or ("未找到单位：" .. TTD.UnitName))
+    end
+
+    local cash = parseNumber(getCashText())
+    if card.price > 0 and cash > 0 and cash < card.price then
+        return 0, "现金不足"
+    end
+
+    -- 选中卡片，进入放置模式
+    clickGui(card.obj)
+    task.wait(0.35)
+
+    local okCount, fails, tries = 0, 0, 0
+    while okCount < maxCount and TTD.Running do
+        local origin = currentOrigin()
+        if not origin then break end
+
+        local beforeCash = parseNumber(getCashText())
+        if card.price > 0 and beforeCash > 0 and beforeCash < card.price then break end
+        local beforeTowers = countTowers()
+
+        slotIndex = slotIndex + 1
+        clickWorld(origin + gridOffset(slotIndex, TTD.Spacing))
+        task.wait(0.35)
+
+        local afterCash = parseNumber(getCashText())
+        local afterTowers = countTowers()
+
+        if afterTowers > beforeTowers or afterCash < beforeCash then
+            okCount = okCount + 1
+            placedByMe = placedByMe + 1
+            fails = 0
+        else
+            fails = fails + 1
+        end
+
+        tries = tries + 1
+        -- 连续失败，重新选中卡片
+        if fails >= 2 then
+            clickGui(card.obj)
+            task.wait(0.25)
+            fails = 0
+        end
+        if tries >= maxCount * 4 then break end
+    end
+
+    return okCount
+end
+
+-- 找升级按钮
+local function findUpgradeButton()
+    local rb = pg:FindFirstChild("RightButtons")
+    local up = rb and rb:FindFirstChild("Upgrade")
+    if up then
+        if up:IsA("GuiButton") then return up end
+        local fast = up:FindFirstChild("fastUpgrader")
+        if fast and fast:IsA("GuiButton") then return fast end
+        for _, d in ipairs(up:GetDescendants()) do
+            if d:IsA("GuiButton") then return d end
+        end
+    end
+
+    local um = pg:FindFirstChild("UnitManager")
+    local handler = um and um:FindFirstChild("Handler")
+    local tower = handler and handler:FindFirstChild("Tower")
+    local up2 = tower and tower:FindFirstChild("Upgrade")
+    if up2 then
+        if up2:IsA("GuiButton") then return up2 end
+        for _, d in ipairs(up2:GetDescendants()) do
+            if d:IsA("GuiButton") then return d end
+        end
+    end
+    return nil
+end
+
+-- 升级
+local function doUpgrade()
+    local scripted = workspace:FindFirstChild("Scripted")
+    local folder = scripted and scripted:FindFirstChild("Towers")
+    if not folder then return 0, "还没找到已放置的单位" end
+
+    local list = {}
+    for _, t in ipairs(folder:GetChildren()) do
+        if t:IsA("Model") and isMyTower(t) then
+            table.insert(list, t)
+        end
+    end
+    if #list == 0 then return 0, "没有自己的单位" end
+
+    local btn = findUpgradeButton()
+    if not btn then return 0, "未找到升级按钮" end
+
+    local n = 0
+    for _, t in ipairs(list) do
+        if n >= 6 or not TTD.Running then break end
+        local part = t:FindFirstChild("HumanoidRootPart") or t:FindFirstChildWhichIsA("BasePart")
+        if part then
+            clickWorld(part.Position)
+            task.wait(0.2)
+            local b = findUpgradeButton() or btn
+            for _ = 1, 3 do
+                clickGui(b)
+                task.wait(0.15)
+            end
+            n = n + 1
+        end
+    end
+    return n
+end
+
+-- 准备 / 开始
+local function doReady()
+    local startGui = pg:FindFirstChild("StartUI")
+    if not (startGui and deepVisible(startGui)) then return end
+    local frame = startGui:FindFirstChild("Frame")
+    local labels = frame and frame:FindFirstChild("Labels")
+    local btn = labels and labels:FindFirstChild("startbutton")
+    if btn then clickGui(btn) end
+end
+
+-- 跳波确认
+local function doSkip()
+    local sw = pg:FindFirstChild("skipWave")
+    if not sw then return end
+    local frame = sw:FindFirstChild("Frame")
+    if not (frame and deepVisible(frame)) then return end
+    local y = frame:FindFirstChild("Y")
+    if y then clickGui(y) end
+end
+
+-- 状态刷新
+local function refreshStatus()
+    local cash = getCashText() or "?"
+    local wave = readLabel({ "Data", "Wave", "Frame", "TextLabel" }) or "?"
+    local hp = readLabel({ "Data", "HP", "Frame", "TextLabel" }) or "?"
+    local text = string.format("波数 %s ｜ 现金 %s ｜ 基地 %s ｜ 我的单位 %d", wave, cash, hp, countTowers())
+    pcall(function() StatusPara:SetDesc(text) end)
+end
+
+-- 记录放置原点
+local function recordOrigin()
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = { player.Character }
+    local ray = cam:ScreenPointToRay(cam.ViewportSize.X * 0.5, cam.ViewportSize.Y * 0.5)
+    local hit = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
+    if hit then
+        TTD.PlaceOrigin = hit.Position
+        notify("放置原点", string.format("已记录 %.1f, %.1f, %.1f", hit.Position.X, hit.Position.Y, hit.Position.Z))
+    else
+        notify("放置原点", "准星没有对准地面，请重新瞄准")
+    end
+end
+
+-- 对外接口
+TTD.Actions.Place = function(n)
+    task.spawn(function()
+        local okCount, msg = doPlace(n)
+        if okCount == 0 and msg then notify("放置", msg) end
+    end)
+end
+
+TTD.Actions.Upgrade = function()
+    task.spawn(function()
+        local n, msg = doUpgrade()
+        notify("升级", msg or ("已尝试升级 " .. tostring(n) .. " 个单位"))
+    end)
+end
+
+TTD.Actions.RecordOrigin = recordOrigin
+TTD.Actions.Refresh = refreshStatus
+
+-- 防掉线
+player.Idled:Connect(function()
+    if not TTD.AntiAfk then return end
+    local ok, vu = pcall(function()
+        return game:GetService("VirtualUser")
+    end)
+    if ok and vu then
+        pcall(function()
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+-- 主循环
+task.spawn(function()
+    local lastReady, lastSkip, lastPlaceT, lastUpT = 0, 0, 0, 0
+    while TTD.Running do
+        local ok, err = pcall(function()
+            if TTD.AutoReady and tick() - lastReady > 3 then
+                lastReady = tick()
+                doReady()
+            end
+            if TTD.AutoSkip and tick() - lastSkip > 1 then
+                lastSkip = tick()
+                doSkip()
+            end
+            if TTD.AutoPlace and tick() - lastPlaceT > 1.5 then
+                lastPlaceT = tick()
+                -- 新一局导致地图上单位变少时，回落计数
+                if placedByMe >= TTD.Count then
+                    local actual = countTowers()
+                    if actual < placedByMe then placedByMe = actual end
+                end
+                if placedByMe < TTD.Count then doPlace(1) end
+            end
+            if TTD.AutoUpgrade and tick() - lastUpT > 8 then
+                lastUpT = tick()
+                doUpgrade()
+            end
+        end)
+        if not ok then warn("[TTD] " .. tostring(err)) end
+        task.wait(0.35)
+    end
+end)
+
+-- 状态刷新循环
+task.spawn(function()
+    while TTD.Running do
+        pcall(refreshStatus)
+        task.wait(1)
+    end
+end)
+
+print("[TTD 自动化] 引擎已启动 · 自动准备 / 自动跳波 已开启")
