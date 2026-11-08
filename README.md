@@ -1,11 +1,11 @@
 --[[
-  WindUI 独立融合脚本 · 最终版
+  难度模式 自动挂机脚本 · 最终版
   =================================================
   · 内嵌 WindUI v1.6.66，整份文件直接运行，无 loadstring / 无外部链接
-  · 窗口大小 / 位置 / 搜索栏 / 悬浮窗 均已配置好
-  · 搜索【可改】可替换标题 / 作者 / 图标 / 开关等个性化内容
+  · 适配游戏：难度模式（PlaceId 18816546575）
+  · 功能：自动准备 / 自动锁敌开火 / 自动技能 / 自动救人 / 自动跳波 / 结算自动继续
+  · 所有策略内置，玩家不需要改任何设置
   · 密钥系统(KeySystem) / 第三方服务(Services) / 亚克力(Acrylic) / 多语言：全部关闭
-  · 配置系统：仅保存 Toggle（开关）状态
 ]]
 
 --[[
@@ -17449,69 +17449,54 @@ end
 local WindUI = aa
 
 local Window = WindUI:CreateWindow({
-    Title    = "TTD 自动挂机助手",       -- 【可改】窗口标题
-    Icon     = "house",                -- 【可改】Lucide 图标名，或 "rbxassetid://数字ID"
-    Author   = "自动化引擎",            -- 【可改】作者名
-    Folder   = "MyScript",            -- 配置保存目录（Toggle 状态保存在这里）
+    Title    = "难度模式 自动挂机助手",
+    Icon     = "swords",
+    Author   = "自动化引擎",
+    Folder   = "MyScript",
 
-    Size     = UDim2.new(0, 620, 0, 480),  -- 窗口大小（UDim2）
-    MinSize  = Vector2.new(520, 340),      -- 最小尺寸
-    MaxSize  = Vector2.new(1000, 700),     -- 最大尺寸
+    Size     = UDim2.new(0, 620, 0, 480),
+    MinSize  = Vector2.new(520, 340),
+    MaxSize  = Vector2.new(1000, 700),
 
-    Resizable = true,     -- 允许调整窗口大小
-    AutoScale = true,     -- 自动缩放（保留默认开启）
-    Acrylic   = false,    -- 关闭亚克力毛玻璃
+    Resizable = true,
+    AutoScale = true,
+    Acrylic   = false,
 
-    SideBarWidth  = 72,       -- 侧边栏宽度（图标栏）
-    HideSearchBar = false,    -- 显示搜索栏
-    Radius        = 16,       -- 圆角
+    SideBarWidth  = 72,
+    HideSearchBar = false,
+    Radius        = 16,
     ElementsRadius = 16,
 
-    Background = "rbxassetid://90331823252393",  -- 主面板背景图（已压暗）
-    BackgroundImageTransparency = 0.55,        -- 背景图透明度：越大越暗，避免刺眼
+    Background = "rbxassetid://90331823252393",
+    BackgroundImageTransparency = 0.55,
 
-    OpenButton = { Enabled = false },  -- 内置右下角按钮关闭，改用下方内嵌「悬浮窗」
-
-    -- 说明：KeySystem 不传、Services 不加载、Localization 不调用 -> 等效移除/关闭
+    OpenButton = { Enabled = false },
 })
 
--- 配置系统已移除：所有策略写死在脚本内部，玩家无需保存任何开关
-
 -- ============================================================
--- 共享状态（界面与自动化引擎共用）
+-- 共享状态（界面与自动化引擎共用，全部写死，玩家不用改）
 -- ============================================================
--- 内部参数：全部写死，玩家不需要配置
-local TTD = {
-    -- 流程（固定全开）
-    AutoReady    = true,    -- 自动准备 / 开始
-    AutoSkip     = true,    -- 自动跳波
-    AutoLobby    = true,    -- 结算后自动回大厅
-    AutoClose    = true,    -- 自动关弹窗 / 跳过剧情
-    -- 放置（内部固定策略）
-    AutoPlace    = true,
-    Count        = 12,      -- 场上单位上限
-    FillCheap    = 6,       -- 前 6 个先买最便宜的铺场
-    Spacing      = 7,       -- 单位间距
-    Reserve      = 0,       -- 保留现金
-    UseManual    = false,   -- 不使用手动原点
-    AutoReplace  = true,    -- 满员自动替换最弱
-    TitanWave    = 12,      -- 波数 >= 此值开始优先泰坦
-    -- 升级 / 技能（固定全开）
-    AutoUpgrade  = true,
-    UpgradeTimes = 2,
-    AutoAbility  = true,
-    -- 其它
-    AntiAfk      = true,
+local AUTO = {
+    -- 流程：固定全开
+    AutoReady     = true,    -- 大厅自动走到准备垫
+    AutoSkip      = true,    -- 自动开启跳波设置
+    AutoFight     = true,    -- 自动锁敌 + 开火
+    AutoSkill     = true,    -- 自动放技能
+    AutoRevive    = true,    -- 自动救倒地队友
+    AutoContinue  = true,    -- 结算自动准备下一局
+    AutoApproach  = true,    -- 敌人太远自动靠近
+    AntiAfk       = true,    -- 防踢
+    -- 内部数值
+    Range         = 320,     -- 锁敌半径
+    SkillGap      = 3.2,     -- 每个技能最小释放间隔
     -- 运行数据
-    PlaceOrigin  = nil,
-    BadPoints    = {},
-    LastReason   = "就绪",
-    LastPoint    = nil,
-    Phase        = "铺场",
-    Running      = true,
-    Paused       = false,
-    Actions      = {},
-    Logs         = {},
+    Phase         = "启动中",
+    LastReason    = "就绪",
+    Target        = nil,
+    Running       = true,
+    Paused        = false,
+    Actions       = {},
+    Logs          = {},
 }
 
 -- ============================================================
@@ -17539,13 +17524,18 @@ local SecPlan = MainTab:Section({
 })
 
 SecPlan:Paragraph({
-    Title = "建造顺序",
-    Desc  = "开局先买最便宜的单位铺场 → 有余钱换成更强的 → 满员自动替换最弱 → 后期优先攒钱买泰坦 → 泰坦优先升级",
+    Title = "开局",
+    Desc  = "进大厅后自动走到准备垫站住 → 开局自动锁最近的怪开火 → 波次结束自动跳波",
 })
 
 SecPlan:Paragraph({
-    Title = "摆放规则",
-    Desc  = "自动扫描放置区：贴路优先 → 卡转角 → 覆盖路径 → 自动避让已占位置",
+    Title = "战斗",
+    Desc  = "自动锁定最近敌人并持续瞄准射击 → 技能冷却好就自动放 → 敌人太远会自动靠近",
+})
+
+SecPlan:Paragraph({
+    Title = "生存",
+    Desc  = "残血 / 倒地自动等待 → 附近有队友倒地会自动按住救人 → 结算界面自动准备下一局",
 })
 
 local SecLog = LogTab:Section({
@@ -17567,64 +17557,46 @@ local SecTool = ToolTab:Section({
 
 SecTool:Button({
     Title = "暂停 / 继续",
-    Desc  = "暂停后不再点任何游戏按钮",
+    Desc  = "暂停后不再瞄准、开火、放技能",
     Icon  = "pause",
     Callback = function()
-        if TTD.Actions.TogglePause then TTD.Actions.TogglePause() end
-    end,
-})
-
-SecTool:Button({
-    Title = "重新扫描地图",
-    Desc  = "换图后自动重扫，也可手动点一下",
-    Icon  = "map",
-    Callback = function()
-        if TTD.Actions.Rebuild then TTD.Actions.Rebuild() end
-    end,
-})
-
-SecTool:Button({
-    Title = "立即放置一轮",
-    Desc  = "按内部策略放一个单位",
-    Icon  = "target",
-    Callback = function()
-        if TTD.Actions.Place then TTD.Actions.Place(1) end
-    end,
-})
-
-SecTool:Button({
-    Title = "立即升级一轮",
-    Desc  = "优先升级泰坦和高价单位",
-    Icon  = "circle-arrow-up",
-    Callback = function()
-        if TTD.Actions.Upgrade then TTD.Actions.Upgrade() end
-    end,
-})
-
-SecTool:Button({
-    Title = "出售全部我的单位",
-    Desc  = "清场重来（一般不需要）",
-    Icon  = "trash-2",
-    Callback = function()
-        if TTD.Actions.SellAll then TTD.Actions.SellAll() end
+        if AUTO.Actions.TogglePause then AUTO.Actions.TogglePause() end
     end,
 })
 
 SecTool:Button({
     Title = "刷新状态",
-    Desc  = "立即读取波数 / 现金 / 基地血量",
+    Desc  = "立即读取波数 / 生命 / 敌人数",
     Icon  = "refresh-cw",
     Callback = function()
-        if TTD.Actions.Refresh then TTD.Actions.Refresh() end
+        if AUTO.Actions.Refresh then AUTO.Actions.Refresh() end
+    end,
+})
+
+SecTool:Button({
+    Title = "立即锁敌开火",
+    Desc  = "手动触发一次锁定 + 开火 + 技能",
+    Icon  = "crosshair",
+    Callback = function()
+        if AUTO.Actions.Fight then AUTO.Actions.Fight() end
+    end,
+})
+
+SecTool:Button({
+    Title = "立即尝试准备",
+    Desc  = "自动走到准备垫并站住",
+    Icon = "house",
+    Callback = function()
+        if AUTO.Actions.Ready then AUTO.Actions.Ready() end
     end,
 })
 
 SecTool:Button({
     Title = "环境自检",
-    Desc = "检查卡片 / 放置点 / 鼠标输入是否正常",
+    Desc = "检查角色 / 技能 / 敌人识别 / 遥控是否正常",
     Icon = "stethoscope",
     Callback = function()
-        if TTD.Actions.Diag then TTD.Actions.Diag() end
+        if AUTO.Actions.Diag then AUTO.Actions.Diag() end
     end,
 })
 
@@ -17644,13 +17616,12 @@ SecTool:Button({
     Desc  = "关闭界面与所有自动化",
     Icon  = "power",
     Callback = function()
-        TTD.Running = false
+        AUTO.Running = false
         pcall(function() Window:Destroy() end)
     end,
 })
 
-print("[TTD 自动化] 界面已加载")
-
+print("[难度模式 自动化] 界面已加载")
 
 -- ============================================================
 -- ▼▼ 内嵌自定义悬浮窗（替换内置 OpenButton）▼▼
@@ -19029,1480 +19000,665 @@ print("   - 自动清理、自动保存状态")
 
 
 -- ============================================================
--- ▼▼ TTD 自动化引擎（Toilet Tower Defense）▼▼
--- 全部通过“点击游戏内已有按钮 / 点击地面”实现，
--- 不直接伪造 RemoteEvent，稳定性更高。
+-- ▼▼ 难度模式 自动化引擎 ▼▼
+-- 自动准备 → 自动战斗（锁敌 / 开火 / 技能）→ 自动救人 → 结算自动继续
+-- 全部通过游戏本身已有的 Remote 与 ProximityPrompt 实现
 -- ============================================================
+do
+
+local RS = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
 local pg = player:WaitForChild("PlayerGui")
 
-local okVim, VIM = pcall(function()
-    return game:GetService("VirtualInputManager")
-end)
-if not okVim then VIM = nil end
-
--- 日志（同时写入「状态」页）
+----------------------------------------------------------------
+-- 基础工具
+----------------------------------------------------------------
 local function log(msg)
     local line = os.date("%H:%M:%S") .. "  " .. tostring(msg)
-    table.insert(TTD.Logs, 1, line)
-    while #TTD.Logs > 14 do table.remove(TTD.Logs) end
-    print("[TTD] " .. line)
+    table.insert(AUTO.Logs, 1, line)
+    while #AUTO.Logs > 14 do
+        table.remove(AUTO.Logs)
+    end
+    print("[难度模式] " .. line)
 end
 
-local function notify(title, content)
+local function notify(title, text)
     pcall(function()
-        WindUI:Notify({ Title = title, Content = content, Duration = 3, Icon = "check" })
+        WindUI:Notify({ Title = title, Content = tostring(text), Duration = 4 })
     end)
 end
 
--- 控件是否真正可见（含所有父级）
+local function findPath(root, names)
+    local node = root
+    for _, n in ipairs(names) do
+        if not node then return nil end
+        node = node:FindFirstChild(n)
+    end
+    return node
+end
+
 local function deepVisible(obj)
-    if not obj or not obj.Parent then return false end
+    if not obj then return false end
     local cur = obj
     while cur and cur ~= game do
-        if cur:IsA("GuiObject") then
-            if cur.Visible == false then return false end
-        elseif cur:IsA("LayerCollector") then
-            if cur.Enabled == false then return false end
-        end
+        if cur:IsA("GuiObject") and cur.Visible == false then return false end
+        if cur:IsA("ScreenGui") and cur.Enabled == false then return false end
         cur = cur.Parent
     end
     return true
 end
 
--- 按路径逐级查找
-local function findPath(root, path)
-    local cur = root
-    for _, name in ipairs(path) do
-        if not cur then return nil end
-        cur = cur:FindFirstChild(name)
+local clockTimes = {}
+local function every(key, gap)
+    local now = os.clock()
+    if (clockTimes[key] or 0) + gap <= now then
+        clockTimes[key] = now
+        return true
     end
-    return cur
-end
-
--- 判断信号是否有监听（执行器支持 getconnections 时才判断）
-local function signalHasListener(sig)
-    if not sig or type(getconnections) ~= "function" then return nil end
-    local ok, list = pcall(getconnections, sig)
-    if ok and type(list) == "table" then return #list > 0 end
-    return nil
-end
-
-local rawClick  -- 见下方实现（优先执行器鼠标函数）
-
--- 点击按钮：有监听才用 firesignal，否则一律真实鼠标点击
-local function clickGui(obj)
-    if not obj or not obj.Parent then return false end
-    local target = obj
-    if not target:IsA("GuiButton") then
-        for _, d in ipairs(target:GetDescendants()) do
-            if d:IsA("GuiButton") and deepVisible(d) then
-                target = d
-                break
-            end
-        end
-    end
-    if target:IsA("GuiButton") then
-        local mouseSig = target.MouseButton1Click
-        local connected = signalHasListener(mouseSig)
-        if connected == true and type(firesignal) == "function" then
-            if pcall(firesignal, mouseSig) then return true end
-        end
-        if connected == false and type(firesignal) == "function" then
-            local actSig = target.Activated
-            if actSig and signalHasListener(actSig) == true then
-                if pcall(firesignal, actSig) then return true end
-            end
-        end
-    end
-    local pos = target.AbsolutePosition + target.AbsoluteSize * 0.5
-    if rawClick then return rawClick(pos.X, pos.Y) end
     return false
 end
 
--- 点击点是否被我们自己的界面挡住（挡住时游戏收不到点击）
-local function ownGuiAt(x, y)
-    local list = {}
-    local wg = WindUI and WindUI.ScreenGui
-    if wg then table.insert(list, wg) end
-    if screenGui then table.insert(list, screenGui) end
-    for _, g in ipairs(list) do
-        if g and g.Parent and g.Enabled then
-            for _, d in ipairs(g:GetDescendants()) do
-                if d:IsA("GuiObject") and d.Visible and (d:IsA("GuiButton") or d.Active) then
-                    local p, s = d.AbsolutePosition, d.AbsoluteSize
-                    if x >= p.X and x <= p.X + s.X and y >= p.Y and y <= p.Y + s.Y then
-                        return g
-                    end
+local function nameOf(inst)
+    return inst and inst.Name or "无"
+end
+
+local function myChar()
+    local c = player.Character
+    if c and c.Parent then return c end
+    return nil
+end
+
+local function humOf(m)
+    return m and m:FindFirstChildOfClass("Humanoid")
+end
+
+local function hrpOf(m)
+    if not m then return nil end
+    return m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart
+end
+
+local function living()
+    return workspace:FindFirstChild("Living")
+end
+
+----------------------------------------------------------------
+-- 阵营 / 敌人识别
+----------------------------------------------------------------
+local FactionShared = nil
+do
+    local mod = RS:FindFirstChild("FactionShared")
+    if mod then
+        local ok, res = pcall(require, mod)
+        if ok then FactionShared = res end
+    end
+end
+
+local function isEnemy(m)
+    if not m or not m:IsA("Model") then return false end
+    local me = myChar()
+    if m == me then return false end
+    local h = humOf(m)
+    if not h or h.Health <= 0 then return false end
+    if FactionShared then
+        local ok, res = pcall(FactionShared.IsEnemy, { Player = me, Target = m })
+        if ok and res ~= nil then return res == true end
+    end
+    local mine = me and me:GetAttribute("Faction")
+    local other = m:GetAttribute("Faction")
+    if m:FindFirstChild("AI") then
+        return mine ~= other
+    end
+    return false
+end
+
+local enemyCache = { t = 0, n = 0 }
+local function enemyCount()
+    if os.clock() - enemyCache.t < 0.25 then
+        return enemyCache.n
+    end
+    local folder = living()
+    local n = 0
+    if folder then
+        for _, m in ipairs(folder:GetChildren()) do
+            if isEnemy(m) then n = n + 1 end
+        end
+    end
+    enemyCache.t = os.clock()
+    enemyCache.n = n
+    return n
+end
+
+local function nearestEnemy(maxDist)
+    local me = myChar()
+    local base = hrpOf(me)
+    if not base then return nil, nil end
+    local folder = living()
+    if not folder then return nil, nil end
+    local best, bestD = nil, maxDist or math.huge
+    for _, m in ipairs(folder:GetChildren()) do
+        if isEnemy(m) then
+            local p = hrpOf(m)
+            if p then
+                local d = (p.Position - base.Position).Magnitude
+                if d < bestD then
+                    best, bestD = m, d
                 end
             end
         end
     end
+    return best, bestD
+end
+
+----------------------------------------------------------------
+-- 瞄准 / 开火
+----------------------------------------------------------------
+local BotBridge = nil
+local function bot()
+    if BotBridge and BotBridge.Enabled ~= nil then return BotBridge end
+    local mod = RS:FindFirstChild("BotBridge")
+    if not mod then return nil end
+    local ok, res = pcall(require, mod)
+    if ok and type(res) == "table" then
+        BotBridge = res
+        return res
+    end
     return nil
 end
 
--- 真实鼠标点击：优先执行器原生函数，其次 VirtualInputManager
-rawClick = function(x, y)
-    x, y = math.floor(x), math.floor(y)
-
-    -- 自己的窗口压在点击点上时先隐藏，否则点到的是自己的界面
-    local blocked = ownGuiAt(x, y)
-    local blockedWasOn = nil
-    if blocked then
-        blockedWasOn = blocked.Enabled
-        blocked.Enabled = false
-        task.wait(0.03)
+local function aimAt(pos)
+    local bb = bot()
+    if bb then
+        bb.Enabled = true
+        bb.AimPosition = pos
     end
-
-    local ok = false
-    if type(mousemove) == "function" and type(mouse1click) == "function" then
-        ok = pcall(function()
-            mousemove(x, y)
-            task.wait(0.06)
-            mouse1click()
-        end)
+    -- 再直接补发一次准星数据，保证服务端一定收到我们锁定的位置
+    local ms = RS:FindFirstChild("MouseStream")
+    local cam = workspace.CurrentCamera
+    if ms and cam then
+        local dir = pos - cam.CFrame.Position
+        if dir.Magnitude > 0 then
+            dir = dir.Unit
+        else
+            dir = cam.CFrame.LookVector
+        end
+        pcall(function() ms:FireServer(pos, dir, false) end)
     end
-    if not ok and VIM then
-        ok = pcall(function()
-            VIM:SendMouseMoveEvent(x, y, 0)
-            task.wait(0.06)
-            VIM:SendMouseButtonEvent(x, y, 0, true, game, 0)
-            task.wait(0.04)
-            VIM:SendMouseButtonEvent(x, y, 0, false, game, 0)
-        end)
-    end
-
-    if blocked then pcall(function() blocked.Enabled = blockedWasOn end) end
-    return ok
 end
 
--- 取消“正在放置”状态：先把选中的卡片再点一次取消，右键兜底
-local deselectCards  -- 定义在卡片读取之后
-local function cancelPlacement()
-    if deselectCards then
-        local ok, did = pcall(deselectCards)
-        if ok and did then return end
+local function stopAim()
+    local bb = bot()
+    if bb then
+        bb.Enabled = false
+        bb.AimPosition = nil
     end
-    local cam = workspace.CurrentCamera
-    local vp = cam and cam.ViewportSize or Vector2.new(800, 600)
-    local x, y = math.floor(vp.X * 0.5), math.floor(vp.Y * 0.5)
-    if VIM then
-        pcall(function()
-            VIM:SendMouseButtonEvent(x, y, 1, true, game, 0)
-            task.wait(0.03)
-            VIM:SendMouseButtonEvent(x, y, 1, false, game, 0)
-        end)
-    end
-    task.wait(0.18)
 end
 
--- 世界坐标点击：点位不在屏幕内 / 被底部商店挡住时，临时把镜头转过去
-local function clickWorld(worldPos)
-    local cam = workspace.CurrentCamera
-    if not cam or not worldPos then return false end
-    local vp = cam.ViewportSize
-    local sp, onScreen = cam:WorldToViewportPoint(worldPos)
-    local restore = nil
+local holdingTool = nil
+local lastActivate = 0
+local function ensureFire()
+    local c = myChar()
+    if not c then return end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return end
+    local folder = tool:FindFirstChild("Folder")
+    local hold = folder and folder:FindFirstChild("Hold")
+    if hold then
+        -- 连发武器：只要按住就行
+        if holdingTool ~= tool then
+            holdingTool = tool
+            local sync = RS:FindFirstChild("HoldStateSync")
+            if sync then
+                pcall(function() sync:FireServer("Gun", true) end)
+            end
+        end
+    else
+        -- 近战 / 单发武器：按节奏触发
+        if os.clock() - lastActivate > 0.15 then
+            lastActivate = os.clock()
+            pcall(function() tool:Activate() end)
+        end
+    end
+end
 
-    local function badScreen(p, on)
-        if not on then return true end
-        -- 底部 35% 是单位商店，点了会点到商店上
-        return p.X < 12 or p.X > vp.X - 12 or p.Y < 12 or p.Y > vp.Y * 0.65
+local function stopFire()
+    if holdingTool then
+        holdingTool = nil
+        local sync = RS:FindFirstChild("HoldStateSync")
+        if sync then
+            pcall(function() sync:FireServer("Gun", false) end)
+        end
+    end
+end
+
+----------------------------------------------------------------
+-- 技能：从游戏自己的技能注册事件里读取技能 ID
+----------------------------------------------------------------
+local skills = {}
+local skillLast = {}
+
+do
+    local reg = RS:FindFirstChild("SkillRegister")
+    if reg then
+        reg.OnClientEvent:Connect(function(mode, data)
+            if mode == "clear" then
+                skills = {}
+                return
+            end
+            if mode ~= "set" or type(data) ~= "table" then return end
+            local fresh = {}
+            for id, v in pairs(data) do
+                if type(v) == "string" then
+                    fresh[id] = v
+                elseif type(v) == "table" then
+                    for _, item in ipairs(v) do
+                        if type(item) == "string" then
+                            fresh[id] = item
+                            break
+                        end
+                    end
+                end
+            end
+            skills = fresh
+        end)
     end
 
-    if badScreen(sp, onScreen) then
-        local oldType, oldCF = cam.CameraType, cam.CFrame
-        -- 从点位上方的空中俯视，保证视线不被墙 / 单位挡住
-        local from = worldPos + Vector3.new(0, 34, 14)
-        if (from - worldPos).Magnitude < 1 then from = worldPos + Vector3.new(0, 20, 0) end
-        local look = CFrame.lookAt(from, worldPos)
-        cam.CFrame = look
-        local conn, bound = nil, false
-        pcall(function()
-            RunService:BindToRenderStep("TTDAim", Enum.RenderPriority.Camera.Value + 1, function()
-                pcall(function()
-                    cam.CameraType = Enum.CameraType.Scriptable
-                    cam.CFrame = CFrame.lookAt(from, worldPos)
+    task.spawn(function()
+        for _ = 1, 60 do
+            if not AUTO.Running then break end
+            local sync = RS:FindFirstChild("SkillSyncRequest")
+            if sync then
+                pcall(function() sync:FireServer() end)
+            end
+            task.wait(2)
+        end
+    end)
+end
+
+local function skillCount()
+    local n = 0
+    for _ in pairs(skills) do n = n + 1 end
+    return n
+end
+
+local function useSkills(hitPos)
+    local act = RS:FindFirstChild("SkillActivate")
+    if not act or not hitPos then return 0 end
+    local cam = workspace.CurrentCamera
+    local look = cam and cam.CFrame.LookVector or Vector3.new(0, 0, -1)
+    local used = 0
+    for id, name in pairs(skills) do
+        if os.clock() - (skillLast[id] or 0) >= AUTO.SkillGap then
+            skillLast[id] = os.clock()
+            pcall(function()
+                act:FireServer(id, hitPos, look, "press", name)
+                task.delay(0.2, function()
+                    pcall(function() act:FireServer(id, hitPos, look, "release", name) end)
                 end)
             end)
-            bound = true
-        end)
-        if not bound then
-            pcall(function()
-                conn = RunService.RenderStepped:Connect(function()
-                    pcall(function()
-                        cam.CameraType = Enum.CameraType.Scriptable
-                        cam.CFrame = CFrame.lookAt(from, worldPos)
+            used = used + 1
+        end
+    end
+    return used
+end
+
+----------------------------------------------------------------
+-- 自动救人（倒地队友身上的 ProximityPrompt）
+----------------------------------------------------------------
+local function tryRevive()
+    local me = myChar()
+    local base = hrpOf(me)
+    if not base then return 0 end
+    local folder = living()
+    if not folder then return 0 end
+    local n = 0
+    for _, d in ipairs(folder:GetDescendants()) do
+        if d:IsA("ProximityPrompt") and d.Enabled and string.find(d.Name, "Downed") then
+            local model = d:FindFirstAncestorWhichIsA("Model")
+            if model and model ~= me then
+                local p = hrpOf(model)
+                if p and (p.Position - base.Position).Magnitude <= (d.MaxActivationDistance + 3) then
+                    pcall(function() d:InputHoldBegin() end)
+                    task.delay(math.max(0.1, d.HoldDuration) + 0.08, function()
+                        pcall(function() d:InputHoldEnd() end)
                     end)
-                end)
-            end)
-        end
-        task.wait(0.16)
-        sp, onScreen = cam:WorldToViewportPoint(worldPos)
-        restore = function()
-            if bound then pcall(function() RunService:UnbindFromRenderStep("TTDAim") end) end
-            if conn then pcall(function() conn:Disconnect() end) end
-            pcall(function()
-                cam.CameraType = oldType
-                cam.CFrame = oldCF
-            end)
+                    n = n + 1
+                end
+            end
         end
     end
+    return n
+end
 
-    if not onScreen then
-        if restore then restore() end
+----------------------------------------------------------------
+-- 场景判断
+----------------------------------------------------------------
+local function waveText()
+    local wg = pg:FindFirstChild("WavesGui")
+    local lbl = wg and findPath(wg, { "Frame", "TextLabel" })
+    if lbl and lbl:IsA("TextLabel") then return lbl.Text end
+    return ""
+end
+
+local function readyText()
+    local chr = pg:FindFirstChild("ChrGUI")
+    local lbl = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button", "TextLabel" })
+    if lbl and lbl:IsA("TextLabel") then return lbl.Text end
+    return ""
+end
+
+local function modeText()
+    local mv = workspace:FindFirstChild("Mode")
+    if mv and mv:IsA("StringValue") then return mv.Value end
+    if mv and mv:IsA("ValueBase") then return tostring(mv.Value) end
+    return ""
+end
+
+local function hasShownGui(root)
+    if not root then return false end
+    if root:IsA("GuiObject") then return deepVisible(root) end
+    for _, d in ipairs(root:GetDescendants()) do
+        if d:IsA("GuiObject") and deepVisible(d) then return true end
+    end
+    return false
+end
+
+local function inMatch()
+    if enemyCount() > 0 then return true end
+    -- 站在准备垫附近 = 还在大厅
+    local pad = workspace:FindFirstChild("AutoReady")
+    local base = hrpOf(myChar())
+    if pad and base and (base.Position - pad.Position).Magnitude < 90 then
+        return false
+    end
+    local wg = pg:FindFirstChild("WavesGui")
+    if wg then
+        local frame = wg:FindFirstChild("Frame")
+        if frame and frame:IsA("GuiObject") and deepVisible(frame) then
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 自动准备：走到 AutoReady 垫子上站住
+----------------------------------------------------------------
+local readyStuck = 0
+local function autoReady()
+    local pad = workspace:FindFirstChild("AutoReady")
+    if not pad then return false end
+    local me = myChar()
+    local h = humOf(me)
+    local base = hrpOf(me)
+    if not (h and base) then return false end
+
+    local dist = (base.Position - pad.Position).Magnitude
+    if dist > 6 then
+        pcall(function() h:MoveTo(pad.Position) end)
+        readyStuck = readyStuck + 1
+        if readyStuck >= 8 then
+            readyStuck = 0
+            local y = 4
+            if pad:IsA("BasePart") then
+                y = pad.Size.Y * 0.5 + 4
+            end
+            pcall(function()
+                base.CFrame = CFrame.new(pad.Position + Vector3.new(0, y, 0))
+            end)
+            log("准备垫走不过去，已直接贴到垫子上")
+        end
+        AUTO.LastReason = "正在走向准备垫"
         return false
     end
 
-    local ok = rawClick(sp.X, sp.Y)
-    task.wait(0.35)
-    if restore then restore() end
-    return ok
-end
-
--- 解析 "$1,234" / "1.2K" 这类数字（只取第一段数字 + 末位单位）
-local function parseNumber(txt)
-    if txt == nil then return 0 end
-    local s = tostring(txt):lower():gsub(",", "")
-    local num, suffix = s:match("([%d%.]+)%s*([kmb]?)")
-    if not num then return 0 end
-    local mult = 1
-    if suffix == "k" then
-        mult = 1e3
-    elseif suffix == "m" then
-        mult = 1e6
-    elseif suffix == "b" then
-        mult = 1e9
-    end
-    return (tonumber(num) or 0) * mult
-end
-
--- 读取界面文字（按路径逐级查找）
-local function readLabel(path)
-    local cur = pg
-    for _, name in ipairs(path) do
-        if not cur then return nil end
-        cur = cur:FindFirstChild(name)
-    end
-    if cur and cur:IsA("TextLabel") then
-        return cur.Text
-    end
-    return nil
-end
-
-local function getCashText() return readLabel({ "Towers", "Cash", "Frame", "TextLabel" }) end
-local function getWaveText() return readLabel({ "Data", "Wave", "Frame", "TextLabel" }) end
-local function getHpText()   return readLabel({ "Data", "HP", "Frame", "TextLabel" }) end
-
--- 归属判断：只认自己放的 / 有明确归属标记的单位，避免卖到队友的塔
-local ownedTowers = {}
-local towerPart
-
-local function getTowerFolder()
-    local s = workspace:FindFirstChild("Scripted")
-    return s and s:FindFirstChild("Towers")
-end
-
-local function allTowerModels()
-    local folder = getTowerFolder()
-    local out = {}
-    if not folder then return out end
-    local function scan(container)
-        for _, c in ipairs(container:GetChildren()) do
-            if c:IsA("Model") then
-                table.insert(out, c)
-            elseif c:IsA("Folder") then
-                scan(c)
-            end
-        end
-    end
-    scan(folder)
-    return out
-end
-
-local function isMyTower(t)
-    if ownedTowers[t] then return true end
-    for _, attr in ipairs({ "Owner", "OwnerName", "PlacedBy", "Player", "PlayerName", "UserId", "OwnerUserId" }) do
-        local v = t:GetAttribute(attr)
-        if v ~= nil then
-            return tostring(v) == player.Name or tostring(v) == tostring(player.UserId)
-        end
-        local c = t:FindFirstChild(attr)
-        if c and c:IsA("ValueBase") then
-            return tostring(c.Value) == player.Name or tostring(c.Value) == tostring(player.UserId)
-        end
-    end
-    return false  -- 看不出来就不碰
-end
-
-local function towerSet()
-    local set = {}
-    for _, t in ipairs(allTowerModels()) do set[t] = true end
-    return set
-end
-
--- 放置成功后：把新出现的、就在点击点附近的塔记成“自己的”
-local function markNewTowers(before, nearPos)
-    local n = 0
-    for _, t in ipairs(allTowerModels()) do
-        if not before[t] then
-            local part = towerPart(t)
-            if not nearPos or not part or (part.Position - nearPos).Magnitude <= 8 then
-                ownedTowers[t] = true
-                n = n + 1
-            end
-        end
-    end
-    return n
-end
-
-local function myTowers()
-    local list = {}
-    for _, t in ipairs(allTowerModels()) do
-        if isMyTower(t) then
-            table.insert(list, t)
-        end
-    end
-    return list
-end
-
-local function countTowers()
-    return #myTowers()
-end
-
-towerPart = function(t)
-    return t:FindFirstChild("HumanoidRootPart") or t:FindFirstChildWhichIsA("BasePart")
-end
-
--- ============================================================
--- 单位卡片读取（1 秒缓存，避免状态页每秒全量扫描）
--- ============================================================
-local cardsCache = { time = 0, list = {} }
-
-local function getCards()
-    if tick() - cardsCache.time < 0.8 then return cardsCache.list end
-    local out, seen = {}, {}
-    -- 只认商店：PlayerGui.Towers.Towers（另一个 Towers.UIListLayout 是已装备列表，点了会取消装备）
-    local towersGui = pg:FindFirstChild("Towers")
-    local root = towersGui and towersGui:FindFirstChild("Towers")
-    if not root then
-        cardsCache = { time = tick(), list = out }
-        return out
-    end
-
-    for _, d in ipairs(root:GetDescendants()) do
-        if d:IsA("GuiObject") and d:FindFirstChild("Infos") and d:FindFirstChild("Price") and not seen[d] then
-            seen[d] = true
-            if deepVisible(d) then
-                local locked = d:FindFirstChild("LockedFrame")
-                local empty = d:FindFirstChild("NoTower")
-                local usable = not (locked and locked:IsA("GuiObject") and locked.Visible)
-                           and not (empty and empty:IsA("GuiObject") and empty.Visible)
-                if usable then
-                    local infos = d:FindFirstChild("Infos")
-
-                    -- 名字：优先 Infos.UIListLayout.TextCore
-                    local name = ""
-                    local layout = infos:FindFirstChild("UIListLayout")
-                    local tc = layout and layout:FindFirstChild("TextCore")
-                    if tc and tc:IsA("TextLabel") and tc.Text ~= "" then name = tc.Text end
-                    if name == "" then
-                        for _, t in ipairs(infos:GetDescendants()) do
-                            if t:IsA("TextLabel") then
-                                local s = t.Text:gsub("%s", "")
-                                if s ~= "" and not s:find("%$") and not s:match("^%d") then
-                                    name = t.Text
-                                    break
-                                end
-                            end
-                        end
-                    end
-
-                    -- 价格：Price 本身是文本就直接读，否则找它下面的文本；再兜底 Infos 里的数字
-                    local price = 0
-                    local priceObj = d:FindFirstChild("Price")
-                    if priceObj:IsA("TextLabel") then
-                        price = parseNumber(priceObj.Text)
-                    else
-                        local pt = priceObj:FindFirstChildWhichIsA("TextLabel", true)
-                        if pt then
-                            price = parseNumber(pt.Text)
-                        else
-                            local last = nil
-                            for _, t in ipairs(infos:GetDescendants()) do
-                                if t:IsA("TextLabel") then
-                                    if t.Text:find("%$") or t.Text:match("^%s*%d") then
-                                        last = parseNumber(t.Text)
-                                    end
-                                end
-                            end
-                            price = last or 0
-                        end
-                    end
-
-                    if name ~= "" then
-                        local cam = workspace.CurrentCamera
-                        local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
-                        local mid = d.AbsolutePosition + d.AbsoluteSize * 0.5
-                        local onScreen = mid.X > 4 and mid.X < vp.X - 4 and mid.Y > 4 and mid.Y < vp.Y - 4
-                        table.insert(out, { obj = d, name = name, price = price, onScreen = onScreen })
-                    end
-                end
-            end
-        end
-    end
-
-    cardsCache = { time = tick(), list = out }
-    return out
-end
-
-local function normalizeName(s)
-    return tostring(s):lower():gsub("[%s%-_%./:']", "")
-end
-
--- 卡片是否处于“已选中（正在放置）”状态：TowerFrame.Selection 可见
-local function objSelected(obj)
-    if not obj or not obj.Parent then return nil end
-    local sel = obj:FindFirstChild("Selection")
-    if sel and sel:IsA("GuiObject") then return sel.Visible end
-    return nil
-end
-
-local function cardSelected(c)
-    if not c then return nil end
-    return objSelected(c.obj)
-end
-
--- 取消选中：只点我们自己选过的那张卡（再点一次即可取消），不乱点别的卡
-local selectedCardObj = nil
-deselectCards = function()
-    local obj = selectedCardObj
-    selectedCardObj = nil
-    if not obj or not obj.Parent then return false end
-    local state = objSelected(obj)
-    if state == false then return true end    -- 游戏已经自动取消放置，不用再点
-    if state == true then
-        clickGui(obj)
-        task.wait(0.22)
-        -- 如果这一下反而点成了“选中”，再点一次取消
-        if objSelected(obj) == true then
-            clickGui(obj)
-            task.wait(0.2)
-        end
-        return true
-    end
-    return false  -- 判断不了选中状态，交给右键兜底
-end
-
--- 卡片不在可视范围内时，把商店列表滚到它那里
-local function scrollToCard(obj)
-    local anc = obj.Parent
-    while anc and not anc:IsA("ScrollingFrame") do anc = anc.Parent end
-    if not anc then return false end
-    local ok = pcall(function()
-        local rel = obj.AbsolutePosition - anc.AbsolutePosition + anc.CanvasPosition
-        local y = rel.Y + obj.AbsoluteSize.Y * 0.5 - anc.AbsoluteSize.Y * 0.4
-        anc.CanvasPosition = Vector2.new(anc.CanvasPosition.X, math.max(0, y))
-    end)
-    task.wait(0.18)
-    return ok
-end
-
--- 点卡片并确认真的进入放置状态
-local function selectCard(card)
-    if card.onScreen == false then scrollToCard(card.obj) end
-    local before = cardSelected(card)
-    for attempt = 1, 3 do
-        clickGui(card.obj)
-        task.wait(0.45)
-        local now = cardSelected(card)
-        if now == true or now == nil then
-            selectedCardObj = card.obj
-            return true
-        end
-        if before == false and attempt == 1 then
-            -- 信号点击没被游戏处理：补一次真实鼠标点击
-            local p = card.obj.AbsolutePosition + card.obj.AbsoluteSize * 0.5
-            rawClick(p.X, p.Y)
-            task.wait(0.35)
-            if cardSelected(card) == true then
-                selectedCardObj = card.obj
-                return true
-            end
-        end
-    end
-    -- 选中标识不可信时不阻塞放置
-    selectedCardObj = card.obj
+    readyStuck = 0
+    AUTO.LastReason = "已站在准备垫上，等待开局"
     return true
 end
 
-local function affordable(c, cash)
-    if c.price <= 0 then return true end
-    if cash <= 0 then return true end  -- 读不到现金时不阻塞
-    return c.price <= (cash - TTD.Reserve)
-end
-
-local function waveNumber()
-    local n = parseNumber(getWaveText())
-    return math.floor(n or 0)
-end
-
-local function isTitan(c)
-    return normalizeName(c.name):find("titan", 1, true) ~= nil
-end
-
-local function titanOwned()
-    for _, t in ipairs(myTowers()) do
-        if normalizeName(t.Name):find("titan", 1, true) then return true end
-    end
-    return false
-end
-
-local function cheapest(cards, cash, skipTitan)
-    local best
-    for _, c in ipairs(cards) do
-        if affordable(c, cash) and not (skipTitan and isTitan(c))
-            and (not best or c.price < best.price) then
-            best = c
-        end
-    end
-    return best
-end
-
-local function strongest(cards, cash, skipTitan)
-    local best
-    for _, c in ipairs(cards) do
-        if affordable(c, cash) and not (skipTitan and isTitan(c))
-            and (not best or c.price > best.price) then
-            best = c
-        end
-    end
-    return best
-end
-
-local function titanList(cards)
-    local list = {}
-    for _, c in ipairs(cards) do
-        if isTitan(c) then table.insert(list, c) end
-    end
-    table.sort(list, function(a, b) return a.price < b.price end)
-    return list
-end
-
--- 内部固定策略（玩家不需要配置）：
---   1) 铺场：先买买得起的最便宜单位，快速占位
---   2) 补强：铺满后买买得起的最强单位；满员时替换最弱
---   3) 泰坦：波数达标 / 场上缺泰坦时，优先攒钱买泰坦
-local function planCard(cash)
-    local cards = getCards()
-    if #cards == 0 then
-        TTD.LastReason = "没有找到单位卡片（商店可能未打开）"
-        return nil
-    end
-    cash = cash or parseNumber(getCashText())
-    local wave = waveNumber()
-    local count = countTowers()
-
-    local titans = titanList(cards)
-
-    -- 攒泰坦期：临近泰坦波次且还没有泰坦，除铺场外不再乱花钱
-    local savingForTitan = (#titans > 0 and not titanOwned()
-        and wave >= (TTD.TitanWave - 3) and count >= TTD.FillCheap)
-
-    -- 阶段 3：泰坦优先（临近泰坦波次且买得起就直接买）
-    if #titans > 0 and (wave >= (TTD.TitanWave - 3) or count >= TTD.Count - 2) then
-        local bestTitan
-        for _, t in ipairs(titans) do
-            if affordable(t, cash) then bestTitan = t end
-        end
-        if bestTitan then
-            TTD.Phase = "泰坦"
-            return bestTitan
-        end
-    end
-
-    -- 阶段 1：铺场（先放小钱单位）
-    if count < TTD.FillCheap then
-        TTD.Phase = "铺场"
-        local c = cheapest(cards, cash, true) or cheapest(cards, cash, false)
-        if c then return c end
-    end
-
-    -- 阶段 2：补强（买得起的最强）
-    if count < TTD.Count and not savingForTitan then
-        TTD.Phase = "补强"
-        local c = strongest(cards, cash, true) or strongest(cards, cash, false)
-        if c then return c end
-    end
-
-    if savingForTitan then
-        TTD.Phase = "攒泰坦"
-        TTD.LastReason = string.format("攒钱买泰坦（目标 %s）", tostring(titans[1].price))
-        return nil
-    end
-
-    -- 满员：返回最强卡，交由 doReplace 卖弱换强
-    TTD.Phase = "换强"
-    local best = strongest(cards, cash, false)
-    if best then return best end
-
-    -- 都买不起：攒钱（优先攒泰坦）
-    if #titans > 0 and not titanOwned() then
-        TTD.Phase = "攒泰坦"
-        TTD.LastReason = string.format("为泰坦攒钱（目标 %s）", tostring(titans[1].price))
-    else
-        TTD.LastReason = string.format("现金不足（%s），等待攒钱", tostring(getCashText() or "?"))
-    end
-    return nil
-end
-
--- ============================================================
--- 地图自动布点（完全不需要手动记录原点）
--- 1. 取 Workspace.Map.Placement 下的地面
--- 2. 网格采样 + 向下射线，只保留落在放置区的点
--- 3. 按“离道路越近越好”排序，优先贴路放
--- ============================================================
-local mapCache = { map = nil, placement = nil, points = nil, time = 0 }
-local roadCache = { ref = nil, list = {} }
-
-local function getMap() return workspace:FindFirstChild("Map") end
-
-local function getPlacementFolder()
-    local map = getMap()
-    return map and map:FindFirstChild("Placement")
-end
-
-local function getRoadParts()
-    local map = getMap()
-    if not map then return {} end
-    local road = map:FindFirstChild("Road")
-    local ref = road or map
-    if roadCache.ref == ref and #roadCache.list > 0 then return roadCache.list end
-
-    local list = {}
-    if road then
-        for _, d in ipairs(road:GetDescendants()) do
-            if d:IsA("BasePart") then table.insert(list, d) end
-        end
-    end
-    if #list == 0 then
-        local wps = map:FindFirstChild("Waypoints")
-        if wps then
-            for _, d in ipairs(wps:GetDescendants()) do
-                if d:IsA("Attachment") and d.Parent and d.Parent:IsA("BasePart") then
-                    table.insert(list, d.Parent)
-                elseif d:IsA("BasePart") then
-                    table.insert(list, d)
-                end
-            end
-        end
-    end
-    roadCache = { ref = ref, list = list }
-    return list
-end
-
--- 路径点（用来判断点位是否覆盖怪走的主路线）
-local pathCache = { ref = nil, list = {} }
-local function getPathParts()
-    local map = getMap()
-    if not map then return {} end
-    local wps = map:FindFirstChild("Waypoints")
-    if pathCache.ref == wps and #pathCache.list > 0 then return pathCache.list end
-    local list = {}
-    if wps then
-        for _, d in ipairs(wps:GetDescendants()) do
-            if d:IsA("BasePart") then
-                table.insert(list, d)
-            elseif d:IsA("Attachment") and d.Parent and d.Parent:IsA("BasePart") then
-                table.insert(list, d.Parent)
-            end
-        end
-    end
-    pathCache = { ref = wps, list = list }
-    return list
-end
-
-local function distToPart(p, part)
-    local localP = part.CFrame:PointToObjectSpace(p)
-    local half = part.Size * 0.5
-    local clamped = Vector3.new(
-        math.clamp(localP.X, -half.X, half.X),
-        math.clamp(localP.Y, -half.Y, half.Y),
-        math.clamp(localP.Z, -half.Z, half.Z)
-    )
-    return (part.CFrame:PointToWorldSpace(clamped) - p).Magnitude
-end
-
-local function distToRoad(p, roads)
-    local best = math.huge
-    for _, r in ipairs(roads) do
-        local d = distToPart(p, r)
-        if d < best then best = d end
-    end
-    return best
-end
-
-local MAX_POINTS = 600
-
-local function buildPoints()
-    local placement = getPlacementFolder()
-    if not placement then return {} end
-    local roads = getRoadParts()
-    local path = getPathParts()
-
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Include
-    params.FilterDescendantsInstances = { placement }
-    params.IgnoreWater = true
-
-    local parts = {}
-    for _, d in ipairs(placement:GetDescendants()) do
-        if d:IsA("BasePart") then table.insert(parts, d) end
-    end
-
-    local pts, seen = {}, {}
-    local baseStep = math.max(4, math.min(TTD.Spacing, 14))
-    for _, part in ipairs(parts) do
-        local size = part.Size
-        if size.X >= 2 and size.Z >= 2 then
-            local step = baseStep
-            local nx = math.floor(size.X / step)
-            local nz = math.floor(size.Z / step)
-            -- 单块最多采样 220 个点，避免大地图卡顿
-            while nx * nz > 220 and step < 60 do
-                step = step * 1.35
-                nx = math.floor(size.X / step)
-                nz = math.floor(size.Z / step)
-            end
-            local cf = part.CFrame
-            for ix = 1, math.max(nx, 0) do
-                for iz = 1, math.max(nz, 0) do
-                    local lx = -size.X / 2 + (ix - 0.5) * step
-                    local lz = -size.Z / 2 + (iz - 0.5) * step
-                    local world = (cf * CFrame.new(lx, 0, lz)).Position
-                    local origin = Vector3.new(world.X, cf.Position.Y + size.Y / 2 + 30, world.Z)
-                    local hit = workspace:Raycast(origin, Vector3.new(0, -90, 0), params)
-                    if hit then
-                        local key = string.format("%.1f_%.1f_%.1f", hit.Position.X, hit.Position.Y, hit.Position.Z)
-                        if not seen[key] then
-                            seen[key] = true
-                            table.insert(pts, {
-                                pos = hit.Position,
-                                key = key,
-                                road = distToRoad(hit.Position, roads),
-                                path = (#path > 0) and distToRoad(hit.Position, path) or nil,
-                            })
-                        end
-                    end
-                end
-            end
-        end
-        if #pts >= MAX_POINTS then break end
-    end
-
-    -- 评分：贴路 + 覆盖怪物路径，分数越高越优先
-    for _, p in ipairs(pts) do
-        local s = math.clamp(60 - p.road * 2, 0, 60)
-        if p.path then s = s + math.clamp(40 - p.path, 0, 40) * 0.8 end
-        p.score = s
-    end
-
-    local map = getMap()
-    local center = Vector3.new()
-    if map and map:IsA("Model") then
-        local ok, cf = pcall(function() return map:GetModelCFrame() end)
-        if ok and cf then center = cf.Position end
-    end
-    table.sort(pts, function(a, b)
-        local sa, sb = a.score or 0, b.score or 0
-        if math.abs(sa - sb) > 3 then return sa > sb end
-        return (a.pos - center).Magnitude < (b.pos - center).Magnitude
-    end)
-    while #pts > MAX_POINTS do table.remove(pts) end
-    return pts
-end
-
-local function getPoints(force)
-    local map = getMap()
-    local placement = getPlacementFolder()
-    if not map or not placement then return {} end
-    if force or mapCache.map ~= map or mapCache.placement ~= placement
-        or not mapCache.points or tick() - mapCache.time > 120 then
-        mapCache = { map = map, placement = placement, points = buildPoints(), time = tick() }
-        TTD.BadPoints = {}
-        log(string.format("地图扫描完成，可用放置点 %d 个", #mapCache.points))
-    end
-    return mapCache.points
-end
-
-local function pointFree(pos)
-    local folder = getTowerFolder()
-    if not folder then return true end
-    local params = OverlapParams.new()
-    params.FilterType = Enum.RaycastFilterType.Include
-    params.FilterDescendantsInstances = { folder }
-    params.MaxParts = 8
-    local ok, parts = pcall(function()
-        return workspace:GetPartBoundsInRadius(pos + Vector3.new(0, 2, 0), math.max(2.5, TTD.Spacing * 0.5), params)
-    end)
-    if ok and parts then return #parts == 0 end
-    return true
-end
-
-local function groundAt(pos)
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    params.FilterDescendantsInstances = { player.Character }
-    local hit = workspace:Raycast(pos + Vector3.new(0, 60, 0), Vector3.new(0, -160, 0), params)
-    return hit and hit.Position or pos
-end
-
-local function gridOffset(i, spacing)
-    local col = (i - 1) % 5
-    local row = math.floor((i - 1) / 5) % 5
-    return Vector3.new((col - 2) * spacing, 0, (row - 2) * spacing)
-end
-
--- 镜头到点位之间有没有墙（有墙点了会打到墙）
-local function lineOfSight(pos)
-    local cam = workspace.CurrentCamera
-    if not cam then return true end
-    local origin = cam.CFrame.Position
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    local ignore = {}
-    if player.Character then table.insert(ignore, player.Character) end
-    local folder = getTowerFolder()
-    if folder then table.insert(ignore, folder) end
-    params.FilterDescendantsInstances = ignore
-    local ok, hit = pcall(function() return workspace:Raycast(origin, pos - origin, params) end)
-    if not ok or not hit then return true end
-    return (hit.Position - pos).Magnitude <= 8
-end
-
-local function towerSpreadOk(pos)
-    local minD = math.max(4, TTD.Spacing * 0.7)
-    for _, t in ipairs(allTowerModels()) do
-        local part = towerPart(t)
-        if part and (part.Position - pos).Magnitude < minD then return false end
-    end
-    return true
-end
-
-local function pickPoint()
-    -- 手动原点模式（可选，默认不走这里）
-    if TTD.UseManual and TTD.PlaceOrigin then
-        for i = 1, 25 do
-            local pos = groundAt(TTD.PlaceOrigin + gridOffset(i, TTD.Spacing))
-            local key = string.format("%.1f_%.1f_%.1f", pos.X, pos.Y, pos.Z)
-            if not TTD.BadPoints[key] and pointFree(pos) then
-                return { pos = pos, key = key }
-            end
-        end
-        return nil
-    end
-
-    -- 自动布点：高分点里挑一个不重叠、看得见、没被拉黑的位置
-    local best, bestScore, scanned, losChecked = nil, nil, 0, 0
-    for _, p in ipairs(getPoints(false)) do
-        scanned = scanned + 1
-        if scanned > 320 then break end
-        if not TTD.BadPoints[p.key] and pointFree(p.pos) and towerSpreadOk(p.pos) then
-            losChecked = losChecked + 1
-            if losChecked > 60 or lineOfSight(p.pos) then
-                local s = (p.score or 0) + math.random() * 4
-                if not bestScore or s > bestScore then
-                    best, bestScore = p, s
-                end
-            end
-        end
-    end
-    return best
-end
-
--- ============================================================
--- 放置
--- ============================================================
-local placedByMe = 0
-
-local function doPlace(maxCount)
-    if not TTD.Running or TTD.Paused then return 0, "脚本已暂停" end
-
-    local real = countTowers()
-    local actual = real
-    if real > 0 then
-        placedByMe = real          -- 能识别归属就以游戏数据为准
-    else
-        actual = placedByMe        -- 识别不了就用自己的计数，避免无限放置
-    end
-    maxCount = maxCount or math.max(0, TTD.Count - actual)
-    if maxCount <= 0 then return 0, "场上已满，转为换强" end
-
-    TTD.BadHits = TTD.BadHits or {}
-    local okCount = 0
-    for _ = 1, maxCount do
-        if not TTD.Running or TTD.Paused then break end
-
-        local cash = parseNumber(getCashText())
-        local card = planCard(cash)
-        if not card then break end
-
-        -- 先确保没有残留的放置状态
-        cancelPlacement()
-
-        -- 选卡（点卡片进入放置状态）
-        selectCard(card)
-
-        local pt = pickPoint()
-        if not pt then
-            TTD.LastReason = "没有可用的放置点（换图会自动重扫）"
-            deselectCards()
-            return okCount, TTD.LastReason
-        end
-
-        local beforeSet = towerSet()
-        local beforeAll = #allTowerModels()
-        local beforeC = parseNumber(getCashText())
-        local placed = false
-
-        if clickWorld(pt.pos) then
-            -- 最多点三次：有“新塔出现 / 塔总数变多 / 金币减少”任意一条就算成功
-            for attempt = 1, 3 do
-                task.wait(0.5)
-                local newN = markNewTowers(beforeSet, pt.pos)
-                local afterC = parseNumber(getCashText())
-                local cashDrop = (beforeC > 0 and afterC > 0 and afterC < beforeC)
-                if newN > 0 or #allTowerModels() > beforeAll or cashDrop then
-                    placed = true
-                    break
-                end
-                if attempt < 3 then clickWorld(pt.pos) end
-            end
-        end
-
-        if placed then
-            okCount = okCount + 1
-            -- 服务器同步慢时补记一下刚放的塔
-            if markNewTowers(beforeSet, pt.pos) == 0 then
-                task.wait(0.45)
-                markNewTowers(beforeSet, pt.pos)
-            end
-            local realNow = countTowers()
-            placedByMe = (realNow > 0) and realNow or (placedByMe + 1)
-            TTD.LastPoint = pt.pos
-            TTD.BadHits[pt.key] = 0
-            TTD.LastReason = string.format("已放置 %s", card.name)
-            log(string.format("放置 %s（%s）", card.name, tostring(card.price)))
-        else
-            -- 价格和金币都读到了、也确认买得起，才把这个点记为“放不下”
-            local sure = (card.price > 0 and beforeC > 0 and card.price <= beforeC)
-            local hits = (TTD.BadHits[pt.key] or 0) + 1
-            TTD.BadHits[pt.key] = hits
-            if hits >= (sure and 2 or 4) then
-                TTD.BadPoints[pt.key] = true
-            end
-            TTD.LastReason = sure and "这个点放不下，换下一个点" or "金币不足或价格没读到，先攒钱"
-        end
-    end
-
-    -- 放完退出放置状态，避免影响后面的升级/出售
-    deselectCards()
-    return okCount
-end
-
--- ============================================================
--- 升级 / 出售
--- ============================================================
-local function findUpgradeButton()
-    local tm = pg:FindFirstChild("TowerMarker")
-    if tm then
-        -- 优先用选中面板上的升级按钮
-        local up = findPath(tm, { "Anchor", "Frame", "Core", "Upgrade" })
-        if up and deepVisible(up) then return up end
-        -- 面板显示“已满级”时跳过
-        local limit = findPath(tm, { "Anchor", "Frame", "Core", "UpgradeLimit" })
-        if limit and deepVisible(limit) then return nil end
-    end
-    local rb = findPath(pg, { "RightButtons", "Upgrade", "fastUpgrader" })
-    if rb and deepVisible(rb) then return rb end
-    local um = findPath(pg, { "UnitManager", "Handler", "Tower", "Upgrade" })
-    if um and deepVisible(um) then return um end
-    return nil
-end
-
-local function findSellButton()
-    local tm = pg:FindFirstChild("TowerMarker")
-    if tm then
-        local s = findPath(tm, { "Anchor", "Frame", "Core", "Sell" })
-        if s and deepVisible(s) then return s end
-    end
-    local s = findPath(pg, { "UnitManager", "Handler", "Tower", "Sell" })
-    if s and deepVisible(s) then return s end
-    return nil
-end
-
--- 塔的选中面板是否真的打开了（能读到单位信息才算）
-local function markerOpen()
-    local tm = pg:FindFirstChild("TowerMarker")
-    if not tm then return false end
-    if tm:IsA("ScreenGui") and tm.Enabled == false then return false end
-    if tm:IsA("GuiObject") and tm.Visible == false then return false end
-    local core = findPath(tm, { "Anchor", "Frame", "Core" })
-    if not (core and deepVisible(core)) then return false end
-    -- 有单位信息才算选中（面板常驻但没内容时点升级是无效的）
-    local id = core:FindFirstChild("TowerID")
-    if id and id:IsA("TextLabel") and id.Text == "" then return false end
-    local wm = findPath(core, { "Char", "Viewport", "WorldModel" })
-    if wm and #wm:GetChildren() == 0 then return false end
-    return true
-end
-
--- 选中自己的塔：点塔身（略微抬高），最多试 4 次
-local function selectTower(t)
-    local part = towerPart(t)
-    if not part then return false end
-    for attempt = 1, 4 do
-        if clickWorld(part.Position + Vector3.new(0, 0.4 + 0.5 * (attempt - 1), 0)) then
-            task.wait(0.35)
-            if markerOpen() then return true end
-        end
-        task.wait(0.12)
-    end
-    return false
-end
-
--- 单位强度：泰坦最高，其余用卡片价格近似
-local function towerStrength(t)
-    local nm = normalizeName(t.Name)
-    if nm:find("titan", 1, true) then return 1e12 end
-    local best = 0
-    for _, c in ipairs(getCards()) do
-        local cn = normalizeName(c.name)
-        if cn ~= "" and (nm:find(cn, 1, true) or cn:find(nm, 1, true)) then
-            if c.price > best then best = c.price end
-        end
-    end
-    return best
-end
-
--- 选中面板上显示的单位等级（用来确认升级真的生效）
-local function levelText()
-    local tm = pg:FindFirstChild("TowerMarker")
-    local core = tm and findPath(tm, { "Anchor", "Frame", "Core" })
-    local lvl = core and core:FindFirstChild("Level")
-    if not lvl then return nil end
-    if lvl:IsA("TextLabel") then return lvl.Text end
-    local t = lvl:FindFirstChildWhichIsA("TextLabel", true)
-    return t and t.Text or nil
-end
-
-local function doUpgrade()
-    local list = myTowers()
-    if #list == 0 then
-        -- 归属标记失败时退回全部塔，至少保证升级能用
-        list = allTowerModels()
-    end
-    if #list == 0 then return 0, "还没有自己的单位" end
-    local cash = parseNumber(getCashText())
-    if cash > 0 and cash < 50 then return 0, "现金太少，暂不升级" end
-
-    -- 后期还没泰坦：优先把钱留给泰坦，暂停升级
-    local titans = titanList(getCards())
-    if #titans > 0 and not titanOwned() and waveNumber() >= TTD.TitanWave
-        and cash > 0 and cash < titans[1].price then
-        return 0, "优先攒钱买泰坦"
-    end
-
-    -- 先退出放置状态，否则点塔会变成放塔
-    cancelPlacement()
-
-    -- 泰坦 / 高价单位优先升级
-    table.sort(list, function(a, b)
-        return towerStrength(a) > towerStrength(b)
-    end)
-
-    local n = 0
-    -- 每轮最多升级 4 个，避免一轮点太久
-    for i = 1, math.min(#list, 4) do
-        local t = list[i]
-        if not TTD.Running or TTD.Paused then break end
-        if selectTower(t) then
-            local btn = findUpgradeButton()
-            if btn then
-                local beforeC = parseNumber(getCashText())
-                local beforeLv = levelText()
-                for _ = 1, math.max(1, TTD.UpgradeTimes) do
-                    clickGui(btn)
-                    task.wait(0.42)
-                end
-                local afterC = parseNumber(getCashText())
-                local afterLv = levelText()
-                local leveled = (beforeLv ~= nil and afterLv ~= nil and beforeLv ~= afterLv)
-                -- 等级变了 / 金币掉了 = 升级成功；读不到数据时按点击过了算
-                if leveled or beforeC <= 0 or afterC <= 0 or afterC < beforeC then
-                    n = n + 1
-                    TTD.LastReason = string.format("已升级 %s", t.Name)
-                else
-                    -- 信号点击没生效：补一次真实鼠标点击
-                    local pos = btn.AbsolutePosition + btn.AbsoluteSize * 0.5
-                    rawClick(pos.X, pos.Y)
-                    task.wait(0.4)
-                    local after2 = parseNumber(getCashText())
-                    local lv2 = levelText()
-                    if (lv2 ~= nil and beforeLv ~= nil and lv2 ~= beforeLv)
-                        or beforeC <= 0 or after2 <= 0 or after2 < beforeC then
-                        n = n + 1
-                        TTD.LastReason = string.format("已升级 %s", t.Name)
-                    else
-                        TTD.LastReason = "升级没生效（金币不足或已满级）"
-                    end
-                end
-            else
-                TTD.LastReason = "已选中单位，但升级按钮不可用（满级/金币不足）"
-            end
-        else
-            TTD.LastReason = "点不中单位（可能被地形挡住）"
-        end
-        task.wait(0.1)
-    end
-    return n
-end
-
-local function sellTower(t)
-    cancelPlacement()
-    if not selectTower(t) then return false end
-    local btn = findSellButton()
-    if not btn then return false end
-    local before = countTowers()
-    clickGui(btn)
-    task.wait(0.45)
-    if countTowers() < before then
-        ownedTowers[t] = nil
-        return true
-    end
-    -- 信号点击没生效：补一次真实鼠标点击
-    local pos = btn.AbsolutePosition + btn.AbsoluteSize * 0.5
-    if rawClick then rawClick(pos.X, pos.Y) end
-    task.wait(0.4)
-    if countTowers() < before then
-        ownedTowers[t] = nil
+----------------------------------------------------------------
+-- 结算：自动准备下一局
+----------------------------------------------------------------
+local function autoContinue()
+    local gui = pg:FindFirstChild("ModeResult")
+    if not hasShownGui(gui) then return false end
+    local remote = RS:FindFirstChild("ModeResult")
+    if remote then
+        pcall(function() remote:FireServer("Ready") end)
         return true
     end
     return false
 end
 
-local function doSellAll()
-    cancelPlacement()
-    local n = 0
-    for _, t in ipairs(myTowers()) do
-        if not TTD.Running then break end
-        if sellTower(t) then n = n + 1 end
-    end
-    placedByMe = countTowers()
-    return n
-end
-
--- 满员替换：找到自己最弱的单位，卖掉后换更强的
-local function weakestTower()
-    local weakest, weakestStrength = nil, math.huge
-    for _, t in ipairs(myTowers()) do
-        local s = towerStrength(t)
-        if s > 0 and s < weakestStrength then
-            weakest, weakestStrength = t, s
-        end
-    end
-    return weakest, weakestStrength
-end
-
-local function doReplace()
-    if TTD.Paused then return false end
-    local actual = countTowers()
-    if actual < TTD.Count then return false end   -- 没满员先铺场
-
-    local cash = parseNumber(getCashText())
-    local best = planCard(cash)
-    local weak, weakStrength = weakestTower()
-    if not best or not weak or not weakStrength then return false end
-
-    -- 只换“明显更强”的，避免来回卖买
-    local threshold = math.max(weakStrength * 1.25, weakStrength + 1)
-    if best.price < threshold then return false end
-
-    if not sellTower(weak) then return false end
-    placedByMe = math.max(0, countTowers())
-    TTD.Phase = "换强"
-    log(string.format("卖掉 %s，准备换 %s", weak.Name, best.name))
-    return true
-end
-
--- ============================================================
--- 流程：准备 / 跳波 / 关弹窗 / 回大厅 / 技能
--- ============================================================
-local function doReady()
-    local startGui = pg:FindFirstChild("StartUI")
-    if not (startGui and deepVisible(startGui)) then return end
-    local btn = findPath(startGui, { "Frame", "Labels", "startbutton" })
-    if btn then clickGui(btn) end
-end
-
-local function doSkip()
-    local y = findPath(pg, { "skipWave", "Frame", "Y" })
-    if y and deepVisible(y) then clickGui(y) end
-end
-
-local function doCloseAndSkip()
-    local list = {
-        { "BasePrep", "Minigame", "Close" },
-        { "CarrierMedalSummary", "Panel", "Close" },
-        { "SendMoney", "Frame", "Close" },
-        { "Act1Intro", "Skip" },
-        { "Act2Intro", "Skip" },
-        { "Act2End", "Skip" },
-    }
-    for _, path in ipairs(list) do
-        local obj = findPath(pg, path)
-        if obj and deepVisible(obj) then clickGui(obj) end
+----------------------------------------------------------------
+-- 自动跳波设置（游戏内已有开关）
+----------------------------------------------------------------
+local function enableAutoSkip()
+    local r = RS:FindFirstChild("SetSettingAutoSkipWave")
+    if r then
+        pcall(function() r:FireServer(true) end)
     end
 end
 
-local function doLobby()
-    local ge = pg:FindFirstChild("GameEnded")
-    if not (ge and deepVisible(ge)) then return end
-    local back = findPath(ge, { "Frame", "back" })
-    if back then clickGui(back) end
-end
-
--- 每个单位面板里的 Auto 技能开关（只点一次，避免反复切换）
-local abilityDone = {}
-local function doAbility()
-    local gui = pg:FindFirstChild("Towers")
-    if not gui then return end
-    for _, c in ipairs(gui:GetChildren()) do
-        if c.Name:find("Controls") and not abilityDone[c.Name] then
-            local auto = c:FindFirstChild("Auto")
-            if auto and deepVisible(auto) then
-                clickGui(auto)
-                abilityDone[c.Name] = true
-                log("开启 " .. c.Name .. " 的 Auto")
-                task.wait(0.08)
-            end
-        end
-    end
-end
-
--- ============================================================
+----------------------------------------------------------------
 -- 状态刷新
--- ============================================================
+----------------------------------------------------------------
 local function refreshStatus()
-    local cashText = getCashText() or "?"
-    local wave = getWaveText() or "?"
-    local hp = getHpText() or "?"
-    local actual = (countTowers() > 0) and countTowers() or placedByMe
-    local pts = (mapCache.points and #mapCache.points) or 0
-    local titans = titanList(getCards())
-    local titanText = "未解锁"
-    if #titans > 0 then
-        titanText = titanOwned() and "已拥有" or ("攒钱买 " .. tostring(titans[1].price))
-    end
+    local me = myChar()
+    local h = humOf(me)
+    local hp = (h and math.max(0, math.floor(h.Health))) or 0
+    local maxhp = (h and math.floor(h.MaxHealth)) or 0
+    local wt = waveText()
+    local rt = readyText()
+    local mt = modeText()
 
     local text = string.format(
-        "波数 %s ｜ 现金 %s ｜ 基地 %s\n单位 %d / %d ｜ 阶段：%s ｜ 放置点 %d\n泰坦：%s\n状态：%s%s",
-        wave, cashText, hp, actual, TTD.Count, TTD.Phase or "-", pts,
-        titanText, TTD.LastReason or "就绪",
-        TTD.Paused and "（已暂停）" or ""
+        "阶段:%s   模式:%s\n波次:%s   准备:%s\n生命:%d/%d   敌人:%d   技能:%d\n目标:%s\n%s%s",
+        AUTO.Phase or "-",
+        (mt ~= "" and mt or "—"),
+        (wt ~= "" and wt or "—"),
+        (rt ~= "" and rt or "—"),
+        hp, maxhp, enemyCount(), skillCount(),
+        AUTO.Target or "—",
+        AUTO.LastReason or "就绪",
+        AUTO.Paused and "   [已暂停]" or ""
     )
     pcall(function() StatusPara:SetDesc(text) end)
-    pcall(function() LogPara:SetDesc(#TTD.Logs > 0 and table.concat(TTD.Logs, "\n") or "暂无日志") end)
+    pcall(function()
+        LogPara:SetDesc(#AUTO.Logs > 0 and table.concat(AUTO.Logs, "\n") or "暂无日志")
+    end)
 end
 
-local function recordOrigin()
-    local cam = workspace.CurrentCamera
-    if not cam then return end
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    params.FilterDescendantsInstances = { player.Character }
-    local ray = cam:ScreenPointToRay(cam.ViewportSize.X * 0.5, cam.ViewportSize.Y * 0.5)
-    local hit = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
-    if hit then
-        TTD.PlaceOrigin = hit.Position
-        notify("放置原点", string.format("已记录 %.1f, %.1f, %.1f", hit.Position.X, hit.Position.Y, hit.Position.Z))
-        log("已记录手动原点")
-    else
-        notify("放置原点", "准星没有对准地面，请重新瞄准")
+----------------------------------------------------------------
+-- 工具按钮
+----------------------------------------------------------------
+AUTO.Actions.Refresh = refreshStatus
+
+AUTO.Actions.TogglePause = function()
+    AUTO.Paused = not AUTO.Paused
+    if AUTO.Paused then
+        stopFire()
+        stopAim()
     end
+    notify("自动挂机", AUTO.Paused and "已暂停" or "已继续")
+    refreshStatus()
 end
 
--- ============================================================
--- 对外接口
--- ============================================================
-TTD.Actions.Place = function(n)
+AUTO.Actions.Fight = function()
     task.spawn(function()
-        local okCount, msg = doPlace(n)
-        if okCount > 0 then
-            log(string.format("手动放置 %d 个", okCount))
-        elseif msg then
-            log("放置：" .. msg)
+        local enemy, dist = nearestEnemy(AUTO.Range)
+        if not enemy then
+            notify("自动挂机", "附近没有敌人")
+            return
         end
+        local p = hrpOf(enemy)
+        if not p then return end
+        aimAt(p.Position + Vector3.new(0, 1.2, 0))
+        ensureFire()
+        local n = useSkills(p.Position)
+        notify("自动挂机", string.format("已锁定 %s（%.0f 格），释放 %d 个技能", enemy.Name, dist or 0, n))
     end)
 end
 
-TTD.Actions.TogglePause = function()
-    TTD.Paused = not TTD.Paused
-    if TTD.Paused then TTD.LastReason = "已暂停" else TTD.LastReason = "已继续" end
-    log(TTD.Paused and "已暂停自动化" or "已继续自动化")
-    notify("自动化", TTD.Paused and "已暂停" or "已继续")
-end
-
-TTD.Actions.Upgrade = function()
+AUTO.Actions.Ready = function()
     task.spawn(function()
-        local n, msg = doUpgrade()
-        log(msg or ("已升级 " .. tostring(n) .. " 个单位"))
+        autoReady()
+        refreshStatus()
+        notify("自动挂机", "已尝试走向准备垫")
     end)
 end
 
-TTD.Actions.SellAll = function()
+AUTO.Actions.Diag = function()
     task.spawn(function()
-        log("已出售 " .. tostring(doSellAll()) .. " 个单位")
-    end)
-end
-
-TTD.Actions.Rebuild = function()
-    task.spawn(function()
-        TTD.BadPoints = {}
-        local pts = getPoints(true)
-        log(string.format("重新扫描地图：%d 个可用点", #pts))
-    end)
-end
-
-TTD.Actions.RecordOrigin = recordOrigin
-TTD.Actions.Refresh = refreshStatus
-
-TTD.Actions.Diag = function()
-    task.spawn(function()
-        local cards = getCards()
-        local bad = 0
-        for _ in pairs(TTD.BadPoints) do bad = bad + 1 end
-        log(string.format("自检：卡片 %d 张", #cards))
-        for i = 1, math.min(#cards, 5) do
-            local c = cards[i]
-            log(string.format("  %s ｜ 价格 %s ｜ 选中 %s",
-                tostring(c.name), tostring(c.price), tostring(cardSelected(c))))
+        local me = myChar()
+        local tool = me and me:FindFirstChildOfClass("Tool")
+        log("===== 环境自检 =====")
+        log("角色：" .. nameOf(me) .. "   生命：" .. tostring(humOf(me) and math.floor(humOf(me).Health) or 0))
+        log("武器：" .. nameOf(tool))
+        if tool then
+            local folder = tool:FindFirstChild("Folder")
+            local hold = folder and folder:FindFirstChild("Hold")
+            log("连发武器：" .. tostring(hold ~= nil))
         end
-        log(string.format("自检：塔模型 %d 个（我的 %d） ｜ 放置点 %d 个（拉黑 %d）",
-            #allTowerModels(), #myTowers(),
-            (mapCache.points and #mapCache.points) or 0, bad))
-        log(string.format("自检：选中面板 %s ｜ 现金 %s ｜ 波数 %s",
-            tostring(markerOpen()), tostring(getCashText()), tostring(getWaveText())))
-        log(string.format("自检：执行器鼠标 %s ｜ VIM %s",
-            tostring(type(mousemove) == "function" and type(mouse1click) == "function"),
-            tostring(VIM ~= nil)))
+        log("技能数：" .. skillCount())
+        log("Living：" .. tostring(living() ~= nil) .. "   敌人数：" .. enemyCount())
+        log("BotBridge：" .. tostring(bot() ~= nil) .. "   MouseStream：" .. tostring(RS:FindFirstChild("MouseStream") ~= nil))
+        log("AutoReady 垫：" .. tostring(workspace:FindFirstChild("AutoReady") ~= nil))
+        log("波次文本：" .. waveText() .. "   准备文本：" .. readyText())
+        log("结算界面：" .. tostring(pg:FindFirstChild("ModeResult") ~= nil))
         notify("环境自检", "结果已写入日志页")
+        refreshStatus()
     end)
 end
 
--- ============================================================
--- 防掉线
--- ============================================================
-player.Idled:Connect(function()
-    if not TTD.AntiAfk then return end
-    local ok, vu = pcall(function()
-        return game:GetService("VirtualUser")
-    end)
-    if ok and vu then
+----------------------------------------------------------------
+-- 防踢
+----------------------------------------------------------------
+pcall(function()
+    player.Idled:Connect(function()
         pcall(function()
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
+            VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
         end)
-    end
+    end)
 end)
 
--- ============================================================
+----------------------------------------------------------------
 -- 主循环
--- ============================================================
+----------------------------------------------------------------
 task.spawn(function()
-    local timers = {}
-    local function every(key, interval)
-        local now = tick()
-        if not timers[key] or now - timers[key] >= interval then
-            timers[key] = now
-            return true
-        end
-        return false
-    end
-
-    local wasInLobby = false
-    local lastWaveSeen = -1
-    local lobbySince = nil
-    while TTD.Running do
+    local started = os.clock()
+    while AUTO.Running do
         local ok, err = pcall(function()
-            if TTD.Paused then return end
+            if AUTO.Paused then return end
 
-            -- 是否在大厅（准备界面）：必须同时“准备界面可见 + 波数还是 0”
-            -- 只看界面可见会被游戏里常驻的准备界面骗到，导致整局都不放置
-            local startUi = pg:FindFirstChild("StartUI")
-            local inLobby = (startUi ~= nil and deepVisible(startUi) and waveNumber() <= 0)
+            local me = myChar()
+            local h = humOf(me)
+            local base = hrpOf(me)
 
-            -- 兜底：波数一直读不到时，最多等 90 秒就强制当作已开局
-            if inLobby then
-                lobbySince = lobbySince or tick()
-                if tick() - lobbySince > 90 then inLobby = false end
-            else
-                lobbySince = nil
-            end
-
-            -- 进入新的一局：重置本局数据
-            if inLobby and not wasInLobby then
-                placedByMe = 0
-                TTD.BadPoints = {}
-                TTD.BadHits = {}
-                abilityDone = {}
-                TTD.Phase = "铺场"
-                lastWaveSeen = -1
-                log("新对局开始，状态已重置")
-            end
-            wasInLobby = inLobby
-
-            -- 大厅流程
-            if TTD.AutoReady and every("ready", 2) then doReady() end
-            if inLobby then return end
-
-            -- 已开局
-            -- 换波时清空失败点位记录，避免旧点位一直被拉黑
-            local w = waveNumber()
-            if w > 0 and w ~= lastWaveSeen then
-                if lastWaveSeen >= 0 then
-                    TTD.BadPoints = {}
-                    TTD.BadHits = {}
+            -- 救人（任何状态都先救）
+            if AUTO.AutoRevive and every("revive", 0.9) then
+                if tryRevive() > 0 then
+                    AUTO.LastReason = "正在救倒地队友"
                 end
-                lastWaveSeen = w
             end
 
-            if TTD.AutoSkip and every("skip", 1) then doSkip() end
-            if TTD.AutoClose and every("close", 2) then doCloseAndSkip() end
-            if TTD.AutoLobby and every("lobby", 5) then doLobby() end
-
-            if TTD.AutoPlace and every("place", 1.2) then
-                local real = countTowers()
-                if real > 0 then placedByMe = real end
-                local effective = (real > 0) and real or placedByMe
-                if effective < TTD.Count then doPlace(1) end
+            -- 结算界面：自动准备下一局
+            if AUTO.AutoContinue and every("result", 2.5) then
+                if autoContinue() then
+                    AUTO.Phase = "结算"
+                    AUTO.LastReason = "已自动准备下一局"
+                    stopFire()
+                    stopAim()
+                    return
+                end
             end
 
-            if TTD.AutoReplace and every("replace", 8) then doReplace() end
-            if TTD.AutoUpgrade and every("upgrade", 8) then doUpgrade() end
-            if TTD.AutoAbility and every("ability", 6) then doAbility() end
+            -- 角色死亡 / 重生中
+            if not (me and h and base and h.Health > 0) then
+                AUTO.Phase = "等待重生"
+                AUTO.LastReason = "角色倒下了，等待复活"
+                stopFire()
+                stopAim()
+                return
+            end
+
+            -- 大厅：自动站准备垫
+            if not inMatch() then
+                AUTO.Phase = "大厅"
+                stopFire()
+                stopAim()
+                if AUTO.AutoReady and every("ready", 0.8) then
+                    autoReady()
+                end
+                return
+            end
+
+            -- 战斗中
+            AUTO.Phase = "战斗"
+
+            local enemy, dist = nearestEnemy(AUTO.Range)
+            if enemy then
+                local p = hrpOf(enemy)
+                if p then
+                    aimAt(p.Position + Vector3.new(0, 1.2, 0))
+                    ensureFire()
+
+                    if AUTO.AutoSkill and every("skill", 0.6) then
+                        useSkills(p.Position)
+                    end
+
+                    if AUTO.AutoApproach and dist and dist > 110 then
+                        local delta = p.Position - base.Position
+                        if delta.Magnitude > 0 then
+                            local stand = p.Position - delta.Unit * 70
+                            pcall(function() h:MoveTo(stand) end)
+                        end
+                    end
+
+                    AUTO.Target = enemy.Name
+                    AUTO.LastReason = string.format("锁定 %s（%d 格）", enemy.Name, math.floor(dist or 0))
+                end
+            else
+                stopFire()
+                AUTO.Target = nil
+                AUTO.LastReason = "本波已清空，等待下一波"
+            end
         end)
-        if not ok then log("循环异常：" .. tostring(err)) end
-        task.wait(0.25)
+
+        if not ok then
+            log("循环异常：" .. tostring(err))
+        end
+        task.wait(0.18)
     end
+
+    stopFire()
+    stopAim()
 end)
 
--- 状态刷新循环
+-- 状态面板刷新
 task.spawn(function()
-    while TTD.Running do
-        pcall(refreshStatus)
+    refreshStatus()
+    while AUTO.Running do
         task.wait(1)
+        if AUTO.Running then
+            pcall(refreshStatus)
+        end
     end
 end)
 
-log("引擎已启动 · 自动准备 / 跳波 / 回大厅 / 关弹窗 已开启")
-print("[TTD 自动化] 引擎已启动")
+-- 启动时把游戏的自动跳波打开
+task.spawn(function()
+    task.wait(3)
+    for _ = 1, 10 do
+        if not AUTO.Running then break end
+        enableAutoSkip()
+        task.wait(20)
+    end
+end)
+
+log("引擎已启动：自动准备 / 自动战斗 / 自动技能 / 自动救人 / 结算自动继续")
+notify("难度模式 自动挂机", "已启动，全自动运行中")
+
+end
