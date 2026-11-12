@@ -3,8 +3,8 @@
   =================================================
   · 内嵌 WindUI v1.6.66，整份文件直接运行，无 loadstring / 无外部链接
   · 适配游戏：难度模式（PlaceId 18816546575）
-  · 功能：全自动零操作 —— 自动选角色 / 自动开界面 / 自动投票(19 模式) / 自动跳波投票 / 自动准备 / 自动传送 / 自动跳过场 / 自动锁敌开火 / 自动技能 / 自动救人 / 结算自动继续
-  · 所有策略内置，玩家不需要改任何设置
+  · 功能：自动投票(19 模式) / 自动跳波投票 / 点界面准备 / 瞬移准备 / 瞬移贴脸 / 瞬移躲投射物 / 无限复活 / 自动锁敌开火 / 自动技能 / 自动救人 / 结算自动继续
+  · 不使用游戏内置 AI，全部用瞬移处理；默认全开，可在「设置」页逐项开关
   · 密钥系统(KeySystem) / 第三方服务(Services) / 亚克力(Acrylic) / 多语言：全部关闭
 ]]
 
@@ -17474,31 +17474,37 @@ local Window = WindUI:CreateWindow({
 })
 
 -- ============================================================
--- 共享状态（界面与自动化引擎共用，全部写死，玩家不用改）
+-- 共享状态（界面与自动化引擎共用，默认全开，可在「设置」页逐项调整）
 -- ============================================================
 local AUTO = {
-    -- 流程：固定全开
+    -- 流程（可在「设置」页自由开关）
     AutoOpenVote  = true,    -- 大厅自动打开投票界面（相当于点击 GUI）
     AutoVote      = true,    -- 自动投票选难度模式
-    AutoEquip     = true,    -- 大厅自动装备最强已解锁角色（相当于点角色面板）
+    AutoStart     = true,    -- 站上准备垫后自动开单人局（MainHandler StartSolo）
+    AutoEquipChar = true,    -- 自动装备你在「玩家」页选的角色（不判断强弱）
+    Character     = "",      -- 玩家自选角色名，空 = 不自动装备
     AutoSkipVote  = true,    -- 自动跟着投跳波票
-    AutoReady     = true,    -- 大厅自动走到准备垫
+    AutoReady     = true,    -- 大厅自动瞬移到准备垫
     AutoSkip      = true,    -- 自动开启跳波设置
+    AutoSkipHeli  = true,    -- 自动跳过直升机过场
+    AutoSettings  = true,    -- 自动打开游戏内快速过场等设置
     AutoFight     = true,    -- 自动锁敌 + 开火
     AutoAim       = true,    -- 自动瞄准
-    AutoTeleport  = true,    -- 敌人太远时直接传送到脸上
+    AutoTeleport  = true,    -- 敌人太远时直接瞬移到脸上
     AutoSkill     = true,    -- 自动放技能
     AutoRevive    = true,    -- 自动救倒地队友
-    UseGameAI     = true,    -- 用游戏自带的 AutoCombat 当战斗内核（会躲技能 / 风筝 / 自动放技能）
+    AutoRespawn   = true,    -- 无限复活：残血自动重置角色，立刻重生
+    ReviveHp      = 35,      -- 血量百分比低于这个值就触发复活重置
+    AutoDodge     = true,    -- 瞬移躲投射物（导弹/投掷物朝你飞来时侧向瞬移）
     AutoContinue  = true,    -- 结算自动准备下一局
     AutoApproach  = true,    -- 敌人太远自动靠近
     AntiAfk       = true,    -- 防踢
     -- 内部数值
     Range         = 400,     -- 锁敌半径
-    SkillGap      = 3.2,     -- 每个技能最小释放间隔
+    SkillTick     = 0.2,     -- 技能检查频率（每个技能按自己的冷却独立触发）
     VoteGap       = 5,       -- 重复投票间隔
-    TeleportDist  = 90,      -- 超过这个距离直接传送
-    TurnDist      = 110,     -- 超过这个距离开始走位
+    TeleportDist  = 90,      -- 超过这个距离直接瞬移
+    TurnDist      = 110,     -- 超过这个距离开始瞬移
     VoteMode      = "",      -- 空 = 自动投当前票数最高的模式
     -- 运行数据
     Phase         = "启动中",
@@ -17515,8 +17521,10 @@ local AUTO = {
 -- 界面：只展示状态，不提供任何需要玩家调整的配置
 -- ============================================================
 local MainTab = Window:Tab({ Title = "概览", Icon = "activity" })
-local LogTab  = Window:Tab({ Title = "日志", Icon = "scroll-text" })
+local PlayerTab = Window:Tab({ Title = "玩家", Icon = "user" })
+local SetTab = Window:Tab({ Title = "设置", Icon = "sliders-horizontal" })
 local ToolTab = Window:Tab({ Title = "工具", Icon = "wrench" })
+local LogTab  = Window:Tab({ Title = "日志", Icon = "scroll-text" })
 
 local SecStatus = MainTab:Section({
     Title = "运行状态",
@@ -17537,17 +17545,247 @@ local SecPlan = MainTab:Section({
 
 SecPlan:Paragraph({
     Title = "开局",
-    Desc  = "进大厅自动打开投票界面 → 自动投当前票数最高的难度模式 → 自动站准备垫等开局",
+    Desc  = "进大厅装备你选的角色 → 直接瞬移到准备垫 → 自动投票并用 MainHandler 直接开单人局",
 })
 
 SecPlan:Paragraph({
     Title = "战斗",
-    Desc  = "自动锁定最近敌人并持续瞄准射击 → 技能冷却好就自动放 → 敌人太远直接传送贴脸打",
+    Desc  = "自动锁定最近敌人并持续瞄准射击 → 技能冷却好就自动放 → 敌人太远直接瞬移贴脸打",
 })
 
 SecPlan:Paragraph({
     Title = "生存",
     Desc  = "残血 / 倒地自动等待 → 附近有队友倒地会自动按住救人 → 跳波投票自动跟随 → 结算界面自动准备下一局",
+})
+
+local SecLife = PlayerTab:Section({
+    Title = "生存 / 无限复活",
+    Desc  = "残血自动重置角色，瞬间重生",
+    Icon  = "heart-pulse",
+})
+
+SecLife:Paragraph({
+    Title = "无限复活",
+    Desc  = string.format("血量低于 %d%% 时自动卸掉角色部件重置 → 立刻重新出生，冷却 2 秒，不会真死", AUTO.ReviveHp),
+})
+
+SecLife:Paragraph({
+    Title = "救队友",
+    Desc  = "附近队友倒地时自动按住救人交互，救完继续打",
+})
+
+SecLife:Button({
+    Title = "立即复活一次",
+    Desc  = "手动触发一次重置重生",
+    Icon  = "heart-pulse",
+    Callback = function()
+        if AUTO.Actions.Respawn then AUTO.Actions.Respawn() end
+    end,
+})
+
+local SecChar = PlayerTab:Section({
+    Title = "角色（你自己选）",
+    Desc  = "脚本不判断谁强，只装备你选的那个",
+    Icon  = "swords",
+})
+
+local _lp = game:GetService("Players").LocalPlayer
+local charList = {}
+do
+    local ud = _lp and _lp:FindFirstChild("UnlockData")
+    if ud then
+        for _, c in ipairs(ud:GetChildren()) do
+            table.insert(charList, c.Name)
+        end
+    end
+    table.sort(charList)
+    if #charList == 0 then
+        charList = { "（进游戏后重新执行脚本即可读到角色）" }
+    end
+end
+
+SecChar:Paragraph({
+    Title = "说明",
+    Desc  = "下面是你账号里已解锁的角色（读自 UnlockData）。脚本不知道哪个最强，也不会替你判断，只会装备你在下拉框里选中的那个。",
+})
+
+SecChar:Dropdown({
+    Title = "选择要装备的角色",
+    Desc  = "点开选择；选中后点下面按钮装备。默认显示第一个，想换就点开重选",
+    Values = charList,
+    Multi = false,
+    Value = charList[1],
+    Callback = function(v)
+        if v and not string.find(v, "^（") then
+            AUTO.Character = v
+            AUTO.LastReason = "已选择角色：" .. v
+            pcall(function()
+                WindUI:Notify({ Title = "角色", Content = "已选择：" .. v, Duration = 2, Icon = "swords" })
+            end)
+        end
+    end,
+})
+
+SecChar:Button({
+    Title = "装备所选角色",
+    Desc  = "立即用 ForChangeCharacter 换成下拉框里选的角色（战斗中不换）",
+    Icon = "swords",
+    Callback = function()
+        if AUTO.Character == "" then
+            pcall(function()
+                WindUI:Notify({ Title = "装备角色", Content = "请先在下拉框里选一个角色", Duration = 2, Icon = "swords" })
+            end)
+            return
+        end
+        if AUTO.Actions.Equip then AUTO.Actions.Equip() end
+    end,
+})
+
+-- ============================================================
+-- 设置页：每个功能一个开关，附说明
+-- ============================================================
+local SecFlow = SetTab:Section({ Title = "流程", Desc = "从进大厅到下一局，全部可单独开关", Icon = "workflow" })
+
+SecFlow:Toggle({
+    Title = "自动装备所选角色",
+    Desc  = "进大厅后自动装备你在「玩家」页选的角色，只换一次。关闭后完全不碰你的角色。",
+    Value = AUTO.AutoEquipChar,
+    Callback = function(v) AUTO.AutoEquipChar = v end,
+})
+
+SecFlow:Toggle({
+    Title = "自动打开投票界面",
+    Desc  = "大厅里把 SelectCharacter 关掉、打开 Play 投票界面，等于替你点了一次 UI。",
+    Value = AUTO.AutoOpenVote,
+    Callback = function(v) AUTO.AutoOpenVote = v end,
+})
+
+SecFlow:Toggle({
+    Title = "自动投票",
+    Desc  = "把票投给当前票数最高的模式（读 workspace.Vote 的实际票数），票数变了会重新跟票；全没票就投 Normal。关闭后你自己投。",
+    Value = AUTO.AutoVote,
+    Callback = function(v) AUTO.AutoVote = v end,
+})
+
+SecFlow:Toggle({
+    Title = "自动开单人局",
+    Desc  = "站上准备垫后直接调 MainHandler 发起单人开局（StartSolo），不用等别人凑人、不用等倒计时。关闭后走正常流程。",
+    Value = AUTO.AutoStart,
+    Callback = function(v) AUTO.AutoStart = v end,
+})
+
+SecFlow:Toggle({
+    Title = "自动瞬移准备",
+    Desc  = "在大厅直接把角色瞬移到 AutoReady 准备垫上（不走过去）。关闭后需要你自己站上去。",
+    Value = AUTO.AutoReady,
+    Callback = function(v) AUTO.AutoReady = v end,
+})
+
+SecFlow:Toggle({
+    Title = "自动跳波投票",
+    Desc  = "局内弹出跳波投票时，把票投给票数最高的那一档。关闭后不参与。",
+    Value = AUTO.AutoSkipVote,
+    Callback = function(v) AUTO.AutoSkipVote = v end,
+})
+
+SecFlow:Toggle({
+    Title = "结算自动继续",
+    Desc  = "打完出现结算界面时自动发 Ready 回大厅，连续刷下一局。关闭后你自己点。",
+    Value = AUTO.AutoContinue,
+    Callback = function(v) AUTO.AutoContinue = v end,
+})
+
+local SecBattle = SetTab:Section({ Title = "战斗", Desc = "全部瞬移处理，不用任何 AI 走位", Icon = "crosshair" })
+
+SecBattle:Toggle({
+    Title = "自动战斗",
+    Desc  = "锁定最近敌人持续开火（连发武器按住就行，单发武器自动点）。关闭后只瞄准不开枪。",
+    Value = AUTO.AutoFight,
+    Callback = function(v) AUTO.AutoFight = v end,
+})
+
+SecBattle:Toggle({
+    Title = "自动瞄准",
+    Desc  = "把准星压到敌人身上（BotBridge + MouseStream）。关闭后自动战斗就不开枪了。",
+    Value = AUTO.AutoAim,
+    Callback = function(v) AUTO.AutoAim = v end,
+})
+
+SecBattle:Toggle({
+    Title = "瞬移贴脸",
+    Desc  = "敌人超过 90 格就直接瞬移到它身边 12 格并转向它，不走过去。关闭后站在原地打。",
+    Value = AUTO.AutoTeleport,
+    Callback = function(v) AUTO.AutoTeleport = v end,
+})
+
+SecBattle:Toggle({
+    Title = "瞬移躲投射物",
+    Desc  = "检测到导弹/投掷物朝你飞来时，立刻侧向瞬移 30 格躲开，然后继续打。关闭后只能硬吃伤害。",
+    Value = AUTO.AutoDodge,
+    Callback = function(v) AUTO.AutoDodge = v end,
+})
+
+SecBattle:Toggle({
+    Title = "自动技能",
+    Desc  = "每个技能用自己那套冷却独立触发：普攻（鼠标键）1 秒一次连续点，其它技能按槽位错开 2.5 / 3.0 / 3.5 秒，冷却好了就放。关闭后一个技能都不放。",
+    Value = AUTO.AutoSkill,
+    Callback = function(v) AUTO.AutoSkill = v end,
+})
+
+local SecLifeSet = SetTab:Section({ Title = "生存", Desc = "不死、救人、防踢", Icon = "heart-pulse" })
+
+SecLifeSet:Toggle({
+    Title = "无限复活",
+    Desc  = "血量低于下面的阈值时，卸掉 Head/Torso 让角色重置并立刻重新出生，等于无限复活。关闭后残血不会处理。",
+    Value = AUTO.AutoRespawn,
+    Callback = function(v) AUTO.AutoRespawn = v end,
+})
+
+SecLifeSet:Slider({
+    Title = "复活触发血量（%）",
+    Desc  = "默认 35%。调高更保守（更容易触发复活），调低更省，但太低可能被一击秒杀。",
+    Value = { Min = 10, Max = 90, Default = AUTO.ReviveHp },
+    Step = 5,
+    Callback = function(v)
+        AUTO.ReviveHp = v
+    end,
+})
+
+SecLifeSet:Toggle({
+    Title = "自动救队友",
+    Desc  = "附近队友倒地时，自动按住他身上的 ProximityPrompt 完成救援。关闭后不救。",
+    Value = AUTO.AutoRevive,
+    Callback = function(v) AUTO.AutoRevive = v end,
+})
+
+SecLifeSet:Toggle({
+    Title = "防踢（防 AFK）",
+    Desc  = "长时间不动时模拟一次鼠标操作，避免被 Roblox 判定挂机踢出。关闭后挂着可能被踢。",
+    Value = AUTO.AntiAfk,
+    Callback = function(v) AUTO.AntiAfk = v end,
+})
+
+local SecMisc = SetTab:Section({ Title = "杂项", Desc = "过场与游戏设置", Icon = "settings" })
+
+SecMisc:Toggle({
+    Title = "自动跳过直升机过场",
+    Desc  = "出现 skip heli 按钮时自动点掉，不看过场动画。关闭后要自己点。",
+    Value = AUTO.AutoSkipHeli,
+    Callback = function(v) AUTO.AutoSkipHeli = v end,
+})
+
+SecMisc:Toggle({
+    Title = "自动打开游戏设置",
+    Desc  = "把游戏设置里的跳过直升机过场、跳过 Boss 过场、快速模式、去抖屏、伤害显示等置为开启并存档。关闭后保持你原来的设置。",
+    Value = AUTO.AutoSettings,
+    Callback = function(v) AUTO.AutoSettings = v end,
+})
+
+SecMisc:Toggle({
+    Title = "自动跳波设置",
+    Desc  = "向服务器发送 SetSettingAutoSkipWave(true)，让游戏按设置自动跳波。关闭后按游戏默认。",
+    Value = AUTO.AutoSkip,
+    Callback = function(v) AUTO.AutoSkip = v end,
 })
 
 local SecLog = LogTab:Section({
@@ -17604,26 +17842,23 @@ SecTool:Button({
 })
 
 SecTool:Button({
-    Title = "装备最强已解锁角色",
-    Desc  = "按稀有度自动装备 UnlockData 里最强的一个",
+    Title = "装备「玩家」页所选角色",
+    Desc  = "把下拉框里选的角色装备上（不判断强弱）",
     Icon = "swords",
     Callback = function()
+        if AUTO.Character == "" then
+            pcall(function()
+                WindUI:Notify({ Title = "装备角色", Content = "先去「玩家」页选一个角色", Duration = 2, Icon = "swords" })
+            end)
+            return
+        end
         if AUTO.Actions.Equip then AUTO.Actions.Equip() end
     end,
 })
 
 SecTool:Button({
-    Title = "切换战斗内核（内置AI / 自研）",
-    Desc  = "默认用游戏自带 AutoCombat，卡住就切回自研瞄准",
-    Icon = "cpu",
-    Callback = function()
-        if AUTO.Actions.SwitchAI then AUTO.Actions.SwitchAI() end
-    end,
-})
-
-SecTool:Button({
     Title = "立即尝试准备",
-    Desc  = "自动走到准备垫并站住",
+    Desc  = "直接点界面上的准备按钮；点不动就瞬移到准备垫",
     Icon = "house",
     Callback = function()
         if AUTO.Actions.Ready then AUTO.Actions.Ready() end
@@ -19205,6 +19440,7 @@ local function bot()
 end
 
 local function aimAt(pos)
+    if not AUTO.AutoAim then return end
     local bb = bot()
     if bb then
         bb.Enabled = true
@@ -19235,6 +19471,7 @@ end
 local holdingTool = nil
 local lastActivate = 0
 local function ensureFire()
+    if not AUTO.AutoFight then return end
     local c = myChar()
     if not c then return end
     local tool = c:FindFirstChildOfClass("Tool")
@@ -19273,7 +19510,41 @@ end
 -- 技能：从游戏自己的技能注册事件里读取技能 ID
 ----------------------------------------------------------------
 local skills = {}
-local skillLast = {}
+local skillInfo = {}   -- id -> { name = 按键名, cd = 该技能自己的间隔 }
+local skillNext = {}   -- id -> 下次可以点的时间
+
+-- 鼠标键位绑定的就是普攻，可以一直点
+local function isBasicKey(name)
+    if not name then return false end
+    local u = string.upper(name)
+    return u == "M1" or u == "MB1" or u == "LMB" or u == "MOUSEBUTTON1"
+        or u == "M2" or u == "MB2" or u == "RMB" or u == "MOUSEBUTTON2"
+end
+
+-- 每个技能单独一套间隔：普攻 1 秒一次，其余按槽位错开 2.5 / 3.0 / 3.5 …
+local function rebuildSkillInfo(fresh)
+    local ids = {}
+    for id in pairs(fresh) do table.insert(ids, id) end
+    table.sort(ids, function(a, b) return tostring(a) < tostring(b) end)
+    skillInfo = {}
+    local idx = 0
+    for _, id in ipairs(ids) do
+        idx = idx + 1
+        local key = fresh[id]
+        local cd
+        if isBasicKey(key) then
+            cd = 1.0
+        else
+            cd = 2.5 + (idx - 1) * 0.5
+            if cd > 8 then cd = 8 end
+        end
+        skillInfo[id] = { name = key, cd = cd }
+        if skillNext[id] == nil then
+            -- 初始错开，避免几个技能同一帧全按出去
+            skillNext[id] = os.clock() + math.random() * 0.8
+        end
+    end
+end
 
 do
     local reg = RS:FindFirstChild("SkillRegister")
@@ -19281,6 +19552,7 @@ do
         reg.OnClientEvent:Connect(function(mode, data)
             if mode == "clear" then
                 skills = {}
+                skillInfo = {}
                 return
             end
             if mode ~= "set" or type(data) ~= "table" then return end
@@ -19298,6 +19570,7 @@ do
                 end
             end
             skills = fresh
+            rebuildSkillInfo(fresh)
         end)
     end
 
@@ -19319,19 +19592,21 @@ local function skillCount()
     return n
 end
 
+-- 每个技能按自己的冷却独立触发：普攻连着点，其它技能冷却好了就放
 local function useSkills(hitPos)
     local act = RS:FindFirstChild("SkillActivate")
-    if not act or not hitPos then return 0 end
+    if not act or not hitPos or not AUTO.AutoSkill then return 0 end
     local cam = workspace.CurrentCamera
     local look = cam and cam.CFrame.LookVector or Vector3.new(0, 0, -1)
+    local now = os.clock()
     local used = 0
-    for id, name in pairs(skills) do
-        if os.clock() - (skillLast[id] or 0) >= AUTO.SkillGap then
-            skillLast[id] = os.clock()
+    for id, info in pairs(skillInfo) do
+        if now >= (skillNext[id] or 0) then
+            skillNext[id] = now + info.cd
             pcall(function()
-                act:FireServer(id, hitPos, look, "press", name)
-                task.delay(0.2, function()
-                    pcall(function() act:FireServer(id, hitPos, look, "release", name) end)
+                act:FireServer(id, hitPos, look, "press", info.name)
+                task.delay(0.15, function()
+                    pcall(function() act:FireServer(id, hitPos, look, "release", info.name) end)
                 end)
             end)
             used = used + 1
@@ -19428,7 +19703,27 @@ local function inMatch()
 end
 
 ----------------------------------------------------------------
--- 自动准备：走到 AutoReady 垫子上站住
+-- 点按钮：和参考脚本同款（firesignal → getconnections → Activate）
+----------------------------------------------------------------
+local function clickGui(btn)
+    if not btn or not btn:IsA("GuiButton") then return false end
+    local ok = pcall(function()
+        if type(firesignal) == "function" then
+            firesignal(btn.MouseButton1Click)
+            firesignal(btn.Activated)
+        elseif type(getconnections) == "function" then
+            local cons = getconnections(btn.Activated) or {}
+            for _, c in ipairs(cons) do
+                if c.Function then pcall(c.Function) end
+            end
+        else
+            btn:Activate()
+        end
+    end)
+    return ok
+end
+
+-- 自动准备：先点界面准备按钮；界面确认不了再瞬移到垫子
 ----------------------------------------------------------------
 local readyStuck = 0
 local function autoReady()
@@ -19439,27 +19734,47 @@ local function autoReady()
     local base = hrpOf(me)
     if not (h and base) then return false end
 
-    local dist = (base.Position - pad.Position).Magnitude
-    if dist > 6 then
-        pcall(function() h:MoveTo(pad.Position) end)
-        readyStuck = readyStuck + 1
-        if readyStuck >= 8 then
-            readyStuck = 0
-            local y = 4
-            if pad:IsA("BasePart") then
-                y = pad.Size.Y * 0.5 + 4
-            end
-            pcall(function()
-                base.CFrame = CFrame.new(pad.Position + Vector3.new(0, y, 0))
-            end)
-            log("准备垫走不过去，已直接贴到垫子上")
+    -- 优先直接点 UI 上的准备按钮（不用站垫子）
+    if readyText() ~= "READY" and every("readyclick", 2) then
+        local chr = pg:FindFirstChild("ChrGUI")
+        local btn = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button" })
+        if btn and clickGui(btn) then
+            AUTO.LastReason = "已点击准备按钮，等服务器确认"
         end
-        AUTO.LastReason = "正在走向准备垫"
-        return false
+    end
+    if readyText() == "READY" then
+        readyStuck = 0
+        AUTO.LastReason = "已准备（界面已确认）"
+        return true
+    end
+
+    local dist = (base.Position - pad.Position).Magnitude
+    if dist > 3 then
+        -- 和参考脚本一样：直接瞬移，不走路
+        local y = 4
+        if pad:IsA("BasePart") then
+            y = pad.Size.Y * 0.5 + 3.5
+        end
+        local ok = pcall(function()
+            me:PivotTo(CFrame.new(pad.Position + Vector3.new(0, y, 0)))
+        end)
+        if not ok then
+            pcall(function() base.CFrame = CFrame.new(pad.Position + Vector3.new(0, y, 0)) end)
+        end
+        pcall(function()
+            base.AssemblyLinearVelocity = Vector3.zero
+            base.AssemblyAngularVelocity = Vector3.zero
+        end)
+        readyStuck = readyStuck + 1
+        if readyStuck == 1 then
+            log("已瞬移到准备垫")
+        end
+        AUTO.LastReason = "已瞬移到准备垫，等待开局"
+        return true
     end
 
     readyStuck = 0
-    AUTO.LastReason = "已站在准备垫上，等待开局"
+    AUTO.LastReason = "站在准备垫上，等待开局"
     return true
 end
 
@@ -19481,6 +19796,7 @@ end
 -- 自动跳波设置（游戏内已有开关）
 ----------------------------------------------------------------
 local function enableAutoSkip()
+    if not AUTO.AutoSkip then return end
     local r = RS:FindFirstChild("SetSettingAutoSkipWave")
     if r then
         pcall(function() r:FireServer(true) end)
@@ -19490,121 +19806,25 @@ end
 ----------------------------------------------------------------
 -- 自动点击界面 / 自动投票
 ----------------------------------------------------------------
--- 角色稀有度（来自游戏数据包 character_tiers）
-local CHAR_TIER = {
-    ["Alarm Clock Man"] = "Rare",
-    ["Astro Large TV man"] = "Legendary",
-    ["Beru"] = "Exclusive",
-    ["Big Camera man 3.0"] = "Legendary",
-    ["Big Camera man"] = "Common",
-    ["Big Quad Laser Toilet"] = "Exclusive",
-    ["Brown Camera man"] = "Exclusive",
-    ["Buff Mutant"] = "Legendary",
-    ["Buzzsaw Mutant"] = "Rare",
-    ["Camera Helicopter"] = "Epic",
-    ["Camera Strider"] = "Rare",
-    ["Camera Toilet"] = "Legendary",
-    ["Camera man 3.0"] = "Epic",
-    ["Camera man"] = "Common",
-    ["Camera woman 2.0"] = "Legendary",
-    ["Camera woman"] = "Common",
-    ["Chief Engineer Camera"] = "Legendary",
-    ["Clock Man"] = "Epic",
-    ["Clock Titan"] = "Mythic",
-    ["DJ Toilet 2.0"] = "Epic",
-    ["DJ Toilet"] = "Epic",
-    ["Dark Speakerman"] = "Rare",
-    ["Double plungers"] = "Rare",
-    ["Drill Man"] = "Common",
-    ["Drill Titan"] = "Epic",
-    ["Elite Speakerman"] = "Legendary",
-    ["Energized TV"] = "Legendary",
-    ["Engineer Camera Man"] = "Rare",
-    ["Espada #1"] = "Exclusive",
-    ["Eto"] = "Exclusive",
-    ["Executor"] = "Exclusive",
-    ["Fuse"] = "Epic",
-    ["G-Man V4"] = "Exclusive",
-    ["G-Man V5"] = "Exclusive",
-    ["G-Toilet Z"] = "Exclusive",
-    ["Glitch Double plunger"] = "Legendary",
-    ["Gojo"] = "Exclusive",
-    ["Gun Titan"] = "Exclusive",
-    ["Head Captain Of The CCTV"] = "Unique",
-    ["Healer Clock Man"] = "Rare",
-    ["Jetpacked Double plunger"] = "Epic",
-    ["Large Clock Man"] = "Epic",
-    ["Large Drill Man"] = "Rare",
-    ["Large Speaker man"] = "Common",
-    ["Large TV man"] = "Rare",
-    ["MJ toilet"] = "Legendary",
-    ["Mafia Toilet"] = "Mythic",
-    ["Nuke Titan"] = "Mythic",
-    ["Pink"] = "Exclusive",
-    ["Primera Espada"] = "Exclusive",
-    ["Projector Titan"] = "Epic",
-    ["Prometheus"] = "Unique",
-    ["PrototypeA"] = "Legendary",
-    ["PrototypeB"] = "Legendary",
-    ["Radio"] = "Exclusive",
-    ["Samurai Camera"] = "Exclusive",
-    ["Scientist Camera man"] = "Epic",
-    ["Scientist TV Man"] = "Rare",
-    ["Secret Agent"] = "Unique",
-    ["Sergeant Camera"] = "Epic",
-    ["Sinister"] = "Exclusive",
-    ["Siren Titan"] = "Mythic",
-    ["Sonar Titan"] = "Mythic",
-    ["Speaker Helicopter"] = "Epic",
-    ["Speaker Strider"] = "Common",
-    ["Speaker man"] = "Common",
-    ["Speaker woman"] = "Rare",
-    ["Stellar Titan"] = "Epic",
-    ["Swat Mutant"] = "Epic",
-    ["TV Titan(Alt)"] = "Epic",
-    ["TV Titan"] = "Epic",
-    ["TV woman"] = "Rare",
-    ["Titan Camera Toilet"] = "Exclusive",
-    ["Titan Camera"] = "Rare",
-    ["Titan Speaker toilet"] = "Exclusive",
-    ["Titan Speaker"] = "Rare",
-    ["Tri Soldier Artemis (Guy)"] = "Exclusive",
-    ["Tri Soldier Athena (Girl)"] = "Exclusive",
-    ["Tv man"] = "Common",
-    ["Upgraded Speaker Strider"] = "Legendary",
-    ["Upgraded Strider Camera"] = "Epic",
-    ["Upgraded Titan Cameraman"] = "Mythic",
-    ["Upgraded Titan Speaker"] = "Mythic",
-    ["Upgraded Titan TV"] = "Mythic",
-}
-local TIER_RANK = {
-    Common = 1, Rare = 2, Epic = 3, Legendary = 4,
-    Mythic = 5, Unique = 6, Exclusive = 7,
-}
-
--- 装备已解锁角色里稀有度最高的一个（ReplicatedStorage.ForChangeCharacter）
+-- 装备指定角色（不自动判断强弱，由玩家在「玩家」页选择）
 local lastEquip = 0
-local function equipBest()
+local function equipNamed(name)
     if inMatch() then return false, "战斗中不换角色" end
     local ud = player:FindFirstChild("UnlockData")
     local remote = RS:FindFirstChild("ForChangeCharacter")
     if not ud or not remote then return false, "缺少 UnlockData / 遥控" end
+    if name == nil or name == "" then return false, "还没选角色" end
+    local c = ud:FindFirstChild(name)
+    if not c then return false, "未解锁：" .. tostring(name) end
     local now = os.clock()
-    if now - lastEquip < 8 then return false, "刚换过" end
-    local best, bestRank = nil, 0
-    for _, c in ipairs(ud:GetChildren()) do
-        local rank = TIER_RANK[CHAR_TIER[c.Name] or ""] or 0
-        if rank > bestRank then
-            best, bestRank = c, rank
-        end
-    end
-    if not best then return false, "没有已解锁角色" end
-    local skin = best:FindFirstChild("SkinNumber")
+    if now - lastEquip < 5 then return false, "刚换过" end
+    local skin = c:FindFirstChild("SkinNumber")
     lastEquip = now
-    pcall(function() remote:FireServer(best.Name, skin and skin.Value or 0) end)
-    log("已装备最强角色：" .. best.Name .. "（" .. (CHAR_TIER[best.Name] or "未知") .. "）")
-    return true, best.Name
+    pcall(function() remote:FireServer(c.Name, skin and skin.Value or 0) end)
+    log("已装备角色：" .. c.Name)
+    return true, c.Name
 end
+
 
 -- 游戏内 19 个模式（Play.Main 实际存在的按钮）
 local MODE_ORDER = {
@@ -19625,7 +19845,17 @@ end
 local function openVoteGui()
     local playGui = pg:FindFirstChild("Play")
     if not playGui then return false end
-    if playGui.Enabled then return true end
+    if playGui.Enabled then
+        -- 顺手把参考脚本用的 OpenVoteUI 也打开
+        local ov = pg:FindFirstChild("OpenVoteUI")
+        if ov then
+            local f = ov:FindFirstChild("OPEN UI")
+            if f and f.Visible ~= true then
+                pcall(function() f.Visible = true end)
+            end
+        end
+        return true
+    end
     local sel = pg:FindFirstChild("SelectCharacter")
     if sel then
         pcall(function() sel.Enabled = false end)
@@ -19671,22 +19901,24 @@ end
 
 local lastVotedMode = nil
 
--- 真的去“点”一下按钮：优先触发按钮自身的 Activated 连接（有 getconnections 的执行器）
-local function clickGui(btn)
-    if not btn or not btn:IsA("GuiButton") then return false end
-    local gc
-    pcall(function() gc = getconnections end)
-    if type(gc) ~= "function" then return false end
-    local fired = false
-    pcall(function()
-        for _, c in ipairs(gc(btn.Activated) or {}) do
-            if c.Function then
-                pcall(c.Function)
-                fired = true
-            end
-        end
-    end)
-    return fired
+-- 自动开单人局：和参考脚本一样直接调 MainHandler
+local lastStart = 0
+local function autoStartSolo()
+    if votePhase() then return false end
+    -- 先站上准备垫再开局，避免脚本在跑图时乱开
+    local pad = workspace:FindFirstChild("AutoReady")
+    local base = hrpOf(myChar())
+    if not pad or not base or (base.Position - pad.Position).Magnitude > 8 then return false end
+    local now = os.clock()
+    if now - lastStart < 8 then return false end
+    local mh = RS:FindFirstChild("MainHandler")
+    if not mh then return false end
+    local mode = bestMode()
+    lastStart = now
+    pcall(function() mh:FireServer({ [1] = "StartSolo", [2] = mode }) end)
+    AUTO.LastReason = "已发起单人开局：" .. mode
+    log("已自动开单人局：" .. mode)
+    return true
 end
 
 local function autoVote()
@@ -19712,6 +19944,13 @@ local function autoVote()
     if not clicked then
         pcall(function() remote:FireServer(mode) end)
     end
+
+    -- 投完把投票浮窗收起来（参考脚本同款做法）
+    pcall(function()
+        local ov = pg:FindFirstChild("OpenVoteUI")
+        local f = ov and ov:FindFirstChild("OPEN UI")
+        if f then f.Visible = false end
+    end)
 
     AUTO.VoteState = string.format("%s（%s）", mode, why)
     AUTO.LastReason = "已投票：" .. mode
@@ -19798,6 +20037,7 @@ local SETTING_ON = {
 local lastSettings = 0
 local function applySettings()
     local now = os.clock()
+    if not AUTO.AutoSettings then return end
     if now - lastSettings < 15 then return end
     lastSettings = now
     local sf = player:FindFirstChild("SettingFolder")
@@ -19822,6 +20062,7 @@ end
 local lastHeli = 0
 local function autoSkipHeli()
     local now = os.clock()
+    if not AUTO.AutoSkipHeli then return false end
     if now - lastHeli < 2 then return false end
     local g = pg:FindFirstChild("skip heli")
     local r = RS:FindFirstChild("SkipHelicopter")
@@ -19852,15 +20093,36 @@ local function autoClaim()
 end
 
 ----------------------------------------------------------------
--- 游戏自带 AutoCombat（ParasiteEnabled 属性触发）
--- 它比自研瞄准更强：会躲投射物、风筝、按血量切技能
+-- 无限复活：残血直接重置角色，立刻重新出生
+-- 和参考脚本同一套原理：卸掉 Head / Torso 让本地角色判死 → 服务端重发 CharacterAdded
 ----------------------------------------------------------------
-local gameAIOn = nil
-local function setGameAI(on)
-    if gameAIOn == on then return end
-    gameAIOn = on
-    pcall(function() player:SetAttribute("ParasiteEnabled", on and true or false) end)
-    log(on and "战斗内核 → 游戏内置 AI（自动瞄准/走位/躲技能/放技能）" or "战斗内核 → 自研引擎")
+local lastReset = 0
+local function forceRespawn(reason)
+    if not AUTO.AutoRespawn then return false end
+    local now = os.clock()
+    if now - lastReset < 2 then return false end
+    local char = player.Character
+    local h = char and char:FindFirstChildOfClass("Humanoid")
+    if not char or not h or h.Health <= 0 then return false end
+    lastReset = now
+    pcall(function()
+        local head = char:FindFirstChild("Head")
+        if head then head:Destroy() end
+    end)
+    task.delay(0.05, function()
+        local c = player.Character
+        local hh = c and c:FindFirstChildOfClass("Humanoid")
+        if hh and hh.Health > 0 then
+            pcall(function()
+                local torso = c:FindFirstChild("Torso") or c:FindFirstChild("UpperTorso")
+                if torso then torso:Destroy() end
+                if hh.Health > 0 then hh.Health = 0 end
+            end)
+        end
+    end)
+    AUTO.LastReason = "无限复活触发：" .. tostring(reason)
+    log("无限复活触发：" .. tostring(reason))
+    return true
 end
 
 ----------------------------------------------------------------
@@ -19883,6 +20145,96 @@ local function combatTeleport(base, targetPos)
         base.AssemblyAngularVelocity = Vector3.zero
     end)
     AUTO.LastReason = string.format("已传送到 %s 身边", AUTO.Target or "敌人")
+    return true
+end
+
+-- 导弹 / 投掷物朝脸飞来时，直接侧向瞬移躲开（不靠走位、不靠 AI）
+local PROJ_KEYS = {
+    "missile", "projectile", "rocket", "grenade", "bomb", "bullet",
+    "acid", "snowball", "laser", "orb", "fireball", "knife", "dart",
+}
+local lastDodge, lastDodgeScan = 0, 0
+
+local function isProjectileName(n)
+    local l = string.lower(n)
+    for _, k in ipairs(PROJ_KEYS) do
+        if string.find(l, k, 1, true) then return true end
+    end
+    return false
+end
+
+local function findIncoming(base)
+    local function scan(list)
+        for _, obj in ipairs(list) do
+            if obj:IsA("BasePart") or obj:IsA("Model") then
+                if isProjectileName(obj.Name) then
+                    local part
+                    if obj:IsA("BasePart") then
+                        part = obj
+                    else
+                        part = obj.PrimaryPart
+                        if not part then
+                            local okp, found = pcall(function()
+                                return obj:FindFirstChildWhichIsA("BasePart", true)
+                            end)
+                            if okp then part = found end
+                        end
+                    end
+                    if part then
+                        local dv = base.Position - part.Position
+                        local dist = dv.Magnitude
+                        if dist > 3 and dist < 90 then
+                            local vel = part.AssemblyLinearVelocity
+                            if vel.Magnitude > 25 and vel.Unit:Dot(dv.Unit) > 0.5 then
+                                return part
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return nil
+    end
+
+    local hit = scan(workspace:GetChildren())
+    if not hit then
+        local box = workspace:FindFirstChild("Projectiles") or workspace:FindFirstChild("Effects")
+        if box then hit = scan(box:GetChildren()) end
+    end
+    return hit
+end
+
+local function dodgeProjectile(base)
+    if not AUTO.AutoDodge or not base then return false end
+    local now = os.clock()
+    if now - lastDodge < 0.6 then return false end
+    if now - lastDodgeScan < 0.3 then return false end
+    lastDodgeScan = now
+    local p = findIncoming(base)
+    if not p then return false end
+    lastDodge = now
+    local away = base.Position - p.Position
+    local flat = Vector3.new(away.X, 0, away.Z)
+    if flat.Magnitude < 0.1 then flat = Vector3.new(1, 0, 0) end
+    flat = flat.Unit
+    local side = Vector3.new(-flat.Z, 0, flat.X)
+    local dest = base.Position + side * 30 + Vector3.new(0, 6, 0)
+    local char = myChar()
+    local ok = false
+    if char then
+        ok = pcall(function() char:PivotTo(CFrame.new(dest)) end)
+    end
+    if not ok then
+        pcall(function() base.CFrame = CFrame.new(dest) end)
+    end
+    pcall(function()
+        base.AssemblyLinearVelocity = Vector3.zero
+        base.AssemblyAngularVelocity = Vector3.zero
+    end)
+    AUTO.LastReason = "瞬移躲投射物：" .. p.Name
+    if every("dodgelog", 2) then
+        log("瞬移躲投射物：" .. p.Name)
+    end
     return true
 end
 
@@ -19917,13 +20269,14 @@ local function refreshStatus()
     local mt = modeText()
 
     local text = string.format(
-        "阶段:%s   模式:%s\n波次:%s   准备:%s\n生命:%d/%d   敌人:%d   技能:%d\n投票:%s\n目标:%s\n%s%s",
+        "阶段:%s   模式:%s\n波次:%s   准备:%s\n生命:%d/%d   敌人:%d   技能:%d\n投票:%s   复活阈值:%d%%\n目标:%s\n%s%s",
         AUTO.Phase or "-",
         (mt ~= "" and mt or "—"),
         (wt ~= "" and wt or "—"),
         (rt ~= "" and rt or "—"),
         hp, maxhp, enemyCount(), skillCount(),
         AUTO.VoteState or "—",
+        AUTO.ReviveHp,
         AUTO.Target or "—",
         AUTO.LastReason or "就绪",
         AUTO.Paused and "   [已暂停]" or ""
@@ -19987,22 +20340,22 @@ end
 
 AUTO.Actions.Equip = function()
     task.spawn(function()
-        local ok, name = equipBest()
+        local ok, name = equipNamed(AUTO.Character)
         if ok then
-            notify("自动装备", "已装备最强角色：" .. tostring(name))
+            notify("装备角色", "已装备：" .. tostring(name))
         else
-            notify("自动装备", "没换：" .. tostring(name))
+            notify("装备角色", "没换：" .. tostring(name))
         end
         refreshStatus()
     end)
 end
 
-AUTO.Actions.SwitchAI = function()
-    AUTO.UseGameAI = not AUTO.UseGameAI
-    if not AUTO.UseGameAI then setGameAI(false) end
-    notify("战斗内核", AUTO.UseGameAI and "已切换到游戏内置 AI" or "已切换到自研瞄准")
-    log("战斗内核切换 → " .. (AUTO.UseGameAI and "内置 AI" or "自研"))
-    refreshStatus()
+AUTO.Actions.Respawn = function()
+    task.spawn(function()
+        local ok = forceRespawn("手动")
+        notify("无限复活", ok and "已重置角色，正在重生" or "当前无法重置（已死或冷却中）")
+        refreshStatus()
+    end)
 end
 
 AUTO.Actions.Diag = function()
@@ -20027,7 +20380,7 @@ AUTO.Actions.Diag = function()
         log("跳波界面：" .. tostring(pg:FindFirstChild("VoteSkip") ~= nil) .. "   跳波遥控：" .. tostring(RS:FindFirstChild("SkipWaveVote") ~= nil))
         log("设置目录：" .. tostring(player:FindFirstChild("SettingFolder") ~= nil) .. "   跳直升机界面：" .. tostring(pg:FindFirstChild("skip heli") ~= nil))
         log("换角色遥控：" .. tostring(RS:FindFirstChild("ForChangeCharacter") ~= nil) .. "   已解锁角色：" .. tostring(player:FindFirstChild("UnlockData") and #player.UnlockData:GetChildren() or 0))
-        log("内置 AI 属性 ParasiteEnabled：" .. tostring(player:GetAttribute("ParasiteEnabled")) .. "   当前内核：" .. (AUTO.UseGameAI and "内置AI" or "自研") .. "   状态：" .. tostring(gameAIOn))
+        log("投射物躲闪：" .. tostring(AUTO.AutoDodge) .. "   瞬移贴脸：" .. tostring(AUTO.AutoTeleport))
         log("波次文本：" .. waveText() .. "   准备文本：" .. readyText())
         log("结算界面：" .. tostring(pg:FindFirstChild("ModeResult") ~= nil))
         notify("环境自检", "结果已写入日志页")
@@ -20040,6 +20393,7 @@ end
 ----------------------------------------------------------------
 pcall(function()
     player.Idled:Connect(function()
+        if not AUTO.AntiAfk then return end
         pcall(function()
             VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
             task.wait(1)
@@ -20094,17 +20448,16 @@ task.spawn(function()
                 AUTO.Phase = "大厅"
                 stopFire()
                 stopAim()
-                setGameAI(false)
                 if every("settings", 3) then
                     applySettings()
                 end
                 if every("claim", 20) then
                     autoClaim()
                 end
-                if AUTO.AutoEquip and not equipDone and every("equip", 3) then
+                if AUTO.AutoEquipChar and AUTO.Character ~= "" and not equipDone and every("equip", 3) then
                     local pad2 = workspace:FindFirstChild("AutoReady")
                     local far = pad2 and (base.Position - pad2.Position).Magnitude > 40
-                    if far and not votePhase() and equipBest() then
+                    if far and not votePhase() and equipNamed(AUTO.Character) then
                         equipDone = true
                     end
                 end
@@ -20115,10 +20468,10 @@ task.spawn(function()
                     autoVote()
                 end
                 if AUTO.AutoReady and every("ready", 0.8) then
-                    local pad = workspace:FindFirstChild("AutoReady")
-                    if pad and not lobbyTeleport(base, pad) then
-                        autoReady()
-                    end
+                    autoReady()
+                end
+                if AUTO.AutoStart and every("start", 1.5) then
+                    autoStartSolo()
                 end
                 return
             end
@@ -20139,19 +20492,19 @@ task.spawn(function()
                 autoSkipVote()
             end
 
-            -- 用游戏自带 AutoCombat 打：它自己会瞄准/开火/走位/躲技能/放技能
-            if AUTO.UseGameAI then
-                setGameAI(true)
-                local e2, d2 = nearestEnemy(AUTO.Range)
-                AUTO.Target = e2 and e2.Name or nil
-                if e2 then
-                    AUTO.LastReason = string.format("内置 AI 交战中：%s（%d 格）", e2.Name, math.floor(d2 or 0))
-                else
-                    AUTO.LastReason = "内置 AI 待机，本波已清空"
+            -- 无限复活：残血就重置角色，瞬间重生
+            if AUTO.AutoRespawn and every("respawn", 0.4) then
+                local hh = humOf(myChar())
+                if hh and hh.MaxHealth > 0 and hh.Health > 0 then
+                    local pct = hh.Health / hh.MaxHealth * 100
+                    if pct <= AUTO.ReviveHp then
+                        forceRespawn(string.format("血量 %.0f%%", pct))
+                    end
                 end
-                return
             end
-            setGameAI(false)
+
+            -- 先看有没有导弹/投掷物朝脸上飞，有就侧向瞬移躲开
+            dodgeProjectile(base)
 
             local enemy, dist = nearestEnemy(AUTO.Range)
             if enemy then
@@ -20162,17 +20515,27 @@ task.spawn(function()
                     end
                     ensureFire()
 
-                    if AUTO.AutoSkill and every("skill", 0.6) then
+                    if AUTO.AutoSkill and every("skill", AUTO.SkillTick) then
                         useSkills(p.Position)
                     end
 
-                    -- 太远：先传送贴脸，传送没触发再走路靠近
+                    -- 太远：直接瞬移到敌人身边（和参考脚本一样，不走路）
                     local teleported = combatTeleport(base, p.Position)
                     if not teleported and AUTO.AutoApproach and dist and dist > AUTO.TurnDist then
                         local delta = p.Position - base.Position
                         if delta.Magnitude > 0 then
-                            local stand = p.Position - delta.Unit * 70
-                            pcall(function() h:MoveTo(stand) end)
+                            local stand = p.Position - delta.Unit * 12 + Vector3.new(0, 4, 0)
+                            local okTp = pcall(function()
+                                myChar():PivotTo(CFrame.lookAt(stand, p.Position))
+                            end)
+                            if not okTp then
+                                pcall(function() base.CFrame = CFrame.lookAt(stand, p.Position) end)
+                            end
+                            pcall(function()
+                                base.AssemblyLinearVelocity = Vector3.zero
+                                base.AssemblyAngularVelocity = Vector3.zero
+                            end)
+                            teleported = true
                         end
                     end
 
@@ -20219,7 +20582,7 @@ task.spawn(function()
     end
 end)
 
-log("引擎已启动：自动选角色 / 自动开界面 / 自动投票 / 自动准备 / 自动传送 / 自动跳过场 / 自动战斗 / 自动技能 / 自动救人 / 结算自动继续")
+log("引擎已启动：自动选角色 / 瞬移准备 / 自动投票 / 自动开单人局 / 自动跳过场 / 自动战斗 / 无限复活 / 自动技能 / 自动救人 / 结算自动继续")
 notify("难度模式 自动挂机", "已启动，全自动运行中")
 
 end
