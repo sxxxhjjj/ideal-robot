@@ -17480,11 +17480,11 @@ local AUTO = {
     -- 流程（可在「设置」页自由开关）
     AutoOpenVote  = true,    -- 大厅自动打开投票界面（相当于点击 GUI）
     AutoVote      = true,    -- 自动投票选难度模式
-    AutoStart     = true,    -- 站上准备垫后自动开单人局（MainHandler StartSolo）
+    AutoStart     = true,    -- 自动开单人局（MainHandler StartSolo）
     AutoEquipChar = true,    -- 自动装备你在「玩家」页选的角色（不判断强弱）
     Character     = "",      -- 玩家自选角色名，空 = 不自动装备
     AutoSkipVote  = true,    -- 自动跟着投跳波票
-    AutoReady     = true,    -- 大厅自动瞬移到准备垫
+    AutoReady     = true,    -- 大厅自动点新版 UI 准备按钮（点不动才发 GetReadyRemote）
     AutoSkip      = true,    -- 自动开启跳波设置
     AutoSkipHeli  = true,    -- 自动跳过直升机过场
     AutoSettings  = true,    -- 自动打开游戏内快速过场等设置
@@ -17520,11 +17520,24 @@ local AUTO = {
 -- ============================================================
 -- 界面：只展示状态，不提供任何需要玩家调整的配置
 -- ============================================================
-local MainTab = Window:Tab({ Title = "概览", Icon = "activity" })
+-- 界面：老版本布局（信息 / 主要 / 玩家 / 游戏模式 / 日志），全部自动，无开关
+-- ============================================================
+local InfoTab = Window:Tab({ Title = "信息", Icon = "info" })
+local MainTab = Window:Tab({ Title = "主要", Icon = "rocket" })
 local PlayerTab = Window:Tab({ Title = "玩家", Icon = "user" })
-local SetTab = Window:Tab({ Title = "设置", Icon = "sliders-horizontal" })
-local ToolTab = Window:Tab({ Title = "工具", Icon = "wrench" })
+local ModeTab = Window:Tab({ Title = "游戏模式", Icon = "gamepad-2" })
 local LogTab  = Window:Tab({ Title = "日志", Icon = "scroll-text" })
+
+local SecInfo = InfoTab:Section({
+    Title = "难度模式 至尊版",
+    TextXAlignment = "Center",
+    TextSize = 17,
+})
+
+SecInfo:Paragraph({
+    Title = "说明",
+    Desc  = "全自动：进大厅自动准备、自动投票、自动开单人局；局内自动锁敌开火、瞬移贴脸、瞬移躲投射物、无限复活、自动技能、自动救人、结算继续。所有功能默认全开，不需要你设置任何开关。",
+})
 
 local SecStatus = MainTab:Section({
     Title = "运行状态",
@@ -17545,7 +17558,7 @@ local SecPlan = MainTab:Section({
 
 SecPlan:Paragraph({
     Title = "开局",
-    Desc  = "进大厅装备你选的角色 → 直接瞬移到准备垫 → 自动投票并用 MainHandler 直接开单人局",
+    Desc  = "进大厅装备你选的角色 → 自动投票 → 点新版 UI 准备按钮 → 用 MainHandler 直接开单人局",
 })
 
 SecPlan:Paragraph({
@@ -17642,150 +17655,42 @@ SecChar:Button({
 })
 
 -- ============================================================
--- 设置页：每个功能一个开关，附说明
+-- 游戏模式页：只展示投票信息 + 两个补枪按钮
 -- ============================================================
-local SecFlow = SetTab:Section({ Title = "流程", Desc = "从进大厅到下一局，全部可单独开关", Icon = "workflow" })
-
-SecFlow:Toggle({
-    Title = "自动装备所选角色",
-    Desc  = "进大厅后自动装备你在「玩家」页选的角色，只换一次。关闭后完全不碰你的角色。",
-    Value = AUTO.AutoEquipChar,
-    Callback = function(v) AUTO.AutoEquipChar = v end,
+local SecMode = ModeTab:Section({
+    Title = "投票信息",
+    TextXAlignment = "Center",
+    TextSize = 17,
 })
 
-SecFlow:Toggle({
-    Title = "自动打开投票界面",
-    Desc  = "大厅里把 SelectCharacter 关掉、打开 Play 投票界面，等于替你点了一次 UI。",
-    Value = AUTO.AutoOpenVote,
-    Callback = function(v) AUTO.AutoOpenVote = v end,
-})
-
-SecFlow:Toggle({
+SecMode:Paragraph({
     Title = "自动投票",
-    Desc  = "把票投给当前票数最高的模式（读 workspace.Vote 的实际票数），票数变了会重新跟票；全没票就投 Normal。关闭后你自己投。",
-    Value = AUTO.AutoVote,
-    Callback = function(v) AUTO.AutoVote = v end,
+    Desc  = "大厅自动读 workspace.Vote 的实时票数，把票投给票数最高的模式；全都没票就投 Normal。投票界面由脚本自己打开、投完自己收起，不需要你操作。",
 })
 
-SecFlow:Toggle({
-    Title = "自动开单人局",
-    Desc  = "站上准备垫后直接调 MainHandler 发起单人开局（StartSolo），不用等别人凑人、不用等倒计时。关闭后走正常流程。",
-    Value = AUTO.AutoStart,
-    Callback = function(v) AUTO.AutoStart = v end,
+SecMode:Paragraph({
+    Title = "自动开局",
+    Desc  = "投完票直接调 MainHandler 发起单人开局（StartSolo），不用等别人、不用等倒计时。",
 })
 
-SecFlow:Toggle({
-    Title = "自动瞬移准备",
-    Desc  = "在大厅直接把角色瞬移到 AutoReady 准备垫上（不走过去）。关闭后需要你自己站上去。",
-    Value = AUTO.AutoReady,
-    Callback = function(v) AUTO.AutoReady = v end,
-})
+local SecMode2 = ModeTab:Section({ Title = "补一枪", Icon = "gamepad-2" })
 
-SecFlow:Toggle({
-    Title = "自动跳波投票",
-    Desc  = "局内弹出跳波投票时，把票投给票数最高的那一档。关闭后不参与。",
-    Value = AUTO.AutoSkipVote,
-    Callback = function(v) AUTO.AutoSkipVote = v end,
-})
-
-SecFlow:Toggle({
-    Title = "结算自动继续",
-    Desc  = "打完出现结算界面时自动发 Ready 回大厅，连续刷下一局。关闭后你自己点。",
-    Value = AUTO.AutoContinue,
-    Callback = function(v) AUTO.AutoContinue = v end,
-})
-
-local SecBattle = SetTab:Section({ Title = "战斗", Desc = "全部瞬移处理，不用任何 AI 走位", Icon = "crosshair" })
-
-SecBattle:Toggle({
-    Title = "自动战斗",
-    Desc  = "锁定最近敌人持续开火（连发武器按住就行，单发武器自动点）。关闭后只瞄准不开枪。",
-    Value = AUTO.AutoFight,
-    Callback = function(v) AUTO.AutoFight = v end,
-})
-
-SecBattle:Toggle({
-    Title = "自动瞄准",
-    Desc  = "把准星压到敌人身上（BotBridge + MouseStream）。关闭后自动战斗就不开枪了。",
-    Value = AUTO.AutoAim,
-    Callback = function(v) AUTO.AutoAim = v end,
-})
-
-SecBattle:Toggle({
-    Title = "瞬移贴脸",
-    Desc  = "敌人超过 90 格就直接瞬移到它身边 12 格并转向它，不走过去。关闭后站在原地打。",
-    Value = AUTO.AutoTeleport,
-    Callback = function(v) AUTO.AutoTeleport = v end,
-})
-
-SecBattle:Toggle({
-    Title = "瞬移躲投射物",
-    Desc  = "检测到导弹/投掷物朝你飞来时，立刻侧向瞬移 30 格躲开，然后继续打。关闭后只能硬吃伤害。",
-    Value = AUTO.AutoDodge,
-    Callback = function(v) AUTO.AutoDodge = v end,
-})
-
-SecBattle:Toggle({
-    Title = "自动技能",
-    Desc  = "每个技能用自己那套冷却独立触发：普攻（鼠标键）1 秒一次连续点，其它技能按槽位错开 2.5 / 3.0 / 3.5 秒，冷却好了就放。关闭后一个技能都不放。",
-    Value = AUTO.AutoSkill,
-    Callback = function(v) AUTO.AutoSkill = v end,
-})
-
-local SecLifeSet = SetTab:Section({ Title = "生存", Desc = "不死、救人、防踢", Icon = "heart-pulse" })
-
-SecLifeSet:Toggle({
-    Title = "无限复活",
-    Desc  = "血量低于下面的阈值时，卸掉 Head/Torso 让角色重置并立刻重新出生，等于无限复活。关闭后残血不会处理。",
-    Value = AUTO.AutoRespawn,
-    Callback = function(v) AUTO.AutoRespawn = v end,
-})
-
-SecLifeSet:Slider({
-    Title = "复活触发血量（%）",
-    Desc  = "默认 35%。调高更保守（更容易触发复活），调低更省，但太低可能被一击秒杀。",
-    Value = { Min = 10, Max = 90, Default = AUTO.ReviveHp },
-    Step = 5,
-    Callback = function(v)
-        AUTO.ReviveHp = v
+SecMode2:Button({
+    Title = "立即投票",
+    Desc  = "马上按当前票数最高的模式投一票",
+    Icon = "check",
+    Callback = function()
+        if AUTO.Actions.Vote then AUTO.Actions.Vote() end
     end,
 })
 
-SecLifeSet:Toggle({
-    Title = "自动救队友",
-    Desc  = "附近队友倒地时，自动按住他身上的 ProximityPrompt 完成救援。关闭后不救。",
-    Value = AUTO.AutoRevive,
-    Callback = function(v) AUTO.AutoRevive = v end,
-})
-
-SecLifeSet:Toggle({
-    Title = "防踢（防 AFK）",
-    Desc  = "长时间不动时模拟一次鼠标操作，避免被 Roblox 判定挂机踢出。关闭后挂着可能被踢。",
-    Value = AUTO.AntiAfk,
-    Callback = function(v) AUTO.AntiAfk = v end,
-})
-
-local SecMisc = SetTab:Section({ Title = "杂项", Desc = "过场与游戏设置", Icon = "settings" })
-
-SecMisc:Toggle({
-    Title = "自动跳过直升机过场",
-    Desc  = "出现 skip heli 按钮时自动点掉，不看过场动画。关闭后要自己点。",
-    Value = AUTO.AutoSkipHeli,
-    Callback = function(v) AUTO.AutoSkipHeli = v end,
-})
-
-SecMisc:Toggle({
-    Title = "自动打开游戏设置",
-    Desc  = "把游戏设置里的跳过直升机过场、跳过 Boss 过场、快速模式、去抖屏、伤害显示等置为开启并存档。关闭后保持你原来的设置。",
-    Value = AUTO.AutoSettings,
-    Callback = function(v) AUTO.AutoSettings = v end,
-})
-
-SecMisc:Toggle({
-    Title = "自动跳波设置",
-    Desc  = "向服务器发送 SetSettingAutoSkipWave(true)，让游戏按设置自动跳波。关闭后按游戏默认。",
-    Value = AUTO.AutoSkip,
-    Callback = function(v) AUTO.AutoSkip = v end,
+SecMode2:Button({
+    Title = "立即开单人局",
+    Desc  = "立刻用 MainHandler 发起 StartSolo",
+    Icon = "rocket",
+    Callback = function()
+        if AUTO.Actions.StartSolo then AUTO.Actions.StartSolo() end
+    end,
 })
 
 local SecLog = LogTab:Section({
@@ -17799,7 +17704,7 @@ local LogPara = SecLog:Paragraph({
     Desc  = "等待引擎启动...",
 })
 
-local SecTool = ToolTab:Section({
+local SecTool = MainTab:Section({
     Title = "工具",
     Desc  = "平时不需要动",
     Icon  = "wrench",
@@ -17858,7 +17763,7 @@ SecTool:Button({
 
 SecTool:Button({
     Title = "立即尝试准备",
-    Desc  = "直接点界面上的准备按钮；点不动就瞬移到准备垫",
+    Desc  = "立刻点一次新版 UI 准备按钮（点不动改发 GetReadyRemote）",
     Icon = "house",
     Callback = function()
         if AUTO.Actions.Ready then AUTO.Actions.Ready() end
@@ -19723,59 +19628,38 @@ local function clickGui(btn)
     return ok
 end
 
--- 自动准备：先点界面准备按钮；界面确认不了再瞬移到垫子
+-- 自动准备：新版有 UI —— 直接点 ChrGUI["Frame-Ready"].Menu.Ready.Button
+-- 反编译源码语义：TextLabel = "READY" 表示还没准备（点了变准备）；
+--                 点完变成 "UNREADY" 就代表已准备
 ----------------------------------------------------------------
-local readyStuck = 0
+local lastReadyAt = 0
 local function autoReady()
-    local pad = workspace:FindFirstChild("AutoReady")
-    if not pad then return false end
-    local me = myChar()
-    local h = humOf(me)
-    local base = hrpOf(me)
-    if not (h and base) then return false end
-
-    -- 优先直接点 UI 上的准备按钮（不用站垫子）
-    if readyText() ~= "READY" and every("readyclick", 2) then
-        local chr = pg:FindFirstChild("ChrGUI")
-        local btn = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button" })
-        if btn and clickGui(btn) then
-            AUTO.LastReason = "已点击准备按钮，等服务器确认"
-        end
-    end
-    if readyText() == "READY" then
-        readyStuck = 0
-        AUTO.LastReason = "已准备（界面已确认）"
+    -- 按钮显示 UNREADY = 已经准备好了
+    if readyText() == "UNREADY" then
+        AUTO.LastReason = "已准备（新版 UI 显示 UNREADY）"
         return true
     end
 
-    local dist = (base.Position - pad.Position).Magnitude
-    if dist > 3 then
-        -- 和参考脚本一样：直接瞬移，不走路
-        local y = 4
-        if pad:IsA("BasePart") then
-            y = pad.Size.Y * 0.5 + 3.5
-        end
-        local ok = pcall(function()
-            me:PivotTo(CFrame.new(pad.Position + Vector3.new(0, y, 0)))
-        end)
-        if not ok then
-            pcall(function() base.CFrame = CFrame.new(pad.Position + Vector3.new(0, y, 0)) end)
-        end
-        pcall(function()
-            base.AssemblyLinearVelocity = Vector3.zero
-            base.AssemblyAngularVelocity = Vector3.zero
-        end)
-        readyStuck = readyStuck + 1
-        if readyStuck == 1 then
-            log("已瞬移到准备垫")
-        end
-        AUTO.LastReason = "已瞬移到准备垫，等待开局"
+    local now = tick()
+    if now - lastReadyAt < 1.2 then return false end
+    lastReadyAt = now
+
+    -- 首选：点新版 UI 的准备按钮（等于玩家自己点）
+    local chr = pg:FindFirstChild("ChrGUI")
+    local btn = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button" })
+    if btn and clickGui(btn) then
+        AUTO.LastReason = "已点击新版 UI 准备按钮，等服务器确认"
         return true
     end
 
-    readyStuck = 0
-    AUTO.LastReason = "站在准备垫上，等待开局"
-    return true
+    -- 兜底：按钮点不动时，直接发按钮底层同款遥控 GetReadyRemote("1", true)
+    local remote = RS:FindFirstChild("GetReadyRemote")
+    if remote then
+        pcall(function() remote:FireServer("1", true) end)
+        AUTO.LastReason = "UI 点不动，改发 GetReadyRemote(\"1\", true)"
+        return true
+    end
+    return false
 end
 
 ----------------------------------------------------------------
@@ -19905,10 +19789,6 @@ local lastVotedMode = nil
 local lastStart = 0
 local function autoStartSolo()
     if votePhase() then return false end
-    -- 先站上准备垫再开局，避免脚本在跑图时乱开
-    local pad = workspace:FindFirstChild("AutoReady")
-    local base = hrpOf(myChar())
-    if not pad or not base or (base.Position - pad.Position).Magnitude > 8 then return false end
     local now = os.clock()
     if now - lastStart < 8 then return false end
     local mh = RS:FindFirstChild("MainHandler")
@@ -20238,23 +20118,6 @@ local function dodgeProjectile(base)
     return true
 end
 
--- 大厅里离准备垫太远就直接传送过去（不用慢慢走）
-local lastLobbyTp = 0
-local function lobbyTeleport(base, pad)
-    if not AUTO.AutoTeleport or not base or not pad then return false end
-    local now = os.clock()
-    if now - lastLobbyTp < 1.5 then return false end
-    local dist = (base.Position - pad.Position).Magnitude
-    if dist < 45 then return false end
-    lastLobbyTp = now
-    pcall(function()
-        base.CFrame = CFrame.new(pad.Position + Vector3.new(0, 5, 0))
-        base.AssemblyLinearVelocity = Vector3.zero
-        base.AssemblyAngularVelocity = Vector3.zero
-    end)
-    log("已传送到准备垫")
-    return true
-end
 
 ----------------------------------------------------------------
 -- 状态刷新
@@ -20322,7 +20185,14 @@ AUTO.Actions.Ready = function()
     task.spawn(function()
         autoReady()
         refreshStatus()
-        notify("自动挂机", "已尝试走向准备垫")
+        notify("自动挂机", "已点击新版 UI 准备按钮")
+    end)
+end
+
+AUTO.Actions.StartSolo = function()
+    task.spawn(function()
+        autoStartSolo()
+        refreshStatus()
     end)
 end
 
@@ -20443,7 +20313,7 @@ task.spawn(function()
                 return
             end
 
-            -- 大厅：打开投票界面 → 自动投票 → 站准备垫
+            -- 大厅：打开投票界面 → 自动投票 → 发准备序列 → 自动开单人局
             if not inMatch() then
                 AUTO.Phase = "大厅"
                 stopFire()
