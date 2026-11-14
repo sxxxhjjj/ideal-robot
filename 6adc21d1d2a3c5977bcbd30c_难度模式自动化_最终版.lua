@@ -1,19182 +1,74 @@
 --[[
-  难度模式 自动挂机脚本 · 最终版
+  难度模式 自动化 · 引擎（UI 外置 / 链接加载版）
   =================================================
-  · 内嵌 WindUI v1.6.66，整份文件直接运行，无 loadstring / 无外部链接
-  · 适配游戏：难度模式（PlaceId 18816546575）
-  · 功能：自动投票(19 模式) / 自动跳波投票 / 点界面准备 / 瞬移准备 / 瞬移贴脸 / 瞬移躲投射物 / 无限复活 / 自动锁敌开火 / 自动技能 / 自动救人 / 结算自动继续
-  · 不使用游戏内置 AI，全部用瞬移处理；默认全开，可在「设置」页逐项开关
-  · 密钥系统(KeySystem) / 第三方服务(Services) / 亚克力(Acrylic) / 多语言：全部关闭
+  · UI（WindUI 库 + 菜单 + 悬浮窗）已单独放在「难度模式_UI.lua」
+  · 本文件通过链接加载 UI，然后启动自动化引擎
+  · 所有功能默认关闭，必须玩家在菜单里手动打开开关才会运行
+  · 准备流程：自动投票 → 点击新版 UI 准备按钮 → 开单人局
 ]]
 
---[[
-     _      ___         ____  ______
-    | | /| / (_)__  ___/ / / / /  _/
-    | |/ |/ / / _ \/ _  / /_/ // /  
-    |__/|__/_/_//_/\_,_/\____/___/
-    
-    v1.6.66  |  2026-07-29  |  Roblox UI Library for scripts
-    
-    To view the source code, see the `src/` folder on the official GitHub repository.
-    
-    Author: Footagesus (Footages, .ftgs, oftgs)
-    Github: https://github.com/Footagesus/WindUI
-    Discord: https://discord.gg/ftgs-development-hub-1300692552005189632
-    License: MIT
-]]
-
-type ConfigType__DARKLUA_TYPE_a={
-Object:Instance,
-Camera:Instance?,
-Interactive:boolean?,
-Height:number?,
-Focused:boolean,
-
-Window:any,
-WindUI:any,
-Tab:any,
-Parent:Instance,
-}local a a={cache={}, load=function(b)if not a.cache[b]then a.cache[b]={c=a[b]()}end return a.cache[b].c end}do function a.a()
-
-local b
-
-local d={
-New=nil,
-Init=nil,
-Shapes={
-Circle={
-Image="rbxassetid://111665032676235",
-Rect=Rect.new(512,512,512,512),
-Radius=512,
-},
-CircleOutline={
-Image="rbxassetid://108556680453287",
-Rect=Rect.new(512,512,512,512),
-Radius=512,
-},
-CircleGlass={
-Image="rbxassetid://95600044758841",
-Rect=Rect.new(512,512,512,512),
-Radius=512,
-},
-
-
-
-SquircleH={
-Image="rbxassetid://125083578015333",
-Rect=Rect.new(512,325,512,325),
-Radius=325,
-},
-SquircleHOutline={
-Image="rbxassetid://107043713170567",
-Rect=Rect.new(512,325,512,325),
-Radius=325,
-},
-SquircleHGlass={
-Image="rbxassetid://84819521201001",
-Rect=Rect.new(512,325,512,325),
-Radius=325,
-},
-["SquircleH-TL-TR"]={
-Image="rbxassetid://90680657206619",
-Rect=Rect.new(807,512,807,512),
-Radius=325,
-AutoChange=false,
-},
-["SquircleH-BL-BR"]={
-Image="rbxassetid://99216342056719",
-Rect=Rect.new(0,512,0,512),
-Radius=325,
-AutoChange=false,
-},
-
-SquircleV={
-Image="rbxassetid://124965260437653",
-Rect=Rect.new(325,512,325,512),
-Radius=325,
-},
-SquircleVOutline={
-Image="rbxassetid://88808835404198",
-Rect=Rect.new(325,512,325,512),
-Radius=325,
-},
-SquircleVGlass={
-Image="rbxassetid://124982801466667",
-Rect=Rect.new(325,512,325,512),
-Radius=325,
-},
-
-Squircle={
-Image="rbxassetid://89641024074289",
-Rect=Rect.new(460,460,460,460),
-Radius=310,
-},
-SquircleOutline={
-Image="rbxassetid://74029063732681",
-Rect=Rect.new(512,512,512,512),
-Radius=310,
-},
-SquircleGlass={
-Image="rbxassetid://131126436897551",
-Rect=Rect.new(512,512,512,512),
-Radius=310,
-},
-
-["Squircle-TL-TR"]={
-Image="rbxassetid://75712142040725",
-Rect=Rect.new(512,512,512,512),
-Radius=310,
-AutoChange=false,
-},
-["Squircle-BL-BR"]={
-Image="rbxassetid://83676684425544",
-Rect=Rect.new(512,0,512,0),
-Radius=310,
-AutoChange=false,
-},Square=
-{
-Image="rbxassetid://82909646051652",
-Rect=Rect.new(512,512,512,512),
-Radius=512,
-AutoChange=false,
-},
-},
-}
-
-function d.Init(e,f)
-b=f
-return e.New
-end
-
-function d.New(e,f,g,h,i,j,l)
-local m={
-Radius=f or 0,
-Type=g or"Circle",
-GetRadius=nil,
-GetType=nil,
-SetRadius=nil,
-SetType=nil,
-}
-
-local p={
-["Glass-0.7"]="SquircleGlass",
-["Glass-1"]="SquircleGlass",
-["Glass-1.4"]="SquircleGlass",
-["Squircle-Outline"]="SquircleOutline",
-}
-
-local function GetShape(r)
-return d.Shapes[p[r]or r]or d.Shapes.Circle
-end
-
-local r=b.New(j and"ImageButton"or"ImageLabel",{
-Image="",
-ScaleType=l~=false and"Slice"or nil,
-SliceCenter=m.Type~="Squircle"and Rect.new(512,512,512,512)or nil,
-SliceScale=1,
-ThemeTag=h and h.ThemeTag or nil,
-BackgroundTransparency=1,
-},i)
-
-for u,v in next,h do
-if not table.find({"ThemeTag"},u)then
-r[u]=v
-end
-end
-
-function m.SetRadius(u,v)
-m.Radius=v
-r.SliceScale=math.max(v/GetShape(m.Type).Radius,0.0001)
-return m
-end
-
-function m.SetType(u,v)
-m.Type=v
-local x=GetShape(v)
-r.Image=x.Image
-r.SliceCenter=x.Rect
-m:SetRadius(m.Radius)
-return m
-end
-
-function m.GetRadius(u)
-return m.Radius
-end
-
-function m.GetType(u)
-return m.Type
-end
-
-m:SetRadius(f)
-m:SetType(g)
-
-b.AddSignal(r:GetPropertyChangedSignal"AbsoluteSize",function()
-local u=GetShape(m.Type)
-if u.AutoChange==false then
-return
-end
-
-if string.find(m.Type,"Squircle")then
-local v=string.find(m.Type,"Glass")and"Glass"or nil
-local x=string.find(m.Type,"Outline")and"Outline"or nil
-
-local z=math.round(r.AbsoluteSize.X/b.UIScale)
-local A=math.round(r.AbsoluteSize.Y/b.UIScale)
-
-local B=m.Radius~=0 and m.Radius or math.min(z,A)/2
-local C=d.Shapes.Squircle.Radius/1024
-local F=B/math.min(z,A)
-
-local G
-
-if z>A then
-if F>=C then
-G="SquircleH"..(x or v or"")
-else
-G="Squircle"..(x or v or"")
-end
-elseif z<A then
-if F>=C then
-G="SquircleV"..(x or v or"")
-else
-G="Squircle"..(x or v or"")
-end
-else
-if F>=C then
-G="Circle"..(x or v or"")
-else
-G="Squircle"..(x or v or"")
-end
-end
-
-if G~=m:GetType()then
-m:SetType(G)
-end
-end
-end)
-
-return r,m
-end
-
-return d end function a.b()
-
-
-
-return{
-["a-arrow-down"]="rbxassetid://92867583610071",
-["a-arrow-up"]="rbxassetid://132318504999733",
-["a-large-small"]="rbxassetid://111491496660216",accessibility=
-"rbxassetid://114029945302017",activity=
-"rbxassetid://94212016861936",
-["air-vent"]="rbxassetid://81517226012329",airplay=
-"rbxassetid://115020759309179",
-["alarm-clock-check"]="rbxassetid://76437352099157",
-["alarm-clock-minus"]="rbxassetid://77364179863205",
-["alarm-clock-off"]="rbxassetid://97904885874823",
-["alarm-clock-plus"]="rbxassetid://80468822979214",
-["alarm-clock"]="rbxassetid://126259032907535",
-["alarm-smoke"]="rbxassetid://96965448419685",album=
-"rbxassetid://127358331163602",
-["align-center-horizontal"]="rbxassetid://81570549209434",
-["align-center-vertical"]="rbxassetid://118470463752466",
-["align-end-horizontal"]="rbxassetid://139502909745427",
-["align-end-vertical"]="rbxassetid://96528869059554",
-["align-horizontal-distribute-center"]="rbxassetid://97220086126656",
-["align-horizontal-distribute-end"]="rbxassetid://106128590702022",
-["align-horizontal-distribute-start"]="rbxassetid://76074660002997",
-["align-horizontal-justify-center"]="rbxassetid://75732302772427",
-["align-horizontal-justify-end"]="rbxassetid://129167626402283",
-["align-horizontal-justify-start"]="rbxassetid://130161830325281",
-["align-horizontal-space-around"]="rbxassetid://91646106782950",
-["align-horizontal-space-between"]="rbxassetid://103886093046990",
-["align-start-horizontal"]="rbxassetid://125674804697729",
-["align-start-vertical"]="rbxassetid://105020230154823",
-["align-vertical-distribute-center"]="rbxassetid://93791183635525",
-["align-vertical-distribute-end"]="rbxassetid://139354223511433",
-["align-vertical-distribute-start"]="rbxassetid://74961997822126",
-["align-vertical-justify-center"]="rbxassetid://134754696166569",
-["align-vertical-justify-end"]="rbxassetid://92569381441969",
-["align-vertical-justify-start"]="rbxassetid://99692844572718",
-["align-vertical-space-around"]="rbxassetid://96206012459190",
-["align-vertical-space-between"]="rbxassetid://124998077349706",ambulance=
-"rbxassetid://78599995190651",ampersand=
-"rbxassetid://75272915739209",ampersands=
-"rbxassetid://126947193455996",amphora=
-"rbxassetid://137370389604364",anchor=
-"rbxassetid://92181172123618",angry=
-"rbxassetid://74237056000103",annoyed=
-"rbxassetid://80064369052011",antenna=
-"rbxassetid://99628923540956",anvil=
-"rbxassetid://100203029845919",aperture=
-"rbxassetid://83396154449972",
-["app-window-mac"]="rbxassetid://79587216113811",
-["app-window"]="rbxassetid://93142176757189",apple=
-"rbxassetid://104349242902442",
-["archive-restore"]="rbxassetid://78956681942188",
-["archive-x"]="rbxassetid://75830115088395",archive=
-"rbxassetid://122180020814574",armchair=
-"rbxassetid://105384358373973",
-["arrow-big-down-dash"]="rbxassetid://137987229582002",
-["arrow-big-down"]="rbxassetid://81081164158885",
-["arrow-big-left-dash"]="rbxassetid://97827621354677",
-["arrow-big-left"]="rbxassetid://85973092492641",
-["arrow-big-right-dash"]="rbxassetid://117825834972403",
-["arrow-big-right"]="rbxassetid://82960676755590",
-["arrow-big-up-dash"]="rbxassetid://99260194327483",
-["arrow-big-up"]="rbxassetid://93136954756149",
-["arrow-down-0-1"]="rbxassetid://120961896217875",
-["arrow-down-1-0"]="rbxassetid://93474255891850",
-["arrow-down-a-z"]="rbxassetid://99554596207900",
-["arrow-down-from-line"]="rbxassetid://132045845807798",
-["arrow-down-left"]="rbxassetid://102899325237364",
-["arrow-down-narrow-wide"]="rbxassetid://129105261655061",
-["arrow-down-right"]="rbxassetid://123109928624974",
-["arrow-down-to-dot"]="rbxassetid://101675355931221",
-["arrow-down-to-line"]="rbxassetid://87050478931254",
-["arrow-down-up"]="rbxassetid://85780258549577",
-["arrow-down-wide-narrow"]="rbxassetid://88461733425991",
-["arrow-down-z-a"]="rbxassetid://76115279362232",
-["arrow-down"]="rbxassetid://98764963621439",
-["arrow-left-from-line"]="rbxassetid://87857914437603",
-["arrow-left-right"]="rbxassetid://131324733048447",
-["arrow-left-to-line"]="rbxassetid://118645136026970",
-["arrow-left"]="rbxassetid://102531941843733",
-["arrow-right-from-line"]="rbxassetid://74073639809355",
-["arrow-right-left"]="rbxassetid://77015754304300",
-["arrow-right-to-line"]="rbxassetid://78632510329852",
-["arrow-right"]="rbxassetid://113692007244654",
-["arrow-up-0-1"]="rbxassetid://105257823943016",
-["arrow-up-1-0"]="rbxassetid://134175521693798",
-["arrow-up-a-z"]="rbxassetid://77763416595160",
-["arrow-up-down"]="rbxassetid://81019887641527",
-["arrow-up-from-dot"]="rbxassetid://124408496673275",
-["arrow-up-from-line"]="rbxassetid://95777664626453",
-["arrow-up-left"]="rbxassetid://123490598231261",
-["arrow-up-narrow-wide"]="rbxassetid://73006024672636",
-["arrow-up-right"]="rbxassetid://129280608535523",
-["arrow-up-to-line"]="rbxassetid://108818207813537",
-["arrow-up-wide-narrow"]="rbxassetid://87437426951568",
-["arrow-up-z-a"]="rbxassetid://107546173611884",
-["arrow-up"]="rbxassetid://89282378235317",
-["arrows-up-from-line"]="rbxassetid://133710016938621",asterisk=
-"rbxassetid://88552752106723",
-["at-sign"]="rbxassetid://79059152889146",atom=
-"rbxassetid://73167696981648",
-["audio-lines"]="rbxassetid://70930641819242",
-["audio-waveform"]="rbxassetid://86462036665209",award=
-"rbxassetid://132740088158419",axe=
-"rbxassetid://132405197863294",
-["axis-3d"]="rbxassetid://122438676546804",baby=
-"rbxassetid://93472926933440",backpack=
-"rbxassetid://140420225386018",
-["badge-alert"]="rbxassetid://101829200081951",
-["badge-cent"]="rbxassetid://133345018873154",
-["badge-check"]="rbxassetid://76078495178149",
-["badge-dollar-sign"]="rbxassetid://127139803581141",
-["badge-euro"]="rbxassetid://120016477674659",
-["badge-indian-rupee"]="rbxassetid://75659682309981",
-["badge-info"]="rbxassetid://131995373201472",
-["badge-japanese-yen"]="rbxassetid://99081574588615",
-["badge-minus"]="rbxassetid://140321561183881",
-["badge-percent"]="rbxassetid://121359224294885",
-["badge-plus"]="rbxassetid://100325578561866",
-["badge-pound-sterling"]="rbxassetid://119688217279444",
-["badge-question-mark"]="rbxassetid://121464963737502",
-["badge-russian-ruble"]="rbxassetid://108839463659864",
-["badge-swiss-franc"]="rbxassetid://91447608372740",
-["badge-turkish-lira"]="rbxassetid://137839965873529",
-["badge-x"]="rbxassetid://122931434733842",badge=
-"rbxassetid://116620312917084",
-["baggage-claim"]="rbxassetid://86922213051957",ban=
-"rbxassetid://90767043015246",banana=
-"rbxassetid://140713420056179",bandage=
-"rbxassetid://129660129590770",
-["banknote-arrow-down"]="rbxassetid://139366449345199",
-["banknote-arrow-up"]="rbxassetid://133758343082529",
-["banknote-x"]="rbxassetid://95348701438065",banknote=
-"rbxassetid://104840231536668",barcode=
-"rbxassetid://118473018143689",barrel=
-"rbxassetid://130647115622774",baseline=
-"rbxassetid://124677132511270",bath=
-"rbxassetid://76031400297942",
-["battery-charging"]="rbxassetid://80139357470047",
-["battery-full"]="rbxassetid://70906718268972",
-["battery-low"]="rbxassetid://139659256984314",
-["battery-medium"]="rbxassetid://105934079398915",
-["battery-plus"]="rbxassetid://91931341486966",
-["battery-warning"]="rbxassetid://115230083817257",battery=
-"rbxassetid://70765800346189",beaker=
-"rbxassetid://80902539995520",
-["bean-off"]="rbxassetid://98164436608714",bean=
-"rbxassetid://89491967076869",
-["bed-double"]="rbxassetid://73820193212911",
-["bed-single"]="rbxassetid://113423940880634",bed=
-"rbxassetid://97726529032925",beef=
-"rbxassetid://105850162318915",
-["beer-off"]="rbxassetid://120333134736361",beer=
-"rbxassetid://116404978807744",
-["bell-dot"]="rbxassetid://93161277118810",
-["bell-electric"]="rbxassetid://100277767266983",
-["bell-minus"]="rbxassetid://126334890449727",
-["bell-off"]="rbxassetid://78560046118930",
-["bell-plus"]="rbxassetid://77014333795836",
-["bell-ring"]="rbxassetid://94612128913941",bell=
-"rbxassetid://97392696311902",
-["between-horizontal-end"]="rbxassetid://81602774794322",
-["between-horizontal-start"]="rbxassetid://76112384929846",
-["between-vertical-end"]="rbxassetid://72817612571631",
-["between-vertical-start"]="rbxassetid://85278312190301",
-["biceps-flexed"]="rbxassetid://82004462003936",bike=
-"rbxassetid://102930322246035",binary=
-"rbxassetid://91751953950088",binoculars=
-"rbxassetid://101460003267896",biohazard=
-"rbxassetid://95956532900432",bird=
-"rbxassetid://132284145117371",birdhouse=
-"rbxassetid://83999157401433",bitcoin=
-"rbxassetid://95459240442938",blend=
-"rbxassetid://111679612185257",blinds=
-"rbxassetid://71164165283925",blocks=
-"rbxassetid://72212693357737",
-["bluetooth-connected"]="rbxassetid://96315134002985",
-["bluetooth-off"]="rbxassetid://80600044218117",
-["bluetooth-searching"]="rbxassetid://100673019606426",bluetooth=
-"rbxassetid://90506573139443",bold=
-"rbxassetid://116141470019166",bolt=
-"rbxassetid://102881251417484",bomb=
-"rbxassetid://139223800924636",bone=
-"rbxassetid://111242153474115",
-["book-a"]="rbxassetid://104067275658465",
-["book-alert"]="rbxassetid://124159928044853",
-["book-audio"]="rbxassetid://109208148317037",
-["book-check"]="rbxassetid://115999656081696",
-["book-copy"]="rbxassetid://108543407492005",
-["book-dashed"]="rbxassetid://127430784795958",
-["book-down"]="rbxassetid://101011730128222",
-["book-headphones"]="rbxassetid://108670200799574",
-["book-heart"]="rbxassetid://112788845135284",
-["book-image"]="rbxassetid://80808285757226",
-["book-key"]="rbxassetid://116024426170705",
-["book-lock"]="rbxassetid://118765061220571",
-["book-marked"]="rbxassetid://73211024251780",
-["book-minus"]="rbxassetid://112724962046282",
-["book-open-check"]="rbxassetid://130848362492667",
-["book-open-text"]="rbxassetid://100629528672195",
-["book-open"]="rbxassetid://129845326810392",
-["book-plus"]="rbxassetid://140267785051233",
-["book-text"]="rbxassetid://94011772484232",
-["book-type"]="rbxassetid://97817304725443",
-["book-up-2"]="rbxassetid://130161620853665",
-["book-up"]="rbxassetid://98640174079190",
-["book-user"]="rbxassetid://128489189240523",
-["book-x"]="rbxassetid://118754548186537",book=
-"rbxassetid://125383279695672",
-["bookmark-check"]="rbxassetid://93940443347986",
-["bookmark-minus"]="rbxassetid://96807096039910",
-["bookmark-plus"]="rbxassetid://121469724491615",
-["bookmark-x"]="rbxassetid://112272342584706",bookmark=
-"rbxassetid://121093149326239",
-["boom-box"]="rbxassetid://99901322535868",
-["bot-message-square"]="rbxassetid://96145330292478",
-["bot-off"]="rbxassetid://140417690560013",bot=
-"rbxassetid://80451686744860",
-["bottle-wine"]="rbxassetid://131675403196921",
-["bow-arrow"]="rbxassetid://124089655150375",box=
-"rbxassetid://101768155599700",boxes=
-"rbxassetid://136372617578355",braces=
-"rbxassetid://117761094704041",brackets=
-"rbxassetid://74368995728099",
-["brain-circuit"]="rbxassetid://70547962410202",
-["brain-cog"]="rbxassetid://132039205501538",brain=
-"rbxassetid://92424107303177",
-["brick-wall-fire"]="rbxassetid://92980588705520",
-["brick-wall-shield"]="rbxassetid://75954432775071",
-["brick-wall"]="rbxassetid://112878522258821",
-["briefcase-business"]="rbxassetid://129135125207283",
-["briefcase-conveyor-belt"]="rbxassetid://108665725653714",
-["briefcase-medical"]="rbxassetid://119917756334087",briefcase=
-"rbxassetid://96754188164225",
-["bring-to-front"]="rbxassetid://132975903553748",
-["brush-cleaning"]="rbxassetid://71728977448805",brush=
-"rbxassetid://127035535799640",bubbles=
-"rbxassetid://106183424168227",
-["bug-off"]="rbxassetid://88020025049245",
-["bug-play"]="rbxassetid://80107955888092",bug=
-"rbxassetid://83626408925438",
-["building-2"]="rbxassetid://77873775611951",building=
-"rbxassetid://110616258983082",
-["bus-front"]="rbxassetid://89863432456045",bus=
-"rbxassetid://133798469717463",
-["cable-car"]="rbxassetid://128643682205596",cable=
-"rbxassetid://128449944504901",
-["cake-slice"]="rbxassetid://136769828413242",cake=
-"rbxassetid://103131590503275",calculator=
-"rbxassetid://74915716529646",
-["calendar-1"]="rbxassetid://98458364171044",
-["calendar-arrow-down"]="rbxassetid://108415736543437",
-["calendar-arrow-up"]="rbxassetid://70574654109118",
-["calendar-check-2"]="rbxassetid://120231170248276",
-["calendar-check"]="rbxassetid://71551019465748",
-["calendar-clock"]="rbxassetid://119132152594595",
-["calendar-cog"]="rbxassetid://122402172360287",
-["calendar-days"]="rbxassetid://99072017568595",
-["calendar-fold"]="rbxassetid://117368871270394",
-["calendar-heart"]="rbxassetid://88839008103676",
-["calendar-minus-2"]="rbxassetid://98846170279891",
-["calendar-minus"]="rbxassetid://137354318924383",
-["calendar-off"]="rbxassetid://109726151749217",
-["calendar-plus-2"]="rbxassetid://112264562093883",
-["calendar-plus"]="rbxassetid://125266115249843",
-["calendar-range"]="rbxassetid://103641849247576",
-["calendar-search"]="rbxassetid://92010083223634",
-["calendar-sync"]="rbxassetid://78082218499697",
-["calendar-x-2"]="rbxassetid://107518051061147",
-["calendar-x"]="rbxassetid://106703374806500",calendar=
-"rbxassetid://114792700814035",
-["camera-off"]="rbxassetid://81057636835256",camera=
-"rbxassetid://79950339943067",
-["candy-cane"]="rbxassetid://71689468772492",
-["candy-off"]="rbxassetid://110232752314832",candy=
-"rbxassetid://107812129154678",cannabis=
-"rbxassetid://98792006538601",
-["captions-off"]="rbxassetid://105223545364193",captions=
-"rbxassetid://104960225031445",
-["car-front"]="rbxassetid://87380942739063",
-["car-taxi-front"]="rbxassetid://122455403384057",car=
-"rbxassetid://121065933462582",caravan=
-"rbxassetid://120070979471783",
-["card-sim"]="rbxassetid://134490550095771",carrot=
-"rbxassetid://119118221444304",
-["case-lower"]="rbxassetid://129303130603241",
-["case-sensitive"]="rbxassetid://125410273293056",
-["case-upper"]="rbxassetid://111633433531325",
-["cassette-tape"]="rbxassetid://137065788934157",cast=
-"rbxassetid://98202245922071",castle=
-"rbxassetid://119275077187784",cat=
-"rbxassetid://124252153404931",cctv=
-"rbxassetid://99979894766624",
-["chart-area"]="rbxassetid://123446436762366",
-["chart-bar-big"]="rbxassetid://72336824986044",
-["chart-bar-decreasing"]="rbxassetid://107217459044963",
-["chart-bar-increasing"]="rbxassetid://88268905998571",
-["chart-bar-stacked"]="rbxassetid://98478751113024",
-["chart-bar"]="rbxassetid://105389816384108",
-["chart-candlestick"]="rbxassetid://125676898615697",
-["chart-column-big"]="rbxassetid://98598733210787",
-["chart-column-decreasing"]="rbxassetid://73586137373563",
-["chart-column-increasing"]="rbxassetid://120421615068601",
-["chart-column-stacked"]="rbxassetid://86031449675105",
-["chart-column"]="rbxassetid://97915995538580",
-["chart-gantt"]="rbxassetid://88811660555940",
-["chart-line"]="rbxassetid://101833156055618",
-["chart-network"]="rbxassetid://104027882693561",
-["chart-no-axes-column-decreasing"]="rbxassetid://123371717192542",
-["chart-no-axes-column-increasing"]="rbxassetid://140383830943049",
-["chart-no-axes-column"]="rbxassetid://94078751170351",
-["chart-no-axes-combined"]="rbxassetid://121424233161912",
-["chart-no-axes-gantt"]="rbxassetid://131936541106368",
-["chart-pie"]="rbxassetid://113412261630136",
-["chart-scatter"]="rbxassetid://108217585014571",
-["chart-spline"]="rbxassetid://90307460742494",
-["check-check"]="rbxassetid://95183312173858",
-["check-line"]="rbxassetid://115122343485290",check=
-"rbxassetid://93898873302694",
-["chef-hat"]="rbxassetid://121744015002573",cherry=
-"rbxassetid://139519182403183",
-["chess-bishop"]="rbxassetid://121701705580238",
-["chess-king"]="rbxassetid://90885687223462",
-["chess-knight"]="rbxassetid://96467707042169",
-["chess-pawn"]="rbxassetid://111318574652751",
-["chess-queen"]="rbxassetid://98304702099749",
-["chess-rook"]="rbxassetid://76223925830262",
-["chevron-down"]="rbxassetid://134243273101015",
-["chevron-first"]="rbxassetid://105243363790238",
-["chevron-last"]="rbxassetid://89268452603731",
-["chevron-left"]="rbxassetid://73780377692148",
-["chevron-right"]="rbxassetid://92473583511724",
-["chevron-up"]="rbxassetid://122444883127455",
-["chevrons-down-up"]="rbxassetid://139404716013205",
-["chevrons-down"]="rbxassetid://100524612205956",
-["chevrons-left-right-ellipsis"]="rbxassetid://125035817741526",
-["chevrons-left-right"]="rbxassetid://87910685945204",
-["chevrons-left"]="rbxassetid://82617201744347",
-["chevrons-right-left"]="rbxassetid://87149546686569",
-["chevrons-right"]="rbxassetid://139121276490483",
-["chevrons-up-down"]="rbxassetid://131833120209646",
-["chevrons-up"]="rbxassetid://100467452364672",chromium=
-"rbxassetid://128165143739006",church=
-"rbxassetid://113714744350666",
-["cigarette-off"]="rbxassetid://77797883078452",
-["circle-alert"]="rbxassetid://83898160590116",
-["circle-arrow-down"]="rbxassetid://95901860261344",
-["circle-arrow-left"]="rbxassetid://102148876968988",
-["circle-arrow-out-down-left"]="rbxassetid://140598097856694",
-["circle-arrow-out-down-right"]="rbxassetid://119952801379305",
-["circle-arrow-out-up-left"]="rbxassetid://132858212688303",
-["circle-arrow-out-up-right"]="rbxassetid://81783743753173",
-["circle-arrow-right"]="rbxassetid://70786767999559",
-["circle-arrow-up"]="rbxassetid://84395128546494",
-["circle-check-big"]="rbxassetid://93202927221730",
-["circle-check"]="rbxassetid://85262178816537",
-["circle-chevron-down"]="rbxassetid://137069490345718",
-["circle-chevron-left"]="rbxassetid://130250009740827",
-["circle-chevron-right"]="rbxassetid://125943696958495",
-["circle-chevron-up"]="rbxassetid://111223574026321",
-["circle-dashed"]="rbxassetid://126799443883746",
-["circle-divide"]="rbxassetid://106398997754208",
-["circle-dollar-sign"]="rbxassetid://91106238890387",
-["circle-dot-dashed"]="rbxassetid://111451232827180",
-["circle-dot"]="rbxassetid://82947033619201",
-["circle-ellipsis"]="rbxassetid://91687150884779",
-["circle-equal"]="rbxassetid://95133963751438",
-["circle-fading-arrow-up"]="rbxassetid://104648212910336",
-["circle-fading-plus"]="rbxassetid://91847890443490",
-["circle-gauge"]="rbxassetid://108157549473765",
-["circle-minus"]="rbxassetid://133556159576809",
-["circle-off"]="rbxassetid://97923456918886",
-["circle-parking-off"]="rbxassetid://128369410981252",
-["circle-parking"]="rbxassetid://124034962915196",
-["circle-pause"]="rbxassetid://139337739700879",
-["circle-percent"]="rbxassetid://133311912860256",
-["circle-play"]="rbxassetid://120408917249739",
-["circle-plus"]="rbxassetid://113157136350384",
-["circle-pound-sterling"]="rbxassetid://105476153083828",
-["circle-power"]="rbxassetid://140676030155098",
-["circle-question-mark"]="rbxassetid://97516698664325",
-["circle-slash-2"]="rbxassetid://136766902186549",
-["circle-slash"]="rbxassetid://125206439913049",
-["circle-small"]="rbxassetid://73685402843600",
-["circle-star"]="rbxassetid://120318414957104",
-["circle-stop"]="rbxassetid://87400503942659",
-["circle-user-round"]="rbxassetid://95489465399880",
-["circle-user"]="rbxassetid://136220511671311",
-["circle-x"]="rbxassetid://76821953846248",circle=
-"rbxassetid://130359823580534",
-["circuit-board"]="rbxassetid://107695264369312",citrus=
-"rbxassetid://139018222976433",clapperboard=
-"rbxassetid://132660667070200",
-["clipboard-check"]="rbxassetid://92649798577170",
-["clipboard-clock"]="rbxassetid://123957515687745",
-["clipboard-copy"]="rbxassetid://125851897718493",
-["clipboard-list"]="rbxassetid://96460215958908",
-["clipboard-minus"]="rbxassetid://107968008485671",
-["clipboard-paste"]="rbxassetid://74382068849983",
-["clipboard-pen-line"]="rbxassetid://77711589791615",
-["clipboard-pen"]="rbxassetid://75290966822953",
-["clipboard-plus"]="rbxassetid://134285318675662",
-["clipboard-type"]="rbxassetid://89949374318028",
-["clipboard-x"]="rbxassetid://102222456890103",clipboard=
-"rbxassetid://89601995828423",
-["clock-1"]="rbxassetid://129363225422045",
-["clock-10"]="rbxassetid://104332695855541",
-["clock-11"]="rbxassetid://119023205186105",
-["clock-12"]="rbxassetid://117789618723068",
-["clock-2"]="rbxassetid://134710777209413",
-["clock-3"]="rbxassetid://136385631189327",
-["clock-4"]="rbxassetid://121808839832144",
-["clock-5"]="rbxassetid://85082019959457",
-["clock-6"]="rbxassetid://71009733505593",
-["clock-7"]="rbxassetid://103111188546225",
-["clock-8"]="rbxassetid://110059272125337",
-["clock-9"]="rbxassetid://77610027126437",
-["clock-alert"]="rbxassetid://97157344465162",
-["clock-arrow-down"]="rbxassetid://92349314416042",
-["clock-arrow-up"]="rbxassetid://111484286332629",
-["clock-check"]="rbxassetid://85231630218857",
-["clock-fading"]="rbxassetid://93205297285245",
-["clock-plus"]="rbxassetid://93367709263150",clock=
-"rbxassetid://121808839832144",
-["closed-caption"]="rbxassetid://99832644030788",
-["cloud-alert"]="rbxassetid://91967273658626",
-["cloud-check"]="rbxassetid://97318598202432",
-["cloud-cog"]="rbxassetid://96497764065749",
-["cloud-download"]="rbxassetid://121435581993566",
-["cloud-drizzle"]="rbxassetid://139525315752605",
-["cloud-fog"]="rbxassetid://76650233148776",
-["cloud-hail"]="rbxassetid://72320462748242",
-["cloud-lightning"]="rbxassetid://133517088924849",
-["cloud-moon-rain"]="rbxassetid://127667837827018",
-["cloud-moon"]="rbxassetid://71938114737914",
-["cloud-off"]="rbxassetid://131907154501444",
-["cloud-rain-wind"]="rbxassetid://107414583736721",
-["cloud-rain"]="rbxassetid://105547081967408",
-["cloud-snow"]="rbxassetid://72307126270226",
-["cloud-sun-rain"]="rbxassetid://99041604425705",
-["cloud-sun"]="rbxassetid://86114208148727",
-["cloud-upload"]="rbxassetid://93307473217005",cloud=
-"rbxassetid://121226497050352",cloudy=
-"rbxassetid://105360479023346",clover=
-"rbxassetid://74925550436750",club=
-"rbxassetid://108490365816628",
-["code-xml"]="rbxassetid://130150477351734",code=
-"rbxassetid://107380207681249",codepen=
-"rbxassetid://135643965971885",codesandbox=
-"rbxassetid://106911852964823",coffee=
-"rbxassetid://106864403231093",cog=
-"rbxassetid://116544501716299",coins=
-"rbxassetid://116510979641930",
-["columns-2"]="rbxassetid://113004100221850",
-["columns-3-cog"]="rbxassetid://121589691981064",
-["columns-3"]="rbxassetid://115223357399375",
-["columns-4"]="rbxassetid://130807991968419",combine=
-"rbxassetid://79908476334048",command=
-"rbxassetid://93648221906330",compass=
-"rbxassetid://115123411028382",component=
-"rbxassetid://110027788875080",computer=
-"rbxassetid://77480056459407",
-["concierge-bell"]="rbxassetid://140384259310436",cone=
-"rbxassetid://97759550688437",construction=
-"rbxassetid://106539489968173",
-["contact-round"]="rbxassetid://71907624112229",contact=
-"rbxassetid://75868297719012",container=
-"rbxassetid://91507237573499",contrast=
-"rbxassetid://112796643981497",cookie=
-"rbxassetid://73159504540002",
-["cooking-pot"]="rbxassetid://94959783129799",
-["copy-check"]="rbxassetid://91177247988892",
-["copy-minus"]="rbxassetid://109524509933035",
-["copy-plus"]="rbxassetid://113618379616952",
-["copy-slash"]="rbxassetid://93805787810390",
-["copy-x"]="rbxassetid://106557557978061",copy=
-"rbxassetid://78979572434545",copyleft=
-"rbxassetid://78559055698593",copyright=
-"rbxassetid://129433635747111",
-["corner-down-left"]="rbxassetid://90473561177832",
-["corner-down-right"]="rbxassetid://86512767702085",
-["corner-left-down"]="rbxassetid://139876989150630",
-["corner-left-up"]="rbxassetid://126228268096099",
-["corner-right-down"]="rbxassetid://89237035551302",
-["corner-right-up"]="rbxassetid://112851237026705",
-["corner-up-left"]="rbxassetid://84669279763024",
-["corner-up-right"]="rbxassetid://115099889693145",cpu=
-"rbxassetid://77549309870247",
-["creative-commons"]="rbxassetid://90408210735312",
-["credit-card"]="rbxassetid://99163352872346",croissant=
-"rbxassetid://130710485559420",crop=
-"rbxassetid://116344601101413",cross=
-"rbxassetid://101833377863588",crosshair=
-"rbxassetid://134242818164054",crown=
-"rbxassetid://127843403295538",cuboid=
-"rbxassetid://75618807946111",
-["cup-soda"]="rbxassetid://121098640829562",currency=
-"rbxassetid://90551250119972",cylinder=
-"rbxassetid://90569677179169",dam=
-"rbxassetid://76874486231393",
-["database-backup"]="rbxassetid://103403210984699",
-["database-zap"]="rbxassetid://131199921258418",database=
-"rbxassetid://126791525623846",
-["decimals-arrow-left"]="rbxassetid://120198500638749",
-["decimals-arrow-right"]="rbxassetid://118263047146797",delete=
-"rbxassetid://126279426372342",dessert=
-"rbxassetid://71508133278830",diameter=
-"rbxassetid://97429051503783",
-["diamond-minus"]="rbxassetid://128989071438290",
-["diamond-percent"]="rbxassetid://107717860105959",
-["diamond-plus"]="rbxassetid://134701163723675",diamond=
-"rbxassetid://105846996304890",
-["dice-1"]="rbxassetid://112650149591038",
-["dice-2"]="rbxassetid://112278274566793",
-["dice-3"]="rbxassetid://118526270626312",
-["dice-4"]="rbxassetid://113365650364004",
-["dice-5"]="rbxassetid://72768312430593",
-["dice-6"]="rbxassetid://85376239182543",dices=
-"rbxassetid://81268120302865",diff=
-"rbxassetid://135052708609715",
-["disc-2"]="rbxassetid://91419420404185",
-["disc-3"]="rbxassetid://135470554736048",
-["disc-album"]="rbxassetid://74693460404344",disc=
-"rbxassetid://101908120120777",divide=
-"rbxassetid://136678191878278",
-["dna-off"]="rbxassetid://89612426361540",dna=
-"rbxassetid://74007982981741",dock=
-"rbxassetid://121997427160252",dog=
-"rbxassetid://71920105558570",
-["dollar-sign"]="rbxassetid://127320961224019",donut=
-"rbxassetid://72204922742657",
-["door-closed-locked"]="rbxassetid://74027613267551",
-["door-closed"]="rbxassetid://136249099949073",
-["door-open"]="rbxassetid://91306356501736",dot=
-"rbxassetid://137321056643916",download=
-"rbxassetid://134814648082393",
-["drafting-compass"]="rbxassetid://99701976182841",drama=
-"rbxassetid://110297795801577",dribbble=
-"rbxassetid://80231809663849",drill=
-"rbxassetid://108644821412796",drone=
-"rbxassetid://117299095794783",
-["droplet-off"]="rbxassetid://119365002225172",droplet=
-"rbxassetid://100597455015098",droplets=
-"rbxassetid://140111846025180",drum=
-"rbxassetid://136979060344890",drumstick=
-"rbxassetid://104662462521709",dumbbell=
-"rbxassetid://80277236776212",
-["ear-off"]="rbxassetid://87421916192807",ear=
-"rbxassetid://121894949934209",
-["earth-lock"]="rbxassetid://88814147073745",earth=
-"rbxassetid://76231597751076",eclipse=
-"rbxassetid://114829622118222",
-["egg-fried"]="rbxassetid://90622538210545",
-["egg-off"]="rbxassetid://92288321309285",egg=
-"rbxassetid://117851493400222",
-["ellipsis-vertical"]="rbxassetid://117978708573781",ellipsis=
-"rbxassetid://140019550645825",
-["equal-approximately"]="rbxassetid://105382689698323",
-["equal-not"]="rbxassetid://76864449458032",equal=
-"rbxassetid://123467780715624",eraser=
-"rbxassetid://133957773112410",
-["ethernet-port"]="rbxassetid://75391715149314",euro=
-"rbxassetid://72229646524456",
-["ev-charger"]="rbxassetid://97906158859623",expand=
-"rbxassetid://137492887754537",
-["external-link"]="rbxassetid://129331830773832",
-["eye-closed"]="rbxassetid://111063268625789",
-["eye-off"]="rbxassetid://135928786788378",eye=
-"rbxassetid://100033680381365",facebook=
-"rbxassetid://72098528632192",factory=
-"rbxassetid://102170024318039",fan=
-"rbxassetid://78391400440696",
-["fast-forward"]="rbxassetid://121615540167909",feather=
-"rbxassetid://91872927606406",fence=
-"rbxassetid://123451565578029",
-["ferris-wheel"]="rbxassetid://79729205796176",figma=
-"rbxassetid://134182122852301",
-["file-archive"]="rbxassetid://77018106869967",
-["file-axis-3d"]="rbxassetid://133912328009885",
-["file-badge"]="rbxassetid://74564895394477",
-["file-box"]="rbxassetid://119264004071690",
-["file-braces-corner"]="rbxassetid://77253337986109",
-["file-braces"]="rbxassetid://95314128621234",
-["file-chart-column-increasing"]="rbxassetid://134449481172067",
-["file-chart-column"]="rbxassetid://82048481252560",
-["file-chart-line"]="rbxassetid://71954360551345",
-["file-chart-pie"]="rbxassetid://81072193564497",
-["file-check-corner"]="rbxassetid://76295552859171",
-["file-check"]="rbxassetid://82604001452455",
-["file-clock"]="rbxassetid://102325208830990",
-["file-code-corner"]="rbxassetid://78293841184371",
-["file-code"]="rbxassetid://130978036895504",
-["file-cog"]="rbxassetid://101385347151368",
-["file-diff"]="rbxassetid://96147216772241",
-["file-digit"]="rbxassetid://89220220354580",
-["file-down"]="rbxassetid://120650154178290",
-["file-exclamation-point"]="rbxassetid://102821865889635",
-["file-headphone"]="rbxassetid://100533735901986",
-["file-heart"]="rbxassetid://132214916401696",
-["file-image"]="rbxassetid://123334057511782",
-["file-input"]="rbxassetid://124728604166044",
-["file-key"]="rbxassetid://118790255921100",
-["file-lock"]="rbxassetid://72170228691242",
-["file-minus-corner"]="rbxassetid://119263271735124",
-["file-minus"]="rbxassetid://111014798459222",
-["file-music"]="rbxassetid://134948051536671",
-["file-output"]="rbxassetid://92146832572911",
-["file-pen-line"]="rbxassetid://104622936345006",
-["file-pen"]="rbxassetid://79556179730240",
-["file-play"]="rbxassetid://89006821567838",
-["file-plus-corner"]="rbxassetid://76544604043974",
-["file-plus"]="rbxassetid://78881710800060",
-["file-question-mark"]="rbxassetid://127617422859576",
-["file-scan"]="rbxassetid://129480105228213",
-["file-search-corner"]="rbxassetid://90974165234008",
-["file-search"]="rbxassetid://97780235974933",
-["file-signal"]="rbxassetid://122070252538165",
-["file-sliders"]="rbxassetid://85787771732439",
-["file-spreadsheet"]="rbxassetid://134501869359270",
-["file-stack"]="rbxassetid://138929929862605",
-["file-symlink"]="rbxassetid://91865722036510",
-["file-terminal"]="rbxassetid://116757454755476",
-["file-text"]="rbxassetid://90496405707281",
-["file-type-corner"]="rbxassetid://124902230275209",
-["file-type"]="rbxassetid://115272552799361",
-["file-up"]="rbxassetid://131173039312748",
-["file-user"]="rbxassetid://99552018455009",
-["file-video-camera"]="rbxassetid://81719056173960",
-["file-volume"]="rbxassetid://111264764438958",
-["file-x-corner"]="rbxassetid://87554136773609",
-["file-x"]="rbxassetid://107333775515154",file=
-"rbxassetid://74748492079329",files=
-"rbxassetid://102806336233202",film=
-"rbxassetid://120978945609706",fingerprint=
-"rbxassetid://112173305232811",
-["fire-extinguisher"]="rbxassetid://111643493006960",
-["fish-off"]="rbxassetid://89756724887508",
-["fish-symbol"]="rbxassetid://118475177681618",fish=
-"rbxassetid://124360663785796",
-["flag-off"]="rbxassetid://112944528856799",
-["flag-triangle-left"]="rbxassetid://88045221285272",
-["flag-triangle-right"]="rbxassetid://108292480304566",flag=
-"rbxassetid://78183383236196",
-["flame-kindling"]="rbxassetid://139728976917928",flame=
-"rbxassetid://98218034436456",
-["flashlight-off"]="rbxassetid://79780362871740",flashlight=
-"rbxassetid://100286985600444",
-["flask-conical-off"]="rbxassetid://112597970025298",
-["flask-conical"]="rbxassetid://128406680901165",
-["flask-round"]="rbxassetid://127508287324940",
-["flip-horizontal-2"]="rbxassetid://103726993598186",
-["flip-horizontal"]="rbxassetid://122937530107837",
-["flip-vertical-2"]="rbxassetid://103836358956328",
-["flip-vertical"]="rbxassetid://108003917346888",
-["flower-2"]="rbxassetid://72934574245145",flower=
-"rbxassetid://86129438272762",focus=
-"rbxassetid://87493973153317",
-["fold-horizontal"]="rbxassetid://92835712442240",
-["fold-vertical"]="rbxassetid://108873727253656",
-["folder-archive"]="rbxassetid://97312009460206",
-["folder-check"]="rbxassetid://128492920904557",
-["folder-clock"]="rbxassetid://111964836738545",
-["folder-closed"]="rbxassetid://118286209350843",
-["folder-code"]="rbxassetid://70624096349370",
-["folder-cog"]="rbxassetid://85299519462846",
-["folder-dot"]="rbxassetid://138687772725278",
-["folder-down"]="rbxassetid://118044108459225",
-["folder-git-2"]="rbxassetid://101394054141166",
-["folder-git"]="rbxassetid://121885778095158",
-["folder-heart"]="rbxassetid://79104747211105",
-["folder-input"]="rbxassetid://90699920697871",
-["folder-kanban"]="rbxassetid://78313285104072",
-["folder-key"]="rbxassetid://85270407596791",
-["folder-lock"]="rbxassetid://119201572260567",
-["folder-minus"]="rbxassetid://85648718999010",
-["folder-open-dot"]="rbxassetid://74741494767354",
-["folder-open"]="rbxassetid://76018996254888",
-["folder-output"]="rbxassetid://101532447937612",
-["folder-pen"]="rbxassetid://112770491173911",
-["folder-plus"]="rbxassetid://91865663406119",
-["folder-root"]="rbxassetid://103333751154693",
-["folder-search-2"]="rbxassetid://71276453442655",
-["folder-search"]="rbxassetid://110568075123861",
-["folder-symlink"]="rbxassetid://127485747227189",
-["folder-sync"]="rbxassetid://91544602659796",
-["folder-tree"]="rbxassetid://85577554337861",
-["folder-up"]="rbxassetid://72008269765857",
-["folder-x"]="rbxassetid://91699618247635",folder=
-"rbxassetid://80846616596607",folders=
-"rbxassetid://110351216219061",footprints=
-"rbxassetid://139192589041315",forklift=
-"rbxassetid://72030930983101",forward=
-"rbxassetid://97545944739523",frame=
-"rbxassetid://109080612832751",framer=
-"rbxassetid://108384807262391",frown=
-"rbxassetid://124407301067982",fuel=
-"rbxassetid://106447647274511",fullscreen=
-"rbxassetid://77793665526178",
-["funnel-plus"]="rbxassetid://100780233821928",
-["funnel-x"]="rbxassetid://70984385812555",funnel=
-"rbxassetid://108829540827529",
-["gallery-horizontal-end"]="rbxassetid://74672430161161",
-["gallery-horizontal"]="rbxassetid://80004001442122",
-["gallery-thumbnails"]="rbxassetid://136219289862706",
-["gallery-vertical-end"]="rbxassetid://106461402088317",
-["gallery-vertical"]="rbxassetid://119299431466725",
-["gamepad-2"]="rbxassetid://92483947987410",
-["gamepad-directional"]="rbxassetid://84342305212226",gamepad=
-"rbxassetid://121607283959010",gauge=
-"rbxassetid://110273524101447",gavel=
-"rbxassetid://78952298198456",gem=
-"rbxassetid://112904952151156",
-["georgian-lari"]="rbxassetid://98084432591687",ghost=
-"rbxassetid://113822048130017",gift=
-"rbxassetid://109855212076373",
-["git-branch-minus"]="rbxassetid://97385010649411",
-["git-branch-plus"]="rbxassetid://125944221134316",
-["git-branch"]="rbxassetid://90490195516649",
-["git-commit-horizontal"]="rbxassetid://133646041800147",
-["git-commit-vertical"]="rbxassetid://122098032990350",
-["git-compare-arrows"]="rbxassetid://84874426520216",
-["git-compare"]="rbxassetid://91945124438792",
-["git-fork"]="rbxassetid://89954992404765",
-["git-graph"]="rbxassetid://86166832019304",
-["git-merge"]="rbxassetid://131833355158059",
-["git-pull-request-arrow"]="rbxassetid://94507974577439",
-["git-pull-request-closed"]="rbxassetid://78070600389091",
-["git-pull-request-create-arrow"]="rbxassetid://127422677061091",
-["git-pull-request-create"]="rbxassetid://105929577383926",
-["git-pull-request-draft"]="rbxassetid://76173459869943",
-["git-pull-request"]="rbxassetid://138463010991471",github=
-"rbxassetid://120349554354380",gitlab=
-"rbxassetid://114054627192933",
-["glass-water"]="rbxassetid://115526102400988",glasses=
-"rbxassetid://87936407455373",
-["globe-lock"]="rbxassetid://134065526704402",globe=
-"rbxassetid://114238209622913",goal=
-"rbxassetid://120517954878160",gpu=
-"rbxassetid://95577823614219",
-["graduation-cap"]="rbxassetid://93771896340220",grape=
-"rbxassetid://134760640415561",
-["grid-2x2-check"]="rbxassetid://138468840220821",
-["grid-2x2-plus"]="rbxassetid://91811610580247",
-["grid-2x2-x"]="rbxassetid://72407303981388",
-["grid-2x2"]="rbxassetid://99050491897640",
-["grid-3x2"]="rbxassetid://95528684210010",
-["grid-3x3"]="rbxassetid://70419024781206",
-["grip-horizontal"]="rbxassetid://136255899715930",
-["grip-vertical"]="rbxassetid://137183678565296",grip=
-"rbxassetid://109058783556768",group=
-"rbxassetid://107643418926671",guitar=
-"rbxassetid://75915531867926",ham=
-"rbxassetid://74465607934635",hamburger=
-"rbxassetid://93086916815495",hammer=
-"rbxassetid://83545120140895",
-["hand-coins"]="rbxassetid://126990543175462",
-["hand-fist"]="rbxassetid://83341608917591",
-["hand-grab"]="rbxassetid://88867162163985",
-["hand-heart"]="rbxassetid://117507367668412",
-["hand-helping"]="rbxassetid://89897738419446",
-["hand-metal"]="rbxassetid://113619498548713",
-["hand-platter"]="rbxassetid://88594727743168",hand=
-"rbxassetid://130703864968637",handbag=
-"rbxassetid://135675846264061",handshake=
-"rbxassetid://78442115255814",
-["hard-drive-download"]="rbxassetid://73913801230614",
-["hard-drive-upload"]="rbxassetid://85762133615118",
-["hard-drive"]="rbxassetid://88183305858463",
-["hard-hat"]="rbxassetid://128050846767382",hash=
-"rbxassetid://82890331678520",
-["hat-glasses"]="rbxassetid://101165538224815",haze=
-"rbxassetid://108857561768901",
-["hdmi-port"]="rbxassetid://103693661037020",
-["heading-1"]="rbxassetid://118129315662110",
-["heading-2"]="rbxassetid://110209069670094",
-["heading-3"]="rbxassetid://90267885237062",
-["heading-4"]="rbxassetid://129625620307602",
-["heading-5"]="rbxassetid://120386663181267",
-["heading-6"]="rbxassetid://90959079775093",heading=
-"rbxassetid://129254312067735",
-["headphone-off"]="rbxassetid://85038251615641",headphones=
-"rbxassetid://118833729589183",headset=
-"rbxassetid://129269236787694",
-["heart-crack"]="rbxassetid://110987638564119",
-["heart-handshake"]="rbxassetid://111483078692002",
-["heart-minus"]="rbxassetid://96827380163326",
-["heart-off"]="rbxassetid://89748414415617",
-["heart-plus"]="rbxassetid://94877796283249",
-["heart-pulse"]="rbxassetid://129352925579546",heart=
-"rbxassetid://116559368303288",heater=
-"rbxassetid://140478466880916",helicopter=
-"rbxassetid://111557171735930",hexagon=
-"rbxassetid://127592089339199",highlighter=
-"rbxassetid://77411555641113",history=
-"rbxassetid://123980022019922",
-["hop-off"]="rbxassetid://103386036934034",hop=
-"rbxassetid://82778923997672",hospital=
-"rbxassetid://105868763850707",hotel=
-"rbxassetid://132283390859718",hourglass=
-"rbxassetid://86160434939203",
-["house-heart"]="rbxassetid://136054771868597",
-["house-plug"]="rbxassetid://71438263712075",
-["house-plus"]="rbxassetid://118495165208309",
-["house-wifi"]="rbxassetid://126495519725698",house=
-"rbxassetid://98755624629571",
-["ice-cream-bowl"]="rbxassetid://124867218454386",
-["ice-cream-cone"]="rbxassetid://90751397288639",
-["id-card-lanyard"]="rbxassetid://90761480469224",
-["id-card"]="rbxassetid://75354294622640",
-["image-down"]="rbxassetid://78972295741235",
-["image-minus"]="rbxassetid://101066016918565",
-["image-off"]="rbxassetid://81934811700938",
-["image-play"]="rbxassetid://129501806784210",
-["image-plus"]="rbxassetid://70391970623917",
-["image-up"]="rbxassetid://126610009605241",
-["image-upscale"]="rbxassetid://106963545024679",images=
-"rbxassetid://79350649395557",import=
-"rbxassetid://116545008906029",inbox=
-"rbxassetid://112591360302868",
-["indian-rupee"]="rbxassetid://113038778381805",infinity=
-"rbxassetid://98083086936965",info=
-"rbxassetid://124560466474914",
-["inspection-panel"]="rbxassetid://70905313146088",instagram=
-"rbxassetid://119864798614855",italic=
-"rbxassetid://96220378864282",
-["iteration-ccw"]="rbxassetid://140221832794083",
-["iteration-cw"]="rbxassetid://95534489554662",
-["japanese-yen"]="rbxassetid://106362863465813",joystick=
-"rbxassetid://99416790224739",kanban=
-"rbxassetid://125934100055431",kayak=
-"rbxassetid://136107544609389",
-["key-round"]="rbxassetid://83619031955390",
-["key-square"]="rbxassetid://94621420033649",key=
-"rbxassetid://96510194465420",
-["keyboard-music"]="rbxassetid://121058541758636",
-["keyboard-off"]="rbxassetid://92466375369772",keyboard=
-"rbxassetid://121474456068237",
-["lamp-ceiling"]="rbxassetid://80032758469141",
-["lamp-desk"]="rbxassetid://85290686983238",
-["lamp-floor"]="rbxassetid://104585881375892",
-["lamp-wall-down"]="rbxassetid://91271394132073",
-["lamp-wall-up"]="rbxassetid://132141464337445",lamp=
-"rbxassetid://110730830653382",
-["land-plot"]="rbxassetid://96449039620294",landmark=
-"rbxassetid://76885079756393",languages=
-"rbxassetid://90816903776498",
-["laptop-minimal-check"]="rbxassetid://114352019833865",
-["laptop-minimal"]="rbxassetid://136705765566068",laptop=
-"rbxassetid://111387063244975",
-["lasso-select"]="rbxassetid://105609719912753",lasso=
-"rbxassetid://121072936884007",laugh=
-"rbxassetid://104491311361166",
-["layers-2"]="rbxassetid://70536710516357",layers=
-"rbxassetid://81973586053257",
-["layout-dashboard"]="rbxassetid://139929981863901",
-["layout-grid"]="rbxassetid://81344910161871",
-["layout-list"]="rbxassetid://87462136296578",
-["layout-panel-left"]="rbxassetid://125092469751491",
-["layout-panel-top"]="rbxassetid://91943941515944",
-["layout-template"]="rbxassetid://115564446417985",leaf=
-"rbxassetid://119951075637174",
-["leafy-green"]="rbxassetid://105146290493154",lectern=
-"rbxassetid://106166425183862",
-["library-big"]="rbxassetid://106794530191412",library=
-"rbxassetid://114334671982047",
-["life-buoy"]="rbxassetid://81168450671956",ligature=
-"rbxassetid://111397873269411",
-["lightbulb-off"]="rbxassetid://83795722296178",lightbulb=
-"rbxassetid://103871245626488",
-["line-squiggle"]="rbxassetid://109555164424447",
-["link-2-off"]="rbxassetid://76885956296867",
-["link-2"]="rbxassetid://86072351557466",link=
-"rbxassetid://131607023382430",linkedin=
-"rbxassetid://132842789255788",
-["list-check"]="rbxassetid://72374358471156",
-["list-checks"]="rbxassetid://99809353635593",
-["list-chevrons-down-up"]="rbxassetid://137409641500711",
-["list-chevrons-up-down"]="rbxassetid://81825351389084",
-["list-collapse"]="rbxassetid://124505247702401",
-["list-end"]="rbxassetid://77650610048119",
-["list-filter-plus"]="rbxassetid://96385120752336",
-["list-filter"]="rbxassetid://103321376129527",
-["list-indent-decrease"]="rbxassetid://137879979228193",
-["list-indent-increase"]="rbxassetid://79051053161201",
-["list-minus"]="rbxassetid://138507965142671",
-["list-music"]="rbxassetid://126380635781840",
-["list-ordered"]="rbxassetid://83212528113913",
-["list-plus"]="rbxassetid://112384738137814",
-["list-restart"]="rbxassetid://91703153577421",
-["list-start"]="rbxassetid://84828348299727",
-["list-todo"]="rbxassetid://132980603752108",
-["list-tree"]="rbxassetid://97685396239010",
-["list-video"]="rbxassetid://93648525452489",
-["list-x"]="rbxassetid://113025303988861",list=
-"rbxassetid://113179976918783",
-["loader-circle"]="rbxassetid://116535712789945",
-["loader-pinwheel"]="rbxassetid://108513357940900",loader=
-"rbxassetid://78408734580845",
-["locate-fixed"]="rbxassetid://137367361548433",
-["locate-off"]="rbxassetid://73729216338137",locate=
-"rbxassetid://84467676590391",
-["lock-keyhole-open"]="rbxassetid://110863509313073",
-["lock-keyhole"]="rbxassetid://78672912777756",
-["lock-open"]="rbxassetid://93597915325122",lock=
-"rbxassetid://134724289526879",
-["log-in"]="rbxassetid://103768533135201",
-["log-out"]="rbxassetid://84895399304975",logs=
-"rbxassetid://89772091251787",lollipop=
-"rbxassetid://84681611583044",luggage=
-"rbxassetid://76619236486400",magnet=
-"rbxassetid://135162361226972",
-["mail-check"]="rbxassetid://86921536259917",
-["mail-minus"]="rbxassetid://81989813236553",
-["mail-open"]="rbxassetid://122785416858638",
-["mail-plus"]="rbxassetid://104886401588341",
-["mail-question-mark"]="rbxassetid://126540170949819",
-["mail-search"]="rbxassetid://135616173775287",
-["mail-warning"]="rbxassetid://81495303676089",
-["mail-x"]="rbxassetid://74607841705644",mail=
-"rbxassetid://103945161245599",mailbox=
-"rbxassetid://82765503320335",mails=
-"rbxassetid://90673453450080",
-["map-minus"]="rbxassetid://129525760577747",
-["map-pin-check-inside"]="rbxassetid://107130529843809",
-["map-pin-check"]="rbxassetid://118110914690154",
-["map-pin-house"]="rbxassetid://80546885029816",
-["map-pin-minus-inside"]="rbxassetid://79005529692964",
-["map-pin-minus"]="rbxassetid://74518762643623",
-["map-pin-off"]="rbxassetid://82474689391020",
-["map-pin-pen"]="rbxassetid://113515395277504",
-["map-pin-plus-inside"]="rbxassetid://134639656514430",
-["map-pin-plus"]="rbxassetid://91875228967029",
-["map-pin-x-inside"]="rbxassetid://126235934252379",
-["map-pin-x"]="rbxassetid://101085273547316",
-["map-pin"]="rbxassetid://84279202219901",
-["map-pinned"]="rbxassetid://103963788475034",
-["map-plus"]="rbxassetid://129388826743495",map=
-"rbxassetid://95107167260947",
-["mars-stroke"]="rbxassetid://131973193186828",mars=
-"rbxassetid://111287112372511",martini=
-"rbxassetid://82977695401058",
-["maximize-2"]="rbxassetid://73085922906397",maximize=
-"rbxassetid://76045941763188",medal=
-"rbxassetid://79016002264450",
-["megaphone-off"]="rbxassetid://124280774193935",megaphone=
-"rbxassetid://118759541854879",meh=
-"rbxassetid://132197867028557",
-["memory-stick"]="rbxassetid://93212591343119",menu=
-"rbxassetid://77021539815611",merge=
-"rbxassetid://126201866476775",
-["message-circle-code"]="rbxassetid://112865244991651",
-["message-circle-dashed"]="rbxassetid://81525157881897",
-["message-circle-heart"]="rbxassetid://101990756073677",
-["message-circle-more"]="rbxassetid://92856823884663",
-["message-circle-off"]="rbxassetid://134955643890328",
-["message-circle-plus"]="rbxassetid://106562979649273",
-["message-circle-question-mark"]="rbxassetid://107700302759934",
-["message-circle-reply"]="rbxassetid://137071749508334",
-["message-circle-warning"]="rbxassetid://119020096067894",
-["message-circle-x"]="rbxassetid://126843387725536",
-["message-circle"]="rbxassetid://127255077587058",
-["message-square-code"]="rbxassetid://110968863152123",
-["message-square-dashed"]="rbxassetid://107653455516238",
-["message-square-diff"]="rbxassetid://75472190472625",
-["message-square-dot"]="rbxassetid://127806382463916",
-["message-square-heart"]="rbxassetid://75612811742074",
-["message-square-lock"]="rbxassetid://81268215619563",
-["message-square-more"]="rbxassetid://120139782405970",
-["message-square-off"]="rbxassetid://99961019005789",
-["message-square-plus"]="rbxassetid://76934450256199",
-["message-square-quote"]="rbxassetid://116670768629340",
-["message-square-reply"]="rbxassetid://130985622754637",
-["message-square-share"]="rbxassetid://131017005324026",
-["message-square-text"]="rbxassetid://94899503194205",
-["message-square-warning"]="rbxassetid://138432903962261",
-["message-square-x"]="rbxassetid://137285463279462",
-["message-square"]="rbxassetid://83881670383280",
-["messages-square"]="rbxassetid://97532166733358",
-["mic-off"]="rbxassetid://82123034444822",
-["mic-vocal"]="rbxassetid://99082286164362",mic=
-"rbxassetid://89640799126523",microchip=
-"rbxassetid://73937907669903",microscope=
-"rbxassetid://116875530102782",microwave=
-"rbxassetid://108411735353008",milestone=
-"rbxassetid://101618292325920",
-["milk-off"]="rbxassetid://72388480962742",milk=
-"rbxassetid://96221903896918",
-["minimize-2"]="rbxassetid://116269596042539",minimize=
-"rbxassetid://121304296213645",minus=
-"rbxassetid://118026365011536",
-["monitor-check"]="rbxassetid://86651948439229",
-["monitor-cloud"]="rbxassetid://85931096038318",
-["monitor-cog"]="rbxassetid://94345128715799",
-["monitor-dot"]="rbxassetid://130394010063680",
-["monitor-down"]="rbxassetid://97466933743423",
-["monitor-off"]="rbxassetid://74395526657953",
-["monitor-pause"]="rbxassetid://76002184067562",
-["monitor-play"]="rbxassetid://133018824306217",
-["monitor-smartphone"]="rbxassetid://84335680433378",
-["monitor-speaker"]="rbxassetid://81744810060380",
-["monitor-stop"]="rbxassetid://98708958984757",
-["monitor-up"]="rbxassetid://96035360858377",
-["monitor-x"]="rbxassetid://126265210441423",monitor=
-"rbxassetid://72664649203050",
-["moon-star"]="rbxassetid://82782200506348",moon=
-"rbxassetid://83380517901735",motorbike=
-"rbxassetid://94580787368233",
-["mountain-snow"]="rbxassetid://105315495740588",mountain=
-"rbxassetid://73269957566415",
-["mouse-off"]="rbxassetid://75267871697595",
-["mouse-pointer-2-off"]="rbxassetid://104701076865632",
-["mouse-pointer-2"]="rbxassetid://117093892862228",
-["mouse-pointer-ban"]="rbxassetid://106849413057133",
-["mouse-pointer-click"]="rbxassetid://107150227368485",
-["mouse-pointer"]="rbxassetid://72322454962935",mouse=
-"rbxassetid://73096068864710",
-["move-3d"]="rbxassetid://103365982054003",
-["move-diagonal-2"]="rbxassetid://117298577948096",
-["move-diagonal"]="rbxassetid://101433481954184",
-["move-down-left"]="rbxassetid://102819433534567",
-["move-down-right"]="rbxassetid://101479760041877",
-["move-down"]="rbxassetid://70510115135583",
-["move-horizontal"]="rbxassetid://88513523439149",
-["move-left"]="rbxassetid://137614740247980",
-["move-right"]="rbxassetid://132455779472989",
-["move-up-left"]="rbxassetid://139079815540148",
-["move-up-right"]="rbxassetid://105885140592646",
-["move-up"]="rbxassetid://84505444262658",
-["move-vertical"]="rbxassetid://86234730730899",move=
-"rbxassetid://116138709011735",
-["music-2"]="rbxassetid://134397426600888",
-["music-3"]="rbxassetid://94466120066498",
-["music-4"]="rbxassetid://132459323665838",music=
-"rbxassetid://113343203848535",
-["navigation-2-off"]="rbxassetid://116569611780763",
-["navigation-2"]="rbxassetid://81889066747907",
-["navigation-off"]="rbxassetid://87003270290777",navigation=
-"rbxassetid://79308213542922",network=
-"rbxassetid://127410729922644",newspaper=
-"rbxassetid://123479530460544",nfc=
-"rbxassetid://76822396542242",
-["non-binary"]="rbxassetid://78442360386235",
-["notebook-pen"]="rbxassetid://140380614761023",
-["notebook-tabs"]="rbxassetid://127371085570083",
-["notebook-text"]="rbxassetid://93061585217270",notebook=
-"rbxassetid://136132108664987",
-["notepad-text-dashed"]="rbxassetid://135793446376219",
-["notepad-text"]="rbxassetid://93404682958966",
-["nut-off"]="rbxassetid://78795397311573",nut=
-"rbxassetid://127146410705656",
-["octagon-alert"]="rbxassetid://140438367956051",
-["octagon-minus"]="rbxassetid://74720436795421",
-["octagon-pause"]="rbxassetid://103161463909039",
-["octagon-x"]="rbxassetid://90498161006311",octagon=
-"rbxassetid://120803515514852",omega=
-"rbxassetid://70414080018786",option=
-"rbxassetid://100776883894054",orbit=
-"rbxassetid://108926136860562",origami=
-"rbxassetid://136020626667101",
-["package-2"]="rbxassetid://70394974762575",
-["package-check"]="rbxassetid://102374216055130",
-["package-minus"]="rbxassetid://114492858789692",
-["package-open"]="rbxassetid://132890233237818",
-["package-plus"]="rbxassetid://129261988138366",
-["package-search"]="rbxassetid://95465120894145",
-["package-x"]="rbxassetid://70818501607442",package=
-"rbxassetid://97261141732706",
-["paint-bucket"]="rbxassetid://124275586663284",
-["paint-roller"]="rbxassetid://115248074358348",
-["paintbrush-vertical"]="rbxassetid://105151296591292",paintbrush=
-"rbxassetid://125572663700289",palette=
-"rbxassetid://86350350950064",panda=
-"rbxassetid://132509022802512",
-["panel-bottom-close"]="rbxassetid://74287004071159",
-["panel-bottom-dashed"]="rbxassetid://131084651621603",
-["panel-bottom-open"]="rbxassetid://107768659586540",
-["panel-bottom"]="rbxassetid://132127145048511",
-["panel-left-close"]="rbxassetid://126579818823552",
-["panel-left-dashed"]="rbxassetid://75536606374585",
-["panel-left-open"]="rbxassetid://111075816195767",
-["panel-left-right-dashed"]="rbxassetid://110100707973959",
-["panel-left"]="rbxassetid://97419752870313",
-["panel-right-close"]="rbxassetid://139528655524132",
-["panel-right-dashed"]="rbxassetid://94959793877311",
-["panel-right-open"]="rbxassetid://118114419142794",
-["panel-right"]="rbxassetid://116365035443156",
-["panel-top-bottom-dashed"]="rbxassetid://134737235653344",
-["panel-top-close"]="rbxassetid://83578325777808",
-["panel-top-dashed"]="rbxassetid://70522913169237",
-["panel-top-open"]="rbxassetid://137959875507454",
-["panel-top"]="rbxassetid://75838479462875",
-["panels-left-bottom"]="rbxassetid://72996856149149",
-["panels-right-bottom"]="rbxassetid://90659068960726",
-["panels-top-left"]="rbxassetid://79858853850600",paperclip=
-"rbxassetid://92088291163453",parentheses=
-"rbxassetid://78950955173096",
-["parking-meter"]="rbxassetid://84652733960568",
-["party-popper"]="rbxassetid://111626795712193",pause=
-"rbxassetid://74873705394436",
-["paw-print"]="rbxassetid://112218825427601",
-["pc-case"]="rbxassetid://122978648019101",
-["pen-line"]="rbxassetid://109108135755303",
-["pen-off"]="rbxassetid://84807123119438",
-["pen-tool"]="rbxassetid://106145404953445",pen=
-"rbxassetid://72037878096321",
-["pencil-line"]="rbxassetid://88392917053533",
-["pencil-off"]="rbxassetid://103330927652832",
-["pencil-ruler"]="rbxassetid://110120288284597",pencil=
-"rbxassetid://137986121120732",pentagon=
-"rbxassetid://79184802179890",percent=
-"rbxassetid://130155041032013",
-["person-standing"]="rbxassetid://125020872044147",
-["philippine-peso"]="rbxassetid://91173798254675",
-["phone-call"]="rbxassetid://70555587592860",
-["phone-forwarded"]="rbxassetid://113269614319737",
-["phone-incoming"]="rbxassetid://82863576359288",
-["phone-missed"]="rbxassetid://130156165198376",
-["phone-off"]="rbxassetid://133318623553383",
-["phone-outgoing"]="rbxassetid://104576478735825",phone=
-"rbxassetid://128804946640049",pi=
-"rbxassetid://74936036243146",piano=
-"rbxassetid://85008880789520",pickaxe=
-"rbxassetid://105888023317688",
-["picture-in-picture-2"]="rbxassetid://112803319544468",
-["picture-in-picture"]="rbxassetid://80579597835123",
-["piggy-bank"]="rbxassetid://79498575790721",
-["pilcrow-left"]="rbxassetid://103803000849583",
-["pilcrow-right"]="rbxassetid://104881733911870",pilcrow=
-"rbxassetid://139512780392871",
-["pill-bottle"]="rbxassetid://118394692404597",pill=
-"rbxassetid://73280534813448",
-["pin-off"]="rbxassetid://127696372451750",pin=
-"rbxassetid://120978111007514",pipette=
-"rbxassetid://133167932934404",pizza=
-"rbxassetid://126964453193501",
-["plane-landing"]="rbxassetid://122555692211889",
-["plane-takeoff"]="rbxassetid://117179478829575",plane=
-"rbxassetid://126985561580989",play=
-"rbxassetid://135609604299893",
-["plug-2"]="rbxassetid://97912386476366",
-["plug-zap"]="rbxassetid://74506269884055",plug=
-"rbxassetid://99782373064495",plus=
-"rbxassetid://111774323017047",
-["pocket-knife"]="rbxassetid://134075428063965",pocket=
-"rbxassetid://136686762542964",podcast=
-"rbxassetid://109577075549215",
-["pointer-off"]="rbxassetid://95488389312794",pointer=
-"rbxassetid://92615117311099",popcorn=
-"rbxassetid://139446511232750",popsicle=
-"rbxassetid://112696318077073",
-["pound-sterling"]="rbxassetid://127482649469130",
-["power-off"]="rbxassetid://118768311012214",power=
-"rbxassetid://96479131758775",presentation=
-"rbxassetid://106134583757890",
-["printer-check"]="rbxassetid://130273549443689",printer=
-"rbxassetid://76080649734247",projector=
-"rbxassetid://103281856385283",proportions=
-"rbxassetid://130046855997237",puzzle=
-"rbxassetid://136837798892463",pyramid=
-"rbxassetid://107811442374127",
-["qr-code"]="rbxassetid://105329945723350",quote=
-"rbxassetid://103271711590001",rabbit=
-"rbxassetid://98580518804206",radar=
-"rbxassetid://138528222906635",radiation=
-"rbxassetid://104499586848433",radical=
-"rbxassetid://132758286926047",
-["radio-receiver"]="rbxassetid://129598303378835",
-["radio-tower"]="rbxassetid://93958663130054",radio=
-"rbxassetid://85611589536956",radius=
-"rbxassetid://89814505307129",
-["rail-symbol"]="rbxassetid://134295386306962",rainbow=
-"rbxassetid://132488862841895",rat=
-"rbxassetid://127400975953159",ratio=
-"rbxassetid://126369423897295",
-["receipt-cent"]="rbxassetid://91557573925201",
-["receipt-euro"]="rbxassetid://94015722210295",
-["receipt-indian-rupee"]="rbxassetid://89718170439990",
-["receipt-japanese-yen"]="rbxassetid://132472560758851",
-["receipt-pound-sterling"]="rbxassetid://73934967569625",
-["receipt-russian-ruble"]="rbxassetid://105164576936853",
-["receipt-swiss-franc"]="rbxassetid://72503668620116",
-["receipt-text"]="rbxassetid://138483536013737",
-["receipt-turkish-lira"]="rbxassetid://91950765836342",receipt=
-"rbxassetid://77877895901792",
-["rectangle-circle"]="rbxassetid://100642423153903",
-["rectangle-ellipsis"]="rbxassetid://112919953980965",
-["rectangle-goggles"]="rbxassetid://98605436666727",
-["rectangle-horizontal"]="rbxassetid://90224199814966",
-["rectangle-vertical"]="rbxassetid://117277050590967",recycle=
-"rbxassetid://140417023381961",
-["redo-2"]="rbxassetid://70451039017914",
-["redo-dot"]="rbxassetid://94252981719732",redo=
-"rbxassetid://116150342119054",
-["refresh-ccw-dot"]="rbxassetid://106702246753270",
-["refresh-ccw"]="rbxassetid://117913330389477",
-["refresh-cw-off"]="rbxassetid://140179498843054",
-["refresh-cw"]="rbxassetid://138133190015277",refrigerator=
-"rbxassetid://102614042652753",regex=
-"rbxassetid://100727200791841",
-["remove-formatting"]="rbxassetid://112833162022628",
-["repeat-1"]="rbxassetid://130144534857095",
-["repeat-2"]="rbxassetid://85927537182704",
-["repeat"]="rbxassetid://121886242955173",
-["replace-all"]="rbxassetid://127862728198635",replace=
-"rbxassetid://128404082279430",
-["reply-all"]="rbxassetid://71723137343562",reply=
-"rbxassetid://109788633497028",rewind=
-"rbxassetid://95205297521988",ribbon=
-"rbxassetid://94265331526851",rocket=
-"rbxassetid://87412317685854",
-["rocking-chair"]="rbxassetid://110420269495360",
-["roller-coaster"]="rbxassetid://112426178972099",rose=
-"rbxassetid://126336840238769",
-["rotate-3d"]="rbxassetid://76300551576392",
-["rotate-ccw-key"]="rbxassetid://74976035240976",
-["rotate-ccw-square"]="rbxassetid://90515853170424",
-["rotate-ccw"]="rbxassetid://110116685948665",
-["rotate-cw-square"]="rbxassetid://77095448159303",
-["rotate-cw"]="rbxassetid://84183336178654",
-["route-off"]="rbxassetid://106350402024079",route=
-"rbxassetid://89968303228953",router=
-"rbxassetid://102130331994471",
-["rows-2"]="rbxassetid://112556185960101",
-["rows-3"]="rbxassetid://117215586961375",
-["rows-4"]="rbxassetid://125646021959055",rss=
-"rbxassetid://131789058984793",
-["ruler-dimension-line"]="rbxassetid://70673861371412",ruler=
-"rbxassetid://81432445547423",
-["russian-ruble"]="rbxassetid://126357936542156",sailboat=
-"rbxassetid://87110567187540",salad=
-"rbxassetid://128864507821603",sandwich=
-"rbxassetid://104573187458917",
-["satellite-dish"]="rbxassetid://136742443888305",satellite=
-"rbxassetid://134967053164645",
-["saudi-riyal"]="rbxassetid://102282769104635",
-["save-all"]="rbxassetid://116946975799440",
-["save-off"]="rbxassetid://87085435778560",save=
-"rbxassetid://126116963775616",
-["scale-3d"]="rbxassetid://72414199620352",scale=
-"rbxassetid://108203682317477",scaling=
-"rbxassetid://122360365318466",
-["scan-barcode"]="rbxassetid://96889457154761",
-["scan-eye"]="rbxassetid://99244790601968",
-["scan-face"]="rbxassetid://109959345069668",
-["scan-heart"]="rbxassetid://106280819776142",
-["scan-line"]="rbxassetid://126544908146540",
-["scan-qr-code"]="rbxassetid://105409149549927",
-["scan-search"]="rbxassetid://80009010551347",
-["scan-text"]="rbxassetid://73702396787766",scan=
-"rbxassetid://123104789658180",school=
-"rbxassetid://76351530290068",
-["scissors-line-dashed"]="rbxassetid://122237447974173",scissors=
-"rbxassetid://118665510911274",
-["screen-share-off"]="rbxassetid://107677572669805",
-["screen-share"]="rbxassetid://85137895705653",
-["scroll-text"]="rbxassetid://97321022666868",scroll=
-"rbxassetid://74072101474951",
-["search-check"]="rbxassetid://75442076191356",
-["search-code"]="rbxassetid://117114794592802",
-["search-slash"]="rbxassetid://96483932261041",
-["search-x"]="rbxassetid://137319957522951",search=
-"rbxassetid://121018724060431",section=
-"rbxassetid://91732188298948",
-["send-horizontal"]="rbxassetid://111734392411664",
-["send-to-back"]="rbxassetid://75340312862253",send=
-"rbxassetid://127751956873796",
-["separator-horizontal"]="rbxassetid://84864453699927",
-["separator-vertical"]="rbxassetid://84031801478581",
-["server-cog"]="rbxassetid://138470287250966",
-["server-crash"]="rbxassetid://132810618000212",
-["server-off"]="rbxassetid://114048751507723",server=
-"rbxassetid://92188766517878",
-["settings-2"]="rbxassetid://135684703553372",settings=
-"rbxassetid://80758916183665",shapes=
-"rbxassetid://129989433311409",
-["share-2"]="rbxassetid://71210767962065",share=
-"rbxassetid://87340985053299",sheet=
-"rbxassetid://134902122480171",shell=
-"rbxassetid://140212943563599",
-["shield-alert"]="rbxassetid://114995877719925",
-["shield-ban"]="rbxassetid://108765041044649",
-["shield-check"]="rbxassetid://87354736164608",
-["shield-ellipsis"]="rbxassetid://114794739892123",
-["shield-half"]="rbxassetid://117842634172647",
-["shield-minus"]="rbxassetid://89965059528921",
-["shield-off"]="rbxassetid://133426959132690",
-["shield-plus"]="rbxassetid://100664857995498",
-["shield-question-mark"]="rbxassetid://135722075265150",
-["shield-user"]="rbxassetid://124832775645347",
-["shield-x"]="rbxassetid://73370117343811",shield=
-"rbxassetid://110987169760162",
-["ship-wheel"]="rbxassetid://130797795829448",ship=
-"rbxassetid://83995100553930",shirt=
-"rbxassetid://106579555405966",
-["shopping-bag"]="rbxassetid://71885477293226",
-["shopping-basket"]="rbxassetid://138646411956433",
-["shopping-cart"]="rbxassetid://128420521375441",shovel=
-"rbxassetid://102465000512056",
-["shower-head"]="rbxassetid://75884944024117",shredder=
-"rbxassetid://122125164414463",shrimp=
-"rbxassetid://102625900815307",shrink=
-"rbxassetid://90953687918880",shrub=
-"rbxassetid://127326280714343",shuffle=
-"rbxassetid://132382786975101",sigma=
-"rbxassetid://126884244870899",
-["signal-high"]="rbxassetid://130436670012270",
-["signal-low"]="rbxassetid://73674683500458",
-["signal-medium"]="rbxassetid://125003021367019",
-["signal-zero"]="rbxassetid://130045332414754",signal=
-"rbxassetid://78424889355261",signature=
-"rbxassetid://114402748013000",
-["signpost-big"]="rbxassetid://115780185675001",signpost=
-"rbxassetid://106584743791433",siren=
-"rbxassetid://134210267818039",
-["skip-back"]="rbxassetid://70466132711334",
-["skip-forward"]="rbxassetid://124844823753990",skull=
-"rbxassetid://137726256442333",slack=
-"rbxassetid://96089719516736",slash=
-"rbxassetid://117792185664263",slice=
-"rbxassetid://95810504278179",
-["sliders-horizontal"]="rbxassetid://85538382643347",
-["sliders-vertical"]="rbxassetid://101190569086853",
-["smartphone-charging"]="rbxassetid://102837532613995",
-["smartphone-nfc"]="rbxassetid://82326425754446",smartphone=
-"rbxassetid://96623008834511",
-["smile-plus"]="rbxassetid://131981881472144",smile=
-"rbxassetid://105880397565283",snail=
-"rbxassetid://70904536548363",snowflake=
-"rbxassetid://101235206534566",
-["soap-dispenser-droplet"]="rbxassetid://77258480479465",sofa=
-"rbxassetid://114427687218324",
-["solar-panel"]="rbxassetid://132448188047921",soup=
-"rbxassetid://115092551871618",space=
-"rbxassetid://87072088914178",spade=
-"rbxassetid://131444449466462",sparkle=
-"rbxassetid://111044800239623",sparkles=
-"rbxassetid://138635884129147",speaker=
-"rbxassetid://96227183003618",speech=
-"rbxassetid://87013139446349",
-["spell-check-2"]="rbxassetid://81556731785534",
-["spell-check"]="rbxassetid://91913483031334",
-["spline-pointer"]="rbxassetid://84842840956804",spline=
-"rbxassetid://129406685807412",split=
-"rbxassetid://105112438805988",spool=
-"rbxassetid://124541981347743",spotlight=
-"rbxassetid://77571742539344",
-["spray-can"]="rbxassetid://128372039366326",sprout=
-"rbxassetid://100091687832508",
-["square-activity"]="rbxassetid://89496630185293",
-["square-arrow-down-left"]="rbxassetid://108194680296901",
-["square-arrow-down-right"]="rbxassetid://99403846801050",
-["square-arrow-down"]="rbxassetid://135962519626588",
-["square-arrow-left"]="rbxassetid://111671474549238",
-["square-arrow-out-down-left"]="rbxassetid://125714881756353",
-["square-arrow-out-down-right"]="rbxassetid://89971003001390",
-["square-arrow-out-up-left"]="rbxassetid://103759986579087",
-["square-arrow-out-up-right"]="rbxassetid://91221896066807",
-["square-arrow-right"]="rbxassetid://113920471701361",
-["square-arrow-up-left"]="rbxassetid://112424670290693",
-["square-arrow-up-right"]="rbxassetid://76602291406940",
-["square-arrow-up"]="rbxassetid://106998604646718",
-["square-asterisk"]="rbxassetid://89186832353625",
-["square-bottom-dashed-scissors"]="rbxassetid://79076980104803",
-["square-chart-gantt"]="rbxassetid://104034017316411",
-["square-check-big"]="rbxassetid://115320390907184",
-["square-check"]="rbxassetid://134682053539509",
-["square-chevron-down"]="rbxassetid://91032307924592",
-["square-chevron-left"]="rbxassetid://73143404829510",
-["square-chevron-right"]="rbxassetid://90612077729930",
-["square-chevron-up"]="rbxassetid://85565910197337",
-["square-code"]="rbxassetid://81604576616881",
-["square-dashed-bottom-code"]="rbxassetid://100354801563230",
-["square-dashed-bottom"]="rbxassetid://101102319625624",
-["square-dashed-kanban"]="rbxassetid://90388067649847",
-["square-dashed-mouse-pointer"]="rbxassetid://121016142178467",
-["square-dashed-top-solid"]="rbxassetid://117157577548540",
-["square-dashed"]="rbxassetid://136905537847606",
-["square-divide"]="rbxassetid://99894657101970",
-["square-dot"]="rbxassetid://116613421354866",
-["square-equal"]="rbxassetid://110283363706707",
-["square-function"]="rbxassetid://86075219551088",
-["square-kanban"]="rbxassetid://114537101260131",
-["square-library"]="rbxassetid://73810931222081",
-["square-m"]="rbxassetid://117662700410577",
-["square-menu"]="rbxassetid://104067089444415",
-["square-minus"]="rbxassetid://116764432015770",
-["square-mouse-pointer"]="rbxassetid://76141850603920",
-["square-parking-off"]="rbxassetid://100857293535141",
-["square-parking"]="rbxassetid://133116656122387",
-["square-pause"]="rbxassetid://86608552787615",
-["square-pen"]="rbxassetid://120239476110475",
-["square-percent"]="rbxassetid://87111930314567",
-["square-pi"]="rbxassetid://75383328781618",
-["square-pilcrow"]="rbxassetid://131854284699367",
-["square-play"]="rbxassetid://108186325238481",
-["square-plus"]="rbxassetid://114713264461873",
-["square-power"]="rbxassetid://129240437805187",
-["square-radical"]="rbxassetid://132645931868292",
-["square-round-corner"]="rbxassetid://104592745113567",
-["square-scissors"]="rbxassetid://110601255612411",
-["square-sigma"]="rbxassetid://113231244246816",
-["square-slash"]="rbxassetid://105477013908757",
-["square-split-horizontal"]="rbxassetid://76095370148660",
-["square-split-vertical"]="rbxassetid://88589192032058",
-["square-square"]="rbxassetid://136555087357875",
-["square-stack"]="rbxassetid://100463396619394",
-["square-star"]="rbxassetid://94506958703720",
-["square-stop"]="rbxassetid://80018708472943",
-["square-terminal"]="rbxassetid://83969264476798",
-["square-user-round"]="rbxassetid://86484997229302",
-["square-user"]="rbxassetid://70771214183445",
-["square-x"]="rbxassetid://125136183850190",square=
-"rbxassetid://86304921356806",
-["squares-exclude"]="rbxassetid://102345385822324",
-["squares-intersect"]="rbxassetid://120869602570119",
-["squares-subtract"]="rbxassetid://131484650948795",
-["squares-unite"]="rbxassetid://96673080107843",
-["squircle-dashed"]="rbxassetid://129936702532522",squircle=
-"rbxassetid://82426632573807",squirrel=
-"rbxassetid://112864252085343",stamp=
-"rbxassetid://92370779813368",
-["star-half"]="rbxassetid://117449275562979",
-["star-off"]="rbxassetid://75742832732503",star=
-"rbxassetid://136141469398409",
-["step-back"]="rbxassetid://108672750005121",
-["step-forward"]="rbxassetid://126131872136145",stethoscope=
-"rbxassetid://122331031702148",sticker=
-"rbxassetid://79938203791608",
-["sticky-note"]="rbxassetid://111894074643919",store=
-"rbxassetid://90338129673705",
-["stretch-horizontal"]="rbxassetid://87665042192343",
-["stretch-vertical"]="rbxassetid://95265463417122",strikethrough=
-"rbxassetid://103417324549613",subscript=
-"rbxassetid://74553514785183",
-["sun-dim"]="rbxassetid://129141645592715",
-["sun-medium"]="rbxassetid://130278807964710",
-["sun-moon"]="rbxassetid://75752898854559",
-["sun-snow"]="rbxassetid://112791898014579",sun=
-"rbxassetid://110150589884127",sunrise=
-"rbxassetid://134705665494098",sunset=
-"rbxassetid://75904872203588",superscript=
-"rbxassetid://96887696590118",
-["swatch-book"]="rbxassetid://126786244872453",
-["swiss-franc"]="rbxassetid://113497920041625",
-["switch-camera"]="rbxassetid://76841154349737",sword=
-"rbxassetid://124448418211665",swords=
-"rbxassetid://81872698913435",syringe=
-"rbxassetid://123891270479254",
-["table-2"]="rbxassetid://95751552281545",
-["table-cells-merge"]="rbxassetid://95363715175258",
-["table-cells-split"]="rbxassetid://114799086088649",
-["table-columns-split"]="rbxassetid://111011625447949",
-["table-of-contents"]="rbxassetid://135044763275414",
-["table-properties"]="rbxassetid://125062886015372",
-["table-rows-split"]="rbxassetid://96443733673997",table=
-"rbxassetid://109109148250737",
-["tablet-smartphone"]="rbxassetid://133680859813404",tablet=
-"rbxassetid://128403991264386",tablets=
-"rbxassetid://80835787970735",tag=
-"rbxassetid://129104970103940",tags=
-"rbxassetid://107179263080798",
-["tally-1"]="rbxassetid://115301298241643",
-["tally-2"]="rbxassetid://110363186864027",
-["tally-3"]="rbxassetid://97655344572540",
-["tally-4"]="rbxassetid://102633494371890",
-["tally-5"]="rbxassetid://88031817475886",tangent=
-"rbxassetid://123263132981724",target=
-"rbxassetid://87563802520297",telescope=
-"rbxassetid://91755049143647",
-["tent-tree"]="rbxassetid://76698322463977",tent=
-"rbxassetid://109779587826330",terminal=
-"rbxassetid://106783148545356",
-["test-tube-diagonal"]="rbxassetid://75662704378840",
-["test-tube"]="rbxassetid://98801015650164",
-["test-tubes"]="rbxassetid://92555361447433",
-["text-align-center"]="rbxassetid://84051028246390",
-["text-align-end"]="rbxassetid://130041738343555",
-["text-align-justify"]="rbxassetid://80279880143030",
-["text-align-start"]="rbxassetid://134489585487649",
-["text-cursor-input"]="rbxassetid://107551944047171",
-["text-cursor"]="rbxassetid://115984654447300",
-["text-initial"]="rbxassetid://129458097472087",
-["text-quote"]="rbxassetid://139278366448736",
-["text-search"]="rbxassetid://92345384671606",
-["text-select"]="rbxassetid://117087320884956",
-["text-wrap"]="rbxassetid://114804318314018",theater=
-"rbxassetid://108558145549163",
-["thermometer-snowflake"]="rbxassetid://121876188028425",
-["thermometer-sun"]="rbxassetid://106693240074310",thermometer=
-"rbxassetid://106546011492311",
-["thumbs-down"]="rbxassetid://87794009914015",
-["thumbs-up"]="rbxassetid://111137070767020",
-["ticket-check"]="rbxassetid://105428777212507",
-["ticket-minus"]="rbxassetid://78966299769328",
-["ticket-percent"]="rbxassetid://80834774406405",
-["ticket-plus"]="rbxassetid://110086734392189",
-["ticket-slash"]="rbxassetid://89045681172265",
-["ticket-x"]="rbxassetid://88674114109926",ticket=
-"rbxassetid://126527071492145",
-["tickets-plane"]="rbxassetid://100367018248695",tickets=
-"rbxassetid://135268612687833",
-["timer-off"]="rbxassetid://110916370767271",
-["timer-reset"]="rbxassetid://110052125369932",timer=
-"rbxassetid://85473888890506",
-["toggle-left"]="rbxassetid://85887872573050",
-["toggle-right"]="rbxassetid://90411952142550",toilet=
-"rbxassetid://80930782432931",
-["tool-case"]="rbxassetid://87533537832522",tornado=
-"rbxassetid://88358291515768",torus=
-"rbxassetid://70855707283051",
-["touchpad-off"]="rbxassetid://78784008075456",touchpad=
-"rbxassetid://74882354908014",
-["tower-control"]="rbxassetid://95937619060532",
-["toy-brick"]="rbxassetid://86293483924633",tractor=
-"rbxassetid://103376704722051",
-["traffic-cone"]="rbxassetid://74110220470369",
-["train-front-tunnel"]="rbxassetid://105194827005114",
-["train-front"]="rbxassetid://125237934215370",
-["train-track"]="rbxassetid://77451032453723",
-["tram-front"]="rbxassetid://93315182364998",transgender=
-"rbxassetid://135530817673639",
-["trash-2"]="rbxassetid://109843431391323",trash=
-"rbxassetid://106723740584310",
-["tree-deciduous"]="rbxassetid://123124389219004",
-["tree-palm"]="rbxassetid://103846705893963",
-["tree-pine"]="rbxassetid://124662547202594",trees=
-"rbxassetid://121203841375919",trello=
-"rbxassetid://130987241149527",
-["trending-down"]="rbxassetid://139309232226438",
-["trending-up-down"]="rbxassetid://85083293981691",
-["trending-up"]="rbxassetid://81819858538839",
-["triangle-alert"]="rbxassetid://125920361880643",
-["triangle-dashed"]="rbxassetid://124324079103935",
-["triangle-right"]="rbxassetid://116930791412791",triangle=
-"rbxassetid://126330486745540",trophy=
-"rbxassetid://131545003268773",
-["truck-electric"]="rbxassetid://111873446387359",truck=
-"rbxassetid://86662707764771",
-["turkish-lira"]="rbxassetid://114589876174070",turntable=
-"rbxassetid://129870346487856",turtle=
-"rbxassetid://118295081560334",
-["tv-minimal-play"]="rbxassetid://99201833426972",
-["tv-minimal"]="rbxassetid://100382201729427",tv=
-"rbxassetid://135687724791776",twitch=
-"rbxassetid://71383308134888",twitter=
-"rbxassetid://88791703276842",
-["type-outline"]="rbxassetid://80108627791690",type=
-"rbxassetid://133543553793564",
-["umbrella-off"]="rbxassetid://72395143739955",umbrella=
-"rbxassetid://127502210274589",underline=
-"rbxassetid://123709229216544",
-["undo-2"]="rbxassetid://113885292059932",
-["undo-dot"]="rbxassetid://132055277744844",undo=
-"rbxassetid://111258459077271",
-["unfold-horizontal"]="rbxassetid://117128358526398",
-["unfold-vertical"]="rbxassetid://116593025265499",ungroup=
-"rbxassetid://106674800451003",university=
-"rbxassetid://84652528263642",
-["unlink-2"]="rbxassetid://128131898892572",unlink=
-"rbxassetid://139835795227752",unplug=
-"rbxassetid://90171381619874",upload=
-"rbxassetid://138212042425501",usb=
-"rbxassetid://117230058949613",
-["user-check"]="rbxassetid://81775205032725",
-["user-cog"]="rbxassetid://92795491530865",
-["user-lock"]="rbxassetid://78892639693821",
-["user-minus"]="rbxassetid://126976941957511",
-["user-pen"]="rbxassetid://87445472574836",
-["user-plus"]="rbxassetid://118514469915884",
-["user-round-check"]="rbxassetid://118794737621941",
-["user-round-cog"]="rbxassetid://78239503290053",
-["user-round-minus"]="rbxassetid://98944176636447",
-["user-round-pen"]="rbxassetid://108155244324878",
-["user-round-plus"]="rbxassetid://113301899567470",
-["user-round-search"]="rbxassetid://71565774381870",
-["user-round-x"]="rbxassetid://122367980560930",
-["user-round"]="rbxassetid://136485052187963",
-["user-search"]="rbxassetid://101335649828115",
-["user-star"]="rbxassetid://98777846316000",
-["user-x"]="rbxassetid://139748155894754",user=
-"rbxassetid://81589895647169",
-["users-round"]="rbxassetid://103005444008339",users=
-"rbxassetid://115398113982385",
-["utensils-crossed"]="rbxassetid://109520762270383",utensils=
-"rbxassetid://139952569804235",
-["utility-pole"]="rbxassetid://101965541238242",variable=
-"rbxassetid://104743088438151",vault=
-"rbxassetid://108049164599845",
-["vector-square"]="rbxassetid://86713728565344",vegan=
-"rbxassetid://119489190688082",
-["venetian-mask"]="rbxassetid://102636443033920",
-["venus-and-mars"]="rbxassetid://120227752103771",venus=
-"rbxassetid://82891342220859",
-["vibrate-off"]="rbxassetid://113446447326246",vibrate=
-"rbxassetid://108330910738733",
-["video-off"]="rbxassetid://132239189859305",video=
-"rbxassetid://107587444636945",videotape=
-"rbxassetid://114816894323398",view=
-"rbxassetid://118717253976805",voicemail=
-"rbxassetid://134313454010227",volleyball=
-"rbxassetid://83889351124153",
-["volume-1"]="rbxassetid://98514588731639",
-["volume-2"]="rbxassetid://89344380902620",
-["volume-off"]="rbxassetid://103047478058767",
-["volume-x"]="rbxassetid://139252359189540",volume=
-"rbxassetid://103236289817396",vote=
-"rbxassetid://89409762851246",
-["wallet-cards"]="rbxassetid://129728715308337",
-["wallet-minimal"]="rbxassetid://137800448816116",wallet=
-"rbxassetid://132331555762628",wallpaper=
-"rbxassetid://74682121235494",
-["wand-sparkles"]="rbxassetid://82546429942392",wand=
-"rbxassetid://114580617777835",warehouse=
-"rbxassetid://78388887451080",
-["washing-machine"]="rbxassetid://104194127573858",watch=
-"rbxassetid://130544621618405",
-["waves-ladder"]="rbxassetid://101808619355514",waves=
-"rbxassetid://96340135183647",waypoints=
-"rbxassetid://102450133666017",webcam=
-"rbxassetid://104148487911129",
-["webhook-off"]="rbxassetid://96370548093471",webhook=
-"rbxassetid://112812457747322",weight=
-"rbxassetid://103860559844854",
-["wheat-off"]="rbxassetid://133294844612307",wheat=
-"rbxassetid://85261952080359",
-["whole-word"]="rbxassetid://90111083954485",
-["wifi-cog"]="rbxassetid://110500263326209",
-["wifi-high"]="rbxassetid://81954601342139",
-["wifi-low"]="rbxassetid://138217335635913",
-["wifi-off"]="rbxassetid://74113634330106",
-["wifi-pen"]="rbxassetid://91290205064712",
-["wifi-sync"]="rbxassetid://84043971055177",
-["wifi-zero"]="rbxassetid://124286465246123",wifi=
-"rbxassetid://104669375183960",
-["wind-arrow-down"]="rbxassetid://127753987414870",wind=
-"rbxassetid://114551690399915",
-["wine-off"]="rbxassetid://108294164302317",wine=
-"rbxassetid://115743721332829",workflow=
-"rbxassetid://99186544029189",worm=
-"rbxassetid://115752311548091",wrench=
-"rbxassetid://112148279212860",x=
-"rbxassetid://110786993356448",youtube=
-"rbxassetid://123663668456341",
-["zap-off"]="rbxassetid://81385483183652",zap=
-"rbxassetid://130551565616516",
-["zoom-in"]="rbxassetid://127956924984803",
-["zoom-out"]="rbxassetid://108334162607319",balloon=
-"rbxassetid://97489111621526",
-["beef-off"]="rbxassetid://99869959725200",
-["book-search"]="rbxassetid://132585409504950",calendars=
-"rbxassetid://130944763042289",
-["cannabis-off"]="rbxassetid://101938500363812",
-["cctv-off"]="rbxassetid://75925370187295",cigarette=
-"rbxassetid://137149549886852",
-["circle-pile"]="rbxassetid://116353155251541",
-["cloud-backup"]="rbxassetid://111649579696132",
-["cloud-sync"]="rbxassetid://79393911188593",
-["database-search"]="rbxassetid://92017137080138",ellipse=
-"rbxassetid://71559658267482",
-["fingerprint-pattern"]="rbxassetid://80934710831288",
-["fishing-hook"]="rbxassetid://121038780855899",
-["fishing-rod"]="rbxassetid://71754848048049",form=
-"rbxassetid://72999643971000",
-["git-merge-conflict"]="rbxassetid://85677801675703",
-["globe-off"]="rbxassetid://77775243585824",
-["globe-x"]="rbxassetid://109268097029296",hd=
-"rbxassetid://71682790698278",image=
-"rbxassetid://112751259236831",
-["layers-plus"]="rbxassetid://77587765623057",
-["lens-concave"]="rbxassetid://94819631937027",
-["lens-convex"]="rbxassetid://74736504195474",
-["line-dot-right-horizontal"]="rbxassetid://104718593155221",
-["line-style"]="rbxassetid://90176717785772",
-["map-pin-search"]="rbxassetid://89065012915078",
-["message-circle-check"]="rbxassetid://132772297689418",
-["message-square-check"]="rbxassetid://125789987055668",metronome=
-"rbxassetid://101991829345965",
-["mirror-rectangular"]="rbxassetid://109046769760336",
-["mirror-round"]="rbxassetid://121534049429097",
-["mouse-left"]="rbxassetid://99144293708743",
-["mouse-right"]="rbxassetid://88331710212594",
-["printer-x"]="rbxassetid://103002721801548",
-["radio-off"]="rbxassetid://80359258046586",road=
-"rbxassetid://120251329173530",scooter=
-"rbxassetid://100035452787934",
-["search-alert"]="rbxassetid://127597984617505",
-["shelving-unit"]="rbxassetid://80116568514793",
-["shield-cog-corner"]="rbxassetid://111694066132698",
-["shield-cog"]="rbxassetid://129235695057857",
-["sport-shoe"]="rbxassetid://120495992692630",
-["square-arrow-right-enter"]="rbxassetid://138867831495334",
-["square-arrow-right-exit"]="rbxassetid://133688575845430",
-["square-centerline-dashed-horizontal"]="rbxassetid://77780104374341",
-["square-centerline-dashed-vertical"]="rbxassetid://107878435803525",stone=
-"rbxassetid://135161057497830",toolbox=
-"rbxassetid://85341033903792",
-["towel-rack"]="rbxassetid://125223915620991",
-["user-key"]="rbxassetid://105403041782190",
-["user-round-key"]="rbxassetid://124547549008939",van=
-"rbxassetid://122066377022942",
-["waves-arrow-down"]="rbxassetid://129215220911792",
-["waves-arrow-up"]="rbxassetid://102314705716217",
-["weight-tilde"]="rbxassetid://112081212176951",
-["x-line-top"]="rbxassetid://140592656289509",
-["zodiac-aquarius"]="rbxassetid://74560047770362",
-["zodiac-aries"]="rbxassetid://73255859670234",
-["zodiac-cancer"]="rbxassetid://131985162532947",
-["zodiac-capricorn"]="rbxassetid://97859568140652",
-["zodiac-gemini"]="rbxassetid://80997588122992",
-["zodiac-leo"]="rbxassetid://75509406718106",
-["zodiac-libra"]="rbxassetid://113222735060218",
-["zodiac-ophiuchus"]="rbxassetid://129180108892480",
-["zodiac-pisces"]="rbxassetid://95845819440327",
-["zodiac-sagittarius"]="rbxassetid://82651026742181",
-["zodiac-scorpio"]="rbxassetid://113640924054631",
-["zodiac-taurus"]="rbxassetid://123053219704400",
-["zodiac-virgo"]="rbxassetid://99462994613661",
-}end function a.h()
-
-
-
-local b=(cloneref or clonereference or function(b)
-return b
-end)
-
-b(game:GetService"RunService")
-local d=b(game:GetService"HttpService")
-local e=b(game:GetService"ReplicatedStorage")
-
-local function IsExploit()
-return request and true or false
-end
-
-local function Get(f)
-if IsExploit()then
-return game:HttpGet(f)
-else
-local g,h=pcall(function()
-return d:GetAsync(f)
-end)
-if g then
-return h
-else
-return e:WaitForChild("Request",9999):InvokeServer{Url=f}
-end
-end
-end
-
-local function Loadstring(f)
-if not IsExploit()and e:WaitForChild("Loadstring",9999)then
-return function()
-return e:WaitForChild("Loadstring",9999):InvokeServer(f)
-end
-else
-return loadstring(f)
-end
-end
-
-local f={
-IconsType="lucide",
-
-New=nil,
-IconThemeTag=nil,
-
-Icons={
-lucide=a.load'b',
-},
-}
-
-local function parseIconString(g)
-if type(g)=="string"then
-local h=g:find":"
-if h then
-local i=g:sub(1,h-1)
-local j=g:sub(h+1)
-return i,j
-end
-end
-return nil,g
-end
-
-function f.AddIcons(g,h)
-if type(g)~="string"or type(h)~="table"then
-error"AddIcons: packName must be string, iconsData must be table"
-return
-end
-
-if not f.Icons[g]then
-f.Icons[g]={
-Icons={},
-Spritesheets={},
-}
-end
-
-for i,j in pairs(h)do
-if type(j)=="number"or(type(j)=="string"and j:match"^rbxassetid://")then
-local l=j
-if type(j)=="number"then
-l="rbxassetid://"..tostring(j)
-end
-
-f.Icons[g].Icons[i]={
-Image=l,
-ImageRectSize=Vector2.new(0,0),
-ImageRectPosition=Vector2.new(0,0),
-Parts=nil,
-}
-f.Icons[g].Spritesheets[l]=l
-elseif type(j)=="table"then
-if j.Image and j.ImageRectSize and j.ImageRectPosition then
-local l=j.Image
-if type(l)=="number"then
-l="rbxassetid://"..tostring(l)
-end
-
-f.Icons[g].Icons[i]={
-Image=l,
-ImageRectSize=j.ImageRectSize,
-ImageRectPosition=j.ImageRectPosition,
-Parts=j.Parts,
-}
-
-if not f.Icons[g].Spritesheets[l]then
-f.Icons[g].Spritesheets[l]=l
-end
-else
-warn("AddIcons: Invalid spritesheet data format for icon '"..i.."'")
-end
-else
-warn("AddIcons: Unsupported data type for icon '"..i.."': "..type(j))
-end
-end
-end
-
-function f.SetIconsType(g)
-f.IconsType=g
-end
-
-function f.Init(g,h)
-f.New=g
-f.IconThemeTag=h
-
-return f
-end
-
-function f.Icon(g,h,i)
-i=i~=false
-local j,l=parseIconString(g)
-
-local m=j or h or f.IconsType
-local p=l
-
-local r=f.Icons[m]
-
-if r and r.Icons and r.Icons[p]then
-return{
-r.Spritesheets[tostring(r.Icons[p].Image)],
-r.Icons[p],
-}
-elseif r and r[p]and string.find(r[p],"rbxassetid://")then
-return i
-and{
-r[p],
-{ImageRectSize=Vector2.new(0,0),ImageRectPosition=Vector2.new(0,0)},
-}
-or r[p]
-end
-return nil
-end
-
-function f.GetIcon(g,h)
-return f.Icon(g,h,false)
-end
-
-function f.Icon2(g,h,i)
-return f.Icon(g,h,true)
-end
-
-function f.Image(g)
-local h={
-Icon=g.Icon or nil,
-Type=g.Type,
-Colors=g.Colors or{(f.IconThemeTag or Color3.new(1,1,1)),Color3.new(1,1,1)},
-Size=g.Size or UDim2.new(0,24,0,24),
-
-IconFrame=nil,
-}
-
-local i={}
-
-for j,l in next,h.Colors do
-i[j]={
-ThemeTag=typeof(l)=="string"and l,
-Color=typeof(l)=="Color3"and l,
-}
-end
-
-local j=f.Icon2(h.Icon,h.Type)
-local l=typeof(j)=="string"and string.find(j,"rbxassetid://")
-
-if f.New then
-local m=f.New
-
-local p=m("ImageLabel",{
-Size=h.Size,
-BackgroundTransparency=1,
-ImageColor3=i[1].Color or nil,
-ThemeTag=i[1].ThemeTag and{
-ImageColor3=i[1].ThemeTag,
-},
-Image=l and j or j[1],
-ImageRectSize=l and nil or j[2].ImageRectSize,
-ImageRectOffset=l and nil or j[2].ImageRectPosition,
-})
-
-if not l and j[2].Parts then
-for r,u in next,j[2].Parts do
-local v=f.Icon(u,h.Type)
-
-m("ImageLabel",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-ImageColor3=i[1+r].Color or nil,
-ThemeTag=i[1+r].ThemeTag and{
-ImageColor3=i[1+r].ThemeTag,
-},
-Image=v[1],
-ImageRectSize=v[2].ImageRectSize,
-ImageRectOffset=v[2].ImageRectPosition,
-Parent=p,
-})
-end
-end
-
-h.IconFrame=p
-else
-local m=Instance.new"ImageLabel"
-m.Size=h.Size
-m.BackgroundTransparency=1
-m.ImageColor3=i[1].Color
-m.Image=l and j or j[1]
-m.ImageRectSize=l and nil or j[2].ImageRectSize
-m.ImageRectOffset=l and nil or j[2].ImageRectPosition
-
-if not l and j[2].Parts then
-for p,r in next,j[2].Parts do
-local u=f.Icon(r,h.Type)
-
-local v=Instance.New"ImageLabel"
-v.Size=UDim2.new(1,0,1,0)
-v.BackgroundTransparency=1
-v.ImageColor3=i[1+p].Color
-v.Image=u[1]
-v.ImageRectSize=u[2].ImageRectSize
-v.ImageRectOffset=u[2].ImageRectPosition
-v.Parent=m
-end
-end
-
-h.IconFrame=m
-end
-
-return h
-end
-
-return f end function a.i()
-
-return function(b)
-return{
-
-
-Primary="Icon",
-
-White=Color3.new(1,1,1),
-Black=Color3.new(0,0,0),
-
-Dialog="Accent",
-
-Background="Accent",
-BackgroundTransparency=0,
-Hover="Text",
-
-PanelBackground="White",
-PanelBackgroundTransparency=0.95,
-
-WindowBackground="Background",
-
-WindowShadow="Black",
-
-
-WindowTopbarTitle="Text",
-WindowTopbarAuthor="Text",
-WindowTopbarIcon="Icon",
-WindowTopbarButtonIcon="Icon",
-
-
-WindowSearchBarBackground="Dialog",
-
-TabBackground="Hover",
-TabBackgroundHover="Hover",
-TabBackgroundHoverTransparency=0.97,
-TabBackgroundActive="Hover",
-TabBackgroundActiveTransparency=0.93,
-TabText="Text",
-TabTextTransparency=0.3,
-TabTextTransparencyActive=0,
-TabTitle="Text",
-TabIcon="Icon",
-TabIconTransparency=0.4,
-TabIconTransparencyActive=0.1,
-TabBorderTransparency=1,
-TabBorderTransparencyActive=0.75,
-TabBorder="White",
-
-ElementBackground="Text",
-ElementBackgroundTransparency=0.93,
-ElementBackgroundHover=b:AddColor("ElementBackground","#ffffff",0.1),
-ElementTitle="Text",
-ElementDesc="Text",
-ElementIcon="Icon",
-
-PopupBackground="Background",
-PopupBackgroundTransparency="BackgroundTransparency",
-PopupTitle="Text",
-PopupContent="Text",
-PopupIcon="Icon",
-
-DialogBackground="Dialog",
-DialogBackgroundTransparency="BackgroundTransparency",
-DialogTitle="Text",
-DialogContent="Text",
-DialogIcon="Icon",
-
-Toggle="Button",
-ToggleBar="White",
-
-Checkbox="Primary",
-CheckboxIcon="White",
-CheckboxBorder="White",
-CheckboxBorderTransparency=0.75,
-
-SliderIcon="Icon",
-
-Slider="Primary",
-SliderThumb="White",
-SliderIconFrom="SliderIcon",
-SliderIconTo="SliderIcon",
-
-ProgressBar="Primary",
-ProgressBarTrack="Text",
-ProgressBarTrackTransparency=0.9,
-ProgressBarText="Text",
-
-Tooltip=Color3.fromHex"4C4C4C",
-TooltipText="White",
-TooltipSecondary="Primary",
-TooltipSecondaryText="White",
-
-TabSectionIcon="Icon",
-
-SectionIcon="Icon",
-
-SectionExpandIcon="Icon",
-SectionExpandIconTransparency=0.4,
-SectionBox="Text",
-SectionBoxTransparency=0.95,
-SectionBoxBorder="White",
-SectionBoxBorderTransparency=0.75,
-SectionBoxBackground="Text",
-SectionBoxBackgroundTransparency=0.97,
-
-SearchBarBorder="White",
-SearchBarBorderTransparency=0.75,
-
-Notification="Background",
-Notification2="White",
-Notification2Transparency=0.92,
-NotificationTitle="Text",
-NotificationTitleTransparency=0,
-NotificationContent="Text",
-NotificationContentTransparency=0.4,
-NotificationDuration="White",
-NotificationDurationTransparency=0.95,
-NotificationBorder="White",
-NotificationBorderTransparency=0.75,
-
-DropdownTabBorder="White",
-DropdownTabBackground="ElementBackground",
-DropdownBackground="Background",
-
-LabelBackground="White",
-LabelBackgroundTransparency=0.95,
-
-ViewportBackground="ElementBackground",
-ViewportBackgroundTransparency="ElementBackgroundTransparency",
-}
-end end function a.j()
-
-local b=(cloneref or clonereference or function(b)
-return b
-end)
-
-local d=b(game:GetService"RunService")
-local e=b(game:GetService"UserInputService")
-local f=b(game:GetService"TweenService")
-local g=b(game:GetService"LocalizationService")
-local h=b(game:GetService"HttpService")
-
-local i=a.load'a'local j=
-
-d.Heartbeat
-
-
-
-local l=a.load'h'
-
-l.SetIconsType"lucide"
-
-local m
-
-local p
-p={
-Font="rbxassetid://12187365364",
-Localization=nil,
-CanDraggable=true,
-Theme=nil,
-Themes=nil,
-Icons=l,
-Signals={},
-Objects={},
-LocalizationObjects={},
-UIScale=1,
-FontObjects={},
-Language=string.match(g.SystemLocaleId,"^[a-z]+"),
-Request=http_request or(syn and syn.request)or request,
-DefaultProperties={
-ScreenGui={
-ResetOnSpawn=false,
-ZIndexBehavior="Sibling",
-},
-CanvasGroup={
-BorderSizePixel=0,
-BackgroundColor3=Color3.new(1,1,1),
-},
-Frame={
-BorderSizePixel=0,
-BackgroundColor3=Color3.new(1,1,1),
-},
-TextLabel={
-BackgroundColor3=Color3.new(1,1,1),
-BorderSizePixel=0,
-Text="",
-RichText=true,
-TextColor3=Color3.new(1,1,1),
-TextSize=14,
-},
-TextButton={
-BackgroundColor3=Color3.new(1,1,1),
-BorderSizePixel=0,
-Text="",
-AutoButtonColor=false,
-TextColor3=Color3.new(1,1,1),
-TextSize=14,
-},
-TextBox={
-BackgroundColor3=Color3.new(1,1,1),
-BorderColor3=Color3.new(0,0,0),
-ClearTextOnFocus=false,
-Text="",
-TextColor3=Color3.new(0,0,0),
-TextSize=14,
-},
-ImageLabel={
-BackgroundTransparency=1,
-BackgroundColor3=Color3.new(1,1,1),
-BorderSizePixel=0,
-},
-ImageButton={
-BackgroundColor3=Color3.new(1,1,1),
-BorderSizePixel=0,
-AutoButtonColor=false,
-},
-UIListLayout={
-SortOrder="LayoutOrder",
-},
-ScrollingFrame={
-ScrollBarImageTransparency=1,
-BorderSizePixel=0,
-},
-VideoFrame={
-BorderSizePixel=0,
-},
-},
-Colors={
-Red="#e53935",
-Orange="#f57c00",
-Green="#43a047",
-Blue="#039be5",
-White="#ffffff",
-Grey="#484848",
-},
-ThemeFallbacks=nil,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ThemeChangeCallbacks={},
-}
-
-function p.Init(r)
-m=r
-
-p.ThemeFallbacks=a.load'i'(p)
-
-p.UIScale=r.UIScale
-
-i:Init(p)
-end
-
-function p.AddSignal(r,u)
-local v=r:Connect(u)
-table.insert(p.Signals,v)
-return v
-end
-
-function p.DisconnectAll()
-for r,u in next,p.Signals do
-local v=table.remove(p.Signals,r)
-v:Disconnect()
-end
-end
-
-function p.SafeCallback(r,...)
-if not r then
-return
-end
-
-local u,v=pcall(r,...)
-if not u then
-if m and m.Window and m.Window.Debug then local
-x, z=v:find":%d+: "
-
-warn("[ WindUI: DEBUG Mode ] "..v)
-
-return m:Notify{
-Title="DEBUG Mode: Error",
-Content=not z and v or v:sub(z+1),
-Duration=8,
-}
-end
-end
-end
-
-function p.Gradient(r,u)
-if m and m.Gradient then
-return m:Gradient(r,u)
-end
-
-local v={}
-local x={}
-
-for z,A in next,r do
-local B=tonumber(z)
-if B then
-B=math.clamp(B/100,0,1)
-table.insert(v,ColorSequenceKeypoint.new(B,A.Color))
-table.insert(x,NumberSequenceKeypoint.new(B,A.Transparency or 0))
-end
-end
-
-table.sort(v,function(z,A)
-return z.Time<A.Time
-end)
-table.sort(x,function(z,A)
-return z.Time<A.Time
-end)
-
-if#v<2 then
-error"ColorSequence requires at least 2 keypoints"
-end
-
-local z={
-Color=ColorSequence.new(v),
-Transparency=NumberSequence.new(x),
-}
-
-if u then
-for A,B in pairs(u)do
-z[A]=B
-end
-end
-
-return z
-end
-
-function p.SetTheme(r)
-local u=p.Theme
-p.Theme=r
-p.UpdateTheme(nil,false)
-
-for v,x in next,p.ThemeChangeCallbacks do
-p.SafeCallback(x,r,u)
-end
-end
-
-function p.AddFontObject(r)
-table.insert(p.FontObjects,r)
-p.UpdateFont(p.Font)
-end
-
-function p.UpdateFont(r)
-p.Font=r
-for u,v in next,p.FontObjects do
-v.FontFace=Font.new(r,v.FontFace.Weight,v.FontFace.Style)
-end
-end
-
-function p.GetThemeProperty(r,u)
-local function getValue(v,x)
-local z=x[v]
-
-if z==nil then
-return nil
-end
-
-if typeof(z)=="string"and string.sub(z,1,1)=="#"then
-return Color3.fromHex(z)
-end
-
-if typeof(z)=="Color3"then
-return z
-end
-
-if typeof(z)=="number"then
-return z
-end
-
-if typeof(z)=="table"and z.Color and z.Transparency then
-return z
-end
-
-if typeof(z)=="function"then
-return z(x)
-end
-
-return z
-end
-
-local v=getValue(r,u)
-if v~=nil then
-if typeof(v)=="string"and string.sub(v,1,1)~="#"then
-local x=p.GetThemeProperty(v,u)
-if x~=nil then
-return x
-end
-else
-return v
-end
-end
-
-local x=p.ThemeFallbacks[r]
-if x~=nil then
-if typeof(x)=="string"and string.sub(x,1,1)~="#"then
-return p.GetThemeProperty(x,u)
-else
-return getValue(r,{[r]=x})
-end
-end
-
-v=getValue(r,p.Themes.Dark)
-if v~=nil then
-if typeof(v)=="string"and string.sub(v,1,1)~="#"then
-local z=p.GetThemeProperty(v,p.Themes.Dark)
-if z~=nil then
-return z
-end
-else
-return v
-end
-end
-
-if x~=nil then
-if typeof(x)=="string"and string.sub(x,1,1)~="#"then
-return p.GetThemeProperty(x,p.Themes.Dark)
-else
-return getValue(r,{[r]=x})
-end
-end
-
-return nil
-end
-
-function p.AddThemeObject(r,u,v)
-if p.Objects[r]then
-for x,z in pairs(u)do
-p.Objects[r].Properties[x]=z
-end
-else
-p.Objects[r]={Object=r,Properties=u}
-end
-
-if not v then
-p.UpdateTheme(r,false)
-end
-return r
-end
-
-function p.AddLangObject(r)
-local u=p.LocalizationObjects[r]
-if not u then
-return
-end
-
-local v=u.Object
-
-p.SetLangForObject(r)
-
-return v
-end
-
-function p.UpdateTheme(r,u,v,x,z,A)
-local function ApplyTheme(B)
-for C,F in pairs(B.Properties or{})do
-local G=p.GetThemeProperty(F,p.Theme)
-if G~=nil then
-if typeof(G)=="Color3"then
-local H=B.Object:FindFirstChild"LibraryGradient"
-if H then
-H:Destroy()
-end
-
-if v then
-p.Tween(
-B.Object,
-x or 0.2,
-{[C]=G},
-z or Enum.EasingStyle.Quint,
-A or Enum.EasingDirection.Out
-):Play()
-elseif u then
-p.Tween(B.Object,0.08,{[C]=G}):Play()
-else
-B.Object[C]=G
-end
-elseif typeof(G)=="table"and G.Color and G.Transparency then
-B.Object[C]=Color3.new(1,1,1)
-
-local H=B.Object:FindFirstChild"LibraryGradient"
-if not H then
-H=Instance.new"UIGradient"
-H.Name="LibraryGradient"
-H.Parent=B.Object
-end
-
-H.Color=G.Color
-H.Transparency=G.Transparency
-
-for J,L in pairs(G)do
-if J~="Color"and J~="Transparency"and H[J]~=nil then
-H[J]=L
-end
-end
-elseif typeof(G)=="number"then
-if v then
-p.Tween(
-B.Object,
-x or 0.2,
-{[C]=G},
-z or Enum.EasingStyle.Quint,
-A or Enum.EasingDirection.Out
-):Play()
-elseif u then
-p.Tween(B.Object,0.08,{[C]=G}):Play()
-else
-B.Object[C]=G
-end
-end
-else
-local H=B.Object:FindFirstChild"LibraryGradient"
-if H then
-H:Destroy()
-end
-end
-end
-end
-
-if r then
-local B=p.Objects[r]
-if B then
-ApplyTheme(B)
-end
-else
-for B,C in pairs(p.Objects)do
-ApplyTheme(C)
-end
-end
-end
-
-function p.SetThemeTag(r,u,v,x,z)
-p.AddThemeObject(r,u)
-p.UpdateTheme(r,false,true,v,x,z)
-end
-
-function p.SetLangForObject(r)
-if p.Localization and p.Localization.Enabled then
-local u=p.LocalizationObjects[r]
-if not u then
-return
-end
-
-local v=u.Object
-local x=u.TranslationId
-
-local z=p.Localization.Translations[p.Language]
-if z and z[x]then
-v.Text=z[x]
-else
-local A=p.Localization
-and p.Localization.Translations
-and p.Localization.Translations.en
-or nil
-if A and A[x]then
-v.Text=A[x]
-else
-v.Text="["..x.."]"
-end
-end
-end
-end
-
-function p.ChangeTranslationKey(r,u,v)
-if p.Localization and p.Localization.Enabled then
-local x=string.match(v,"^"..p.Localization.Prefix.."(.+)")
-if x then
-for z,A in ipairs(p.LocalizationObjects)do
-if A.Object==u then
-A.TranslationId=x
-p.SetLangForObject(z)
-return
-end
-end
-
-table.insert(p.LocalizationObjects,{
-TranslationId=x,
-Object=u,
-})
-p.SetLangForObject(#p.LocalizationObjects)
-end
-end
-end
-
-function p.UpdateLang(r)
-if r then
-p.Language=r
-end
-
-for u=1,#p.LocalizationObjects do
-local v=p.LocalizationObjects[u]
-if v.Object and v.Object.Parent~=nil then
-p.SetLangForObject(u)
-else
-p.LocalizationObjects[u]=nil
-end
-end
-end
-
-function p.SetLanguage(r)
-p.Language=r
-p.UpdateLang()
-end
-
-function p.Icon(r,u)
-return l.Icon2(r,nil,u~=false)
-end
-
-function p.AddIcons(r,u)
-return l.AddIcons(r,u)
-end
-
-function p.New(r,u,v)
-local x=Instance.new(r)
-
-for z,A in next,p.DefaultProperties[r]or{}do
-x[z]=A
-end
-
-for z,A in next,u or{}do
-if z~="ThemeTag"then
-x[z]=A
-end
-if p.Localization and p.Localization.Enabled and z=="Text"then
-local B=string.match(A,"^"..p.Localization.Prefix.."(.+)")
-if B then
-local C=#p.LocalizationObjects+1
-p.LocalizationObjects[C]={TranslationId=B,Object=x}
-
-p.SetLangForObject(C)
-end
-end
-end
-
-for z,A in next,v or{}do
-A.Parent=x
-end
-
-if u and u.ThemeTag then
-p.AddThemeObject(x,u.ThemeTag)
-end
-if u and u.FontFace then
-p.AddFontObject(x)
-end
-return x
-end
-
-function p.Tween(r,u,v,...)
-return f:Create(r,TweenInfo.new(u,...),v)
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function p.NewRoundFrame(r,u,v,x,z,A)
-return i:New(r,u,v,x,z,nil)
-end
-
-local r=p.New local u=
-p.Tween
-
-function p.SetDraggable(v)
-p.CanDraggable=v
-end
-
-function p.Drag(v,x,z)
-local A=m.GenerateGUID()
-
-local B
-local C=false
-local F,G
-local H
-
-local J={
-CanDraggable=true,
-}
-
-if not x or typeof(x)~="table"then
-x={v}
-end
-
-local function update(L)
-if not C or not J.CanDraggable then
-return
-end
-
-local M=L.Position-F
-p.Tween(v,0.02,{
-Position=UDim2.new(
-G.X.Scale,
-G.X.Offset+M.X,
-G.Y.Scale,
-G.Y.Offset+M.Y
-),
-}):Play()
-end
-
-for L,M in pairs(x)do
-M.InputBegan:Connect(function(N)
-if not J.CanDraggable or C then
-return
-end
-
-if
-N.UserInputType==Enum.UserInputType.MouseButton1
-or N.UserInputType==Enum.UserInputType.Touch
-then
-if m and m.CurrentInput and m.CurrentInput~=A then
-return
-end
-
-m.CurrentInput=A
-
-C=true
-H=N
-B=M
-F=N.Position
-G=v.Position
-
-if z and typeof(z)=="function"then
-z(true,B)
-end
-end
-end)
-end
-
-e.InputChanged:Connect(function(L)
-if not C then
-return
-end
-if m.CurrentInput and m.CurrentInput~=A then
-return
-end
-
-if H.UserInputType==Enum.UserInputType.MouseButton1 then
-if L.UserInputType==Enum.UserInputType.MouseMovement then
-update(L)
-end
-elseif H.UserInputType==Enum.UserInputType.Touch then
-if L==H then
-update(L)
-end
-end
-end)
-
-e.InputEnded:Connect(function(L)
-if not C or m.CurrentInput~=A then
-return
-end
-
-if
-L==H
-or(
-H.UserInputType==Enum.UserInputType.MouseButton1
-and L.UserInputType==Enum.UserInputType.MouseButton1
-)
-then
-m.CurrentInput=nil
-C=false
-H=nil
-B=nil
-
-if z and typeof(z)=="function"then
-z(false,nil)
-end
-end
-end)
-
-function J.Set(L,M)
-J.CanDraggable=M
-end
-
-return J
-end
-
-l.Init(r,"Icon")
-
-function p.SanitizeFilename(v)
-local x=v:match"([^/]+)$"or v
-
-x=x:gsub("%.[^%.]+$","")
-
-x=x:gsub("[^%w%-_]","_")
-
-if#x>50 then
-x=x:sub(1,50)
-end
-
-return x
-end
-
-function p.Image(v,x,z,A,B,C,F,G)
-A=A or"Temp"
-x=p.SanitizeFilename(x)
-
-local H=r("Frame",{
-Size=UDim2.new(0,0,0,0),
-BackgroundTransparency=1,
-},{
-r("ImageLabel",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-ScaleType="Crop",
-ThemeTag=(p.Icon(v)or F)and{
-ImageColor3=C and(G or"Icon")or nil,
-}or nil,
-},{
-r("UICorner",{
-CornerRadius=UDim.new(0,z),
-}),
-}),
-})
-if p.Icon(v)then
-H.ImageLabel:Destroy()
-
-local J=l.Image{
-Icon=v,
-Size=UDim2.new(1,0,1,0),
-Colors={
-(C and(G or"Icon")or false),
-"Button",
-},
-}.IconFrame
-J.Parent=H
-elseif string.find(v,"http")and not string.find(v,"roblox.com")then
-local J="WindUI/"..A.."/assets/."..B.."-"..x..".png"
-local L,M=pcall(function()
-task.spawn(function()
-local L=p.Request
-and p.Request{
-Url=v,
-Method="GET",
-}.Body
-or{}
-
-if not d:IsStudio()and writefile then
-writefile(J,L)
-end
-
-
-local M,N=pcall(getcustomasset,J)
-if M then
-H.ImageLabel.Image=N
-else
-warn(
-string.format(
-"[ WindUI.Creator ] Failed to load custom asset '%s': %s",
-J,
-tostring(N)
-)
-)
-H:Destroy()
-
-return
-end
-end)
-end)
-if not L then
-warn(
-"[ WindUI.Creator ]  '"..identifyexecutor()
-or"Studio".."' doesnt support the URL Images. Error: "..M
-)
-
-H:Destroy()
-end
-elseif v==""then
-H.Visible=false
-else
-H.ImageLabel.Image=v
-end
-
-return H
-end
-
-function p.Color3ToHSB(v)
-local x,z,A=v.R,v.G,v.B
-local B=math.max(x,z,A)
-local C=math.min(x,z,A)
-local F=B-C
-
-local G=0
-if F~=0 then
-if B==x then
-G=(z-A)/F%6
-elseif B==z then
-G=(A-x)/F+2
-else
-G=(x-z)/F+4
-end
-G=G*60
-else
-G=0
-end
-
-local H=(B==0)and 0 or(F/B)
-local J=B
-
-return{
-h=math.floor(G+0.5),
-s=H,
-b=J,
-}
-end
-
-function p.GetPerceivedBrightness(v)
-local x=v.R
-local z=v.G
-local A=v.B
-return 0.299*x+0.587*z+0.114*A
-end
-
-function p.GetTextColorForHSB(v,x)
-local z=p.Color3ToHSB(v)local
-A, B, C=z.h, z.s, z.b
-if p.GetPerceivedBrightness(v)>(x or 0.5)then
-return Color3.fromHSV(A/360,0,0.05)
-else
-return Color3.fromHSV(A/360,0,0.98)
-end
-end
-
-function p.GetAverageColor(v)
-local x,z,A=0,0,0
-local B=v.Color.Keypoints
-for C,F in ipairs(B)do
-
-x=x+F.Value.R
-z=z+F.Value.G
-A=A+F.Value.B
-end
-local C=#B
-return Color3.new(x/C,z/C,A/C)
-end
-
-function p.GenerateUniqueID(v)
-return h:GenerateGUID(false)
-end
-
-function p.OnThemeChange(v,x)
-if typeof(x)~="function"then
-return
-end
-
-local z=h:GenerateGUID(false)
-p.ThemeChangeCallbacks[z]=x
-
-return{
-Disconnect=function()
-p.ThemeChangeCallbacks[z]=nil
-end,
-}
-end
-
-function p.AddColor(v,x,z,A)
-A=math.clamp(A or 1,0,1)
-if typeof(z)=="string"then
-z=Color3.fromHex(z)
-end
-
-return function(B)
-local C
-if typeof(x)=="string"and string.sub(x,1,1)~="#"then
-C=p.GetThemeProperty(x,B)
-elseif typeof(x)=="string"then
-C=Color3.fromHex(x)
-else
-C=x
-end
-
-if not C or typeof(C)~="Color3"then
-return nil
-end
-
-return Color3.new(
-math.clamp(C.R+z.R*A,0,1),
-math.clamp(C.G+z.G*A,0,1),
-math.clamp(C.B+z.B*A,0,1)
-)
-end
-end
-
-function p.GetElementPosition(v,x,z,A)
-if type(z)~="number"or z~=math.floor(z)then
-return nil,1
-end
-
-
-
-
-
-
-local B=#x
-
-
-if B==0 or z<1 or z>B then
-return nil,2
-end
-
-local function isDelimiter(C)
-if C==nil then
-return true
-end
-local F=C.__type
-return F=="Divider"or F=="Space"or F=="Section"
-end
-
-if isDelimiter(x[z])then
-return nil,3
-end
-
-local function calculate(C,F)
-if F==1 then
-return"Squircle"
-end
-if C==1 then
-return A and"SquircleH-TL-TR"or"Squircle-TL-TR"
-end
-if C==F then
-return A and"SquircleH-BL-BR"or"Squircle-BL-BR"
-end
-return"Square"
-end
-
-local C=1
-local F=0
-
-for G=1,B do
-local H=x[G]
-if isDelimiter(H)then
-if z>=C and z<=G-1 then
-local J=z-C+1
-return calculate(J,F)
-end
-C=G+1
-F=0
-else
-F=F+1
-end
-end
-
-if z>=C and z<=B then
-local G=z-C+1
-return calculate(G,F)
-end
-
-return nil,4
-end
-
-return p end function a.k()
-
-local b={}
-
-
-
-
-
-
-
-function b.New(d,e,f)
-local g={
-Enabled=e.Enabled or false,
-Translations=e.Translations or{},
-Prefix=e.Prefix or"loc:",
-DefaultLanguage=e.DefaultLanguage or"en"
-}
-
-f.Localization=g
-
-return g
-end
-
-
-
-return b end function a.l()
-local b=a.load'j'
-local d=b.New
-local e=b.Tween
-
-local f={
-Size=UDim2.new(0,300,1,-156),
-SizeLower=UDim2.new(0,300,1,-56),
-UICorner=18,
-UIPadding=14,
-
-Holder=nil,
-NotificationIndex=0,
-Notifications={},
-}
-
-function f.Init(g)
-local h={
-Lower=false,
-}
-
-function h.SetLower(i)
-h.Lower=i
-h.Frame.Size=i and f.SizeLower or f.Size
-end
-
-h.Frame=d("Frame",{
-Position=UDim2.new(1,-29,0,56),
-AnchorPoint=Vector2.new(1,0),
-Size=f.Size,
-Parent=g,
-BackgroundTransparency=1,
-
-
-
-
-},{
-d("UIListLayout",{
-HorizontalAlignment="Center",
-SortOrder="LayoutOrder",
-VerticalAlignment="Bottom",
-Padding=UDim.new(0,8),
-}),
-d("UIPadding",{
-PaddingBottom=UDim.new(0,29),
-}),
-})
-return h
-end
-
-function f.New(g)
-local h={
-Title=g.Title or"Notification",
-Content=g.Content or nil,
-Icon=g.Icon or nil,
-IconThemed=g.IconThemed,
-Background=g.Background,
-BackgroundImageTransparency=g.BackgroundImageTransparency,
-Duration=g.Duration or 5,
-Buttons=g.Buttons or{},
-CanClose=g.CanClose~=false,
-UIElements={},
-Closed=false,
-}
-
-
-
-f.NotificationIndex=f.NotificationIndex+1
-f.Notifications[f.NotificationIndex]=h
-
-
-
-
-
-
-
-
-
-local i
-
-if h.Icon then
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-i=b.Image(
-h.Icon,
-h.Title..":"..h.Icon,
-0,
-g.Window,
-"Notification",
-h.IconThemed
-)
-i.Size=UDim2.new(0,26,0,26)
-i.Position=UDim2.new(0,f.UIPadding,0,f.UIPadding)
-
-end
-
-local l
-if h.CanClose then
-l=d("ImageButton",{
-Image=b.Icon"x"[1],
-ImageRectSize=b.Icon"x"[2].ImageRectSize,
-ImageRectOffset=b.Icon"x"[2].ImageRectPosition,
-BackgroundTransparency=1,
-Size=UDim2.new(0,16,0,16),
-Position=UDim2.new(1,-f.UIPadding,0,f.UIPadding),
-AnchorPoint=Vector2.new(1,0),
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=0.4,
-},{
-d("TextButton",{
-Size=UDim2.new(1,8,1,8),
-BackgroundTransparency=1,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Text="",
-}),
-})
-end
-
-local m=b.NewRoundFrame(f.UICorner,"Squircle",{
-Size=UDim2.new(0,0,1,0),
-ThemeTag={
-ImageTransparency="NotificationDurationTransparency",
-ImageColor3="NotificationDuration",
-},
-
-})
-
-local p=d("Frame",{
-Size=UDim2.new(1,h.Icon and-28-f.UIPadding or 0,1,0),
-Position=UDim2.new(1,0,0,0),
-AnchorPoint=Vector2.new(1,0),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-},{
-d("UIPadding",{
-PaddingTop=UDim.new(0,f.UIPadding),
-PaddingLeft=UDim.new(0,f.UIPadding),
-PaddingRight=UDim.new(0,f.UIPadding),
-PaddingBottom=UDim.new(0,f.UIPadding),
-}),
-d("TextLabel",{
-AutomaticSize="Y",
-Size=UDim2.new(1,-30-f.UIPadding,0,0),
-TextWrapped=true,
-TextXAlignment="Left",
-RichText=true,
-BackgroundTransparency=1,
-TextSize=18,
-ThemeTag={
-TextColor3="NotificationTitle",
-TextTransparency="NotificationTitleTransparency",
-},
-Text=h.Title,
-FontFace=Font.new(b.Font,Enum.FontWeight.SemiBold),
-}),
-d("UIListLayout",{
-Padding=UDim.new(0,f.UIPadding/3),
-}),
-})
-
-if h.Content then
-d("TextLabel",{
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-TextWrapped=true,
-TextXAlignment="Left",
-RichText=true,
-BackgroundTransparency=1,
-
-TextSize=15,
-ThemeTag={
-TextColor3="NotificationContent",
-TextTransparency="NotificationContentTransparency",
-},
-Text=h.Content,
-FontFace=Font.new(b.Font,Enum.FontWeight.Medium),
-Parent=p,
-})
-end
-
-local r=b.NewRoundFrame(f.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-Position=UDim2.new(2,0,1,0),
-AnchorPoint=Vector2.new(0,1),
-AutomaticSize="Y",
-ImageTransparency=0.05,
-ThemeTag={
-ImageColor3="Notification",
-},
-
-},{
-b.NewRoundFrame(f.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="Notification2",
-ImageTransparency="Notification2Transparency",
-},
-}),
-d("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Name="DurationFrame",
-},{
-
-
-
-
-
-
-d("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-ClipsDescendants=true,
-},{
-m,
-}),
-
-
-
-
-}),
-d("ImageLabel",{
-Name="Background",
-Image=h.Background,
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,0),
-ScaleType="Crop",
-ImageTransparency=h.BackgroundImageTransparency,
-
-},{
-d("UICorner",{
-CornerRadius=UDim.new(0,f.UICorner),
-}),
-}),
-
-p,
-i,
-l,
-})
-
-local u=d("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,0,0),
-Parent=g.Holder,
-},{
-r,
-})
-
-function h.Close(v)
-if not h.Closed then
-h.Closed=true
-e(
-u,
-0.45,
-{Size=UDim2.new(1,0,0,-8)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-e(r,0.55,{Position=UDim2.new(2,0,1,0)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-task.wait(0.45)
-u:Destroy()
-end
-end
-
-task.spawn(function()
-task.wait()
-e(
-u,
-0.45,
-{Size=UDim2.new(1,0,0,r.AbsoluteSize.Y)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-e(r,0.45,{Position=UDim2.new(0,0,1,0)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-if h.Duration then
-m.Size=UDim2.new(0,r.DurationFrame.AbsoluteSize.X,1,0)
-e(
-r.DurationFrame.Frame,
-h.Duration,
-{Size=UDim2.new(0,0,1,0)},
-Enum.EasingStyle.Linear,
-Enum.EasingDirection.InOut
-):Play()
-task.wait(h.Duration)
-h:Close()
-end
-end)
-
-if l then
-b.AddSignal(l.TextButton.MouseButton1Click,function()
-h:Close()
-end)
-end
-
-
-return h
-end
-
-return f end function a.m()
-
-
-
-
-
-
-
-
-
-
-
-
-local b=4294967296;local d=b-1;local function c(e,f)local g,h=0,1;while e~=0 or f~=0 do local i,l=e%2,f%2;local m=(i+l)%2;g=g+m*h;e=math.floor(e/2)f=math.floor(f/2)h=h*2 end;return g%b end;local function k(e,f,g,...)local h;if f then e=e%b;f=f%b;h=c(e,f)if g then h=k(h,g,...)end;return h elseif e then return e%b else return 0 end end;local function n(e,f,g,...)local h;if f then e=e%b;f=f%b;h=(e+f-c(e,f))/2;if g then h=n(h,g,...)end;return h elseif e then return e%b else return d end end;local function o(e)return d-e end;local function q(e,f)if f<0 then return lshift(e,-f)end;return math.floor(e%4294967296/2^f)end;local function s(e,f)if f>31 or f<-31 then return 0 end;return q(e%b,f)end;local function lshift(e,f)if f<0 then return s(e,-f)end;return e*2^f%4294967296 end;local function t(e,f)e=e%b;f=f%32;local g=n(e,2^f-1)return s(e,f)+lshift(g,32-f)end;local e={0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2}local function w(f)return string.gsub(f,".",function(g)return string.format("%02x",string.byte(g))end)end;local function y(f,g)local h=""for i=1,g do local l=f%256;h=string.char(l)..h;f=(f-l)/256 end;return h end;local function D(f,g)local h=0;for i=g,g+3 do h=h*256+string.byte(f,i)end;return h end;local function E(f,g)local h=64-(g+9)%64;g=y(8*g,8)f=f.."\128"..string.rep("\0",h)..g;assert(#f%64==0)return f end;local function I(f)f[1]=0x6a09e667;f[2]=0xbb67ae85;f[3]=0x3c6ef372;f[4]=0xa54ff53a;f[5]=0x510e527f;f[6]=0x9b05688c;f[7]=0x1f83d9ab;f[8]=0x5be0cd19;return f end;local function K(f,g,h)local i={}for l=1,16 do i[l]=D(f,g+(l-1)*4)end;for l=17,64 do local m=i[l-15]local p=k(t(m,7),t(m,18),s(m,3))m=i[l-2]i[l]=(i[l-16]+p+i[l-7]+k(t(m,17),t(m,19),s(m,10)))%b end;local l,m,p,r,u,v,x,z=h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8]for A=1,64 do local B=k(t(l,2),t(l,13),t(l,22))local C=k(n(l,m),n(l,p),n(m,p))local F=(B+C)%b;local G=k(t(u,6),t(u,11),t(u,25))local H=k(n(u,v),n(o(u),x))local J=(z+G+H+e[A]+i[A])%b;z=x;x=v;v=u;u=(r+J)%b;r=p;p=m;m=l;l=(J+F)%b end;h[1]=(h[1]+l)%b;h[2]=(h[2]+m)%b;h[3]=(h[3]+p)%b;h[4]=(h[4]+r)%b;h[5]=(h[5]+u)%b;h[6]=(h[6]+v)%b;h[7]=(h[7]+x)%b;h[8]=(h[8]+z)%b end;local function Z(f)f=E(f,#f)local g=I{}for h=1,#f,64 do K(f,h,g)end;return w(y(g[1],4)..y(g[2],4)..y(g[3],4)..y(g[4],4)..y(g[5],4)..y(g[6],4)..y(g[7],4)..y(g[8],4))end;local f;local g={["\\"]="\\",["\""]="\"",["\b"]="b",["\f"]="f",["\n"]="n",["\r"]="r",["\t"]="t"}local h={["/"]="/"}for i,l in pairs(g)do h[l]=i end;local i=function(i)return"\\"..(g[i]or string.format("u%04x",i:byte()))end;local l=function(l)return"null"end;local m=function(m,p)local r={}p=p or{}if p[m]then error"circular reference"end;p[m]=true;if rawget(m,1)~=nil or next(m)==nil then local u=0;for v in pairs(m)do if type(v)~="number"then error"invalid table: mixed or invalid key types"end;u=u+1 end;if u~=#m then error"invalid table: sparse array"end;for v,x in ipairs(m)do table.insert(r,f(x,p))end;p[m]=nil;return"["..table.concat(r,",").."]"else for u,v in pairs(m)do if type(u)~="string"then error"invalid table: mixed or invalid key types"end;table.insert(r,f(u,p)..":"..f(v,p))end;p[m]=nil;return"{"..table.concat(r,",").."}"end end;local p=function(p)return'"'..p:gsub('[%z\1-\31\\"]',i)..'"'end;local r=function(r)if r~=r or r<=-math.huge or r>=math.huge then error("unexpected number value '"..tostring(r).."'")end;return string.format("%.14g",r)end;local u={["nil"]=l,table=m,string=p,number=r,boolean=tostring}f=function(v,x)local z=type(v)local A=u[z]if A then return A(v,x)end;error("unexpected type '"..z.."'")end;local v=function(v)return f(v)end;local x;local z=function(...)local z={}for A=1,select("#",...)do z[select(A,...)]=true end;return z end;local A=z(" ","\t","\r","\n")local B=z(" ","\t","\r","\n","]","}",",")local C=z("\\","/",'"',"b","f","n","r","t","u")local F=z("true","false","null")local G={["true"]=true,["false"]=false,null=nil}local H=function(H,J,L,M)for N=J,#H do if L[H:sub(N,N)]~=M then return N end end;return#H+1 end;local J=function(J,L,M)local N=1;local O=1;for P=1,L-1 do O=O+1;if J:sub(P,P)=="\n"then N=N+1;O=1 end end;error(string.format("%s at line %d col %d",M,N,O))end;local L=function(L)local M=math.floor;if L<=0x7f then return string.char(L)elseif L<=0x7ff then return string.char(M(L/64)+192,L%64+128)elseif L<=0xffff then return string.char(M(L/4096)+224,M(L%4096/64)+128,L%64+128)elseif L<=0x10ffff then return string.char(M(L/262144)+240,M(L%262144/4096)+128,M(L%4096/64)+128,L%64+128)end;error(string.format("invalid unicode codepoint '%x'",L))end;local M=function(M)local N=tonumber(M:sub(1,4),16)local O=tonumber(M:sub(7,10),16)if O then return L((N-0xd800)*0x400+O-0xdc00+0x10000)else return L(N)end end;local N=function(N,O)local P=""local Q=O+1;local R=Q;while Q<=#N do local S=N:byte(Q)if S<32 then J(N,Q,"control character in string")elseif S==92 then P=P..N:sub(R,Q-1)Q=Q+1;local T=N:sub(Q,Q)if T=="u"then local U=N:match("^[dD][89aAbB]%x%x\\u%x%x%x%x",Q+1)or N:match("^%x%x%x%x",Q+1)or J(N,Q-1,"invalid unicode escape in string")P=P..M(U)Q=Q+#U else if not C[T]then J(N,Q-1,"invalid escape char '"..T.."' in string")end;P=P..h[T]end;R=Q+1 elseif S==34 then P=P..N:sub(R,Q-1)return P,Q+1 end;Q=Q+1 end;J(N,O,"expected closing quote for string")end;local O=function(O,P)local Q=H(O,P,B)local R=O:sub(P,Q-1)local S=tonumber(R)if not S then J(O,P,"invalid number '"..R.."'")end;return S,Q end;local P=function(P,Q)local R=H(P,Q,B)local S=P:sub(Q,R-1)if not F[S]then J(P,Q,"invalid literal '"..S.."'")end;return G[S],R end;local Q=function(Q,R)local S={}local T=1;R=R+1;while 1 do local U;R=H(Q,R,A,true)if Q:sub(R,R)=="]"then R=R+1;break end;U,R=x(Q,R)S[T]=U;T=T+1;R=H(Q,R,A,true)local V=Q:sub(R,R)R=R+1;if V=="]"then break end;if V~=","then J(Q,R,"expected ']' or ','")end end;return S,R end;local R=function(R,S)local T={}S=S+1;while 1 do local U,V;S=H(R,S,A,true)if R:sub(S,S)=="}"then S=S+1;break end;if R:sub(S,S)~='"'then J(R,S,"expected string for key")end;U,S=x(R,S)S=H(R,S,A,true)if R:sub(S,S)~=":"then J(R,S,"expected ':' after key")end;S=H(R,S+1,A,true)V,S=x(R,S)T[U]=V;S=H(R,S,A,true)local W=R:sub(S,S)S=S+1;if W=="}"then break end;if W~=","then J(R,S,"expected '}' or ','")end end;return T,S end;local S={['"']=N,["0"]=O,["1"]=O,["2"]=O,["3"]=O,["4"]=O,["5"]=O,["6"]=O,["7"]=O,["8"]=O,["9"]=O,["-"]=O,t=P,f=P,n=P,["["]=Q,["{"]=R}x=function(T,U)local V=T:sub(U,U)local W=S[V]if W then return W(T,U)end;J(T,U,"unexpected character '"..V.."'")end;local T=function(T)if type(T)~="string"then error("expected argument of type string, got "..type(T))end;local U,V=x(T,H(T,1,A,true))V=H(T,V,A,true)if V<=#T then J(T,V,"trailing garbage")end;return U end;
-local U,V,W=v,T,Z;
-
-
-
-
-
-local X={}
-
-local Y=(cloneref or clonereference or function(Y)return Y end)
-
-
-function X.New(_,aa)
-
-local ab=_;
-local ac=aa;
-local ad=true;
-
-
-local ae=function(ae)end;
-
-
-repeat task.wait(1)until game:IsLoaded();
-
-
-local af=false;
-local ag,ah,ai,aj,ak,al,am,an,ao=setclipboard or toclipboard,request or http_request or syn_request,string.char,tostring,string.sub,os.time,math.random,math.floor,gethwid or function()return Y(game:GetService"Players").LocalPlayer.UserId end
-local ap,aq="",0;
-
-
-local ar="https://api.platoboost.app";
-local as=ah{
-Url=ar.."/public/connectivity",
-Method="GET"
-};
-if as.StatusCode~=200 and as.StatusCode~=429 then
-ar="https://api.platoboost.net";
-end
-
-
-function cacheLink()
-if aq+(600)<al()then
-local at=ah{
-Url=ar.."/public/start",
-Method="POST",
-Body=U{
-service=ab,
-identifier=W(ao())
-},
-Headers={
-["Content-Type"]="application/json",
-["User-Agent"]="Roblox/Exploit"
-}
-};
-
-if at.StatusCode==200 then
-local au=V(at.Body);
-
-if au.success==true then
-ap=au.data.url;
-aq=al();
-return true,ap
-else
-ae(au.message);
-return false,au.message
-end
-elseif at.StatusCode==429 then
-local au="you are being rate limited, please wait 20 seconds and try again.";
-ae(au);
-return false,au
-end
-
-local au="Failed to cache link.";
-ae(au);
-return false,au
-else
-return true,ap
-end
-end
-
-cacheLink();
-
-
-local at=function()
-local at=""
-for au=1,16 do
-at=at..ai(an(am()*(26))+97)
-end
-return at
-end
-
-
-for au=1,5 do
-local av=at();
-task.wait(0.2)
-if at()==av then
-local aw="platoboost nonce error.";
-ae(aw);
-error(aw);
-end
-end
-
-
-local au=function()
-local au,av=cacheLink();
-
-if au then
-ag(av);
-end
-end
-
-
-local av=function(av)
-local aw=at();
-local ax=ar.."/public/redeem/"..aj(ab);
-
-local ay={
-identifier=W(ao()),
-key=av
-}
-
-if ad then
-ay.nonce=aw;
-end
-
-local az=ah{
-Url=ax,
-Method="POST",
-Body=U(ay),
-Headers={
-["Content-Type"]="application/json"
-}
-};
-
-if az.StatusCode==200 then
-local aA=V(az.Body);
-
-if aA.success==true then
-if aA.data.valid==true then
-if ad then
-if aA.data.hash==W("true".."-"..aw.."-"..ac)then
-return true
-else
-ae"failed to verify integrity.";
-return false
-end
-else
-return true
-end
-else
-ae"key is invalid.";
-return false
-end
-else
-if ak(aA.message,1,27)=="unique constraint violation"then
-ae"you already have an active key, please wait for it to expire before redeeming it.";
-return false
-else
-ae(aA.message);
-return false
-end
-end
-elseif az.StatusCode==429 then
-ae"you are being rate limited, please wait 20 seconds and try again.";
-return false
-else
-ae"server returned an invalid status code, please try again later.";
-return false
-end
-end
-
-
-local aw=function(aw)
-if af==true then
-return false,("A request is already being sent, please slow down.")
-else
-af=true;
-end
-
-local ax=at();
-local ay=ar.."/public/whitelist/"..aj(ab).."?identifier="..W(ao()).."&key="..aw;
-
-if ad then
-ay=ay.."&nonce="..ax;
-end
-
-local az=ah{
-Url=ay,
-Method="GET",
-};
-
-af=false;
-
-if az.StatusCode==200 then
-local aA=V(az.Body);
-
-if aA.success==true then
-if aA.data.valid==true then
-if ad then
-if aA.data.hash==W("true".."-"..ax.."-"..ac)then
-return true,""
-else
-return false,("failed to verify integrity.")
-end
-else
-return true
-end
-else
-if ak(aw,1,4)=="KEY_"then
-return true,av(aw)
-else
-return false,("Key is invalid.")
-end
-end
-else
-return false,(aA.message)
-end
-elseif az.StatusCode==429 then
-return false,("You are being rate limited, please wait 20 seconds and try again.")
-else
-return false,("Server returned an invalid status code, please try again later.")
-end
-end
-
-
-local ax=function(ax)
-local ay=at();
-local az=ar.."/public/flag/"..aj(ab).."?name="..ax;
-
-if ad then
-az=az.."&nonce="..ay;
-end
-
-local aA=ah{
-Url=az,
-Method="GET",
-};
-
-if aA.StatusCode==200 then
-local aB=V(aA.Body);
-
-if aB.success==true then
-if ad then
-if aB.data.hash==W(aj(aB.data.value).."-"..ay.."-"..ac)then
-return aB.data.value
-else
-ae"failed to verify integrity.";
-return nil
-end
-else
-return aB.data.value
-end
-else
-ae(aB.message);
-return nil
-end
-else
-return nil
-end
-end
-
-
-return{
-Verify=aw,
-GetFlag=ax,
-Copy=au,
-}
-end
-
-
-return X end function a.n()
-
-
-
-
-
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local ab=aa(game:GetService"HttpService")
-local ac={}
-
-function ac.New(ad)
-local ae=gethwid or function()
-return aa(game:GetService"Players").LocalPlayer.UserId
-end
-local af,ag=request or http_request or syn_request,setclipboard or toclipboard
-
-function ValidateKey(ah)
-local ai="https://api.pandauth.com/api/v1/keys/validate"
-
-local aj={
-ServiceID=ad,
-HWID=tostring(ae()),
-Key=tostring(ah),
-}
-
-local ak=ab:JSONEncode(aj)
-local al,am=pcall(function()
-return af{
-Url=ai,
-Method="POST",
-Headers={
-["User-Agent"]="Roblox/Exploit",
-["Content-Type"]="application/json",
-},
-Body=ak,
-}
-end)
-
-if al and am then
-if am.Success then
-local an,ao=pcall(function()
-return ab:JSONDecode(am.Body)
-end)
-
-if an and ao then
-if ao.Authenticated_Status and ao.Authenticated_Status=="Success"then
-return true,"Authenticated"
-else
-local ap=ao.Note or"Unknown reason"
-return false,"Authentication failed: "..ap
-end
-else
-return false,"JSON decode error"
-end
-else
-warn(
-" HTTP request was not successful. Code: "
-..tostring(am.StatusCode)
-.." Message: "
-..am.StatusMessage
-)
-return false,"HTTP request failed: "..am.StatusMessage
-end
-else
-return false,"Request pcall error"
-end
-end
-
-function GetKeyLink()
-return"https://new.pandadevelopment.net/getkey/"..tostring(ad).."?hwid="..tostring(ae())
-end
-
-function CopyLink()
-return ag(GetKeyLink())
-end
-
-return{
-Verify=ValidateKey,
-Copy=CopyLink,
-}
-end
-
-return ac end function a.o()
-
-
-
-
-
-
-
-local aa={}
-
-function aa.New(ab,ac)
-local ad="https://sdkapi-public.luarmor.net/library.lua"
-
-local ae=loadstring(game.HttpGet and game:HttpGet(ad)or HttpService:GetAsync(ad))()
-local af=setclipboard or toclipboard
-
-ae.script_id=ab
-
-function ValidateKey(ag)
-local ah=ae.check_key(ag)
-
-
-if ah.code=="KEY_VALID"then
-return true,"Whitelisted!"
-elseif ah.code=="KEY_HWID_LOCKED"then
-return false,"Key linked to a different HWID. Please reset it using our bot"
-elseif ah.code=="KEY_INCORRECT"then
-return false,"Key is wrong or deleted!"
-else
-return false,"Key check failed:"..ah.message.." Code: "..ah.code
-end
-end
-
-function CopyLink()
-af(tostring(ac))
-end
-
-return{
-Verify=ValidateKey,
-Copy=CopyLink,
-}
-end
-
-return aa end function a.p()
-
-
-
-
-
-
-
-
-
-local aa={}
-
-function aa.New(ab,ac,ad)
-JunkieProtected.API_KEY=ac
-JunkieProtected.PROVIDER=ad
-JunkieProtected.SERVICE_ID=ab
-
-local function ValidateKey(ae)
-if not ae or ae==""then
-print"No key provided!"
-
-return false,"No key provided. Please get a key."
-end
-
-local af=JunkieProtected.IsKeylessMode()
-if af and af.keyless_mode then
-print"Keyless mode enabled. Starting script..."
-return true,"Keyless mode enabled. Starting script..."
-end
-
-local ag=JunkieProtected.ValidateKey{Key=ae}
-if ag=="valid"then
-print"Key is valid! Starting script..."
-load()
-if _G.JD_IsPremium then
-print"Premium user detected!"
-else
-print"Standard user"
-end
-
-return true,"Key is valid!"
-else
-local ah=JunkieProtected.GetKeyLink()
-print"Invalid key!"
-
-return false,"Invalid key. Get one from:"..ah
-end
-end
-
-local function copyLink()
-local ae=JunkieProtected.GetKeyLink()
-
-if setclipboard then
-setclipboard(ae)
-end
-end
-return{
-Verify=ValidateKey,
-Copy=copyLink
-}
-end
-
-return aa end function a.q()
-
-
-
-return{
-platoboost={
-Name="Platoboost",
-Icon="rbxassetid://75920162824531",
-Args={"ServiceId","Secret"},
-
-New=a.load'm'.New
-},
-pandadevelopment={
-Name="Panda Development",
-Icon="panda",
-Args={"ServiceId"},
-
-New=a.load'n'.New
-},
-luarmor={
-Name="Luarmor",
-Icon="rbxassetid://130918283130165",
-Args={"ScriptId","Discord"},
-
-New=a.load'o'.New
-},
-junkiedevelopment={
-Name="Junkie Development",
-Icon="rbxassetid://106310347705078",
-Args={"ServiceId","ApiKey","Provider"},
-
-New=a.load'p'.New
-},
-
-
-}end function a.r()
-
-
-
-return[[
-{
-    "name": "windui",
-    "version": "1.6.66",
-    "main": "./dist/main.lua",
-    "repository": "https://github.com/Footagesus/WindUI",
-    "discord": "https://discord.gg/ftgs-development-hub-1300692552005189632",
-    "author": "Footagesus",
-    "description": "Roblox UI Library for scripts",
-    "license": "MIT",
-    "scripts": {
-        "dev": "bash build/build.sh dev $INPUT_FILE",
-        "build": "bash build/build.sh build $INPUT_FILE",
-        "live": "python3 -m http.server 8642",
-        "watch": "chokidar . -i 'node_modules' -i 'dist' -i 'build' -c 'npm run dev --'",
-        "live-build": "concurrently \"npm run live\" \"npm run watch --\"",
-        "example-live-build": "INPUT_FILE=main_example.lua npm run live-build",
-        "updater": "python3 updater/main.py"
-    },
-    "keywords": [
-        "ui-library",
-        "ui-design",
-        "script",
-        "script-hub",
-        "exploiting"
-    ],
-    "devDependencies": {
-        "chokidar-cli": "^3.0.0",
-        "concurrently": "^9.2.0"
-    }
-}
-]]end function a.s()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-function aa.New(ae,af,ag,ah,ai,aj,ak,al)
-ah=ah or"Primary"
-local am=al or(not ak and 10 or 999)
-local an
-if af and af~=""then
-an=ac("ImageLabel",{
-Image=ab.Icon(af)[1],
-ImageRectSize=ab.Icon(af)[2].ImageRectSize,
-ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
-Size=UDim2.new(0,21,0,21),
-BackgroundTransparency=1,
-ImageColor3=ah=="White"and Color3.new(0,0,0)or nil,
-ImageTransparency=ah=="White"and 0.4 or 0,
-ThemeTag={
-ImageColor3=ah~="White"and"Icon"or nil,
-},
-})
-end
-
-local ao=ac("TextButton",{
-Size=UDim2.new(0,0,1,0),
-AutomaticSize="X",
-Parent=ai,
-BackgroundTransparency=1,
-},{
-ab.NewRoundFrame(am,"Squircle",{
-ThemeTag={
-ImageColor3=ah~="White"and"Button"or nil,
-},
-ImageColor3=ah=="White"and Color3.new(1,1,1)or nil,
-Size=UDim2.new(1,0,1,0),
-Name="Squircle",
-ImageTransparency=ah=="Primary"and 0 or ah=="White"and 0 or 0.9,
-}),
-
-ab.NewRoundFrame(am,"Squircle",{
-
-
-
-ImageColor3=Color3.new(1,1,1),
-Size=UDim2.new(1,0,1,0),
-Name="Special",
-ImageTransparency=ah=="Secondary"and 0.95 or 1,
-}),
-
-ab.NewRoundFrame(am,"Shadow-sm",{
-
-
-
-ImageColor3=Color3.new(0,0,0),
-Size=UDim2.new(1,3,1,3),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Shadow",
-
-ImageTransparency=1,
-Visible=not ak,
-}),
-
-ab.NewRoundFrame(am,"SquircleGlass",{
-ThemeTag={
-ImageColor3="White",
-},
-Size=UDim2.new(1,1,1,1),
-
-ImageTransparency=0.9,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Outline",
-},{
-
-
-
-
-
-
-
-
-
-
-
-
-
-}),
-
-ab.NewRoundFrame(am,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="Frame",
-ThemeTag={
-ImageColor3=ah~="White"and"Text"or nil,
-},
-ImageColor3=ah=="White"and Color3.new(0,0,0)or nil,
-ImageTransparency=1,
-},{
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,16),
-PaddingRight=UDim.new(0,16),
-}),
-ac("UIListLayout",{
-FillDirection="Horizontal",
-Padding=UDim.new(0,8),
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-}),
-an,
-ac("TextLabel",{
-BackgroundTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
-Text=ae or"Button",
-ThemeTag={
-TextColor3=(ah~="Primary"and ah~="White")and"Text",
-},
-TextColor3=ah=="Primary"and Color3.new(1,1,1)
-or ah=="White"and Color3.new(0,0,0)
-or nil,
-AutomaticSize="XY",
-TextSize=18,
-}),
-}),
-})
-
-ab.AddSignal(ao.MouseEnter,function()
-ad(ao.Frame,0.047,{ImageTransparency=0.95}):Play()
-end)
-ab.AddSignal(ao.MouseLeave,function()
-ad(ao.Frame,0.047,{ImageTransparency=1}):Play()
-end)
-ab.AddSignal(ao.MouseButton1Click,function()
-if aj then
-aj:Close()()
-end
-if ag then
-ab.SafeCallback(ag)
-end
-end)
-
-return ao
-end
-
-return aa end function a.t()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New local ad=
-ab.Tween
-
-function aa.New(ae,af,ag,ah,ai,aj,ak,al,am)
-ah=ah or"Input"
-local an=ak or 10
-local ao
-if af and af~=""then
-ao=ac("ImageLabel",{
-Image=ab.Icon(af)[1],
-ImageRectSize=ab.Icon(af)[2].ImageRectSize,
-ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
-Size=UDim2.new(0,21,0,21),
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Icon",
-},
-})
-end
-
-local ap=ah=="Textarea"
-
-local aq=ac("TextBox",{
-BackgroundTransparency=1,
-TextSize=17,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
-Size=UDim2.new(1,ao and-29 or 0,1,0),
-PlaceholderText=ae,
-ClearTextOnFocus=al or false,
-ClipsDescendants=true,
-TextWrapped=ap,
-MultiLine=ap,
-TextXAlignment="Left",
-TextYAlignment=ah~="Textarea"and"Center"or"Top",
-
-ThemeTag={
-PlaceholderColor3="PlaceholderText",
-TextColor3="Text",
-},
-})
-
-local ar=ac("Frame",{
-Size=UDim2.new(1,0,0,42),
-Parent=ag,
-BackgroundTransparency=1,
-},{
-ac("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ab.NewRoundFrame(an,"Squircle",{
-ThemeTag={
-ImageColor3="Placeholder",
-},
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.85,
-}),
-not am and ab.NewRoundFrame(an-1,"SquircleGlass",{
-ThemeTag={
-ImageColor3="Outline",
-},
-Size=UDim2.new(1,1,1,1),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ImageTransparency=0.8,
-})or nil,
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="Frame",
-ThemeTag={
-ImageColor3="LabelBackground",
-ImageTransparency="LabelBackgroundTransparency",
-},
-
-
-},{
-ac("UIPadding",{
-PaddingTop=UDim.new(0,ah~="Textarea"and 0 or 12),
-PaddingLeft=UDim.new(0,12),
-PaddingRight=UDim.new(0,12),
-PaddingBottom=UDim.new(0,ah~="Textarea"and 0 or 12),
-}),
-ac("UIListLayout",{
-FillDirection="Horizontal",
-Padding=UDim.new(0,8),
-VerticalAlignment=ah~="Textarea"and"Center"or"Top",
-HorizontalAlignment="Left",
-}),
-ao,
-aq,
-}),
-}),
-})
-
-
-
-
-
-
-
-
-
-
-if aj then
-ab.AddSignal(aq:GetPropertyChangedSignal"Text",function()
-if ai then
-ab.SafeCallback(ai,aq.Text)
-end
-end)
-else
-ab.AddSignal(aq.FocusLost,function()
-if ai then
-ab.SafeCallback(ai,aq.Text)
-end
-end)
-end
-
-return ar
-end
-
-return aa end function a.u()
-
-local aa=a.load'j'
-local ab=aa.New
-local ac=aa.Tween
-
-
-
-
-local ad={
-Holder=nil,
-
-Parent=nil,
-}
-
-function ad.Create(ae,af,ag,ah,ai)
-local aj={
-UICorner=28,
-UIPadding=12,
-
-Window=ag,
-WindUI=ah,
-
-UIElements={},
-}
-
-if ae then
-aj.UIPadding=0
-end
-if ae then
-aj.UICorner=26
-end
-
-af=af or"Dialog"
-
-if not ae then
-aj.UIElements.FullScreen=ab("Frame",{
-ZIndex=999,
-BackgroundTransparency=1,
-BackgroundColor3=Color3.fromHex"#000000",
-Size=UDim2.new(1,0,1,0),
-Active=false,
-Visible=false,
-Parent=ad.Parent
-or(ag and ag.UIElements and ag.UIElements.Main and ag.UIElements.Main.Main),
-},{
-ab("UICorner",{
-CornerRadius=UDim.new(0,ag.UICorner),
-}),
-})
-end
-
-ab("ImageLabel",{
-Image="rbxassetid://8992230677",
-ThemeTag={
-ImageColor3="WindowShadow",
-
-},
-ImageTransparency=1,
-Size=UDim2.new(1,100,1,100),
-Position=UDim2.new(0,-50,0,-50),
-ScaleType="Slice",
-SliceCenter=Rect.new(99,99,99,99),
-BackgroundTransparency=1,
-ZIndex=-999999999999999,
-Name="Blur",
-})
-
-aj.UIElements.Main=ab("Frame",{
-Size=UDim2.new(0,280,0,0),
-ThemeTag={
-BackgroundColor3=af.."Background",
-},
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Visible=false,
-ZIndex=99999,
-},{
-ab("UIPadding",{
-PaddingTop=UDim.new(0,aj.UIPadding),
-PaddingLeft=UDim.new(0,aj.UIPadding),
-PaddingRight=UDim.new(0,aj.UIPadding),
-PaddingBottom=UDim.new(0,aj.UIPadding),
-}),
-})
-
-aj.UIElements.MainContainer=aa.NewRoundFrame(aj.UICorner,"Squircle",{
-Visible=false,
-
-ImageTransparency=ae and 0.15 or 0,
-Parent=ai or aj.UIElements.FullScreen,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-AutomaticSize="XY",
-ThemeTag={
-ImageColor3=af.."Background",
-ImageTransparency=af.."BackgroundTransparency",
-},
-ZIndex=9999,
-},{
-
-
-
-
-
-
-aj.UIElements.Main,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-})
-
-function aj.Open(ak)
-if not ae then
-aj.UIElements.FullScreen.Visible=true
-aj.UIElements.FullScreen.Active=true
-end
-
-task.spawn(function()
-aj.UIElements.MainContainer.Visible=true
-
-if not ae then
-ac(aj.UIElements.FullScreen,0.1,{BackgroundTransparency=0.65}):Play()
-end
-ac(aj.UIElements.MainContainer,0.1,{ImageTransparency=0}):Play()
-
-
-task.spawn(function()
-task.wait(0.05)
-aj.UIElements.Main.Visible=true
-end)
-end)
-end
-function aj.Close(ak)
-if not ae then
-ac(aj.UIElements.FullScreen,0.1,{BackgroundTransparency=1}):Play()
-aj.UIElements.FullScreen.Active=false
-task.spawn(function()
-task.wait(0.1)
-aj.UIElements.FullScreen.Visible=false
-end)
-end
-aj.UIElements.Main.Visible=false
-
-ac(aj.UIElements.MainContainer,0.1,{ImageTransparency=1}):Play()
-
-
-
-task.spawn(function()
-task.wait(0.1)
-if not ae then
-aj.UIElements.FullScreen:Destroy()
-else
-aj.UIElements.MainContainer:Destroy()
-end
-end)
-
-return function()end
-end
-
-
-return aj
-end
-
-return ad end function a.v()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-local ae=a.load's'.New
-local af=a.load't'.New
-
-function aa.new(ag,ah,ai,aj)
-local ak=a.load'u'
-local al=ak.Create(true,"Popup",ag.Window,ag.WindUI,ag.WindUI.ScreenGui.KeySystem)
-
-local am={}
-
-local an
-
-local ao=(ag.KeySystem.Thumbnail and ag.KeySystem.Thumbnail.Width)or 200
-
-local ap=430
-if ag.KeySystem.Thumbnail and ag.KeySystem.Thumbnail.Image then
-ap=430+(ao/2)
-end
-
-al.UIElements.Main.AutomaticSize="Y"
-al.UIElements.Main.Size=UDim2.new(0,ap,0,0)
-
-local aq
-
-if ag.Icon then
-aq=
-ab.Image(ag.Icon,ag.Title..":"..ag.Icon,0,"Temp","KeySystem",ag.IconThemed)
-aq.Size=UDim2.new(0,24,0,24)
-aq.LayoutOrder=-1
-end
-
-local ar=ac("TextLabel",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-Text=ag.KeySystem.Title or ag.Title,
-FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=20,
-})
-
-local as=ac("TextLabel",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-Text="Key System",
-AnchorPoint=Vector2.new(1,0.5),
-Position=UDim2.new(1,0,0.5,0),
-TextTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=16,
-})
-
-local at=ac("Frame",{
-BackgroundTransparency=1,
-AutomaticSize="XY",
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,14),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-aq,
-ar,
-})
-
-local au=ac("Frame",{
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-},{
-
-
-
-
-
-at,
-as,
-})
-
-local av=af("Enter Key","key",nil,"Input",function(av)
-an=av
-end)
-
-local aw
-if ag.KeySystem.Note and ag.KeySystem.Note~=""then
-aw=ac("TextLabel",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-TextXAlignment="Left",
-Text=ag.KeySystem.Note,
-TextSize=18,
-TextTransparency=0.4,
-ThemeTag={
-TextColor3="Text",
-},
-BackgroundTransparency=1,
-RichText=true,
-TextWrapped=true,
-})
-end
-
-local ax=ac("Frame",{
-Size=UDim2.new(1,0,0,42),
-BackgroundTransparency=1,
-},{
-ac("Frame",{
-BackgroundTransparency=1,
-AutomaticSize="X",
-Size=UDim2.new(0,0,1,0),
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,9),
-FillDirection="Horizontal",
-}),
-}),
-})
-
-local ay
-if ag.KeySystem.Thumbnail and ag.KeySystem.Thumbnail.Image then
-local az
-if ag.KeySystem.Thumbnail.Title then
-az=ac("TextLabel",{
-Text=ag.KeySystem.Thumbnail.Title,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=18,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-BackgroundTransparency=1,
-AutomaticSize="XY",
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-})
-end
-ay=ac("ImageLabel",{
-Image=ag.KeySystem.Thumbnail.Image,
-BackgroundTransparency=1,
-Size=UDim2.new(0,ao,1,-12),
-Position=UDim2.new(0,6,0,6),
-Parent=al.UIElements.Main,
-ScaleType="Crop",
-},{
-az,
-ac("UICorner",{
-CornerRadius=UDim.new(0,20),
-}),
-})
-end
-
-ac("Frame",{
-
-Size=UDim2.new(1,ay and-ao or 0,1,0),
-Position=UDim2.new(0,ay and ao or 0,0,0),
-BackgroundTransparency=1,
-Parent=al.UIElements.Main,
-},{
-ac("Frame",{
-
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,18),
-FillDirection="Vertical",
-}),
-au,
-aw,
-av,
-ax,
-ac("UIPadding",{
-PaddingTop=UDim.new(0,16),
-PaddingLeft=UDim.new(0,16),
-PaddingRight=UDim.new(0,16),
-PaddingBottom=UDim.new(0,16),
-}),
-}),
-})
-
-
-
-
-
-local az=ae("Exit","log-out",function()
-al:Close()()
-end,"Tertiary",ax.Frame)
-
-if ay then
-az.Parent=ay
-az.Size=UDim2.new(0,0,0,42)
-az.Position=UDim2.new(0,10,1,-10)
-az.AnchorPoint=Vector2.new(0,1)
-end
-
-if ag.KeySystem.URL then
-ae("Get key","key",function()
-setclipboard(ag.KeySystem.URL)
-end,"Secondary",ax.Frame)
-end
-
-if ag.KeySystem.API then
-
-
-
-
-
-
-
-
-local aA=240
-local aB=false
-local b=ae("Get key","key",nil,"Secondary",ax.Frame)
-
-local d=ab.NewRoundFrame(99,"Squircle",{
-Size=UDim2.new(0,1,1,0),
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=0.9,
-})
-
-ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(0,0,1,0),
-AutomaticSize="X",
-Parent=b.Frame,
-},{
-d,
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,5),
-PaddingRight=UDim.new(0,5),
-}),
-})
-
-local f=ab.Image("chevron-down","chevron-down",0,"Temp","KeySystem",true)
-
-f.Size=UDim2.new(1,0,1,0)
-
-ac("Frame",{
-Size=UDim2.new(0,21,0,21),
-Parent=b.Frame,
-BackgroundTransparency=1,
-},{
-f,
-})
-
-local g=ab.NewRoundFrame(15,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-ThemeTag={
-ImageColor3="Background",
-},
-},{
-ac("UIPadding",{
-PaddingTop=UDim.new(0,5),
-PaddingLeft=UDim.new(0,5),
-PaddingRight=UDim.new(0,5),
-PaddingBottom=UDim.new(0,5),
-}),
-ac("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,5),
-}),
-})
-
-local h=ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(0,aA,0,0),
-ClipsDescendants=true,
-AnchorPoint=Vector2.new(1,0),
-Parent=b,
-Position=UDim2.new(1,0,1,15),
-},{
-g,
-})
-
-ac("TextLabel",{
-Text="Select Service",
-BackgroundTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-ThemeTag={TextColor3="Text"},
-TextTransparency=0.2,
-TextSize=16,
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-TextWrapped=true,
-TextXAlignment="Left",
-Parent=g,
-},{
-ac("UIPadding",{
-PaddingTop=UDim.new(0,10),
-PaddingLeft=UDim.new(0,10),
-PaddingRight=UDim.new(0,10),
-PaddingBottom=UDim.new(0,10),
-}),
-})
-
-for i,l in next,ag.KeySystem.API do
-local m=ag.WindUI.Services[l.Type]
-if m then
-local p={}
-for r,u in next,m.Args do
-table.insert(p,l[u])
-end
-
-local r=m.New(table.unpack(p))
-r.Type=l.Type
-table.insert(am,r)
-
-local u=ab.Image(
-l.Icon or m.Icon or Icons[l.Type]or"user",
-l.Icon or m.Icon or Icons[l.Type]or"user",
-0,
-"Temp",
-"KeySystem",
-true
-)
-u.Size=UDim2.new(0,24,0,24)
-
-local v=ab.NewRoundFrame(10,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-ThemeTag={ImageColor3="Text"},
-ImageTransparency=1,
-Parent=g,
-AutomaticSize="Y",
-},{
-ac("UIListLayout",{
-FillDirection="Horizontal",
-Padding=UDim.new(0,10),
-VerticalAlignment="Center",
-}),
-u,
-ac("UIPadding",{
-PaddingTop=UDim.new(0,10),
-PaddingLeft=UDim.new(0,10),
-PaddingRight=UDim.new(0,10),
-PaddingBottom=UDim.new(0,10),
-}),
-ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,-34,0,0),
-AutomaticSize="Y",
-},{
-ac("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,5),
-HorizontalAlignment="Center",
-}),
-ac("TextLabel",{
-Text=l.Title or m.Name,
-BackgroundTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-ThemeTag={TextColor3="Text"},
-TextTransparency=0.05,
-TextSize=18,
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-TextWrapped=true,
-TextXAlignment="Left",
-}),
-ac("TextLabel",{
-Text=l.Desc or"",
-BackgroundTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
-ThemeTag={TextColor3="Text"},
-TextTransparency=0.2,
-TextSize=16,
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-TextWrapped=true,
-Visible=l.Desc and true or false,
-TextXAlignment="Left",
-}),
-}),
-},true)
-
-ab.AddSignal(v.MouseEnter,function()
-ad(v,0.08,{ImageTransparency=0.95}):Play()
-end)
-ab.AddSignal(v.InputEnded,function()
-ad(v,0.08,{ImageTransparency=1}):Play()
-end)
-ab.AddSignal(v.MouseButton1Click,function()
-r.Copy()
-ag.WindUI:Notify{
-Title="Key System",
-Content="Key link copied to clipboard.",
-Image="key",
-}
-end)
-end
-end
-
-ab.AddSignal(b.MouseButton1Click,function()
-if not aB then
-ad(
-h,
-0.3,
-{Size=UDim2.new(0,aA,0,g.AbsoluteSize.Y+1)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ad(f,0.3,{Rotation=180},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-else
-ad(
-h,
-0.25,
-{Size=UDim2.new(0,aA,0,0)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ad(f,0.25,{Rotation=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-aB=not aB
-end)
-end
-
-local function handleSuccess(aA)
-al:Close()()
-writefile((ag.Folder or"Temp").."/"..ah..".key",tostring(aA))
-task.wait(0.4)
-ai(true)
-end
-
-local aA=ae("Submit","arrow-right",function()
-local aA=tostring(an or"empty")local aB=
-ag.Folder or ag.Title
-
-if ag.KeySystem.KeyValidator then
-local b=ag.KeySystem.KeyValidator(aA)
-
-if b then
-if ag.KeySystem.SaveKey then
-handleSuccess(aA)
-else
-al:Close()()
-task.wait(0.4)
-ai(true)
-end
-else
-ag.WindUI:Notify{
-Title="Key System. Error",
-Content="Invalid key.",
-Icon="triangle-alert",
-}
-end
-elseif not ag.KeySystem.API then
-local b=type(ag.KeySystem.Key)=="table"and table.find(ag.KeySystem.Key,aA)
-or ag.KeySystem.Key==aA
-
-if b then
-if ag.KeySystem.SaveKey then
-handleSuccess(aA)
-else
-al:Close()()
-task.wait(0.4)
-ai(true)
-end
-end
-else
-local b,d
-for f,g in next,am do
-local h,i=g.Verify(aA)
-if h then
-b,d=true,i
-break
-end
-d=i
-end
-
-if b then
-handleSuccess(aA)
-else
-ag.WindUI:Notify{
-Title="Key System. Error",
-Content=d,
-Icon="triangle-alert",
-}
-end
-end
-end,"Primary",ax)
-
-aA.AnchorPoint=Vector2.new(1,0.5)
-aA.Position=UDim2.new(1,0,0.5,0)
-
-
-
-
-
-
-
-
-
-
-al:Open()
-end
-
-return aa end function a.w()
-
-
-
-
-local aa=(cloneref or clonereference or function(aa)return aa end)
-
-
-local function map(ab,ac,ad,ae,af)
-return(ab-ac)*(af-ae)/(ad-ac)+ae
-end
-
-local function viewportPointToWorld(ab,ac)
-local ad=aa(game:GetService"Workspace").CurrentCamera:ScreenPointToRay(ab.X,ab.Y)
-return ad.Origin+ad.Direction*ac
-end
-
-local function getOffset()
-local ab=aa(game:GetService"Workspace").CurrentCamera.ViewportSize.Y
-return map(ab,0,2560,8,56)
-end
-
-return{viewportPointToWorld,getOffset}end function a.x()
-
-
-
-local aa=(cloneref or clonereference or function(aa)return aa end)
-
-
-local ab=a.load'j'
-local ac=ab.New
-
-
-local ad,ae=unpack(a.load'w')
-local af=Instance.new("Folder",aa(game:GetService"Workspace").CurrentCamera)
-
-
-local function createAcrylic()
-local ag=ac("Part",{
-Name="Body",
-Color=Color3.new(0,0,0),
-Material=Enum.Material.Glass,
-Size=Vector3.new(1,1,0),
-Anchored=true,
-CanCollide=false,
-Locked=true,
-CastShadow=false,
-Transparency=0.98,
-},{
-ac("SpecialMesh",{
-MeshType=Enum.MeshType.Brick,
-Offset=Vector3.new(0,0,-1E-6),
-}),
-})
-
-return ag
-end
-
-
-local function createAcrylicBlur(ag)
-local ah={}
-
-ag=ag or 0.001
-local ai={
-topLeft=Vector2.new(),
-topRight=Vector2.new(),
-bottomRight=Vector2.new(),
-}
-local aj=createAcrylic()
-aj.Parent=af
-
-local function updatePositions(ak,al)
-ai.topLeft=al
-ai.topRight=al+Vector2.new(ak.X,0)
-ai.bottomRight=al+ak
-end
-
-local function render()
-local ak=aa(game:GetService"Workspace").CurrentCamera
-if ak then
-ak=ak.CFrame
-end
-local al=ak
-if not al then
-al=CFrame.new()
-end
-
-local am=al
-local an=ai.topLeft
-local ao=ai.topRight
-local ap=ai.bottomRight
-
-local aq=ad(an,ag)
-local ar=ad(ao,ag)
-local as=ad(ap,ag)
-
-local at=(ar-aq).Magnitude
-local au=(ar-as).Magnitude
-
-aj.CFrame=
-CFrame.fromMatrix((aq+as)/2,am.XVector,am.YVector,am.ZVector)
-aj.Mesh.Scale=Vector3.new(at,au,0)
-end
-
-local function onChange(ak)
-local al=ae()
-local am=ak.AbsoluteSize-Vector2.new(al,al)
-local an=ak.AbsolutePosition+Vector2.new(al/2,al/2)
-
-updatePositions(am,an)
-task.spawn(render)
-end
-
-local function renderOnChange()
-local ak=aa(game:GetService"Workspace").CurrentCamera
-if not ak then
-return
-end
-
-table.insert(ah,ak:GetPropertyChangedSignal"CFrame":Connect(render))
-table.insert(ah,ak:GetPropertyChangedSignal"ViewportSize":Connect(render))
-table.insert(ah,ak:GetPropertyChangedSignal"FieldOfView":Connect(render))
-task.spawn(render)
-end
-
-aj.Destroying:Connect(function()
-for ak,al in ah do
-pcall(function()
-al:Disconnect()
-end)
-end
-end)
-
-renderOnChange()
-
-return onChange,aj
-end
-
-return function(ag)
-local ah={}
-local ai,aj=createAcrylicBlur(ag)
-
-local ak=ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.fromScale(1,1),
-})
-
-ab.AddSignal(ak:GetPropertyChangedSignal"AbsolutePosition",function()
-ai(ak)
-end)
-
-ab.AddSignal(ak:GetPropertyChangedSignal"AbsoluteSize",function()
-ai(ak)
-end)
-
-ah.AddParent=function(al)
-ab.AddSignal(al:GetPropertyChangedSignal"Visible",function()
-
-end)
-end
-
-ah.SetVisibility=function(al)
-aj.Transparency=al and 0.98 or 1
-end
-
-ah.Frame=ak
-ah.Model=aj
-
-return ah
-end end function a.y()
-
-
-local aa=a.load'j'
-local ab=a.load'x'
-
-local ac=aa.New
-
-return function(ad)
-local ae={}
-
-ae.Frame=ac("Frame",{
-Size=UDim2.fromScale(1,1),
-BackgroundTransparency=1,
-BackgroundColor3=Color3.fromRGB(255,255,255),
-BorderSizePixel=0,
-},{
-
-
-
-
-
-
-
-
-
-
-
-
-ac("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-
-ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.fromScale(1,1),
-Name="Background",
-ThemeTag={
-BackgroundColor3="AcrylicMain",
-},
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-}),
-
-ac("Frame",{
-BackgroundColor3=Color3.fromRGB(255,255,255),
-BackgroundTransparency=1,
-Size=UDim2.fromScale(1,1),
-},{
-
-
-
-
-
-
-
-
-
-
-}),
-
-ac("ImageLabel",{
-Image="rbxassetid://9968344105",
-ImageTransparency=0.98,
-ScaleType=Enum.ScaleType.Tile,
-TileSize=UDim2.new(0,128,0,128),
-Size=UDim2.fromScale(1,1),
-BackgroundTransparency=1,
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-}),
-
-ac("ImageLabel",{
-Image="rbxassetid://9968344227",
-ImageTransparency=0.9,
-ScaleType=Enum.ScaleType.Tile,
-TileSize=UDim2.new(0,128,0,128),
-Size=UDim2.fromScale(1,1),
-BackgroundTransparency=1,
-ThemeTag={
-ImageTransparency="AcrylicNoise",
-},
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-}),
-
-ac("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.fromScale(1,1),
-ZIndex=2,
-},{
-
-
-
-
-
-
-
-
-
-
-}),
-})
-
-
-local af
-
-task.wait()
-if ad.UseAcrylic then
-af=ab()
-
-af.Frame.Parent=ae.Frame
-ae.Model=af.Model
-ae.AddParent=af.AddParent
-ae.SetVisibility=af.SetVisibility
-end
-
-return ae,af
-end end function a.z()
-
-
-
-local aa=(cloneref or clonereference or function(aa)return aa end)
-
-
-local ab={
-AcrylicBlur=a.load'x',
-
-AcrylicPaint=a.load'y',
-}
-
-function ab.init()
-local ac=Instance.new"DepthOfFieldEffect"
-ac.FarIntensity=0
-ac.InFocusRadius=0.1
-ac.NearIntensity=1
-
-local ad={}
-
-function ab.Enable()
-for ae,af in pairs(ad)do
-af.Enabled=false
-end
-ac.Parent=aa(game:GetService"Lighting")
-end
-
-function ab.Disable()
-for ae,af in pairs(ad)do
-af.Enabled=af.enabled
-end
-ac.Parent=nil
-end
-
-local function registerDefaults()
-local function register(ae)
-if ae:IsA"DepthOfFieldEffect"then
-ad[ae]={enabled=ae.Enabled}
-end
-end
-
-for ae,af in pairs(aa(game:GetService"Lighting"):GetChildren())do
-register(af)
-end
-
-if aa(game:GetService"Workspace").CurrentCamera then
-for ae,af in pairs(aa(game:GetService"Workspace").CurrentCamera:GetChildren())do
-register(af)
-end
-end
-end
-
-registerDefaults()
-ab.Enable()
-end
-
-return ab end function a.A()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New local ad=
-ab.Tween
-
-
-function aa.new(ae,af)
-local ag={
-Title=ae.Title or"Dialog",
-Content=ae.Content,
-Icon=ae.Icon,
-IconThemed=ae.IconThemed,
-Thumbnail=ae.Thumbnail,
-Buttons=ae.Buttons,
-
-IconSize=22,
-}
-
-local ah=a.load'u'
-local ai=ah.Create(true,"Popup",ae.WindUI.Window,ae.WindUI,af)
-
-local aj=200
-
-local ak=430
-if ag.Thumbnail and ag.Thumbnail.Image then
-ak=430+(aj/2)
-end
-
-ai.UIElements.Main.AutomaticSize="Y"
-ai.UIElements.Main.Size=UDim2.new(0,ak,0,0)
-
-
-
-local al
-
-if ag.Icon then
-al=ab.Image(
-ag.Icon,
-ag.Title..":"..ag.Icon,
-0,
-ae.WindUI.Window,
-"Popup",
-true,
-ae.IconThemed,
-"PopupIcon"
-)
-al.Size=UDim2.new(0,ag.IconSize,0,ag.IconSize)
-al.LayoutOrder=-1
-end
-
-
-local am=ac("TextLabel",{
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Text=ag.Title,
-TextXAlignment="Left",
-FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
-ThemeTag={
-TextColor3="PopupTitle",
-},
-TextSize=20,
-TextWrapped=true,
-Size=UDim2.new(1,al and-ag.IconSize-14 or 0,0,0)
-})
-
-local an=ac("Frame",{
-BackgroundTransparency=1,
-AutomaticSize="XY",
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,14),
-FillDirection="Horizontal",
-VerticalAlignment="Center"
-}),
-al,am
-})
-
-local ao=ac("Frame",{
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-},{
-
-
-
-
-
-an,
-})
-
-local ap
-if ag.Content and ag.Content~=""then
-ap=ac("TextLabel",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-TextXAlignment="Left",
-Text=ag.Content,
-TextSize=18,
-TextTransparency=.2,
-ThemeTag={
-TextColor3="PopupContent",
-},
-BackgroundTransparency=1,
-RichText=true,
-TextWrapped=true,
-})
-end
-
-local aq=ac("Frame",{
-Size=UDim2.new(1,0,0,42),
-BackgroundTransparency=1,
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,9),
-FillDirection="Horizontal",
-HorizontalAlignment="Right"
-})
-})
-
-local ar
-if ag.Thumbnail and ag.Thumbnail.Image then
-local as
-if ag.Thumbnail.Title then
-as=ac("TextLabel",{
-Text=ag.Thumbnail.Title,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=18,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-BackgroundTransparency=1,
-AutomaticSize="XY",
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-})
-end
-ar=ac("ImageLabel",{
-Image=ag.Thumbnail.Image,
-BackgroundTransparency=1,
-Size=UDim2.new(0,aj,1,0),
-Parent=ai.UIElements.Main,
-ScaleType="Crop"
-},{
-as,
-ac("UICorner",{
-CornerRadius=UDim.new(0,0),
-})
-})
-end
-
-ac("Frame",{
-
-Size=UDim2.new(1,ar and-aj or 0,1,0),
-Position=UDim2.new(0,ar and aj or 0,0,0),
-BackgroundTransparency=1,
-Parent=ai.UIElements.Main
-},{
-ac("Frame",{
-
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,18),
-FillDirection="Vertical",
-}),
-ao,
-ap,
-aq,
-ac("UIPadding",{
-PaddingTop=UDim.new(0,16),
-PaddingLeft=UDim.new(0,16),
-PaddingRight=UDim.new(0,16),
-PaddingBottom=UDim.new(0,16),
-})
-}),
-})
-
-local as=a.load's'.New
-
-for at,au in next,ag.Buttons do
-as(au.Title,au.Icon,au.Callback,au.Variant,aq,ai)
-end
-
-ai:Open()
-
-
-return ag
-end
-
-return aa end function a.B()
-return function(aa,ab)
-return{
-Dark={
-Name="Dark",
-
-Accent=Color3.fromHex"#18181b",
-Dialog=Color3.fromHex"#1a1a1a",
-Outline=Color3.fromHex"#FFFFFF",
-Text=Color3.fromHex"#FFFFFF",
-Placeholder=Color3.fromHex"#a1a1a1",
-Background=Color3.fromHex"#101010",
-Button=Color3.fromHex"#52525b",
-Icon=Color3.fromHex"#a1a1aa",
-Toggle=Color3.fromHex"#33C759",
-Slider=Color3.fromHex"#0091FF",
-Checkbox=Color3.fromHex"#0091FF",
-
-PanelBackground=Color3.fromHex"#FFFFFF",
-PanelBackgroundTransparency=0.95,
-
-SliderIcon=Color3.fromHex"#908F95",
-Primary=Color3.fromHex"#0091FF",
-
-
-LabelBackground=Color3.fromHex"#000000",
-LabelBackgroundTransparency=0.83,
-
-ElementBackground=Color3.fromHex"#2A2A2C",
-ElementBackgroundTransparency=0,
-},
-
-Light={
-Name="Light",
-
-Accent=Color3.fromHex"#efefef",
-Dialog=Color3.fromHex"#f4f4f5",
-Outline=Color3.fromHex"#ffffff",
-Text=Color3.fromHex"#000000",
-Placeholder=Color3.fromHex"#555555",
-Background=Color3.fromHex"#FFFFFF",
-Button=Color3.fromHex"#18181b",
-Icon=Color3.fromHex"#52525b",
-Toggle=Color3.fromHex"#33C759",
-Slider=Color3.fromHex"#0091FF",
-Checkbox=Color3.fromHex"#0091FF",
-
-DropdownTabBackground=Color3.fromHex"#bebebe",
-DropdownBackground=Color3.fromHex"#ffffff",
-
-TabBackground=Color3.fromHex"#ffffff",
-TabBackgroundHover=Color3.fromHex"#f3f3f3",
-TabBackgroundHoverTransparency=0,
-TabBackgroundActive=Color3.fromHex"#efefef",
-TabBackgroundActiveTransparency=0,
-
-PanelBackground=Color3.fromHex"#efefef",
-PanelBackgroundTransparency=0,
-
-LabelBackground=Color3.fromHex"#efefef",
-LabelBackgroundTransparency=0,
-
-ElementBackground=Color3.fromHex"#ffffff",
-ElementBackgroundTransparency=0,
-},
-
-Rose={
-Name="Rose",
-
-Accent=Color3.fromHex"#be185d",
-Dialog=Color3.fromHex"#4c0519",
-
-Text=Color3.fromHex"#fdf2f8",
-Placeholder=Color3.fromHex"#d67aa6",
-Background=Color3.fromHex"#1f0308",
-Button=Color3.fromHex"#e95f74",
-Icon=Color3.fromHex"#fb7185",
-
-ElementBackground=Color3.fromHex"#381E23",
-ElementBackgroundTransparency=0,
-},
-
-Plant={
-Name="Plant",
-
-Accent=Color3.fromHex"#166534",
-Dialog=Color3.fromHex"#052e16",
-
-Text=Color3.fromHex"#f0fdf4",
-Placeholder=Color3.fromHex"#4fbf7a",
-Background=Color3.fromHex"#0a1b0f",
-Button=Color3.fromHex"#16a34a",
-Icon=Color3.fromHex"#4ade80",
-
-ElementBackground=Color3.fromHex"#28342A",
-ElementBackgroundTransparency=0,
-},
-
-Red={
-Name="Red",
-
-Accent=Color3.fromHex"#991b1b",
-Dialog=Color3.fromHex"#450a0a",
-
-Text=Color3.fromHex"#fef2f2",
-Placeholder=Color3.fromHex"#d95353",
-Background=Color3.fromHex"#1c0606",
-Button=Color3.fromHex"#dc2626",
-Icon=Color3.fromHex"#ef4444",
-
-ElementBackground=Color3.fromHex"#322221",
-ElementBackgroundTransparency=0,
-},
-
-Indigo={
-Name="Indigo",
-
-Accent=Color3.fromHex"#3730a3",
-Dialog=Color3.fromHex"#1e1b4b",
-
-Text=Color3.fromHex"#f1f5f9",
-Placeholder=Color3.fromHex"#7078d9",
-Background=Color3.fromHex"#0f0a2e",
-Button=Color3.fromHex"#4f46e5",
-Icon=Color3.fromHex"#6366f1",
-
-ElementBackground=Color3.fromHex"#282543",
-ElementBackgroundTransparency=0,
-},
-
-Sky={
-Name="Sky",
-
-Accent=Color3.fromHex"#00d4ff",
-Dialog=Color3.fromHex"#0a4d66",
-
-Text=Color3.fromHex"#e6f7ff",
-Placeholder=Color3.fromHex"#66b3cc",
-Background=Color3.fromHex"#051a26",
-Button=Color3.fromHex"#00a8cc",
-Icon=Color3.fromHex"#2db8d9",
-
-Toggle=Color3.fromHex"#00d9d9",
-Slider=Color3.fromHex"#00d4ff",
-Checkbox=Color3.fromHex"#00d4ff",
-
-PanelBackground=Color3.fromHex"#0d3a47",
-PanelBackgroundTransparency=0.8,
-
-ElementBackground=Color3.fromHex"#172E3B",
-ElementBackgroundTransparency=0,
-},
-
-Violet={
-Name="Violet",
-
-Accent=Color3.fromHex"#6d28d9",
-Dialog=Color3.fromHex"#3c1361",
-
-Text=Color3.fromHex"#faf5ff",
-Placeholder=Color3.fromHex"#8f7ee0",
-Background=Color3.fromHex"#1e0a3e",
-Button=Color3.fromHex"#7c3aed",
-Icon=Color3.fromHex"#8b5cf6",
-
-ElementBackground=Color3.fromHex"#342650",
-ElementBackgroundTransparency=0,
-},
-
-Amber={
-Name="Amber",
-
-Accent=aa:Gradient({
-["0"]={Color=Color3.fromHex"#b45309",Transparency=0},
-["100"]={Color=Color3.fromHex"#d97706",Transparency=0},
-},{Rotation=45}),
-
-Dialog=aa:Gradient({
-["0"]={Color=Color3.fromHex"#451a03",Transparency=0},
-["100"]={Color=Color3.fromHex"#6b2e05",Transparency=0},
-},{Rotation=90}),
-
-
-
-
-
-
-Text=aa:Gradient({
-["0"]={Color=Color3.fromHex"#fffbeb",Transparency=0},
-["100"]={Color=Color3.fromHex"#fff7ed",Transparency=0},
-},{Rotation=45}),
-
-Placeholder=aa:Gradient({
-["0"]={Color=Color3.fromHex"#d1a326",Transparency=0},
-["100"]={Color=Color3.fromHex"#fbbf24",Transparency=0},
-},{Rotation=45}),
-
-Background=aa:Gradient({
-["0"]={Color=Color3.fromHex"#1c1003",Transparency=0},
-["100"]={Color=Color3.fromHex"#3f210d",Transparency=0},
-},{Rotation=90}),
-
-Button=aa:Gradient({
-["0"]={Color=Color3.fromHex"#d97706",Transparency=0},
-["100"]={Color=Color3.fromHex"#f59e0b",Transparency=0},
-},{Rotation=45}),
-
-Icon=Color3.fromHex"#f59e0b",
-
-Toggle=aa:Gradient({
-["0"]={Color=Color3.fromHex"#d97706",Transparency=0},
-["100"]={Color=Color3.fromHex"#f59e0b",Transparency=0},
-},{Rotation=45}),
-
-Slider=Color3.fromHex"#d97706",
-
-Checkbox=aa:Gradient({
-["0"]={Color=Color3.fromHex"#d97706",Transparency=0},
-["100"]={Color=Color3.fromHex"#fbbf24",Transparency=0},
-},{Rotation=45}),
-
-PanelBackground=Color3.fromHex"#FFFFFF",
-PanelBackgroundTransparency=0.95,
-
-ElementBackground=Color3.fromHex"#3A2E22",
-ElementBackgroundTransparency=0,
-},
-
-Emerald={
-Name="Emerald",
-
-Accent=Color3.fromHex"#047857",
-Dialog=Color3.fromHex"#022c22",
-
-Text=Color3.fromHex"#ecfdf5",
-Placeholder=Color3.fromHex"#3fbf8f",
-Background=Color3.fromHex"#011411",
-Button=Color3.fromHex"#059669",
-Icon=Color3.fromHex"#10b981",
-
-ElementBackground=Color3.fromHex"#202E2A",
-ElementBackgroundTransparency=0,
-},
-
-Midnight={
-Name="Midnight",
-
-Accent=Color3.fromHex"#1e3a8a",
-Dialog=Color3.fromHex"#0c1e42",
-
-Text=Color3.fromHex"#dbeafe",
-Placeholder=Color3.fromHex"#2f74d1",
-Background=Color3.fromHex"#0a0f1e",
-Button=Color3.fromHex"#2563eb",
-Primary=Color3.fromHex"#2563eb",
-Icon=Color3.fromHex"#5591f4",
-
-ElementBackground=Color3.fromHex"#242836",
-ElementBackgroundTransparency=0,
-},
-
-Crimson={
-Name="Crimson",
-
-Accent=Color3.fromHex"#b91c1c",
-Dialog=Color3.fromHex"#450a0a",
-
-Text=Color3.fromHex"#fef2f2",
-Placeholder=Color3.fromHex"#6f757b",
-Background=Color3.fromHex"#0c0404",
-Button=Color3.fromHex"#991b1b",
-Icon=Color3.fromHex"#dc2626",
-
-ElementBackground=Color3.fromHex"#251F1F",
-ElementBackgroundTransparency=0,
-},
-
-MonokaiPro={
-Name="Monokai Pro",
-
-Accent=Color3.fromHex"#fc9867",
-Dialog=Color3.fromHex"#1e1e1e",
-
-Text=Color3.fromHex"#fcfcfa",
-Placeholder=Color3.fromHex"#afafaf",
-Background=Color3.fromHex"#191622",
-Button=Color3.fromHex"#ab9df2",
-Icon=Color3.fromHex"#a9dc76",
-
-ElementBackground=Color3.fromHex"#323039",
-ElementBackgroundTransparency=0,
-
-Metadata={
-PullRequest=23,
-},
-},
-
-CottonCandy={
-Name="Cotton Candy",
-
-Accent=Color3.fromHex"#ec4899",
-Dialog=Color3.fromHex"#2d1b3d",
-
-Text=Color3.fromHex"#fdf2f8",
-Placeholder=Color3.fromHex"#8a5fd3",
-Background=Color3.fromHex"#1a0b2e",
-Button=Color3.fromHex"#d946ef",
-Slider=Color3.fromHex"#d946ef",
-Icon=Color3.fromHex"#06b6d4",
-
-ElementBackground=Color3.fromHex"#312643",
-ElementBackgroundTransparency=0,
-},
-
-Mellowsi={
-Name="Mellowsi",
-
-Accent=Color3.fromHex"#342A1E",
-Dialog=Color3.fromHex"#291C13",
-
-Text=Color3.fromHex"#F5EBDD",
-Placeholder=Color3.fromHex"#9C8A73",
-Background=Color3.fromHex"#1C1002",
-Button=Color3.fromHex"#342A1E",
-Icon=Color3.fromHex"#C9B79C",
-
-Toggle=Color3.fromHex"#a9873f",
-Slider=Color3.fromHex"#C9A24D",
-Checkbox=Color3.fromHex"#C9A24D",
-
-ElementBackground=Color3.fromHex"#33291E",
-ElementBackgroundTransparency=0,
-
-Metadata={
-PullRequest=52,
-},
-},
-
-Rainbow={
-Name="Rainbow",
-
-Accent=aa:Gradient({
-["0"]={Color=Color3.fromHex"#00ff41",Transparency=0},
-["33"]={Color=Color3.fromHex"#00ffff",Transparency=0},
-["66"]={Color=Color3.fromHex"#0080ff",Transparency=0},
-["100"]={Color=Color3.fromHex"#8000ff",Transparency=0},
-},{Rotation=45}),
-
-Dialog=aa:Gradient({
-["0"]={Color=Color3.fromHex"#ff0080",Transparency=0},
-["25"]={Color=Color3.fromHex"#8000ff",Transparency=0},
-["50"]={Color=Color3.fromHex"#0080ff",Transparency=0},
-["75"]={Color=Color3.fromHex"#00ff80",Transparency=0},
-["100"]={Color=Color3.fromHex"#ff8000",Transparency=0},
-},{Rotation=135}),
-
-
-Text=Color3.fromHex"#ffffff",
-Placeholder=Color3.fromHex"#00ff80",
-
-Background=aa:Gradient({
-["0"]={Color=Color3.fromHex"#ff0040",Transparency=0},
-["20"]={Color=Color3.fromHex"#ff4000",Transparency=0},
-["40"]={Color=Color3.fromHex"#ffff00",Transparency=0},
-["60"]={Color=Color3.fromHex"#00ff40",Transparency=0},
-["80"]={Color=Color3.fromHex"#0040ff",Transparency=0},
-["100"]={Color=Color3.fromHex"#4000ff",Transparency=0},
-},{Rotation=90}),
-
-Button=aa:Gradient({
-["0"]={Color=Color3.fromHex"#ff0080",Transparency=0},
-["25"]={Color=Color3.fromHex"#ff8000",Transparency=0},
-["50"]={Color=Color3.fromHex"#ffff00",Transparency=0},
-["75"]={Color=Color3.fromHex"#80ff00",Transparency=0},
-["100"]={Color=Color3.fromHex"#00ffff",Transparency=0},
-},{Rotation=60}),
-
-Icon=Color3.fromHex"#ffffff",
-},
-}
-end end function a.C()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New local ad=
-ab.Tween
-
-function aa.New(ae,af,ag,ah,ai,aj)
-local ak=ai or 10
-local al
-if af and af~=""then
-al=ac("ImageLabel",{
-Image=ab.Icon(af)[1],
-ImageRectSize=ab.Icon(af)[2].ImageRectSize,
-ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
-Size=UDim2.new(0,21,0,21),
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Icon",
-},
-})
-end
-
-local am=ac("TextLabel",{
-BackgroundTransparency=1,
-TextSize=17,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Regular),
-Size=UDim2.new(1,al and-29 or 0,1,0),
-TextXAlignment="Left",
-ThemeTag={
-TextColor3=ah and"Placeholder"or"Text",
-},
-Text=ae,
-})
-
-local an=ac("TextButton",{
-Size=UDim2.new(1,0,0,42),
-Parent=ag,
-BackgroundTransparency=1,
-Text="",
-},{
-ac("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ab.NewRoundFrame(ak,"Squircle",{
-ThemeTag={
-ImageColor3="Placeholder",
-},
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.85,
-}),
-not aj and ab.NewRoundFrame(ak,"SquircleGlass",{
-ThemeTag={
-ImageColor3="Outline",
-},
-Size=UDim2.new(1,1,1,1),
-ImageTransparency=0.9,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-})or nil,
-ab.NewRoundFrame(ak,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="Frame",
-ThemeTag={
-ImageColor3="LabelBackground",
-ImageTransparency="LabelBackgroundTransparency",
-},
-
-
-},{
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,12),
-PaddingRight=UDim.new(0,12),
-}),
-ac("UIListLayout",{
-FillDirection="Horizontal",
-Padding=UDim.new(0,8),
-VerticalAlignment="Center",
-HorizontalAlignment="Left",
-}),
-al,
-am,
-}),
-}),
-})
-
-return an
-end
-
-return aa end function a.D()
-
-local aa={}
-
-local ab=cloneref or clonereference or function(ab)
-return ab
-end
-local ac=ab(game:GetService"UserInputService")
-
-local ad=a.load'j'
-local ae=ad.New
-
-function aa.New(af,ag,ah,ai,aj)
-local ak=ae("Frame",{
-Size=UDim2.new(0,ai,1,0),
-BackgroundTransparency=1,
-Position=UDim2.new(1,0,0,0),
-AnchorPoint=Vector2.new(1,0),
-Parent=ag,
-ZIndex=999,
-Active=true,
-})
-
-local al=ad.NewRoundFrame(ai/2,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-ImageTransparency=0.85,
-ThemeTag={ImageColor3="Text"},
-Parent=ak,
-})
-
-local am=ae("Frame",{
-Size=UDim2.new(1,12,1,12),
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundTransparency=1,
-Active=true,
-ZIndex=999,
-Parent=al,
-})
-
-local an=ad:GenerateUniqueID()
-local ao=false
-local ap,aq
-
-local function UpdateVisuals()
-local ar=af.AbsoluteCanvasSize.Y
-local as=af.AbsoluteWindowSize.Y
-
-if ar<=as then
-al.Visible=false
-return
-end
-
-al.Visible=true
-
-local at=math.clamp(as/ar,0.05,1)
-al.Size=UDim2.new(1,0,at,0)
-
-local au=ar-as
-local av=1-at
-
-if au>0 then
-local aw=af.CanvasPosition.Y/au
-al.Position=UDim2.new(0,0,math.clamp(aw*av,0,av),0)
-else
-al.Position=UDim2.new(0,0,0,0)
-end
-end
-
-local function StopDrag()
-if aj.CurrentInput==an then
-aj.CurrentInput=nil
-end
-ao=false
-af.ScrollingEnabled=true
-if ap then
-ap:Disconnect()
-end
-if aq then
-aq:Disconnect()
-end
-end
-
-ad.AddSignal(am.InputBegan,function(ar)
-if
-ar.UserInputType~=Enum.UserInputType.MouseButton1
-and ar.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-if ao then
-return
-end
-if aj.CurrentInput and aj.CurrentInput~=an then
-return
-end
-
-aj.CurrentInput=an
-
-ao=true
-af.ScrollingEnabled=false
-
-local as=ar.Position.Y
-local at=af.CanvasPosition.Y
-
-ap=ac.InputChanged:Connect(function(au)
-if
-au.UserInputType==Enum.UserInputType.MouseMovement
-or au.UserInputType==Enum.UserInputType.Touch
-then
-local av=au.Position.Y-as
-
-local aw=af.AbsoluteCanvasSize.Y
-local ax=af.AbsoluteWindowSize.Y
-local ay=math.max(aw-ax,0)
-
-local az=ak.AbsoluteSize.Y
-local aA=al.AbsoluteSize.Y
-local aB=math.max(az-aA,1)
-
-local b=av*(ay/aB)
-
-af.CanvasPosition=
-Vector2.new(af.CanvasPosition.X,math.clamp(at+b,0,ay))
-end
-end)
-
-aq=ac.InputEnded:Connect(function(au)
-if au.UserInputType==ar.UserInputType then
-if aj.CurrentInput and aj.CurrentInput~=an then
-return
-end
-
-aj.CurrentInput=nil
-
-StopDrag()
-end
-end)
-end)
-
-ad.AddSignal(af:GetPropertyChangedSignal"AbsoluteWindowSize",UpdateVisuals)
-ad.AddSignal(af:GetPropertyChangedSignal"AbsoluteCanvasSize",UpdateVisuals)
-ad.AddSignal(af:GetPropertyChangedSignal"CanvasPosition",UpdateVisuals)
-
-UpdateVisuals()
-
-return ak
-end
-
-return aa end function a.E()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-function aa.New(ae,af,ag)
-local ah={
-Title=af.Title or"Tag",
-Icon=af.Icon,
-Color=af.Color or Color3.fromHex"#315dff",
-Radius=af.Radius or 999,
-Border=af.Border or false,
-
-TagFrame=nil,
-Height=26,
-Padding=10,
-TextSize=14,
-IconSize=16,
-}
-
-local ai
-if ah.Icon then
-ai=ab.Image(ah.Icon,ah.Icon,0,af.Window,"Tag",false)
-
-ai.Size=UDim2.new(0,ah.IconSize,0,ah.IconSize)
-ai.ImageLabel.ImageColor3=typeof(ah.Color)=="Color3"
-and ab.GetTextColorForHSB(ah.Color)
-or typeof(ah.Color)=="string"
-and(ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme)))
-end
-
-local aj=ac("TextLabel",{
-BackgroundTransparency=1,
-AutomaticSize="XY",
-TextSize=ah.TextSize,
-FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
-Text=ah.Title,
-TextColor3=typeof(ah.Color)=="Color3"and ab.GetTextColorForHSB(ah.Color)or typeof(
-ah.Color
-)=="string"and(ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme))),
-LayoutOrder=9999,
-})
-
-local ak
-
-if typeof(ah.Color)=="table"then
-ak=ac"UIGradient"
-for al,am in next,ah.Color do
-ak[al]=am
-end
-
-aj.TextColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
-if ai then
-ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
-end
-end
-
-local al=ab.NewRoundFrame(ah.Radius,"Squircle",{
-AutomaticSize="X",
-Size=UDim2.new(0,0,0,ah.Height),
-Parent=ag,
-ImageColor3=typeof(ah.Color)=="Color3"and ah.Color
-or typeof(ah.Color)=="table"and Color3.new(1,1,1)
-or nil,
-ThemeTag=typeof(ah.Color)=="string"and{
-ImageColor3=ah.Color,
-},
-},{
-ak,
-ab.NewRoundFrame(ah.Radius+1,"SquircleGlass",{
-Size=UDim2.new(1,1,1,1),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ThemeTag={
-ImageColor3="White",
-},
-ImageTransparency=0.75,
-}),
-ac("Frame",{
-Size=UDim2.new(0,0,1,0),
-AutomaticSize="X",
-Name="Content",
-BackgroundTransparency=1,
-},{
-ai,
-aj,
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,ah.Padding),
-PaddingRight=UDim.new(0,ah.Padding),
-}),
-ac("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-Padding=UDim.new(0,ah.Padding/1.5),
-}),
-}),
-})
-
-function ah.SetTitle(am,an)
-ah.Title=an
-aj.Text=an
-
-return ah
-end
-
-function ah.SetColor(am,an)
-ah.Color=an
-if typeof(an)=="table"then
-local ao=ab.GetAverageColor(an)
-ad(aj,0.06,{TextColor3=ab.GetTextColorForHSB(ao)}):Play()
-local ap=al:FindFirstChildOfClass"UIGradient"or ac("UIGradient",{Parent=al})
-for aq,ar in next,an do
-ap[aq]=ar
-end
-ad(al,0.06,{ImageColor3=Color3.new(1,1,1)}):Play()
-else
-if ak then
-ak:Destroy()
-end
-ad(aj,0.06,{TextColor3=ab.GetTextColorForHSB(an)}):Play()
-if ai then
-ad(ai.ImageLabel,0.06,{ImageColor3=ab.GetTextColorForHSB(an)}):Play()
-end
-ad(al,0.06,{ImageColor3=an}):Play()
-end
-
-return ah
-end
-
-function ah.SetIcon(am,an)
-ah.Icon=an
-
-if ai then
-ai:Destroy()
-ai=nil
-end
-
-if an then
-ai=ab.Image(an,an,0,af.Window,"Tag",false)
-
-ai.Size=UDim2.new(0,ah.IconSize,0,ah.IconSize)
-ai.Parent=al:FindFirstChild"Content"
-
-if typeof(ah.Color)=="Color3"then
-ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ah.Color)
-elseif typeof(ah.Color)=="table"then
-ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
-end
-end
-return ah
-end
-
-function ah.Destroy(am)
-al:Destroy()
-return ah
-end
-
-ab:OnThemeChange(function(am,an)
-aj.TextColor3=ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme))
-ai.ImageLabel.ImageColor3=
-ab.GetTextColorForHSB(ab.GetThemeProperty(ah.Color,ab.Theme))
-end)
-
-return ah
-end
-
-return aa end function a.F()
-
-local aa=(cloneref or clonereference or function(aa)return aa end)
-
-
-local ab=aa(game:GetService"RunService")
-local ac=aa(game:GetService"HttpService")
-
-local ad
-
-local ae
-ae={
-Folder=nil,
-Path=nil,
-Configs={},
-Parser={
-Colorpicker={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Default:ToHex(),
-transparency=af.Transparency or nil,
-}
-end,
-Load=function(af,ag)
-if af and af.Update then
-af:Update(Color3.fromHex(ag.value),ag.transparency or nil)
-end
-end
-},
-Dropdown={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Value,
-}
-end,
-Load=function(af,ag)
-if af and af.Select then
-af:Select(ag.value)
-end
-end
-},
-Input={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Value,
-}
-end,
-Load=function(af,ag)
-if af and af.Set then
-af:Set(ag.value)
-end
-end
-},
-Keybind={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Value,
-}
-end,
-Load=function(af,ag)
-if af and af.Set then
-af:Set(ag.value)
-end
-end
-},
-Slider={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Value.Default,
-}
-end,
-Load=function(af,ag)
-if af and af.Set then
-af:Set(tonumber(ag.value))
-end
-end
-},
-Toggle={
-Save=function(af)
-return{
-__type=af.__type,
-value=af.Value,
-}
-end,
-Load=function(af,ag)
-if af and af.Set then
-af:Set(ag.value)
-end
-end
-},
-}
-}
-
-function ae.Init(af,ag)
-if not ag.Folder then
-warn"[ WindUI.ConfigManager ] Window.Folder is not specified."
-return false
-end
-if ab:IsStudio()or not writefile then
-warn"[ WindUI.ConfigManager ] The config system doesn't work in the studio."
-return false
-end
-
-ad=ag
-ae.Folder=ad.Folder
-ae.Path="WindUI/"..tostring(ae.Folder).."/config/"
-
-if not isfolder(ae.Path)then
-makefolder(ae.Path)
-end
-
-local ah=ae:AllConfigs()
-
-for ai,aj in next,ah do
-if isfile and readfile and isfile(aj..".json")then
-ae.Configs[aj]=readfile(aj..".json")
-end
-end
-
-return ae
-end
-
-function ae.SetPath(af,ag)
-if not ag then
-warn"[ WindUI.ConfigManager ] Custom path is not specified."
-return false
-end
-
-ae.Path=ag
-if not ag:match"/$"then
-ae.Path=ag.."/"
-end
-
-if not isfolder(ae.Path)then
-makefolder(ae.Path)
-end
-
-return true
-end
-
-function ae.CreateConfig(af,ag,ah)
-local ai={
-Path=ae.Path..ag..".json",
-Elements={},
-CustomData={},
-AutoLoad=ah or false,
-Version=1.2,
-}
-
-if not ag then
-return false,"No config file is selected"
-end
-
-function ai.SetAsCurrent(aj)
-ad:SetCurrentConfig(ai)
-end
-
-function ai.Register(aj,ak,al)
-ai.Elements[ak]=al
-end
-
-function ai.Set(aj,ak,al)
-ai.CustomData[ak]=al
-end
-
-function ai.Get(aj,ak)
-return ai.CustomData[ak]
-end
-
-function ai.SetAutoLoad(aj,ak)
-ai.AutoLoad=ak
-end
-
-function ai.Save(aj)
-if ad.PendingFlags then
-for ak,al in next,ad.PendingFlags do
-ai:Register(ak,al)
-end
-end
-
-local ak={
-__version=ai.Version,
-__elements={},
-__autoload=ai.AutoLoad,
-__custom=ai.CustomData
-}
-
-for al,am in next,ai.Elements do
-if ae.Parser[am.__type]then
-ak.__elements[tostring(al)]=ae.Parser[am.__type].Save(am)
-end
-end
-
-local al=ac:JSONEncode(ak)
-if writefile then
-writefile(ai.Path,al)
-end
-
-return ak
-end
-
-function ai.Load(aj)
-if isfile and not isfile(ai.Path)then
-return false,"Config file does not exist"
-end
-
-local ak,al=pcall(function()
-local ak=readfile or function()
-warn"[ WindUI.ConfigManager ] The config system doesn't work in the studio."
-return nil
-end
-return ac:JSONDecode(ak(ai.Path))
-end)
-
-if not ak then
-return false,"Failed to parse config file"
-end
-
-if not al.__version then
-local am={
-__version=ai.Version,
-__elements=al,
-__custom={}
-}
-al=am
-end
-
-if ad.PendingFlags then
-for am,an in next,ad.PendingFlags do
-ai:Register(am,an)
-end
-end
-
-for am,an in next,(al.__elements or{})do
-if ai.Elements[am]and ae.Parser[an.__type]then
-task.spawn(function()
-ae.Parser[an.__type].Load(ai.Elements[am],an)
-end)
-end
-end
-
-ai.CustomData=al.__custom or{}
-
-return ai.CustomData
-end
-
-function ai.Delete(aj)
-if not delfile then
-return false,"delfile function is not available"
-end
-
-if not isfile(ai.Path)then
-return false,"Config file does not exist"
-end
-
-local ak,al=pcall(function()
-delfile(ai.Path)
-end)
-
-if not ak then
-return false,"Failed to delete config file: "..tostring(al)
-end
-
-ae.Configs[ag]=nil
-
-if ad.CurrentConfig==ai then
-ad.CurrentConfig=nil
-end
-
-return true,"Config deleted successfully"
-end
-
-function ai.GetData(aj)
-return{
-elements=ai.Elements,
-custom=ai.CustomData,
-autoload=ai.AutoLoad
-}
-end
-
-
-if isfile(ai.Path)then
-local aj,ak=pcall(function()
-return ac:JSONDecode(readfile(ai.Path))
-end)
-
-if aj and ak and ak.__autoload then
-ai.AutoLoad=true
-
-task.spawn(function()
-task.wait(0.5)
-local al,am=pcall(function()
-return ai:Load()
-end)
-if al then
-if ad.Debug then print("[ WindUI.ConfigManager ] AutoLoaded config: "..ag)end
-else
-warn("[ WindUI.ConfigManager ] Failed to AutoLoad config: "..ag.." - "..tostring(am))
-end
-end)
-end
-end
-
-
-ai:SetAsCurrent()
-ae.Configs[ag]=ai
-return ai
-end
-
-function ae.Config(af,ag,ah)
-return ae:CreateConfig(ag,ah)
-end
-
-function ae.GetAutoLoadConfigs(af)
-local ag={}
-
-for ah,ai in pairs(ae.Configs)do
-if ai.AutoLoad then
-table.insert(ag,ah)
-end
-end
-
-return ag
-end
-
-function ae.DeleteConfig(af,ag)
-if not delfile then
-return false,"delfile function is not available"
-end
-
-local ah=ae.Path..ag..".json"
-
-if not isfile(ah)then
-return false,"Config file does not exist"
-end
-
-local ai,aj=pcall(function()
-delfile(ah)
-end)
-
-if not ai then
-return false,"Failed to delete config file: "..tostring(aj)
-end
-
-ae.Configs[ag]=nil
-
-if ad.CurrentConfig and ad.CurrentConfig.Path==ah then
-ad.CurrentConfig=nil
-end
-
-return true,"Config deleted successfully"
-end
-
-function ae.AllConfigs(af)
-if not listfiles then return{}end
-
-local ag={}
-if not isfolder(ae.Path)then
-makefolder(ae.Path)
-return ag
-end
-
-for ah,ai in next,listfiles(ae.Path)do
-local aj=ai:match"([^\\/]+)%.json$"
-if aj then
-table.insert(ag,aj)
-end
-end
-
-return ag
-end
-
-function ae.GetConfig(af,ag)
-return ae.Configs[ag]
-end
-
-return ae end function a.G()
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-
-local ae=(cloneref or clonereference or function(ae)return ae end)
-
-
-ae(game:GetService"UserInputService")
-
-
-function aa.New(af)
-local ag={
-Button=nil
-}
-
-local ah
-
-
-
-
-
-
-
-
-
-
-
-
-
-local ai=ac("TextLabel",{
-Text=af.Title,
-TextSize=17,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-BackgroundTransparency=1,
-AutomaticSize="XY",
-})
-
-local aj=ac("Frame",{
-Size=UDim2.new(0,36,0,36),
-BackgroundTransparency=1,
-Name="Drag",
-},{
-ac("ImageLabel",{
-Image=ab.Icon"move"[1],
-ImageRectOffset=ab.Icon"move"[2].ImageRectPosition,
-ImageRectSize=ab.Icon"move"[2].ImageRectSize,
-Size=UDim2.new(0,18,0,18),
-BackgroundTransparency=1,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-ThemeTag={
-ImageColor3="Icon",
-},
-ImageTransparency=.3,
-})
-})
-local ak=ac("Frame",{
-Size=UDim2.new(0,1,1,0),
-Position=UDim2.new(0,36,0.5,0),
-AnchorPoint=Vector2.new(0,0.5),
-BackgroundColor3=Color3.new(1,1,1),
-BackgroundTransparency=.9,
-})
-
-local al=ac("Frame",{
-Size=UDim2.new(0,0,0,0),
-Position=UDim2.new(0.5,0,0,28),
-AnchorPoint=Vector2.new(0.5,0.5),
-Parent=af.Parent,
-BackgroundTransparency=1,
-Active=true,
-Visible=false,
-})
-
-
-local am=ac("UIScale",{
-Scale=1,
-})
-
-local an=ac("Frame",{
-Size=UDim2.new(0,0,0,44),
-AutomaticSize="X",
-Parent=al,
-Active=false,
-BackgroundTransparency=.25,
-ZIndex=99,
-BackgroundColor3=Color3.new(0,0,0),
-},{
-am,
-ac("UICorner",{
-CornerRadius=UDim.new(1,0)
-}),
-ac("UIStroke",{
-Thickness=1,
-ApplyStrokeMode="Border",
-Color=Color3.new(1,1,1),
-Transparency=0,
-},{
-ac("UIGradient",{
-Color=ColorSequence.new(Color3.fromHex"40c9ff",Color3.fromHex"e81cff")
-})
-}),
-aj,
-ak,
-
-ac("UIListLayout",{
-Padding=UDim.new(0,4),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-
-ac("TextButton",{
-AutomaticSize="XY",
-Active=true,
-BackgroundTransparency=1,
-Size=UDim2.new(0,0,0,36),
-
-BackgroundColor3=Color3.new(1,1,1),
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(1,-4)
-}),
-ah,
-ac("UIListLayout",{
-Padding=UDim.new(0,af.UIPadding),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-ai,
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,11),
-PaddingRight=UDim.new(0,11),
-}),
-}),
-ac("UIPadding",{
-PaddingLeft=UDim.new(0,4),
-PaddingRight=UDim.new(0,4),
-})
-})
-
-ag.Button=an
-
-
-
-function ag.SetIcon(ao,ap)
-if ah then
-ah:Destroy()
-end
-if ap then
-ah=ab.Image(
-ap,
-af.Title,
-0,
-af.Folder,
-"OpenButton",
-true,
-af.IconThemed
-)
-ah.Size=UDim2.new(0,22,0,22)
-ah.LayoutOrder=-1
-ah.Parent=ag.Button.TextButton
-end
-end
-
-if af.Icon then
-ag:SetIcon(af.Icon)
-end
-
-
-
-ab.AddSignal(an:GetPropertyChangedSignal"AbsoluteSize",function()
-al.Size=UDim2.new(
-0,an.AbsoluteSize.X,
-0,an.AbsoluteSize.Y
-)
-end)
-
-ab.AddSignal(an.TextButton.MouseEnter,function()
-ad(an.TextButton,.1,{BackgroundTransparency=.93}):Play()
-end)
-ab.AddSignal(an.TextButton.MouseLeave,function()
-ad(an.TextButton,.1,{BackgroundTransparency=1}):Play()
-end)
-
-local ao=ab.Drag(al)
-
-
-function ag.Visible(ap,aq)
-al.Visible=aq
-end
-
-function ag.SetScale(ap,aq)
-am.Scale=aq
-end
-
-function ag.Edit(ap,aq)
-local ar={
-Title=aq.Title,
-Icon=aq.Icon,
-Enabled=aq.Enabled,
-Position=aq.Position,
-OnlyIcon=aq.OnlyIcon or false,
-Draggable=aq.Draggable or nil,
-OnlyMobile=aq.OnlyMobile,
-CornerRadius=aq.CornerRadius or UDim.new(1,0),
-StrokeThickness=aq.StrokeThickness or 2,
-Scale=aq.Scale or 1,
-Color=aq.Color
-or ColorSequence.new(Color3.fromHex"40c9ff",Color3.fromHex"e81cff"),
-}
-
-
-
-if ar.Enabled==false then
-af.IsOpenButtonEnabled=false
-end
-
-if ar.OnlyMobile~=false then
-ar.OnlyMobile=true
-else
-af.IsPC=false
-end
-
-
-if ar.Draggable==false and aj and ak then
-aj.Visible=ar.Draggable
-ak.Visible=ar.Draggable
-
-if ao then
-ao:Set(ar.Draggable)
-end
-end
-
-if ar.Position and al then
-al.Position=ar.Position
-end
-
-if ar.OnlyIcon==true and ai then
-ai.Visible=false
-an.TextButton.UIPadding.PaddingLeft=UDim.new(0,7)
-an.TextButton.UIPadding.PaddingRight=UDim.new(0,7)
-elseif ar.OnlyIcon==false then
-ai.Visible=true
-an.TextButton.UIPadding.PaddingLeft=UDim.new(0,11)
-an.TextButton.UIPadding.PaddingRight=UDim.new(0,11)
-end
-
-
-
-
-
-if ai then
-if ar.Title then
-ai.Text=ar.Title
-ab:ChangeTranslationKey(ai,ar.Title)
-elseif ar.Title==nil then
-
-end
-end
-
-if ar.Icon then
-ag:SetIcon(ar.Icon)
-end
-
-an.UIStroke.UIGradient.Color=ar.Color
-if Glow then
-Glow.UIGradient.Color=ar.Color
-end
-
-an.UICorner.CornerRadius=ar.CornerRadius
-an.TextButton.UICorner.CornerRadius=UDim.new(ar.CornerRadius.Scale,ar.CornerRadius.Offset-4)
-an.UIStroke.Thickness=ar.StrokeThickness
-
-ag:SetScale(ar.Scale)
-end
-
-return ag
-end
-
-
-
-return aa end function a.H()
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-
-function aa.New(ae,af,ag,ah,ai,aj)
-local ak={
-Container=nil,
-TooltipSize=16,
-
-TooltipArrowSizeX=ai=="Small"and 16 or 24,
-TooltipArrowSizeY=ai=="Small"and 6 or 9,
-
-PaddingX=ai=="Small"and 12 or 14,
-PaddingY=ai=="Small"and 7 or 9,
-
-Radius=999,
-
-TitleFrame=nil,
-}
-
-ah=ah or""
-aj=aj~=false
-
-local al=ac("TextLabel",{
-AutomaticSize="XY",
-TextWrapped=aj,
-BackgroundTransparency=1,
-FontFace=Font.new(ab.Font,Enum.FontWeight.Medium),
-Text=ae,
-TextSize=ai=="Small"and 15 or 17,
-TextTransparency=1,
-ThemeTag={
-TextColor3="Tooltip"..ah.."Text",
-}
-})
-
-ak.TitleFrame=al
-
-local am=ac("UIScale",{
-Scale=.9
-})
-
-local an=ac("Frame",{
-AnchorPoint=Vector2.new(0.5,0),
-AutomaticSize="XY",
-BackgroundTransparency=1,
-Parent=af,
-
-Visible=false
-},{
-ac("UISizeConstraint",{
-MaxSize=Vector2.new(400,math.huge)
-}),
-ac("Frame",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-LayoutOrder=99,
-Visible=ag,
-Name="Arrow",
-},{
-ac("ImageLabel",{
-Size=UDim2.new(0,ak.TooltipArrowSizeX,0,ak.TooltipArrowSizeY),
-BackgroundTransparency=1,
-
-Image="rbxassetid://105854070513330",
-ThemeTag={
-ImageColor3="Tooltip"..ah,
-},
-},{
-
-
-
-
-
-
-
-
-
-
-}),
-}),
-ab.NewRoundFrame(ak.Radius,"Squircle",{
-AutomaticSize="XY",
-ThemeTag={
-ImageColor3="Tooltip"..ah,
-},
-ImageTransparency=1,
-Name="Background",
-},{
-
-
-
-ac("Frame",{
-
-
-
-AutomaticSize="XY",
-BackgroundTransparency=1,
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(0,16),
-}),
-ac("UIListLayout",{
-Padding=UDim.new(0,12),
-FillDirection="Horizontal",
-VerticalAlignment="Center"
-}),
-
-al,
-ac("UIPadding",{
-PaddingTop=UDim.new(0,ak.PaddingY),
-PaddingLeft=UDim.new(0,ak.PaddingX),
-PaddingRight=UDim.new(0,ak.PaddingX),
-PaddingBottom=UDim.new(0,ak.PaddingY),
-}),
-})
-}),
-am,
-ac("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-}),
-})
-ak.Container=an
-
-function ak.Open(ao)
-an.Visible=true
-
-
-ad(an.Background,.2,{ImageTransparency=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(an.Arrow.ImageLabel,.2,{ImageTransparency=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(al,.2,{TextTransparency=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(am,.22,{Scale=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-
-function ak.Close(ao,ap)
-
-ad(an.Background,.3,{ImageTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(an.Arrow.ImageLabel,.2,{ImageTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(al,.3,{TextTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ad(am,.35,{Scale=.9},Enum.EasingStyle.Quint,Enum.EasingDirection.In):Play()
-
-ap=ap~=false
-if ap then
-task.wait(.35)
-
-an.Visible=false
-an:Destroy()
-end
-end
-
-return ak
-end
-
-
-
-return aa end function a.I()
-game:GetService"ReplicatedStorage"
-local aa=a.load'j'
-local ab=aa.New
-local ac=aa.NewRoundFrame
-local ad=aa.Tween
-
-local ae=(cloneref or clonereference or function(ae)
-return ae
-end)
-
-ae(game:GetService"UserInputService")
-
-local af=a.load'E'
-
-local function Color3ToHSB(ag)
-local ah,ai,aj=ag.R,ag.G,ag.B
-local ak=math.max(ah,ai,aj)
-local al=math.min(ah,ai,aj)
-local am=ak-al
-
-local an=0
-if am~=0 then
-if ak==ah then
-an=(ai-aj)/am%6
-elseif ak==ai then
-an=(aj-ah)/am+2
-else
-an=(ah-ai)/am+4
-end
-an=an*60
-else
-an=0
-end
-
-local ao=(ak==0)and 0 or(am/ak)
-local ap=ak
-
-return{
-h=math.floor(an+0.5),
-s=ao,
-b=ap,
-}
-end
-
-local function GetPerceivedBrightness(ag)
-local ah=ag.R
-local ai=ag.G
-local aj=ag.B
-return 0.299*ah+0.587*ai+0.114*aj
-end
-
-local function GetTextColorForHSB(ag)
-local ah=Color3ToHSB(ag)local
-ai, aj, ak=ah.h, ah.s, ah.b
-if GetPerceivedBrightness(ag)>0.5 then
-return Color3.fromHSV(ai/360,0,0.05)
-else
-return Color3.fromHSV(ai/360,0,0.98)
-end
-end
-
-return function(ag)
-local ah={
-Title=ag.Title,
-Desc=ag.Desc or nil,
-Hover=ag.Hover,
-Thumbnail=ag.Thumbnail,
-ThumbnailSize=ag.ThumbnailSize or 80,
-Image=ag.Image,
-IconThemed=ag.IconThemed or false,
-ImageSize=ag.ImageSize or 30,
-Color=ag.Color,
-Scalable=ag.Scalable,
-Parent=ag.Parent,
-Justify=ag.Justify or"Between",
-UIPadding=ag.Window.ElementConfig.UIPadding,
-UICorner=ag.Window.ElementConfig.UICorner,
-Size=ag.Size or"Default",
-Tags=ag.Tags or{},
-UIElements={},
-
-Index=ag.Index,
-}
-
-local ai=ah.Size=="Small"and-4 or ah.Size=="Large"and 4 or 0
-local aj=ah.Size=="Small"and-4 or ah.Size=="Large"and 4 or 0
-
-local ak=ah.ImageSize
-local al=ah.ThumbnailSize
-local am=true
-
-
-local an=0
-
-local ao
-local ap
-if ah.Thumbnail then
-ao=aa.Image(
-ah.Thumbnail,
-ah.Title,
-ag.Window.NewElements and ah.UICorner-11 or(ah.UICorner-4),
-ag.Window.Folder,
-"Thumbnail",
-false,
-ah.IconThemed
-)
-ao.Size=UDim2.new(1,0,0,al)
-end
-if ah.Image then
-ap=aa.Image(
-ah.Image,
-ah.Title,
-ag.Window.NewElements and ah.UICorner-11 or(ah.UICorner-4),
-ag.Window.Folder,
-"Image",
-ah.IconThemed,
-not ah.Color and true or false,
-"ElementIcon"
-)
-
-if typeof(ah.Color)=="string"and not string.find(ah.Image,"rbxthumb")then
-ap.ImageLabel.ImageColor3=GetTextColorForHSB(Color3.fromHex(aa.Colors[ah.Color]))
-elseif typeof(ah.Color)=="Color3"and not string.find(ah.Image,"rbxthumb")then
-ap.ImageLabel.ImageColor3=GetTextColorForHSB(ah.Color)
-end
-
-ap.Size=UDim2.new(0,ak,0,ak)
-
-an=ak
-end
-
-local function CreateText(aq,ar)
-local as=typeof(ah.Color)=="string"
-and GetTextColorForHSB(Color3.fromHex(aa.Colors[ah.Color]))
-or typeof(ah.Color)=="Color3"and GetTextColorForHSB(ah.Color)
-
-return ab("TextLabel",{
-BackgroundTransparency=1,
-Text=aq or"",
-TextSize=ar=="Desc"and 15 or 17,
-TextXAlignment="Left",
-ThemeTag={
-TextColor3=not ah.Color and("Element"..ar)or nil,
-},
-TextColor3=ah.Color and as or nil,
-TextTransparency=ar=="Desc"and 0.3 or 0,
-TextWrapped=true,
-Size=UDim2.new(ah.Justify=="Between"and 1 or 0,0,0,0),
-AutomaticSize=ah.Justify=="Between"and"Y"or"XY",
-FontFace=Font.new(aa.Font,ar=="Desc"and Enum.FontWeight.Medium or Enum.FontWeight.SemiBold),
-})
-end
-
-local aq=CreateText(ah.Title,"Title")
-local ar=CreateText(ah.Desc,"Desc")
-if not ah.Title or ah.Title==""then
-ar.Visible=false
-end
-if not ah.Desc or ah.Desc==""then
-ar.Visible=false
-end
-
-ah.UIElements.Title=aq
-ah.UIElements.Desc=ar
-
-ah.UIElements.Container=ab("Frame",{
-Size=UDim2.new(1,0,1,0),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-},{
-ab("UIListLayout",{
-Padding=UDim.new(0,ah.UIPadding),
-FillDirection="Vertical",
-VerticalAlignment="Center",
-HorizontalAlignment=ah.Justify=="Between"and"Left"or"Center",
-}),
-ao,
-ab("Frame",{
-Size=UDim2.new(
-ah.Justify=="Between"and 1 or 0,
-ah.Justify=="Between"and-ag.TextOffset or 0,
-0,
-0
-),
-AutomaticSize=ah.Justify=="Between"and"Y"or"XY",
-BackgroundTransparency=1,
-Name="TitleFrame",
-},{
-ab("UIListLayout",{
-Padding=UDim.new(0,ah.UIPadding),
-FillDirection="Horizontal",
-VerticalAlignment=ag.Window.NewElements and(ah.Justify=="Between"and"Top"or"Center")
-or"Center",
-HorizontalAlignment=ah.Justify~="Between"and ah.Justify or"Center",
-}),
-ap,
-ab("Frame",{
-BackgroundTransparency=1,
-AutomaticSize=ah.Justify=="Between"and"Y"or"XY",
-Size=UDim2.new(
-ah.Justify=="Between"and 1 or 0,
-ah.Justify=="Between"and(ap and-an-ah.UIPadding or-an)
-or 0,
-1,
-0
-),
-Name="TitleFrame",
-},{
-ab("UIPadding",{
-PaddingTop=UDim.new(0,(ag.Window.NewElements and ah.UIPadding/2 or 0)+aj),
-PaddingLeft=UDim.new(0,(ag.Window.NewElements and ah.UIPadding/2 or 0)+ai),
-PaddingRight=UDim.new(
-0,
-(ag.Window.NewElements and ah.UIPadding/2 or 0)+ai
-),
-PaddingBottom=UDim.new(
-0,
-(ag.Window.NewElements and ah.UIPadding/2 or 0)+aj
-),
-}),
-ab("UIListLayout",{
-Padding=UDim.new(0,6),
-FillDirection="Vertical",
-VerticalAlignment="Center",
-HorizontalAlignment="Left",
-}),
-ab("ScrollingFrame",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-LayoutOrder=-99,
-BackgroundTransparency=1,
-ScrollingDirection="X",
-CanvasSize=UDim2.new(0,0,0,0),
-ScrollBarThickness=0,
-Visible=false,
-},{
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Left",
-Padding=UDim.new(0,ag.Window.UIPadding/2),
-}),
-}),
-ab("Frame",{
-Name="Space",
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-Visible=false,
-}),
-aq,
-ar,
-}),
-}),
-})
-
-for as,at in next,ag.Tags or{}do
-if not ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame.Visible then
-ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame.Visible=true
-ah.UIElements.Container.TitleFrame.TitleFrame.Space.Visible=true
-end
-af:New(at,ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame)
-end
-
-aa.AddSignal(
-ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame.UIListLayout:GetPropertyChangedSignal
-"AbsoluteContentSize"
-,
-function()
-ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame.Size=UDim2.new(
-1,
-0,
-0,
-ah.UIElements.Container.TitleFrame.TitleFrame.ScrollingFrame.UIListLayout.AbsoluteContentSize.Y
-/ag.ParentConfig.UIScale
-)
-end
-)
-
-
-
-
-
-local as=aa.Image("lock","lock",0,ag.Window.Folder,"Lock",false)
-as.Size=UDim2.new(0,20,0,20)
-as.ImageLabel.ImageColor3=Color3.new(1,1,1)
-as.ImageLabel.ImageTransparency=0.4
-
-local at=ab("TextLabel",{
-Text="Locked",
-TextSize=18,
-FontFace=Font.new(aa.Font,Enum.FontWeight.Medium),
-AutomaticSize="XY",
-BackgroundTransparency=1,
-TextColor3=Color3.new(1,1,1),
-TextTransparency=0.05,
-})
-
-local au=ab("Frame",{
-Size=UDim2.new(1,ah.UIPadding*2,1,ah.UIPadding*2),
-BackgroundTransparency=1,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ZIndex=9999999,
-})
-
-local av,aw=ac(ah.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.25,
-ImageColor3=Color3.new(0,0,0),
-Visible=false,
-Active=false,
-Parent=au,
-},{
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-Padding=UDim.new(0,8),
-}),
-as,
-at,
-},nil,true)local
-
-ax=ac(ah.UICorner,"Squircle-Outline",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-Active=false,
-ThemeTag={
-ImageColor3="Text",
-},
-Parent=au,
-},{
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-Padding=UDim.new(0,8),
-}),
-},nil,true)
-
-local ay,az=ac(ah.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-Active=false,
-ThemeTag={
-ImageColor3="Text",
-},
-Parent=au,
-},{
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-Padding=UDim.new(0,8),
-}),
-},nil,true)local
-
-aA=ac(ah.UICorner,"Squircle-Outline",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-Visible=false,
-Active=false,
-ThemeTag={
-ImageColor3="Text",
-},
-Parent=au,
-},{
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-Padding=UDim.new(0,8),
-}),
-ab("UIGradient",{
-Name="HoverGradient",
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(0.5,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(1,Color3.new(1,1,1)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,1),
-NumberSequenceKeypoint.new(0.25,0.9),
-NumberSequenceKeypoint.new(0.5,0.3),
-NumberSequenceKeypoint.new(0.75,0.9),
-NumberSequenceKeypoint.new(1,1),
-},
-}),
-},nil,true)
-
-local aB,b=ac(ah.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-Active=false,
-ThemeTag={
-ImageColor3="Text",
-},
-Parent=au,
-},{
-ab("UIGradient",{
-Name="HoverGradient",
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(0.5,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(1,Color3.new(1,1,1)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,1),
-NumberSequenceKeypoint.new(0.25,0.9),
-NumberSequenceKeypoint.new(0.5,0.3),
-NumberSequenceKeypoint.new(0.75,0.9),
-NumberSequenceKeypoint.new(1,1),
-},
-}),
-ab("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-Padding=UDim.new(0,8),
-}),
-},nil,true)
-
-local d,f=ac(ah.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-ImageTransparency=ah.Color and 0.05 or(not ag.Window.NewElements and 0.93 or nil),
-
-
-
-Parent=ag.Parent,
-ThemeTag={
-ImageColor3=not ah.Color and(ag.Window.NewElements and"ElementBackground"or"Text")or nil,
-ImageTransparency=not ah.Color
-and(ag.Window.NewElements and"ElementBackgroundTransparency"or nil)
-or nil,
-},
-ImageColor3=ah.Color and(typeof(ah.Color)=="string"and Color3.fromHex(
-aa.Colors[ah.Color]
-)or typeof(ah.Color)=="Color3"and ah.Color)or nil,
-},{
-ah.UIElements.Container,
-au,
-ab("UIPadding",{
-PaddingTop=UDim.new(0,ah.UIPadding),
-PaddingLeft=UDim.new(0,ah.UIPadding),
-PaddingRight=UDim.new(0,ah.UIPadding),
-PaddingBottom=UDim.new(0,ah.UIPadding),
-}),
-},true,true)
-
-ah.UIElements.Main=d
-ah.UIElements.Locked=av
-
-if ah.Hover then
-aa.AddSignal(d.MouseEnter,function()
-if am then
-
-ad(aB,0.12,{ImageTransparency=0.9}):Play()
-ad(aA,0.12,{ImageTransparency=0.8}):Play()
-aa.AddSignal(d.MouseMoved,function(g,h)
-aB.HoverGradient.Offset=
-Vector2.new(((g-d.AbsolutePosition.X)/d.AbsoluteSize.X)-0.5,0)
-aA.HoverGradient.Offset=
-Vector2.new(((g-d.AbsolutePosition.X)/d.AbsoluteSize.X)-0.5,0)
-end)
-end
-end)
-aa.AddSignal(d.InputEnded,function()
-if am then
-
-ad(aB,0.12,{ImageTransparency=1}):Play()
-ad(aA,0.12,{ImageTransparency=1}):Play()
-end
-end)
-end
-
-function ah.SetTitle(g,h)
-ah.Title=h
-aq.Text=h
-end
-
-function ah.SetDesc(g,h)
-ah.Desc=h
-ar.Text=h or""
-if not h then
-ar.Visible=false
-elseif not ar.Visible then
-ar.Visible=true
-end
-end
-
-function ah.Colorize(g,h,i)
-if ah.Color then
-h[i]=typeof(ah.Color)=="string"
-and GetTextColorForHSB(Color3.fromHex(aa.Colors[ah.Color]))
-or typeof(ah.Color)=="Color3"and GetTextColorForHSB(ah.Color)
-or nil
-end
-end
-
-if ag.ElementTable then
-aa.AddSignal(aq:GetPropertyChangedSignal"Text",function()
-if ah.Title~=aq.Text then
-ah:SetTitle(aq.Text)
-ag.ElementTable.Title=aq.Text
-end
-end)
-aa.AddSignal(ar:GetPropertyChangedSignal"Text",function()
-if ah.Desc~=ar.Text then
-ah:SetDesc(ar.Text)
-ag.ElementTable.Desc=ar.Text
-end
-end)
-end
-
-
-
-
-
-function ah.SetThumbnail(g,h,i)
-ah.Thumbnail=h
-if i then
-ah.ThumbnailSize=i
-al=i
-end
-
-if ao then
-if h then
-ao:Destroy()
-ao=aa.Image(
-h,
-ah.Title,
-ah.UICorner-3,
-ag.Window.Folder,
-"Thumbnail",
-false,
-ah.IconThemed
-)
-if ao then
-ao.Size=UDim2.new(1,0,0,al)
-ao.Parent=ah.UIElements.Container
-local l=ah.UIElements.Container:FindFirstChild"UIListLayout"
-if l then
-ao.LayoutOrder=-1
-end
-end
-else
-ao.Visible=false
-end
-else
-if h then
-ao=aa.Image(
-h,
-ah.Title,
-ah.UICorner-3,
-ag.Window.Folder,
-"Thumbnail",
-false,
-ah.IconThemed
-)
-if ao then
-ao.Size=UDim2.new(1,0,0,al)
-ao.Parent=ah.UIElements.Container
-local l=ah.UIElements.Container:FindFirstChild"UIListLayout"
-if l then
-ao.LayoutOrder=-1
-end
-end
-end
-end
-end
-
-function ah.SetImage(g,h,i)
-ah.Image=h
-if i then
-ah.ImageSize=i
-ak=i
-end
-
-if h then
-local l=ap and ap.Parent or ah.UIElements.Container.TitleFrame
-if ap then
-ap:Destroy()
-end
-
-ap=aa.Image(
-h,
-h,
-ah.UICorner-3,
-ag.Window.Folder,
-"Image",
-not ah.Color and true or false
-)
-if ap then
-if typeof(ah.Color)=="string"and not string.find(ah.Image,"rbxthumb")then
-ap.ImageLabel.ImageColor3=
-GetTextColorForHSB(Color3.fromHex(aa.Colors[ah.Color]))
-elseif typeof(ah.Color)=="Color3"and not string.find(ah.Image,"rbxthumb")then
-ap.ImageLabel.ImageColor3=GetTextColorForHSB(ah.Color)
-end
-
-ap.Visible=true
-ap.Parent=l
-ap.LayoutOrder=-99
-
-ap.Size=UDim2.new(0,ak,0,ak)
-an=ah.ImageSize+ah.UIPadding
-end
-else
-if ap then
-ap.Visible=true
-end
-an=0
-end
-
-ah.UIElements.Container.TitleFrame.TitleFrame.Size=UDim2.new(1,-an,1,0)
-end
-
-function ah.Destroy(g)
-d:Destroy()
-end
-
-function ah.Lock(g,h)
-am=false
-av.Active=true
-av.Visible=true
-at.Text=h or"Locked"
-end
-
-function ah.Unlock(g)
-am=true
-av.Active=false
-av.Visible=false
-end
-
-function ah.Highlight(g)
-local h=ab("UIGradient",{
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(0.5,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(1,Color3.new(1,1,1)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,1),
-NumberSequenceKeypoint.new(0.1,0.9),
-NumberSequenceKeypoint.new(0.5,0.3),
-NumberSequenceKeypoint.new(0.9,0.9),
-NumberSequenceKeypoint.new(1,1),
-},
-Rotation=0,
-Offset=Vector2.new(-1,0),
-Parent=ax,
-})
-
-local i=ab("UIGradient",{
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(0.5,Color3.new(1,1,1)),
-ColorSequenceKeypoint.new(1,Color3.new(1,1,1)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,1),
-NumberSequenceKeypoint.new(0.15,0.8),
-NumberSequenceKeypoint.new(0.5,0.1),
-NumberSequenceKeypoint.new(0.85,0.8),
-NumberSequenceKeypoint.new(1,1),
-},
-Rotation=0,
-Offset=Vector2.new(-1,0),
-Parent=ay,
-})
-
-ax.ImageTransparency=0.65
-ay.ImageTransparency=0.88
-
-ad(h,0.75,{
-Offset=Vector2.new(1,0),
-}):Play()
-
-ad(i,0.75,{
-Offset=Vector2.new(1,0),
-}):Play()
-
-task.spawn(function()
-task.wait(0.75)
-ax.ImageTransparency=1
-ay.ImageTransparency=1
-h:Destroy()
-i:Destroy()
-end)
-end
-
-function ah.UpdateShape(g)
-if ag.Window.NewElements then
-local h=aa:GetElementPosition(
-g.Elements,
-ah.Index,
-ag.ParentConfig.ParentTable.__type=="HStack"or ag.ParentConfig.ParentTable.__type=="Group"
-)
-
-if h and d then
-f:SetType(h)
-aw:SetType(h)
-az:SetType(h)
-
-b:SetType(h)
-
-end
-end
-end
-
-
-
-
-
-return ah
-end end function a.J()
-
-local aa=a.load'j'
-local ab=aa.New
-
-local ac={}
-
-local ad=a.load's'.New
-
-function ac.New(ae,af)
-af.Hover=false
-af.TextOffset=0
-af.ParentConfig=af
-af.IsButtons=af.Buttons and#af.Buttons>0 and true or false
-
-local ag={
-__type="Paragraph",
-Title=af.Title or"Paragraph",
-Desc=af.Desc or nil,
-
-Locked=af.Locked or false,
-}
-local ah=a.load'I'(af)
-
-ag.ParagraphFrame=ah
-if af.Buttons and#af.Buttons>0 then
-local ai=ab("Frame",{
-Size=UDim2.new(1,0,0,38),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Parent=ah.UIElements.Container,
-},{
-ab("UIListLayout",{
-Padding=UDim.new(0,10),
-FillDirection="Vertical",
-}),
-})
-
-for aj,ak in next,af.Buttons do
-local al=ad(
-ak.Title,
-ak.Icon,
-ak.Callback,
-ak.Variant or"White",
-ai,
-nil,
-nil,
-af.Window.NewElements and 999 or 10
-)
-al.Size=UDim2.new(1,0,0,38)
-
-end
-end
-
-return ag.__type,ag
-end
-
-return ac end function a.K()
-
-local aa=a.load'j'local ab=
-aa.New
-
-local ac={}
-
-function ac.New(ad,ae)
-local af={
-__type="Button",
-Title=ae.Title or"Button",
-Desc=ae.Desc or nil,
-Icon=ae.Icon or"mouse-pointer-click",
-IconThemed=ae.IconThemed or false,
-IconColor=ae.IconColor or nil,
-Color=ae.Color,
-Justify=ae.Justify or"Between",
-IconAlign=ae.IconAlign or"Right",
-Locked=ae.Locked or false,
-LockedTitle=ae.LockedTitle,
-Callback=ae.Callback or function()end,
-UIElements={},
-}
-
-local ag=true
-
-af.ButtonFrame=a.load'I'{
-Title=af.Title,
-Desc=af.Desc,
-Parent=ae.Parent,
-
-
-
-
-Window=ae.Window,
-Color=af.Color,
-Justify=af.Justify,
-TextOffset=20,
-Hover=true,
-Scalable=true,
-Tab=ae.Tab,
-Index=ae.Index,
-ElementTable=af,
-ParentConfig=ae,
-Size=ae.Size,
-Tags=ae.Tags,
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-af.UIElements.ButtonIcon=aa.Image(
-af.Icon,
-af.Icon,
-0,
-ae.Window.Folder,
-"Button",
-not(af.Color or af.IconColor)and true or nil,
-af.IconThemed
-)
-
-if af.IconColor then
-af.UIElements.ButtonIcon.ImageLabel.ImageColor3=af.IconColor
-end
-
-af.UIElements.ButtonIcon.Size=UDim2.new(0,20,0,20)
-af.UIElements.ButtonIcon.Parent=af.Justify=="Between"and af.ButtonFrame.UIElements.Main
-or af.ButtonFrame.UIElements.Container.TitleFrame
-af.UIElements.ButtonIcon.LayoutOrder=af.IconAlign=="Left"and-99999 or 99999
-af.UIElements.ButtonIcon.AnchorPoint=Vector2.new(1,0.5)
-af.UIElements.ButtonIcon.Position=UDim2.new(1,0,0.5,0)
-
-af.ButtonFrame:Colorize(af.UIElements.ButtonIcon.ImageLabel,"ImageColor3")
-
-function af.Lock(ah)
-af.Locked=true
-ag=false
-return af.ButtonFrame:Lock(af.LockedTitle)
-end
-function af.Unlock(ah)
-af.Locked=false
-ag=true
-return af.ButtonFrame:Unlock()
-end
-
-if af.Locked then
-af:Lock()
-end
-
-aa.AddSignal(af.ButtonFrame.UIElements.Main.MouseButton1Click,function()
-if ag then
-task.spawn(function()
-aa.SafeCallback(af.Callback)
-end)
-end
-end)
-return af.__type,af
-end
-
-return ac end function a.L()
-
-local aa={}
-
-local ab=a.load'j'
-local ac=ab.New
-local ad=ab.Tween
-
-local ae=game:GetService"UserInputService"
-
-function aa.New(af,ag,ah,ai,aj,ak,al)
-local am={
-GlassSpritesheet={
-Id="rbxassetid://77297718671545",
-MirroredId="rbxassetid://92258969882244",
-Size=Vector2.new(102,128),
-Total=80,
-Cols=10,
-},
-}
-
-function am.GetGlassFrame(an,ao:number):(string,Vector2,Vector2)
-local ap=am.GlassSpritesheet
-local aq:number
-
-if ao<=0.4 then
-aq=math.floor((ao/0.4)*(ap.Total-1))
-elseif ao<0.6 then
-aq=ap.Total-1
-else
-aq=math.floor(((ao-0.6)/0.4)*(ap.Total-1))
-end
-
-aq=math.clamp(aq,0,ap.Total-1)
-
-local ar=ao>=0.6
-if ar then
-aq=(ap.Total-1)-aq
-end
-
-local as=ar and ap.MirroredId or ap.Id
-
-return as,ap.Size,Vector2.new((aq%ap.Cols)*ap.Size.X,math.floor(aq/ap.Cols)*ap.Size.Y)
-end
-
-local an=12
-local ao
-if ag and ag~=""then
-ao=ac("ImageLabel",{
-Size=UDim2.new(0,13,0,13),
-BackgroundTransparency=1,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Image=ab.Icon(ag)[1],
-ImageRectOffset=ab.Icon(ag)[2].ImageRectPosition,
-ImageRectSize=ab.Icon(ag)[2].ImageRectSize,
-ImageTransparency=1,
-ImageColor3=Color3.new(0,0,0),
-})
-end
-
-local ap=ac("Frame",{
-Size=UDim2.new(0,2,0,26),
-BackgroundTransparency=1,
-Parent=ai,
-})
-
-local aq=ab.NewRoundFrame(an,"Squircle",{
-ImageTransparency=0.85,
-ThemeTag={
-ImageColor3="Text",
-},
-Parent=ap,
-Size=UDim2.new(0,ak and(52)or(40.8),0,24),
-AnchorPoint=Vector2.new(1,0.5),
-Position=UDim2.new(0,0,0.5,0),
-Name="ToggleFrame",
-},{
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="Layer",
-ThemeTag={
-ImageColor3="Toggle",
-},
-ImageTransparency=1,
-}),
-ab.NewRoundFrame(an,"SquircleOutline",{
-Size=UDim2.new(1,0,1,0),
-Name="Stroke",
-ImageColor3=Color3.new(1,1,1),
-ImageTransparency=1,
-},{
-ac("UIGradient",{
-Rotation=90,
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,0),
-NumberSequenceKeypoint.new(1,1),
-},
-}),
-}),
-
-
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(0,ak and 30 or 20,0,20),
-Position=UDim2.new(0,2,0.5,0),
-AnchorPoint=Vector2.new(0,0.5),
-ImageTransparency=1,
-Name="Frame",
-},{
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Bar",
-},{
-ab.New("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundColor3=Color3.new(1,1,1),
-Name="Highlight",
-BackgroundTransparency=1,
-},{
-ab.NewRoundFrame(9999,"SquircleGlass",{
-Size=UDim2.new(1,1,1,1),
-ImageColor3=Color3.new(1,1,1),
-Name="SquircleGlass",
-ImageTransparency=0.5,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-}),
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="GlassBackground",
-ImageTransparency=0,
-ThemeTag={
-ImageColor3="ElementBackground",
-},
-ZIndex=-1,
-}),
-ac("ImageLabel",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Name="Glass",
-ImageTransparency=0,
-},{
-ac("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-}),
-
-
-
-
-
-
-ab.NewRoundFrame(an,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="BarOverlay",
-ThemeTag={
-ImageColor3="ToggleBar",
-},
-ZIndex=999,
-}),
-}),
-ao,
-ac("UIScale",{
-Scale=1,
-}),
-}),
-}),
-ac("TextButton",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-Name="Hitbox",
-Text="",
-}),
-})
-
-local ar
-local as
-
-local at=ak and 30 or 20
-local au=aq.Size.X.Offset
-
-function am.Set(av,aw,ax,ay)
-if not ay then
-if aw then
-ad(aq.Frame,0.35,{
-Position=UDim2.new(0,au-at-2,0.5,0),
-},Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
-ab.SetThemeTag(aq.Frame.Bar.Highlight.Glass,{ImageColor3="Toggle"},0.15)
-
-ad(
-aq.Frame.Bar.Highlight.Glass,
-0.15,
-{ImageTransparency=0},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-else
-ad(aq.Frame,0.35,{
-Position=UDim2.new(0,2,0.5,0),
-},Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
-ab.SetThemeTag(aq.Frame.Bar.Highlight.Glass,{ImageColor3="Text"},0.15)
-ad(
-aq.Frame.Bar.Highlight.Glass,
-0.15,
-{ImageTransparency=0.85},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-else
-if aw then
-aq.Frame.Position=UDim2.new(0,au-at-2,0.5,0)
-else
-aq.Frame.Position=UDim2.new(0,2,0.5,0)
-end
-end
-
-if aw then
-ad(aq.Layer,0.1,{
-ImageTransparency=0,
-}):Play()
-ab.SetThemeTag(aq.Frame.Bar.Highlight.Glass,{ImageColor3="Toggle"},0.1)
-ad(
-aq.Frame.Bar.Highlight.Glass,
-0.1,
-{ImageTransparency=0},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-
-if ao then
-ad(ao,0.1,{
-ImageTransparency=0,
-}):Play()
-end
-
-local az,aA,aB=am:GetGlassFrame(1)
-
-aq.Frame.Bar.Highlight.Glass.Image=az
-aq.Frame.Bar.Highlight.Glass.ImageRectSize=aA
-aq.Frame.Bar.Highlight.Glass.ImageRectOffset=aB
-else
-ad(aq.Layer,0.1,{
-ImageTransparency=1,
-}):Play()
-ab.SetThemeTag(aq.Frame.Bar.Highlight.Glass,{ImageColor3="Text"},0.1)
-ad(
-aq.Frame.Bar.Highlight.Glass,
-0.1,
-{ImageTransparency=0.85},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-
-if ao then
-ad(ao,0.1,{
-ImageTransparency=1,
-}):Play()
-end
-
-local az,aA,aB=am:GetGlassFrame(0)
-
-aq.Frame.Bar.Highlight.Glass.Image=az
-aq.Frame.Bar.Highlight.Glass.ImageRectSize=aA
-aq.Frame.Bar.Highlight.Glass.ImageRectOffset=aB
-end
-
-ax=ax~=false
-
-task.spawn(function()
-if aj and ax then
-ab.SafeCallback(aj,aw)
-end
-end)
-end
-
-function am.Animate(av,aw,ax)
-if not al.Window.IsToggleDragging then
-al.Window.IsToggleDragging=true
-
-local ay=aw.Position.X
-local az=aw.Position.Y
-local aA=aq.Frame.Position.X.Offset
-local aB=false
-local b=false
-
-ad(
-aq.Frame.Bar.UIScale,
-0.28,
-{Scale=1.5},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ad(
-aq.Frame.Bar.Highlight.BarOverlay,
-0.28,
-{ImageTransparency=0.86},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-
-if ar then
-ar:Disconnect()
-end
-
-ar=ae.InputChanged:Connect(function(d)
-if not al.Window.IsToggleDragging then
-return
-end
-if
-d.UserInputType~=Enum.UserInputType.MouseMovement
-and d.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-if aB then
-return
-end
-
-local f=math.abs(d.Position.X-ay)
-math.abs(d.Position.Y-az)
-
-if not b and f>8 then
-b=true
-end
-
-local g=d.Position.X-ay
-local h=math.max(2,math.min(aA+g,au-at-2))
-
-local i=math.clamp((h-2)/(au-at-4),0,1)
-
-local l,m,p=am:GetGlassFrame(i)
-aq.Frame.Bar.Highlight.Glass.Image=l
-aq.Frame.Bar.Highlight.Glass.ImageRectSize=m
-aq.Frame.Bar.Highlight.Glass.ImageRectOffset=p
-
-ad(aq.Frame,0.12,{
-Position=UDim2.new(0,h,0.5,0),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end)
-
-if as then
-as:Disconnect()
-end
-
-as=ae.InputEnded:Connect(function(d)
-if not al.Window.IsToggleDragging then
-return
-end
-if
-d.UserInputType~=Enum.UserInputType.MouseButton1
-and d.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-
-al.Window.IsToggleDragging=false
-
-if ar then
-ar:Disconnect()
-ar=nil
-end
-if as then
-as:Disconnect()
-as=nil
-end
-
-al.WindUI.CurrentInput=nil
-
-if aB then
-return
-end
-
-if not b then
-ax:Set(not ax.Value,true,false)
-else
-local f=aq.Frame.Position.X.Offset
-local g=f+at/2
-local h=g>au/2
-ax:Set(h,true,false)
-end
-
-ad(
-aq.Frame.Bar.UIScale,
-0.23,
-{Scale=1},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ad(
-aq.Frame.Bar.Highlight.BarOverlay,
-0.23,
-{ImageTransparency=0},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end)
-end
-end
-
-return ap,am
-end
-
-return aa end function a.M()
-
-local aa={}
-
-local ab=a.load'j'local ac=
-ab.New
-local ad=ab.Tween
-
-
-function aa.New(ae,af,ag,ah,ai,aj)
-local ak={}
-
-af=af or"lucide:check"
-
-local al=9
-
-local am=ab.Image(
-af,
-af,
-0,
-(aj and aj.Window.Folder or"Temp"),
-"Checkbox",
-true,
-false,
-"CheckboxIcon"
-)
-am.Size=UDim2.new(1,-26+ag,1,-26+ag)
-am.AnchorPoint=Vector2.new(0.5,0.5)
-am.Position=UDim2.new(0.5,0,0.5,0)
-
-
-local an=ab.NewRoundFrame(al,"Squircle",{
-ImageTransparency=.85,
-ThemeTag={
-ImageColor3="Text"
-},
-Parent=ah,
-Size=UDim2.new(0,26,0,26),
-},{
-ab.NewRoundFrame(al,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Name="Layer",
-ThemeTag={
-ImageColor3="Checkbox",
-},
-ImageTransparency=1,
-}),
-ab.NewRoundFrame(al,"Glass-1.4",{
-Size=UDim2.new(1,0,1,0),
-Name="Stroke",
-ThemeTag={
-ImageColor3="CheckboxBorder",
-ImageTransparency="CheckboxBorderTransparency",
-},
-},{
-
-
-
-
-
-
-
-}),
-
-am,
-},true)
-
-function ak.Set(ao,ap)
-if ap then
-ad(an.Layer,0.06,{
-ImageTransparency=0,
-}):Play()
-
-
-
-ad(am.ImageLabel,0.06,{
-ImageTransparency=0,
-}):Play()
-else
-ad(an.Layer,0.05,{
-ImageTransparency=1,
-}):Play()
-
-
-
-ad(am.ImageLabel,0.06,{
-ImageTransparency=1,
-}):Play()
-end
-
-task.spawn(function()
-if ai then
-ab.SafeCallback(ai,ap)
-end
-end)
-end
-
-return an,ak
-end
-
-
-return aa end function a.N()
-local aa=a.load'j'local ab=
-aa.New local ac=
-aa.Tween
-
-local ad=a.load'L'.New
-local ae=a.load'M'.New
-
-local af={}
-
-function af.New(ag,ah)
-local ai={
-__type="Toggle",
-Title=ah.Title or"Toggle",
-Desc=ah.Desc or nil,
-Locked=ah.Locked or false,
-LockedTitle=ah.LockedTitle,
-Value=ah.Value,
-Icon=ah.Icon or nil,
-IconSize=ah.IconSize or 23,
-Type=ah.Type or"Toggle",
-Callback=ah.Callback or function()end,
-UIElements={},
-}
-ai.ToggleFrame=a.load'I'{
-Title=ai.Title,
-Desc=ai.Desc,
-
-
-
-
-Window=ah.Window,
-Parent=ah.Parent,
-TextOffset=(52),
-Hover=false,
-Tab=ah.Tab,
-Index=ah.Index,
-ElementTable=ai,
-ParentConfig=ah,
-Tags=ah.Tags,
-}
-
-local aj=true
-
-if ai.Value==nil then
-ai.Value=false
-end
-
-function ai.Lock(ak)
-ai.Locked=true
-aj=false
-return ai.ToggleFrame:Lock(ai.LockedTitle)
-end
-function ai.Unlock(ak)
-ai.Locked=false
-aj=true
-return ai.ToggleFrame:Unlock()
-end
-
-if ai.Locked then
-ai:Lock()
-end
-
-local ak=ai.Value
-
-local al,am
-if ai.Type=="Toggle"then
-al,am=ad(
-ak,
-ai.Icon,
-ai.IconSize,
-ai.ToggleFrame.UIElements.Main,
-ai.Callback,
-ah.Window.NewElements,
-ah
-)
-elseif ai.Type=="Checkbox"then
-al,am=ae(
-ak,
-ai.Icon,
-ai.IconSize,
-ai.ToggleFrame.UIElements.Main,
-ai.Callback,
-ah
-)
-else
-error("Unknown Toggle Type: "..tostring(ai.Type))
-end
-
-al.AnchorPoint=Vector2.new(1,ah.Window.NewElements and 0 or 0.5)
-al.Position=UDim2.new(1,0,ah.Window.NewElements and 0 or 0.5,0)
-
-function ai.Set(an,ao,ap,aq)
-if aj then
-am:Set(ao,ap,aq or false)
-ak=ao
-ai.Value=ao
-end
-end
-
-ai:Set(ak,false,ah.Window.NewElements)
-
-local an=ah.WindUI.GenerateGUID()
-
-if ah.Window.NewElements and am.Animate then
-if ai.Type=="Toggle"then
-aa.AddSignal(al.ToggleFrame.Hitbox.InputBegan,function(ao)
-if
-not ah.Window.IsToggleDragging
-and(
-ao.UserInputType==Enum.UserInputType.MouseButton1
-or ao.UserInputType==Enum.UserInputType.Touch
-)
-then
-if ah.WindUI.CurrentInput and ah.WindUI.CurrentInput~=an then
-return
-end
-
-ah.WindUI.CurrentInput=an
-am:Animate(ao,ai)
-end
-end)
-end
-
-
-
-
-
-else
-if ai.Type=="Toggle"then
-aa.AddSignal(al.ToggleFrame.Hitbox.MouseButton1Click,function()
-ai:Set(not ai.Value,nil,ah.Window.NewElements)
-end)
-elseif ai.Type=="Checkbox"then
-aa.AddSignal(al.MouseButton1Click,function()
-ai:Set(not ai.Value,nil,ah.Window.NewElements)
-end)
-end
-end
-
-return ai.__type,ai
-end
-
-return af end function a.O()
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local ac=aa(game:GetService"UserInputService")
-local ad=aa(game:GetService"RunService")
-
-local ae=a.load'j'
-local af=ae.New
-local ag=ae.Tween
-
-local ah={}
-
-local ai=false
-
-function ah.New(aj,ak)
-local al={
-__type="Slider",
-Title=ak.Title or nil,
-Desc=ak.Desc or nil,
-Locked=ak.Locked or nil,
-LockedTitle=ak.LockedTitle,
-Value=ak.Value or{},
-Icons=ak.Icons or nil,
-IsTooltip=ak.IsTooltip or false,
-IsTextbox=ak.IsTextbox,
-Step=ak.Step or 1,
-Callback=ak.Callback or function()end,
-UIElements={},
-IsFocusing=false,
-
-Width=ak.Width or 130,
-TextBoxWidth=ak.Window.NewElements and 40 or 30,
-ThumbSize=13,
-IconSize=26,
-}
-if al.Icons=={}then
-al.Icons={
-From="lucide:sun-dim",
-To="lucide:sun",
-}
-end
-if al.IsTextbox==nil and al.Title==nil then
-al.IsTextbox=false
-else
-al.IsTextbox=al.IsTextbox~=false
-end
-
-local am
-local an
-local ao
-local ap=al.Value.Default or al.Value.Min or 0
-
-local aq=ap
-local ar=(ap-(al.Value.Min or 0))/((al.Value.Max or 100)-(al.Value.Min or 0))
-
-local as=true
-local at=al.Step%1~=0
-
-local function FormatValue(au)
-if at then
-return tonumber(string.format("%.2f",au))
-end
-return math.floor(au+0.5)
-end
-
-local function CalculateValue(au)
-if at then
-return math.floor(au/al.Step+0.5)*al.Step
-else
-return math.floor(au/al.Step+0.5)*al.Step
-end
-end
-
-local au,av
-local aw=32
-if al.Icons then
-if al.Icons.From then
-au=ae.Image(
-al.Icons.From,
-al.Icons.From,
-0,
-ak.Window.Folder,
-"SliderIconFrom",
-true,
-true,
-"SliderIconFrom"
-)
-au.Size=UDim2.new(0,al.IconSize,0,al.IconSize)
-aw=aw+al.IconSize-2
-end
-if al.Icons.To then
-av=ae.Image(
-al.Icons.To,
-al.Icons.To,
-0,
-ak.Window.Folder,
-"SliderIconTo",
-true,
-true,
-"SliderIconTo"
-)
-av.Size=UDim2.new(0,al.IconSize,0,al.IconSize)
-aw=aw+al.IconSize-2
-end
-end
-al.SliderFrame=a.load'I'{
-Title=al.Title,
-Desc=al.Desc,
-Parent=ak.Parent,
-TextOffset=al.Width,
-Hover=false,
-Tab=ak.Tab,
-Index=ak.Index,
-Window=ak.Window,
-ElementTable=al,
-ParentConfig=ak,
-Tags=ak.Tags,
-}
-
-al.UIElements.SliderIcon=ae.NewRoundFrame(99,"Squircle",{
-ImageTransparency=0.95,
-Size=UDim2.new(1,not al.IsTextbox and-aw or(-al.TextBoxWidth-8),0,4),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Frame",
-ThemeTag={
-ImageColor3="Text",
-},
-},{
-ae.NewRoundFrame(99,"Squircle",{
-Name="Frame",
-Size=UDim2.new(ar,0,1,0),
-ImageTransparency=0.1,
-ThemeTag={
-ImageColor3="Slider",
-},
-},{
-ae.NewRoundFrame(99,"Squircle",{
-Size=UDim2.new(
-0,
-ak.Window.NewElements and(al.ThumbSize*2)or(al.ThumbSize+2),
-0,
-ak.Window.NewElements and(al.ThumbSize+4)or(al.ThumbSize+2)
-),
-Position=UDim2.new(1,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-ThemeTag={
-ImageColor3="SliderThumb",
-},
-Name="Thumb",
-},{
-ae.NewRoundFrame(999,"SquircleGlass",{
-Size=UDim2.new(1,0,1,0),
-ImageColor3=Color3.new(1,1,1),
-Name="Highlight",
-ImageTransparency=0.5,
-}),
-}),
-}),
-})
-
-al.UIElements.SliderContainer=af("Frame",{
-Size=UDim2.new(al.Title==nil and 1 or 0,al.Title==nil and 0 or al.Width,0,0),
-AutomaticSize="Y",
-Position=UDim2.new(1,al.IsTextbox and(ak.Window.NewElements and-16 or 0)or 0,0.5,0),
-AnchorPoint=Vector2.new(1,0.5),
-BackgroundTransparency=1,
-Parent=al.SliderFrame.UIElements.Main,
-},{
-af("UIListLayout",{
-Padding=UDim.new(0,al.Title~=nil and 8 or 12),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment=al.Icons
-and(al.Icons.From and(al.Icons.To and"Center"or"Left")or al.Icons.To and"Right")
-or"Center",
-}),
-au,
-al.UIElements.SliderIcon,
-av,
-af("TextBox",{
-Size=UDim2.new(0,al.TextBoxWidth,0,0),
-TextXAlignment="Left",
-Text=FormatValue(ap),
-ThemeTag={
-TextColor3="Text",
-},
-TextTransparency=0.4,
-AutomaticSize="Y",
-TextSize=15,
-FontFace=Font.new(ae.Font,Enum.FontWeight.Medium),
-BackgroundTransparency=1,
-LayoutOrder=-1,
-Visible=al.IsTextbox,
-}),
-})
-
-local ax
-if al.IsTooltip then
-ax=a.load'H'.New(
-ap,
-al.UIElements.SliderIcon.Frame.Thumb,
-true,
-"Secondary",
-"Small",
-false
-)
-ax.Container.AnchorPoint=Vector2.new(0.5,1)
-ax.Container.Position=UDim2.new(0.5,0,0,-8)
-end
-
-function al.Lock(ay)
-al.Locked=true
-as=false
-return al.SliderFrame:Lock(al.LockedTitle)
-end
-function al.Unlock(ay)
-al.Locked=false
-as=true
-return al.SliderFrame:Unlock()
-end
-
-if al.Locked then
-al:Lock()
-end
-
-
-local ay=ak.Tab.UIElements.ContainerFrame
-
-function al.Set(az,aA,aB)
-if as then
-if
-not al.IsFocusing
-and not ai
-and(
-not aB
-or(
-aB.UserInputType==Enum.UserInputType.MouseButton1
-or aB.UserInputType==Enum.UserInputType.Touch
-)
-)
-then
-if aB then
-am=(aB.UserInputType==Enum.UserInputType.Touch)
-ay.ScrollingEnabled=false
-ai=true
-
-local b=am and aB.Position.X or ac:GetMouseLocation().X
-local d=math.clamp(
-(b-al.UIElements.SliderIcon.AbsolutePosition.X)
-/al.UIElements.SliderIcon.AbsoluteSize.X,
-0,
-1
-)
-aA=CalculateValue(al.Value.Min+d*(al.Value.Max-al.Value.Min))
-aA=math.clamp(aA,al.Value.Min or 0,al.Value.Max or 100)
-
-if aA~=aq then
-ag(al.UIElements.SliderIcon.Frame,0.05,{Size=UDim2.new(d,0,1,0)}):Play()
-al.UIElements.SliderContainer.TextBox.Text=FormatValue(aA)
-if ax then
-ax.TitleFrame.Text=FormatValue(aA)
-end
-al.Value.Default=FormatValue(aA)
-aq=aA
-ae.SafeCallback(al.Callback,FormatValue(aA))
-end
-
-an=ad.RenderStepped:Connect(function()
-local f=am and aB.Position.X or ac:GetMouseLocation().X
-local g=math.clamp(
-(f-al.UIElements.SliderIcon.AbsolutePosition.X)
-/al.UIElements.SliderIcon.AbsoluteSize.X,
-0,
-1
-)
-aA=CalculateValue(al.Value.Min+g*(al.Value.Max-al.Value.Min))
-
-if aA~=aq then
-ag(al.UIElements.SliderIcon.Frame,0.05,{Size=UDim2.new(g,0,1,0)}):Play()
-al.UIElements.SliderContainer.TextBox.Text=FormatValue(aA)
-if ax then
-ax.TitleFrame.Text=FormatValue(aA)
-end
-al.Value.Default=FormatValue(aA)
-aq=aA
-ae.SafeCallback(al.Callback,FormatValue(aA))
-end
-end)
-
-
-ao=ac.InputEnded:Connect(function(f)
-if
-(
-f.UserInputType==Enum.UserInputType.MouseButton1
-or f.UserInputType==Enum.UserInputType.Touch
-)and aB==f
-then
-an:Disconnect()
-ao:Disconnect()
-ai=false
-ay.ScrollingEnabled=true
-
-ak.WindUI.CurrentInput=nil
-
-if ak.Window.NewElements then
-ag(al.UIElements.SliderIcon.Frame.Thumb,0.2,{
-ImageTransparency=0,
-Size=UDim2.new(
-0,
-ak.Window.NewElements and(al.ThumbSize*2)or(al.ThumbSize+2),
-0,
-ak.Window.NewElements and(al.ThumbSize+4)or(al.ThumbSize+2)
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
-end
-if ax then
-ax:Close(false)
-end
-end
-end)
-else
-aA=math.clamp(aA,al.Value.Min or 0,al.Value.Max or 100)
-
-local b=math.clamp(
-(aA-(al.Value.Min or 0))/((al.Value.Max or 100)-(al.Value.Min or 0)),
-0,
-1
-)
-aA=CalculateValue(al.Value.Min+b*(al.Value.Max-al.Value.Min))
-
-if aA~=aq then
-ag(al.UIElements.SliderIcon.Frame,0.05,{Size=UDim2.new(b,0,1,0)}):Play()
-al.UIElements.SliderContainer.TextBox.Text=FormatValue(aA)
-if ax then
-ax.TitleFrame.Text=FormatValue(aA)
-end
-al.Value.Default=FormatValue(aA)
-aq=aA
-ae.SafeCallback(al.Callback,FormatValue(aA))
-end
-end
-end
-end
-end
-
-function al.SetMax(az,aA)
-al.Value.Max=aA
-
-local aB=tonumber(al.Value.Default)or aq
-if aB>aA then
-al:Set(aA)
-else
-local b=
-math.clamp((aB-(al.Value.Min or 0))/(aA-(al.Value.Min or 0)),0,1)
-ag(al.UIElements.SliderIcon.Frame,0.1,{Size=UDim2.new(b,0,1,0)}):Play()
-end
-end
-
-function al.SetMin(az,aA)
-al.Value.Min=aA
-
-local aB=tonumber(al.Value.Default)or aq
-if aB<aA then
-al:Set(aA)
-else
-local b=math.clamp((aB-aA)/((al.Value.Max or 100)-aA),0,1)
-ag(al.UIElements.SliderIcon.Frame,0.1,{Size=UDim2.new(b,0,1,0)}):Play()
-end
-end
-
-ae.AddSignal(al.UIElements.SliderContainer.TextBox.FocusLost,function(az)
-local aA=tonumber(al.UIElements.SliderContainer.TextBox.Text)
-if aA then
-al:Set(aA)
-else
-al.UIElements.SliderContainer.TextBox.Text=FormatValue(aq)
-if ax then
-ax.TitleFrame.Text=FormatValue(aq)
-end
-end
-end)
-
-local az=ak.WindUI.GenerateGUID()
-
-ae.AddSignal(al.UIElements.SliderContainer.InputBegan,function(aA)
-if al.Locked or ai then
-return
-end
-if
-aA.UserInputType==Enum.UserInputType.MouseButton1
-or aA.UserInputType==Enum.UserInputType.Touch
-then
-if ak.WindUI.CurrentInput and ak.WindUI.CurrentInput~=az then
-return
-end
-ak.WindUI.CurrentInput=az
-
-al:Set(ap,aA)
-
-
-if ak.Window.NewElements then
-ag(al.UIElements.SliderIcon.Frame.Thumb,0.24,{
-ImageTransparency=0.85,
-Size=UDim2.new(
-0,
-(ak.Window.NewElements and(al.ThumbSize*2)or al.ThumbSize)+8,
-0,
-al.ThumbSize+8
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-if ax then
-ax:Open()
-end
-
-end
-end)
-
-return al.__type,al
-end
-
-return ah end function a.P()
-
-local aa=a.load'j'
-local ac=aa.New
-local ad=aa.Tween
-
-local ae={}
-
-local function ToFiniteNumber(af)
-local ag=tonumber(af)
-if ag==nil or ag~=ag or math.abs(ag)==math.huge then
-return nil
-end
-
-return ag
-end
-
-local function FormatNumber(af)
-if af%1==0 then
-return tostring(af)
-end
-
-return tostring(tonumber(string.format("%.2f",af)))
-end
-
-function ae.New(af,ag)
-local ah=typeof(ag.Value)=="table"and ag.Value or{}
-local ai=ToFiniteNumber(ah.Min)or ToFiniteNumber(ag.Min)or 0
-local aj=ToFiniteNumber(ah.Max)or ToFiniteNumber(ag.Max)or 100
-
-if ai>aj then
-ai,aj=aj,ai
-end
-
-local ak=typeof(ag.Value)=="number"and ag.Value
-or ToFiniteNumber(ah.Default)
-or ToFiniteNumber(ag.Default)
-or ai
-ak=ToFiniteNumber(ak)or ai
-
-local al=ag.Indeterminate==true
-
-local am=ag.ShowValue
-if am==nil then
-am=not al
-end
-
-local an=math.max(ToFiniteNumber(ag.ValueWidth)or 44,0)
-
-local ao={
-__type="ProgressBar",
-Title=ag.Title or"Progress",
-Desc=ag.Desc or nil,
-Value={
-Min=ai,
-Max=aj,
-Default=math.clamp(ak,ai,aj),
-},
-ShowValue=am,
-DisplayMode=ag.DisplayMode or"Percent",
-Format=ag.Format,
-Animate=ag.Animate~=false,
-AnimationDuration=math.max(ToFiniteNumber(ag.AnimationDuration)or 0.15,0),
-Indeterminate=al,
-IndeterminateText=ag.IndeterminateText or"",
-Speed=math.max(ToFiniteNumber(ag.Speed)or 1,0.01),
-ControlGap=math.max(ToFiniteNumber(ag.ControlGap)or 16,0),
-UIElements={},
-
-Width=math.max(ToFiniteNumber(ag.Width)or 160,0),
-ValueWidth=an,
-}
-
-local function GetRatio(ap)
-if ao.Value.Max==ao.Value.Min then
-return ap>=ao.Value.Max and 1 or 0
-end
-
-return math.clamp((ap-ao.Value.Min)/(ao.Value.Max-ao.Value.Min),0,1)
-end
-
-local function GetValueText(ap,aq)
-if ao.Indeterminate then
-return tostring(ao.IndeterminateText)
-end
-
-local ar=aq*100
-
-if typeof(ao.Format)=="function"then
-local as,at=
-pcall(ao.Format,ap,ar,ao.Value.Min,ao.Value.Max)
-
-if as and at~=nil then
-return tostring(at)
-end
-end
-
-if ao.DisplayMode=="Value"then
-return FormatNumber(ap)
-elseif ao.DisplayMode=="Fraction"then
-return FormatNumber(ap).."/"..FormatNumber(ao.Value.Max)
-end
-
-return tostring(math.floor(ar+0.5)).."%"
-end
-
-ao.ProgressBarFrame=a.load'I'{
-Title=ao.Title,
-Desc=ao.Desc,
-Parent=ag.Parent,
-TextOffset=ao.Width+ao.ControlGap,
-Hover=false,
-Tab=ag.Tab,
-Index=ag.Index,
-Window=ag.Window,
-ElementTable=ao,
-ParentConfig=ag,
-Tags=ag.Tags,
-}
-
-ao.UIElements.Fill=aa.NewRoundFrame(99,"Squircle",{
-Name="Fill",
-Size=ao.Indeterminate and UDim2.new(0.3,0,1,0)
-or UDim2.new(GetRatio(ao.Value.Default),0,1,0),
-Position=ao.Indeterminate and UDim2.new(-0.3,0,0,0)or UDim2.new(0,0,0,0),
-ThemeTag={
-ImageColor3="ProgressBar",
-},
-})
-
-ao.UIElements.Bar=aa.NewRoundFrame(99,"Squircle",{
-Name="Bar",
-Size=UDim2.new(1,ao.ShowValue and-(ao.ValueWidth+8)or 0,0,6),
-ClipsDescendants=true,
-ImageTransparency=0.9,
-ThemeTag={
-ImageColor3="ProgressBarTrack",
-ImageTransparency="ProgressBarTrackTransparency",
-},
-},{
-ao.UIElements.Fill,
-})
-
-ao.UIElements.Value=ac("TextLabel",{
-Name="Value",
-Size=UDim2.new(0,ao.ValueWidth,0,20),
-BackgroundTransparency=1,
-FontFace=Font.new(aa.Font,Enum.FontWeight.Medium),
-Text=GetValueText(ao.Value.Default,GetRatio(ao.Value.Default)),
-TextSize=14,
-TextTransparency=0.25,
-TextTruncate="AtEnd",
-TextXAlignment="Right",
-Visible=ao.ShowValue,
-ThemeTag={
-TextColor3="ProgressBarText",
-},
-})
-
-ao.UIElements.Container=ac("Frame",{
-Name="ProgressBarContainer",
-Size=UDim2.new(0,ao.Width,0,36),
-Position=UDim2.new(1,0,ag.Window.NewElements and 0 or 0.5,0),
-AnchorPoint=Vector2.new(1,ag.Window.NewElements and 0 or 0.5),
-BackgroundTransparency=1,
-Parent=ao.ProgressBarFrame.UIElements.Main,
-},{
-ac("UIListLayout",{
-Padding=UDim.new(0,8),
-FillDirection="Horizontal",
-HorizontalAlignment="Right",
-VerticalAlignment="Center",
-}),
-ao.UIElements.Bar,
-ao.UIElements.Value,
-})
-
-if ao.Indeterminate then
-local ap=ad(
-ao.UIElements.Fill,
-1/ao.Speed,
-{Position=UDim2.new(1,0,0,0)},
-Enum.EasingStyle.Linear,
-Enum.EasingDirection.InOut,-1
-
-)
-aa.AddSignal(ao.UIElements.Bar.Destroying,function()
-ap:Cancel()
-end)
-ap:Play()
-end
-
-local function Update(ap,aq)
-local ar=ToFiniteNumber(ap)
-if ar==nil then
-return ao.Value.Default
-end
-
-ar=math.clamp(ar,ao.Value.Min,ao.Value.Max)
-ao.Value.Default=ar
-
-local as=GetRatio(ar)
-local at=UDim2.new(as,0,1,0)
-
-if ao.UIElements.Fill and not ao.Indeterminate then
-if aq or not ao.Animate or ao.AnimationDuration<=0 then
-ao.UIElements.Fill.Size=at
-else
-ad(
-ao.UIElements.Fill,
-ao.AnimationDuration,
-{Size=at},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-end
-
-ao.UIElements.Value.Text=GetValueText(ar,as)
-
-return ar
-end
-
-function ao.Set(ap,aq)
-return Update(aq,false)
-end
-
-function ao.Get(ap)
-return ao.Value.Default
-end
-
-function ao.GetPercentage(ap)
-return GetRatio(ao.Value.Default)*100
-end
-
-function ao.SetRange(ap,aq,ar)
-aq=ToFiniteNumber(aq)
-ar=ToFiniteNumber(ar)
-
-if aq==nil or ar==nil then
-return ao.Value.Min,ao.Value.Max
-end
-
-if aq>ar then
-aq,ar=ar,aq
-end
-
-ao.Value.Min=aq
-ao.Value.Max=ar
-Update(ao.Value.Default,false)
-
-return aq,ar
-end
-
-function ao.SetMin(ap,aq)
-aq=ToFiniteNumber(aq)
-if aq==nil then
-return ao.Value.Min
-end
-
-ao:SetRange(aq,math.max(aq,ao.Value.Max))
-return ao.Value.Min
-end
-
-function ao.SetMax(ap,aq)
-aq=ToFiniteNumber(aq)
-if aq==nil then
-return ao.Value.Max
-end
-
-ao:SetRange(math.min(ao.Value.Min,aq),aq)
-return ao.Value.Max
-end
-
-Update(ao.Value.Default,true)
-
-return ao.__type,ao
-end
-
-return ae end function a.Q()
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local ac=aa(game:GetService"UserInputService")
-
-local ad=a.load'j'
-local ae=ad.New local af=
-ad.Tween
-
-local ag={
-UICorner=6,
-UIPadding=8,
-}
-
-local ah=a.load'C'.New
-
-function ag.New(ai,aj)
-local function NormalizeKeyCode(ak)
-if typeof(ak)=="EnumItem"then
-return ak.Name
-elseif type(ak)=="string"then
-return ak
-else
-return"F"
-end
-end
-
-local ak={
-__type="Keybind",
-Title=aj.Title or"Keybind",
-Desc=aj.Desc or nil,
-Locked=aj.Locked or false,
-LockedTitle=aj.LockedTitle,
-Value=NormalizeKeyCode(aj.Value)or"F",
-Callback=aj.Callback or function()end,
-CanChange=aj.CanChange~=false,
-Blacklist=aj.Blacklist or{},
-Picking=false,
-UIElements={},
-}
-
-local al={}
-
-for am,an in next,ak.Blacklist do
-table.insert(al,Enum.KeyCode[NormalizeKeyCode(an)])
-end
-table.insert(al,Enum.KeyCode[NormalizeKeyCode"Escape"])
-
-local am=true
-
-ak.KeybindFrame=a.load'I'{
-Title=ak.Title,
-Desc=ak.Desc,
-Parent=aj.Parent,
-TextOffset=85,
-Hover=ak.CanChange,
-Tab=aj.Tab,
-Index=aj.Index,
-Window=aj.Window,
-ElementTable=ak,
-ParentConfig=aj,
-Tags=aj.Tags,
-}
-
-ak.UIElements.Keybind=ah(
-ak.Value,
-nil,
-ak.KeybindFrame.UIElements.Main,
-nil,
-aj.Window.NewElements and 12 or 10
-)
-
-ak.UIElements.Keybind.Size=
-UDim2.new(0,24+ak.UIElements.Keybind.Frame.Frame.TextLabel.TextBounds.X,0,42)
-ak.UIElements.Keybind.AnchorPoint=Vector2.new(1,0.5)
-ak.UIElements.Keybind.Position=UDim2.new(1,0,0.5,0)
-ak.UIElements.Keybind.Interactable=false
-
-ae("UIScale",{
-Parent=ak.UIElements.Keybind,
-Scale=0.85,
-})
-
-ad.AddSignal(
-ak.UIElements.Keybind.Frame.Frame.TextLabel:GetPropertyChangedSignal"TextBounds",
-function()
-ak.UIElements.Keybind.Size=
-UDim2.new(0,24+ak.UIElements.Keybind.Frame.Frame.TextLabel.TextBounds.X,0,42)
-end
-)
-
-function ak.Lock(an)
-ak.Locked=true
-am=false
-return ak.KeybindFrame:Lock(ak.LockedTitle)
-end
-function ak.Unlock(an)
-ak.Locked=false
-am=true
-return ak.KeybindFrame:Unlock()
-end
-
-function ak.Set(an,ao)
-local ap=NormalizeKeyCode(ao)
-ak.Value=ap
-ak.UIElements.Keybind.Frame.Frame.TextLabel.Text=ap
-end
-
-if ak.Locked then
-ak:Lock()
-end
-
-local an
-
-ad.AddSignal(ak.KeybindFrame.UIElements.Main.MouseButton1Click,function()
-if am then
-if ak.CanChange then
-ak.Picking=true
-ak.UIElements.Keybind.Frame.Frame.TextLabel.Text="..."
-
-
-
-local ao
-ao=ac.InputBegan:Connect(function(ap)
-local aq
-
-if ap.UserInputType==Enum.UserInputType.Keyboard then
-if table.find(al,ap.KeyCode)then
-aq=nil
-return
-else
-aq=ap.KeyCode.Name
-end
-elseif
-ap.UserInputType==Enum.UserInputType.MouseButton1
-and not table.find(al,"MouseLeftButton")
-then
-aq="MouseLeftButton"
-elseif
-ap.UserInputType==Enum.UserInputType.MouseButton2
-and not table.find(al,"MouseRightButton")
-then
-aq="MouseRightButton"
-end
-
-if an then
-an:Disconnect()
-end
-
-an=ac.InputEnded:Connect(function(ar)
-if
-aq
-and(
-ar.KeyCode.Name==aq
-or aq=="MouseLeft"and ar.UserInputType==Enum.UserInputType.MouseButton1
-or aq=="MouseRight"and ar.UserInputType==Enum.UserInputType.MouseButton2
-)
-then
-ak.Picking=false
-
-ak.UIElements.Keybind.Frame.Frame.TextLabel.Text=aq
-ak.Value=aq
-
-ao:Disconnect()
-an:Disconnect()
-end
-end)
-end)
-end
-end
-end)
-
-ad.AddSignal(ac.InputBegan,function(ao,ap)
-if ac:GetFocusedTextBox()then
-return
-end
-if not am then
-return
-end
-if ak.Picking then
-return
-end
-
-if ao.UserInputType==Enum.UserInputType.Keyboard then
-if ao.KeyCode.Name==ak.Value then
-ad.SafeCallback(ak.Callback,ao.KeyCode.Name)
-end
-elseif ao.UserInputType==Enum.UserInputType.MouseButton1 and ak.Value=="MouseLeft"then
-ad.SafeCallback(ak.Callback,"MouseLeft")
-elseif ao.UserInputType==Enum.UserInputType.MouseButton2 and ak.Value=="MouseRight"then
-ad.SafeCallback(ak.Callback,"MouseRight")
-end
-end)
-
-return ak.__type,ak
-end
-
-return ag end function a.R()
-
-local aa=a.load'j'local ac=
-aa.New local ad=
-aa.Tween
-
-local ae={
-UICorner=8,
-UIPadding=8,
-}local af=a.load's'
-
-.New
-local ag=a.load't'.New
-
-function ae.New(ah,ai)
-local aj={
-__type="Input",
-Title=ai.Title or"Input",
-Desc=ai.Desc or nil,
-Type=ai.Type or"Input",
-Locked=ai.Locked or false,
-LockedTitle=ai.LockedTitle,
-InputIcon=ai.InputIcon or false,
-Placeholder=ai.Placeholder or"Enter Text...",
-Value=ai.Value or"",
-Callback=ai.Callback or function()end,
-ClearTextOnFocus=ai.ClearTextOnFocus or false,
-UIElements={},
-
-Width=150,
-}
-
-local ak=true
-
-aj.InputFrame=a.load'I'{
-Title=aj.Title,
-Desc=aj.Desc,
-Parent=ai.Parent,
-TextOffset=aj.Width,
-Hover=false,
-Tab=ai.Tab,
-Index=ai.Index,
-Window=ai.Window,
-ElementTable=aj,
-ParentConfig=ai,
-Tags=ai.Tags,
-}
-
-local al=ag(
-aj.Placeholder,
-aj.InputIcon,
-aj.Type=="Textarea"and aj.InputFrame.UIElements.Container or aj.InputFrame.UIElements.Main,
-aj.Type,
-function(al)
-aj:Set(al,true)
-end,
-nil,
-ai.Window.NewElements and 12 or 10,
-aj.ClearTextOnFocus
-)
-
-if aj.Type~="Textarea"then
-al.Size=UDim2.new(0,aj.Width,0,36)
-al.Position=UDim2.new(1,0,ai.Window.NewElements and 0 or 0.5,0)
-al.AnchorPoint=Vector2.new(1,ai.Window.NewElements and 0 or 0.5)
-else
-al.Size=UDim2.new(1,0,0,148)
-end
-
-
-
-
-
-
-function aj.Lock(am)
-aj.Locked=true
-ak=false
-return aj.InputFrame:Lock(aj.LockedTitle)
-end
-function aj.Unlock(am)
-aj.Locked=false
-ak=true
-return aj.InputFrame:Unlock()
-end
-
-function aj.Set(am,an,ao)
-if ak then
-aj.Value=an
-aa.SafeCallback(aj.Callback,an)
-
-if not ao then
-al.Frame.Frame.TextBox.Text=an
-end
-end
-end
-
-function aj.SetPlaceholder(am,an)
-al.Frame.Frame.TextBox.PlaceholderText=an
-aj.Placeholder=an
-end
-
-aj:Set(aj.Value)
-
-if aj.Locked then
-aj:Lock()
-end
-
-return aj.__type,aj
-end
-
-return ae end function a.S()
-
-local aa=a.load'j'
-local ae=aa.New
-
-local af={}
-
-function af.New(ag,ah)
-local ai=ae("Frame",{
-Size=ah.ParentType~="Group"and UDim2.new(1,0,0,1)or UDim2.new(0,1,1,0),
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundTransparency=.9,
-ThemeTag={
-BackgroundColor3="Text"
-}
-})
-local aj=ae("Frame",{
-Parent=ah.Parent,
-Size=ah.ParentType~="Group"and UDim2.new(1,-7,0,7)or UDim2.new(0,7,1,-7),
-BackgroundTransparency=1,
-},{
-ai
-})
-
-return"Divider",{__type="Divider",ElementFrame=aj}
-end
-
-return af end function a.T()
-local aa={}
-
-local ae=(cloneref or clonereference or function(ae)
-return ae
-end)
-
-local af=ae(game:GetService"UserInputService")
-local ag=ae(game:GetService"Players").LocalPlayer:GetMouse()
-local ah=ae(game:GetService"Workspace").CurrentCamera local ai=
-
-workspace.CurrentCamera
-
-local aj=a.load't'.New
-
-local ak=a.load'j'
-local al=ak.New
-local am=ak.Tween
-
-local an=0.67
-
-function aa.New(ao,ap,aq,ar)
-local as={}
-
-if not ap.Callback then
-ar="Menu"
-end
-
-ap.UIElements.UIListLayout=al("UIListLayout",{
-Padding=UDim.new(0,aq.MenuPadding/1.5),
-FillDirection="Vertical",
-HorizontalAlignment="Center",
-})
-
-ap.UIElements.Menu=ak.NewRoundFrame(aq.MenuCorner,"Squircle",{
-ThemeTag={
-ImageColor3="DropdownBackground",
-},
-ImageTransparency=1,
-Size=UDim2.new(1,0,1,0),
-AnchorPoint=Vector2.new(1,0),
-Position=UDim2.new(1,0,0,0),
-},{
-al("UIPadding",{
-PaddingTop=UDim.new(0,aq.MenuPadding),
-PaddingLeft=UDim.new(0,aq.MenuPadding),
-PaddingRight=UDim.new(0,aq.MenuPadding),
-PaddingBottom=UDim.new(0,aq.MenuPadding),
-}),
-al("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,aq.MenuPadding),
-}),
-al("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,ap.SearchBarEnabled and-aq.MenuPadding-aq.SearchBarHeight),
-
-ClipsDescendants=true,
-LayoutOrder=999,
-Name="Frame",
-},{
-al("UICorner",{
-CornerRadius=UDim.new(0,aq.MenuCorner-aq.MenuPadding),
-}),
-al("ScrollingFrame",{
-Size=UDim2.new(1,0,1,0),
-ScrollBarThickness=0,
-ScrollingDirection="Y",
-AutomaticCanvasSize="Y",
-CanvasSize=UDim2.new(0,0,0,0),
-BackgroundTransparency=1,
-ScrollBarImageTransparency=1,
-},{
-ap.UIElements.UIListLayout,
-}),
-}),
-})
-
-ap.UIElements.MenuCanvas=al("Frame",{
-Size=UDim2.new(0,ap.MenuWidth,0,300),
-BackgroundTransparency=1,
-Position=UDim2.new(-10,0,-10,0),
-Visible=false,
-Active=false,
-
-Parent=ao.WindUI.DropdownGui,
-AnchorPoint=Vector2.new(1,0),
-},{
-ap.UIElements.Menu,
-al("UISizeConstraint",{
-MinSize=Vector2.new(170,0),
-MaxSize=Vector2.new(300,400),
-}),
-})
-
-local function RecalculateCanvasSize()
-ap.UIElements.Menu.Frame.ScrollingFrame.CanvasSize=
-UDim2.fromOffset(0,ap.UIElements.UIListLayout.AbsoluteContentSize.Y)
-end
-
-local function RecalculateListSize()
-local at=ao.WindUI.DropdownGui.AbsoluteSize.Y
-
-local au=ap.UIElements.UIListLayout.AbsoluteContentSize.Y/ao.UIScale
-local av=ap.SearchBarEnabled and(aq.SearchBarHeight+(aq.MenuPadding*3))
-or(aq.MenuPadding*2)
-local aw=au+av
-
-if aw>at then
-ap.UIElements.MenuCanvas.Size=
-UDim2.fromOffset(ap.UIElements.MenuCanvas.AbsoluteSize.X,at)
-else
-ap.UIElements.MenuCanvas.Size=
-UDim2.fromOffset(ap.UIElements.MenuCanvas.AbsoluteSize.X,aw)
-end
-end
-
-function UpdatePosition()
-local at=ap.UIElements.Dropdown or ap.DropdownFrame.UIElements.Main
-local au=ap.UIElements.MenuCanvas
-
-local av=ah.ViewportSize.Y
--(at.AbsolutePosition.Y+at.AbsoluteSize.Y)
--aq.MenuPadding
--54
-local aw=au.AbsoluteSize.Y+aq.MenuPadding
-
-local ax=-54
-if av<aw then
-ax=aw-av-54
-end
-
-au.Position=UDim2.new(
-0,
-at.AbsolutePosition.X+at.AbsoluteSize.X,
-0,
-at.AbsolutePosition.Y+at.AbsoluteSize.Y-ax+(aq.MenuPadding*2)
-)
-end
-
-local at
-
-function as.Display(au)
-local av=ap.Values
-local aw=""
-
-if ap.Multi then
-local ax={}
-if typeof(ap.Value)=="table"then
-for ay,az in ipairs(ap.Value)do
-local aA=typeof(az)=="table"and az.Title or az
-ax[aA]=true
-end
-end
-
-for ay,az in ipairs(av)do
-local aA=typeof(az)=="table"and az.Title or az
-if ax[aA]then
-aw=aw..aA..", "
-end
-end
-
-if#aw>0 then
-aw=aw:sub(1,#aw-2)
-end
-else
-aw=typeof(ap.Value)=="table"and(ap.Value.Title or ap.Value[1])
-or ap.Value
-or""
-end
-
-if ap.UIElements.Dropdown then
-ap.UIElements.Dropdown.Frame.Frame.TextLabel.Text=(aw==""and"--"or aw)
-end
-end
-
-local function Callback(au)
-as:Display()
-if ap.Locked then
-return
-end
-
-if ap.Callback then
-task.spawn(function()
-if ap.Locked then
-return
-end
-ak.SafeCallback(ap.Callback,ap.Value)
-end)
-else
-task.spawn(function()
-if ap.Locked then
-return
-end
-ak.SafeCallback(au)
-end)
-end
-end
-
-function as.LockValues(au,av)
-if not av then
-return
-end
-
-for aw,ax in next,ap.Tabs do
-if ax and ax.UIElements and ax.UIElements.TabItem then
-local ay=ax.Name
-local az=false
-
-for aA,aB in next,av do
-if ay==aB then
-az=true
-break
-end
-end
-
-if az then
-am(ax.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
-
-am(ax.UIElements.TabItem.Frame.Title.TextLabel,0.1,{TextTransparency=0.6}):Play()
-if ax.UIElements.TabIcon then
-am(ax.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0.6}):Play()
-end
-
-ax.UIElements.TabItem.Active=false
-ax.Locked=true
-else
-if ax.Selected then
-am(ax.UIElements.TabItem,0.1,{ImageTransparency=an}):Play()
-
-am(ax.UIElements.TabItem.Frame.Title.TextLabel,0.1,{TextTransparency=0}):Play()
-if ax.UIElements.TabIcon then
-am(ax.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0}):Play()
-end
-else
-am(ax.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
-
-am(
-ax.UIElements.TabItem.Frame.Title.TextLabel,
-0.1,
-{TextTransparency=ar=="Dropdown"and 0.4 or 0.05}
-):Play()
-if ax.UIElements.TabIcon then
-am(
-ax.UIElements.TabIcon.ImageLabel,
-0.1,
-{ImageTransparency=ar=="Dropdown"and 0.2 or 0}
-):Play()
-end
-end
-
-ax.UIElements.TabItem.Active=true
-ax.Locked=false
-end
-end
-end
-end
-
-function as.Refresh(au,av)
-if ao.Window.Destroyed then
-return
-end
-
-for aw,ax in next,ap.UIElements.Menu.Frame.ScrollingFrame:GetChildren()do
-if not ax:IsA"UIListLayout"then
-ax:Destroy()
-end
-end
-
-ap.Tabs={}
-
-if ap.SearchBarEnabled then
-if not at then
-at=aj("Search...","search",ap.UIElements.Menu,nil,function(aw)
-for ax,ay in next,ap.Tabs do
-if string.find(string.lower(ay.Name),string.lower(aw),1,true)then
-ay.UIElements.TabItem.Visible=true
-else
-ay.UIElements.TabItem.Visible=false
-end
-RecalculateListSize()
-RecalculateCanvasSize()
-end
-end,true)
-at.Size=UDim2.new(1,0,0,aq.SearchBarHeight)
-at.Position=UDim2.new(0,0,0,0)
-at.Name="SearchBar"
-end
-end
-
-for aw,ax in next,av do
-if ax.Type~="Divider"then
-local ay={
-Name=typeof(ax)=="table"and ax.Title or ax,
-Desc=typeof(ax)=="table"and ax.Desc or nil,
-Icon=typeof(ax)=="table"and ax.Icon or nil,
-IconSize=typeof(ax)=="table"and ax.IconSize or nil,
-Original=ax,
-Selected=false,
-Locked=typeof(ax)=="table"and ax.Locked or false,
-UIElements={},
-}
-local az
-if ay.Icon then
-az=ak.Image(ay.Icon,ay.Icon,0,ao.Window.Folder,"Dropdown",true)
-az.Size=
-UDim2.new(0,ay.IconSize or aq.TabIcon,0,ay.IconSize or aq.TabIcon)
-az.ImageLabel.ImageTransparency=ar=="Dropdown"and 0.2 or 0
-ay.UIElements.TabIcon=az
-end
-ay.UIElements.TabItem=ak.NewRoundFrame(
-aq.MenuCorner-aq.MenuPadding,
-"Squircle",
-{
-Size=UDim2.new(1,0,0,36),
-AutomaticSize=ay.Desc and"Y",
-ImageTransparency=1,
-Parent=ap.UIElements.Menu.Frame.ScrollingFrame,
-
-ThemeTag={
-ImageColor3="DropdownTabBackground",
-},
-Active=not ay.Locked,
-},
-{
-ak.NewRoundFrame(aq.MenuCorner-aq.MenuPadding,"Glass-1.4",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="DropdownTabBorder",
-},
-ImageTransparency=1,
-Name="Highlight",
-},{
-
-
-
-
-
-
-
-
-
-
-
-
-
-}),
-al("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-al("UIListLayout",{
-Padding=UDim.new(0,aq.TabPadding),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-al("UIPadding",{
-PaddingTop=UDim.new(0,aq.TabPadding),
-PaddingLeft=UDim.new(0,aq.TabPadding),
-PaddingRight=UDim.new(0,aq.TabPadding),
-PaddingBottom=UDim.new(0,aq.TabPadding),
-}),
-al("UICorner",{
-CornerRadius=UDim.new(0,aq.MenuCorner-aq.MenuPadding),
-}),
-az,
-al("Frame",{
-Size=UDim2.new(1,az and-aq.TabPadding-aq.TabIcon or 0,0,0),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Name="Title",
-},{
-al("TextLabel",{
-Text=ay.Name,
-TextXAlignment="Left",
-FontFace=Font.new(ak.Font,Enum.FontWeight.Medium),
-ThemeTag={
-TextColor3="Text",
-BackgroundColor3="Text",
-},
-TextSize=15,
-BackgroundTransparency=1,
-TextTransparency=ar=="Dropdown"and 0.4 or 0.05,
-LayoutOrder=999,
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-}),
-al("TextLabel",{
-Text=ay.Desc or"",
-TextXAlignment="Left",
-FontFace=Font.new(ak.Font,Enum.FontWeight.Regular),
-ThemeTag={
-TextColor3="Text",
-BackgroundColor3="Text",
-},
-TextSize=15,
-BackgroundTransparency=1,
-TextTransparency=ar=="Dropdown"and 0.6 or 0.35,
-LayoutOrder=999,
-AutomaticSize="Y",
-TextWrapped=true,
-Size=UDim2.new(1,0,0,0),
-Visible=ay.Desc and true or false,
-Name="Desc",
-}),
-al("UIListLayout",{
-Padding=UDim.new(0,aq.TabPadding/3),
-FillDirection="Vertical",
-}),
-}),
-}),
-},
-true
-)
-
-if ay.Locked then
-ay.UIElements.TabItem.Frame.Title.TextLabel.TextTransparency=0.6
-if ay.UIElements.TabIcon then
-ay.UIElements.TabIcon.ImageLabel.ImageTransparency=0.6
-end
-end
-
-if ap.Multi and typeof(ap.Value)=="string"then
-for aA,aB in next,ap.Values do
-if typeof(aB)=="table"then
-if aB.Title==ap.Value then
-ap.Value={aB}
-end
-else
-if aB==ap.Value then
-ap.Value={ap.Value}
-end
-end
-end
-end
-
-if ap.Multi then
-local aA=false
-if typeof(ap.Value)=="table"then
-for aB,b in ipairs(ap.Value)do
-local d=typeof(b)=="table"and b.Title or b
-if d==ay.Name then
-aA=true
-break
-end
-end
-end
-ay.Selected=aA
-else
-local aA=typeof(ap.Value)=="table"and ap.Value.Title or ap.Value
-ay.Selected=aA==ay.Name
-end
-
-if ay.Selected and not ay.Locked then
-ay.UIElements.TabItem.ImageTransparency=an
-
-ay.UIElements.TabItem.Frame.Title.TextLabel.TextTransparency=0
-if ay.UIElements.TabIcon then
-ay.UIElements.TabIcon.ImageLabel.ImageTransparency=0
-end
-end
-
-ap.Tabs[aw]=ay
-
-as:Display()
-
-if ar=="Dropdown"then
-ak.AddSignal(ay.UIElements.TabItem.MouseButton1Click,function()
-if ap.Locked or ay.Locked then
-return
-end
-
-if ap.Multi then
-if not ay.Selected then
-ay.Selected=true
-am(
-ay.UIElements.TabItem,
-0.1,
-{ImageTransparency=an}
-):Play()
-
-am(ay.UIElements.TabItem.Frame.Title.TextLabel,0.1,{TextTransparency=0}):Play()
-if ay.UIElements.TabIcon then
-am(ay.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0}):Play()
-end
-table.insert(ap.Value,ay.Original)
-else
-if not ap.AllowNone and#ap.Value==1 then
-return
-end
-ay.Selected=false
-am(ay.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
-
-am(ay.UIElements.TabItem.Frame.Title.TextLabel,0.1,{TextTransparency=0.4}):Play()
-if ay.UIElements.TabIcon then
-am(ay.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0.2}):Play()
-end
-
-for aA,aB in next,ap.Value do
-if typeof(aB)=="table"and(aB.Title==ay.Name)or(aB==ay.Name)then
-table.remove(ap.Value,aA)
-break
-end
-end
-end
-else
-for aA,aB in next,ap.Tabs do
-am(aB.UIElements.TabItem,0.1,{ImageTransparency=1}):Play()
-
-am(
-aB.UIElements.TabItem.Frame.Title.TextLabel,
-0.1,
-{TextTransparency=0.4}
-):Play()
-if aB.UIElements.TabIcon then
-am(aB.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0.2}):Play()
-end
-aB.Selected=false
-end
-ay.Selected=true
-am(ay.UIElements.TabItem,0.1,{ImageTransparency=an}):Play()
-
-am(ay.UIElements.TabItem.Frame.Title.TextLabel,0.1,{TextTransparency=0}):Play()
-if ay.UIElements.TabIcon then
-am(ay.UIElements.TabIcon.ImageLabel,0.1,{ImageTransparency=0}):Play()
-end
-ap.Value=ay.Original
-end
-Callback()
-end)
-elseif ar=="Menu"then
-if not ay.Locked then
-ak.AddSignal(ay.UIElements.TabItem.MouseEnter,function()
-am(ay.UIElements.TabItem,0.08,{ImageTransparency=an}):Play()
-end)
-ak.AddSignal(ay.UIElements.TabItem.InputEnded,function()
-am(ay.UIElements.TabItem,0.08,{ImageTransparency=1}):Play()
-end)
-end
-ak.AddSignal(ay.UIElements.TabItem.MouseButton1Click,function()
-if ap.Locked or ay.Locked then
-return
-end
-Callback(ax.Callback or function()end)
-end)
-end
-
-RecalculateCanvasSize()
-RecalculateListSize()
-else a.load'S'
-:New{Parent=ap.UIElements.Menu.Frame.ScrollingFrame}
-end
-end
-
-
-
-
-
-
-
-
-
-
-ap.UIElements.MenuCanvas.Size=UDim2.new(
-0,
-ap.MenuWidth+6+6+5+5+18+6+6,
-ap.UIElements.MenuCanvas.Size.Y.Scale,
-ap.UIElements.MenuCanvas.Size.Y.Offset
-)
-Callback()
-
-ap.Values=av
-end
-
-as:Refresh(ap.Values)
-
-function as.Select(au,av)
-if av then
-ap.Value=av
-else
-if ap.Multi then
-ap.Value={}
-else
-ap.Value=nil
-end
-end
-as:Refresh(ap.Values)
-end
-
-RecalculateListSize()
-RecalculateCanvasSize()
-
-function as.Open(au)
-if not ap.Locked then
-ap.UIElements.Menu.Visible=true
-ap.UIElements.MenuCanvas.Visible=true
-ap.UIElements.MenuCanvas.Active=true
-ap.UIElements.Menu.Size=UDim2.new(1,0,0,0)
-am(ap.UIElements.Menu,0.1,{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0,
-},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
-
-task.spawn(function()
-task.wait(0.1)
-if ap.Locked then
-return
-end
-ap.Opened=true
-end)
-
-UpdatePosition()
-end
-end
-
-function as.Close(au)
-ap.Opened=false
-
-am(ap.UIElements.Menu,0.25,{
-Size=UDim2.new(1,0,0,0),
-ImageTransparency=1,
-},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
-
-task.spawn(function()
-task.wait(0.1)
-ap.UIElements.Menu.Visible=false
-end)
-
-task.spawn(function()
-task.wait(0.25)
-ap.UIElements.MenuCanvas.Visible=false
-ap.UIElements.MenuCanvas.Active=false
-end)
-end
-
-ak.AddSignal(
-(
-ap.UIElements.Dropdown and ap.UIElements.Dropdown.MouseButton1Click
-or ap.DropdownFrame.UIElements.Main.MouseButton1Click
-),
-function()
-as:Open()
-end
-)
-
-ak.AddSignal(af.InputBegan,function(au)
-if
-au.UserInputType==Enum.UserInputType.MouseButton1
-or au.UserInputType==Enum.UserInputType.Touch
-then
-local av=ap.UIElements.MenuCanvas
-local aw,ax=av.AbsolutePosition,av.AbsoluteSize
-
-local ay=ap.UIElements.Dropdown or ap.DropdownFrame.UIElements.Main
-local az=ay.AbsolutePosition
-local aA=ay.AbsoluteSize
-
-local aB=ag.X>=az.X
-and ag.X<=az.X+aA.X
-and ag.Y>=az.Y
-and ag.Y<=az.Y+aA.Y
-
-local b=ag.X>=aw.X
-and ag.X<=aw.X+ax.X
-and ag.Y>=aw.Y
-and ag.Y<=aw.Y+ax.Y
-
-if ao.Window.CanDropdown and ap.Opened and not aB and not b then
-as:Close()
-end
-end
-end)
-
-ak.AddSignal(
-ap.UIElements.Dropdown and ap.UIElements.Dropdown:GetPropertyChangedSignal"AbsolutePosition"
-or ap.DropdownFrame.UIElements.Main:GetPropertyChangedSignal"AbsolutePosition",
-UpdatePosition
-)
-
-return as
-end
-
-return aa end function a.U()
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-aa(game:GetService"UserInputService")
-aa(game:GetService"Players").LocalPlayer:GetMouse()local ae=
-aa(game:GetService"Workspace").CurrentCamera
-
-local af=a.load'j'
-local ag=af.New local ah=
-af.Tween
-
-local ai=a.load'C'.New local aj=a.load't'
-.New
-local ak=a.load'T'.New local al=
-
-workspace.CurrentCamera
-
-local am={
-UICorner=10,
-UIPadding=12,
-MenuCorner=15,
-MenuPadding=5,
-TabPadding=10,
-SearchBarHeight=39,
-TabIcon=18,
-}
-
-function am.New(an,ao)
-local ap={
-__type="Dropdown",
-Title=ao.Title or"Dropdown",
-Desc=ao.Desc or nil,
-Locked=ao.Locked or false,
-LockedTitle=ao.LockedTitle,
-Values=ao.Values or{},
-MenuWidth=ao.MenuWidth or 180,
-Value=ao.Value,
-AllowNone=ao.AllowNone,
-SearchBarEnabled=ao.SearchBarEnabled or false,
-Multi=ao.Multi,
-Callback=ao.Callback or nil,
-
-UIElements={},
-
-Opened=false,
-Tabs={},
-
-Width=150,
-}
-
-if ap.Multi and not ap.Value then
-ap.Value={}
-end
-if ap.Values and typeof(ap.Value)=="number"then
-ap.Value=ap.Values[ap.Value]
-end
-
-ap.DropdownFrame=a.load'I'{
-Title=ap.Title,
-Desc=ap.Desc,
-Parent=ao.Parent,
-TextOffset=ap.Callback and ap.Width or 20,
-Hover=not ap.Callback and true or false,
-Tab=ao.Tab,
-Index=ao.Index,
-Window=ao.Window,
-ElementTable=ap,
-ParentConfig=ao,
-Tags=ao.Tags,
-}
-
-if ap.Callback then
-ap.UIElements.Dropdown=
-ai("",nil,ap.DropdownFrame.UIElements.Main,nil,ao.Window.NewElements and 12 or 10)
-
-ap.UIElements.Dropdown.Frame.Frame.TextLabel.TextTruncate="AtEnd"
-ap.UIElements.Dropdown.Frame.Frame.TextLabel.Size=
-UDim2.new(1,ap.UIElements.Dropdown.Frame.Frame.TextLabel.Size.X.Offset-18-12-12,0,0)
-
-ap.UIElements.Dropdown.Size=UDim2.new(0,ap.Width,0,36)
-ap.UIElements.Dropdown.Position=UDim2.new(1,0,ao.Window.NewElements and 0 or 0.5,0)
-ap.UIElements.Dropdown.AnchorPoint=Vector2.new(1,ao.Window.NewElements and 0 or 0.5)
-
-
-
-
-
-end
-
-ap.DropdownMenu=ak(ao,ap,am,"Dropdown")
-
-ap.Display=ap.DropdownMenu.Display
-ap.Refresh=ap.DropdownMenu.Refresh
-ap.Select=ap.DropdownMenu.Select
-ap.Open=ap.DropdownMenu.Open
-ap.Close=ap.DropdownMenu.Close
-
-ag("ImageLabel",{
-Image=af.Icon"chevrons-up-down"[1],
-ImageRectOffset=af.Icon"chevrons-up-down"[2].ImageRectPosition,
-ImageRectSize=af.Icon"chevrons-up-down"[2].ImageRectSize,
-Size=UDim2.new(0,18,0,18),
-Position=UDim2.new(1,ap.UIElements.Dropdown and-12 or 0,0.5,0),
-ThemeTag={
-ImageColor3="Icon",
-},
-AnchorPoint=Vector2.new(1,0.5),
-Parent=ap.UIElements.Dropdown and ap.UIElements.Dropdown.Frame
-or ap.DropdownFrame.UIElements.Main,
-})
-
-function ap.Lock(aq)
-ap.Locked=true
-if ap.Opened or ap.UIElements.MenuCanvas.Visible then
-ap:Close()
-end
-return ap.DropdownFrame:Lock(ap.LockedTitle)
-end
-function ap.Unlock(aq)
-ap.Locked=false
-return ap.DropdownFrame:Unlock()
-end
-
-if ap.Locked then
-ap:Lock()
-end
-
-return ap.__type,ap
-end
-
-return am end function a.V()
-
-
-
-
-local aa={}
-local af={
-lua={
-"and",
-"break",
-"or",
-"else",
-"elseif",
-"if",
-"then",
-"until",
-"repeat",
-"while",
-"do",
-"for",
-"in",
-"end",
-"local",
-"return",
-"function",
-"export",
-},
-rbx={
-"game",
-"workspace",
-"script",
-"math",
-"string",
-"table",
-"task",
-"wait",
-"select",
-"next",
-"Enum",
-"tick",
-"assert",
-"shared",
-"loadstring",
-"tonumber",
-"tostring",
-"type",
-"typeof",
-"unpack",
-"Instance",
-"CFrame",
-"Vector3",
-"Vector2",
-"Color3",
-"UDim",
-"UDim2",
-"Ray",
-"BrickColor",
-"OverlapParams",
-"RaycastParams",
-"Axes",
-"Random",
-"Region3",
-"Rect",
-"TweenInfo",
-"collectgarbage",
-"not",
-"utf8",
-"pcall",
-"xpcall",
-"_G",
-"setmetatable",
-"getmetatable",
-"os",
-"pairs",
-"ipairs",
-},
-operators={
-"#",
-"+",
-"-",
-"*",
-"%",
-"/",
-"^",
-"=",
-"~",
-"=",
-"<",
-">",
-},
-}
-
-local ag={
-numbers=Color3.fromHex"#FAB387",
-boolean=Color3.fromHex"#FAB387",
-operator=Color3.fromHex"#94E2D5",
-lua=Color3.fromHex"#CBA6F7",
-rbx=Color3.fromHex"#F38BA8",
-str=Color3.fromHex"#A6E3A1",
-comment=Color3.fromHex"#9399B2",
-null=Color3.fromHex"#F38BA8",
-call=Color3.fromHex"#89B4FA",
-self_call=Color3.fromHex"#89B4FA",
-local_property=Color3.fromHex"#CBA6F7",
-}
-
-local function createKeywordSet(ai)
-local ak={}
-for al,am in ipairs(ai)do
-ak[am]=true
-end
-return ak
-end
-
-local ai=createKeywordSet(af.lua)
-local ak=createKeywordSet(af.rbx)
-local al=createKeywordSet(af.operators)
-
-local function getHighlight(am,an)
-local ao=am[an]
-
-if ag[ao.."_color"]then
-return ag[ao.."_color"]
-end
-
-if tonumber(ao)then
-return ag.numbers
-elseif ao=="nil"then
-return ag.null
-elseif ao:sub(1,2)=="--"then
-return ag.comment
-elseif al[ao]then
-return ag.operator
-elseif ai[ao]then
-return ag.lua
-elseif ak[ao]then
-return ag.rbx
-elseif ao:sub(1,1)=='"'or ao:sub(1,1)=="'"then
-return ag.str
-elseif ao=="true"or ao=="false"then
-return ag.boolean
-end
-
-if am[an+1]=="("then
-if am[an-1]==":"then
-return ag.self_call
-end
-
-return ag.call
-end
-
-if am[an-1]=="."then
-if am[an-2]=="Enum"then
-return ag.rbx
-end
-
-return ag.local_property
-end
-end
-
-function aa.run(am,an)
-if an~=nil then
-for ao,ap in next,an do
-ag[ao]=ap
-end
-end
-
-local ao={}
-local ap=""
-
-local aq=false
-local ar=false
-local as=false
-
-for at=1,#am do
-local au=am:sub(at,at)
-
-if ar then
-if au=="\n"and not as then
-table.insert(ao,ap)
-table.insert(ao,au)
-ap=""
-
-ar=false
-elseif am:sub(at-1,at)=="]]"and as then
-ap=ap.."]"
-
-table.insert(ao,ap)
-ap=""
-
-ar=false
-as=false
-else
-ap=ap..au
-end
-elseif aq then
-if au==aq and am:sub(at-1,at-1)~="\\"or au=="\n"then
-ap=ap..au
-aq=false
-else
-ap=ap..au
-end
-else
-if am:sub(at,at+1)=="--"then
-table.insert(ao,ap)
-ap="-"
-ar=true
-as=am:sub(at+2,at+3)=="[["
-elseif au=='"'or au=="'"then
-table.insert(ao,ap)
-ap=au
-aq=au
-elseif al[au]then
-table.insert(ao,ap)
-table.insert(ao,au)
-ap=""
-elseif au:match"[%w_]"then
-ap=ap..au
-else
-table.insert(ao,ap)
-table.insert(ao,au)
-ap=""
-end
-end
-end
-
-table.insert(ao,ap)
-
-local at={}
-
-for au,av in ipairs(ao)do
-local aw=getHighlight(ao,au)
-
-if aw then
-local ax=string.format(
-'<font color = "#%s">%s</font>',
-aw:ToHex(),
-av:gsub("<","&lt;"):gsub(">","&gt;")
-)
-
-table.insert(at,ax)
-else
-table.insert(at,av)
-end
-end
-
-return table.concat(at)
-end
-
-return aa end function a.W()
-
-local aa={}
-
-local af=a.load'j'
-local ag=af.New
-local ai=af.Tween
-
-local ak=a.load'V'
-
-function aa.New(al,am,an,ao,ap)
-local aq={
-Radius=am.ElementConfig.UICorner,
-Padding=am.NewElements and am.ElementConfig.UIPadding+4 or am.ElementConfig.UIPadding,
-
-CodeFrame=nil,
-}
-
-local ar=ag("TextLabel",{
-Text="",
-TextColor3=Color3.fromHex"#CDD6F4",
-TextTransparency=0,
-TextSize=al.CodeSize,
-TextWrapped=false,
-LineHeight=1.15,
-RichText=true,
-TextXAlignment="Left",
-Size=UDim2.new(0,0,0,0),
-BackgroundTransparency=1,
-AutomaticSize="XY",
-},{
-ag("UIPadding",{
-PaddingTop=UDim.new(0,aq.Padding+3),
-PaddingLeft=UDim.new(0,aq.Padding+3),
-PaddingRight=UDim.new(0,aq.Padding+3),
-PaddingBottom=UDim.new(0,aq.Padding+3),
-}),
-})
-ar.Font="Code"
-
-local as=ag("ScrollingFrame",{
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-AutomaticCanvasSize=al.Height~=nil and"XY"or"X",
-ScrollingDirection=al.Height~=nil and"XY"or"X",
-ElasticBehavior="Never",
-CanvasSize=UDim2.new(0,0,0,0),
-ScrollBarThickness=0,
-},{
-ar,
-})
-
-local at=al.CanCopied
-and ag("TextButton",{
-BackgroundTransparency=1,
-Size=UDim2.new(0,35,0,35),
-Position=UDim2.new(1,-aq.Padding/2,0,aq.Padding/2),
-AnchorPoint=Vector2.new(1,0),
-Visible=ao and true or false,
-},{
-af.NewRoundFrame(aq.Radius-4,"Squircle",{
-
-
-
-ImageColor3=Color3.fromHex"#ffffff",
-ImageTransparency=1,
-Size=UDim2.new(1,0,1,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Button",
-},{
-ag("UIScale",{
-Scale=1,
-}),
-ag("ImageLabel",{
-Image=af.Icon"copy"[1],
-ImageRectSize=af.Icon"copy"[2].ImageRectSize,
-ImageRectOffset=af.Icon"copy"[2].ImageRectPosition,
-BackgroundTransparency=1,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Size=UDim2.new(0,12,0,12),
-
-
-
-ImageColor3=Color3.fromHex"#ffffff",
-ImageTransparency=0.1,
-}),
-}),
-})
-or nil
-
-local au,av=af.NewRoundFrame(aq.Radius,"SquircleOutline",{
-Size=UDim2.new(1,0,1,0),
-
-
-
-ImageColor3=Color3.fromHex"#ffffff",
-ImageTransparency=0.955,
-Visible=false,
-})
-
-local aw,ax=af.NewRoundFrame(aq.Radius,"Squircle-TL-TR",{
-
-
-
-ImageColor3=Color3.fromHex"#ffffff",
-ImageTransparency=0.96,
-Size=UDim2.new(1,0,0,20+(aq.Padding*2)),
-Visible=al.Title and true or false,
-},{
-
-
-
-
-
-
-
-
-
-
-ag("TextLabel",{
-Text=al.Title,
-
-
-
-TextColor3=Color3.fromHex"#ffffff",
-TextTransparency=0.2,
-TextSize=18,
-AutomaticSize="Y",
-FontFace=Font.new(af.Font,Enum.FontWeight.Medium),
-TextXAlignment="Left",
-BackgroundTransparency=1,
-TextTruncate="AtEnd",
-Size=UDim2.new(1,at and-20-(aq.Padding*2),0,0),
-}),
-ag("UIPadding",{
-
-PaddingLeft=UDim.new(0,aq.Padding+3),
-PaddingRight=UDim.new(0,aq.Padding+3),
-
-}),
-ag("UIListLayout",{
-Padding=UDim.new(0,aq.Padding),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-})
-
-local ay,az=af.NewRoundFrame(aq.Radius,"Squircle",{
-
-
-
-ImageColor3=Color3.fromHex"#212121",
-ImageTransparency=0.035,
-Size=al.Height~=nil
-and UDim2.new(1,0,al.Height.Scale,al.Height.Offset==0 and-40 or al.Height.Offset)
-or UDim2.new(1,0,0,20+(aq.Padding*2)),
-AutomaticSize=al.Height~=nil and"None"or"Y",
-Parent=an,
-},{
-au,
-ag("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,al.Height~=nil and 1 or 0,0),
-AutomaticSize=al.Height~=nil and"None"or"Y",
-},{
-aw,
-as,
-ag("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-}),
-}),
-at,
-},nil,true)
-
-aq.CodeFrame=ay
-aq.CodeFrameModule=az
-aq.OutlineFrame=au
-aq.OutlineFrameModule=av
-aq.TopbarFrame=aw
-aq.TopbarFrameModule=ax
-
-af.AddSignal(ar:GetPropertyChangedSignal"TextBounds",function()
-if al.Height~=nil then
-as.Size=UDim2.new(1,0,1,al.Title~=nil and-(20+(aq.Padding*2))or nil)
-else
-as.Size=
-UDim2.new(1,0,0,(ar.TextBounds.Y/(ap or 1))+((aq.Padding+3)*2))
-end
-end)
-
-function aq.Set(aA)
-ar.Text=ak.run(aA,al.CodeTheme)
-end
-
-function aq.Destroy()
-ay:Destroy()
-aq=nil
-end
-
-aq.Set(al.Code)
-
-if at then
-af.AddSignal(at.InputBegan,function(aA:InputObject)
-if
-aA.UserInputType==Enum.UserInputType.MouseButton1
-or aA.UserInputType==Enum.UserInputType.Touch
-then
-ai(at.Button,0.05,{ImageTransparency=0.95}):Play()
-ai(at.Button.UIScale,0.05,{Scale=0.9}):Play()
-end
-end)
-af.AddSignal(at.InputEnded,function()
-ai(at.Button,0.08,{ImageTransparency=1}):Play()
-ai(at.Button.UIScale,0.08,{Scale=1}):Play()
-end)
-af.AddSignal(at.MouseButton1Click,function()
-if ao then
-ao()
-local aA=af.Icon"check"
-at.Button.ImageLabel.Image=aA[1]
-at.Button.ImageLabel.ImageRectSize=aA[2].ImageRectSize
-at.Button.ImageLabel.ImageRectOffset=aA[2].ImageRectPosition
-
-task.delay(1,function()
-local aB=af.Icon"copy"
-at.Button.ImageLabel.Image=aB[1]
-at.Button.ImageLabel.ImageRectSize=aB[2].ImageRectSize
-at.Button.ImageLabel.ImageRectOffset=aB[2].ImageRectPosition
-end)
-end
-end)
-end
-
-return aq
-end
-
-return aa end function a.X()
-
-local aa=a.load'j'local af=
-aa.New
-
-
-local ag=a.load'W'
-
-local ai={}
-
-function ai.New(ak,al)
-local am={
-__type="Code",
-Title=al.Title,
-Code=al.Code,
-CodeSize=al.CodeSize or 18,
-Height=al.Height,
-CodeTheme=al.CodeTheme,
-Locked=false,
-CanCopied=al.CanCopied~=false,
-OnCopy=al.OnCopy,
-
-Index=al.Index,
-}
-
-local an=not am.Locked
-
-
-
-
-
-
-
-
-
-
-
-local ao=ag.New(am,al.Window,al.Parent,function()
-if an then
-local ao=am.Title or"code"
-local ap,aq=pcall(function()
-if toclipboard then
-toclipboard(am.Code)
-end
-if setclipboard then
-setclipboard(am.Code)
-end
-
-if am.OnCopy then
-am.OnCopy()
-end
-end)
-if not ap then
-al.WindUI:Notify{
-Title="Error",
-Content="The "..ao.." is not copied. Error: "..aq,
-Icon="x",
-Duration=5,
-}
-end
-end
-end,al.WindUI.UIScale)
-
-function am.SetCode(ap,aq)
-ao.Set(aq)
-am.Code=aq
-end
-
-function am.Set(ap,aq)
-return am.SetCode(aq)
-end
-
-function am.Destroy(ap)
-ao.Destroy()
-am=nil
-end
-
-function am.UpdateShape(ap)
-if al.Window.NewElements then
-local aq=aa:GetElementPosition(
-ap.Elements,
-am.Index,
-al.ParentType=="HStack"or al.ParentType=="Group"
-)
-
-if aq and ao.CodeFrameModule then
-ao.CodeFrameModule:SetType(aq)
-
-print(aq)
-ao.TopbarFrameModule:SetType(
-table.find({"Squircle-BL-BR","SquircleH-BL-BR"},aq)~=nil and"Square"or aq
-)
-end
-end
-end
-
-am.UIElements={Main=ao.CodeFrame}
-am.ElementFrame=ao.CodeFrame
-
-return am.__type,am
-end
-
-return ai end function a.Y()
-
-local aa=a.load'j'
-local af=aa.New local ag=
-aa.Tween
-
-local ai=(cloneref or clonereference or function(ai)
-return ai
-end)
-
-local ak=ai(game:GetService"UserInputService")
-ai(game:GetService"TouchInputService")
-local al=ai(game:GetService"RunService")
-local am=ai(game:GetService"Players")local an=
-
-al.RenderStepped
-local ao=am.LocalPlayer
-local ap=ao:GetMouse()
-
-local aq=a.load's'.New
-local ar=a.load't'.New
-
-local as={
-UICorner=9,
-
-}
-
-local at
-
-function as.Colorpicker(au,av,aw,ax,ay)
-local az={
-__type="Colorpicker",
-Title=av.Title,
-Desc=av.Desc,
-Default=av.Value or av.Default,
-Callback=av.Callback,
-Transparency=av.Transparency,
-UIElements=av.UIElements,
-
-TextPadding=10,
-}
-
-local aA={}
-local aB=az.Transparency~=nil
-
-function az.SetHSVFromRGB(b,d)
-local f,g,h=Color3.toHSV(d)
-az.Hue=f
-az.Sat=g
-az.Vib=h
-end
-
-az:SetHSVFromRGB(az.Default)
-
-local b=a.load'u'
-local d=b.Create(nil,"Dialog",aw,ax,aw.UIElements.Main.Main)
-
-az.ColorpickerFrame=d
-
-d.UIElements.Main.Size=UDim2.new(1,0,0,0)
-
-
-
-local f,g,h=az.Hue,az.Sat,az.Vib
-
-az.UIElements.Title=af("TextLabel",{
-Text=az.Title,
-TextSize=20,
-FontFace=Font.new(aa.Font,Enum.FontWeight.SemiBold),
-TextXAlignment="Left",
-Size=UDim2.new(0,0,0,0),
-AutomaticSize="Y",
-ThemeTag={
-TextColor3="Text",
-},
-BackgroundTransparency=1,
-Parent=d.UIElements.Main,
-},{
-af("UIPadding",{
-PaddingTop=UDim.new(0,az.TextPadding/2),
-PaddingLeft=UDim.new(0,az.TextPadding/2),
-PaddingRight=UDim.new(0,az.TextPadding/2),
-PaddingBottom=UDim.new(0,az.TextPadding/2),
-}),
-})
-
-
-
-
-
-local i=af("Frame",{
-Size=UDim2.new(1,0,1,0),
-Position=UDim2.new(0,0,0,0),
-BackgroundTransparency=1,
-})
-
-local l=af("Frame",{
-Size=UDim2.new(0,14,0,14),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0,0),
-Parent=i,
-BackgroundColor3=az.Default,
-},{
-af("UIStroke",{
-Thickness=2,
-Transparency=0.1,
-ThemeTag={
-Color="Text",
-},
-}),
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-})
-
-az.UIElements.SatVibMap=af("ImageLabel",{
-Size=UDim2.fromOffset(160,158),
-Position=UDim2.fromOffset(0,40+az.TextPadding),
-Image="rbxassetid://4155801252",
-BackgroundColor3=Color3.fromHSV(f,1,1),
-BackgroundTransparency=0,
-Parent=d.UIElements.Main,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-aa.NewRoundFrame(8,"SquircleOutline",{
-ThemeTag={
-ImageColor3="Outline",
-},
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.85,
-ZIndex=99999,
-},{
-af("UIGradient",{
-Rotation=45,
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0.0,0.1),
-NumberSequenceKeypoint.new(0.5,1),
-NumberSequenceKeypoint.new(1.0,0.1),
-},
-}),
-}),
-
-l,
-})
-
-az.UIElements.Inputs=af("Frame",{
-AutomaticSize="XY",
-Size=UDim2.new(0,0,0,0),
-Position=UDim2.fromOffset(
-aB and 240 or 210,
-40+az.TextPadding
-),
-BackgroundTransparency=1,
-Parent=d.UIElements.Main,
-},{
-af("UIListLayout",{
-Padding=UDim.new(0,4),
-FillDirection="Vertical",
-}),
-})
-
-
-
-
-
-local m=af("Frame",{
-BackgroundColor3=az.Default,
-Size=UDim2.fromScale(1,1),
-BackgroundTransparency=az.Transparency,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-})
-
-af("ImageLabel",{
-Image="http://www.roblox.com/asset/?id=14204231522",
-ImageTransparency=0.45,
-ScaleType=Enum.ScaleType.Tile,
-TileSize=UDim2.fromOffset(40,40),
-BackgroundTransparency=1,
-Position=UDim2.fromOffset(85,208+az.TextPadding),
-Size=UDim2.fromOffset(75,24),
-Parent=d.UIElements.Main,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-aa.NewRoundFrame(8,"SquircleOutline",{
-ThemeTag={
-ImageColor3="Outline",
-},
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.85,
-ZIndex=99999,
-},{
-af("UIGradient",{
-Rotation=60,
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0.0,0.1),
-NumberSequenceKeypoint.new(0.5,1),
-NumberSequenceKeypoint.new(1.0,0.1),
-},
-}),
-}),
-
-
-
-
-
-
-
-m,
-})
-
-local p=af("Frame",{
-BackgroundColor3=az.Default,
-Size=UDim2.fromScale(1,1),
-BackgroundTransparency=0,
-ZIndex=9,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-})
-
-af("ImageLabel",{
-Image="http://www.roblox.com/asset/?id=14204231522",
-ImageTransparency=0.45,
-ScaleType=Enum.ScaleType.Tile,
-TileSize=UDim2.fromOffset(40,40),
-BackgroundTransparency=1,
-Position=UDim2.fromOffset(0,208+az.TextPadding),
-Size=UDim2.fromOffset(75,24),
-Parent=d.UIElements.Main,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(0,8),
-}),
-
-
-
-
-
-
-
-aa.NewRoundFrame(8,"SquircleOutline",{
-ThemeTag={
-ImageColor3="Outline",
-},
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=0.85,
-ZIndex=99999,
-},{
-af("UIGradient",{
-Rotation=60,
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0.0,0.1),
-NumberSequenceKeypoint.new(0.5,1),
-NumberSequenceKeypoint.new(1.0,0.1),
-},
-}),
-}),
-p,
-})
-
-local r={}
-
-for u=0,1,0.1 do
-table.insert(r,ColorSequenceKeypoint.new(u,Color3.fromHSV(u,1,1)))
-end
-
-local u=af("UIGradient",{
-Color=ColorSequence.new(r),
-Rotation=90,
-})
-
-local v=af("Frame",{
-Size=UDim2.new(0,14,0,14),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0,0),
-Parent=i,
-
-
-BackgroundColor3=az.Default,
-},{
-af("UIStroke",{
-Thickness=2,
-Transparency=0.1,
-ThemeTag={
-Color="Text",
-},
-}),
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-})
-
-local x=af("Frame",{
-Size=UDim2.fromOffset(6,192),
-Position=UDim2.fromOffset(180,40+az.TextPadding),
-Parent=d.UIElements.Main,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-u,
-i,
-})
-
-local function CreateNewInput(z,A)
-local B=ar(z,nil,az.UIElements.Inputs,nil,nil,nil,nil,nil,true)
-
-af("TextLabel",{
-BackgroundTransparency=1,
-TextTransparency=0.4,
-TextSize=17,
-FontFace=Font.new(aa.Font,Enum.FontWeight.Regular),
-AutomaticSize="XY",
-ThemeTag={
-TextColor3="Placeholder",
-},
-AnchorPoint=Vector2.new(1,0.5),
-Position=UDim2.new(1,-12,0.5,0),
-Parent=B.Frame,
-Text=z,
-})
-
-af("UIScale",{
-Parent=B,
-Scale=0.85,
-})
-
-B.Frame.Frame.TextBox.Text=A
-B.Size=UDim2.new(0,150,0,42)
-
-return B
-end
-
-local function ToRGB(z)
-return{
-R=math.floor(z.R*255),
-G=math.floor(z.G*255),
-B=math.floor(z.B*255),
-}
-end
-
-local z=CreateNewInput("Hex","#"..az.Default:ToHex())
-
-local A=CreateNewInput("Red",ToRGB(az.Default).R)
-local B=CreateNewInput("Green",ToRGB(az.Default).G)
-local C=CreateNewInput("Blue",ToRGB(az.Default).B)
-local F
-if aB then
-F=CreateNewInput("Alpha",((1-az.Transparency)*100).."%")
-end
-
-local G=af("Frame",{
-Size=UDim2.new(0,0,0,40),
-AutomaticSize="Y",
-Position=UDim2.new(0,0,0,254+az.TextPadding),
-BackgroundTransparency=1,
-Parent=d.UIElements.Main,
-LayoutOrder=4,
-},{
-af("UIListLayout",{
-Padding=UDim.new(0,6),
-FillDirection="Horizontal",
-HorizontalAlignment="Right",
-}),
-
-
-
-
-
-
-})
-
-aa.AddSignal(d.UIElements.Main:GetPropertyChangedSignal"AbsoluteSize",function()
-az.UIElements.Title.Size=UDim2.new(
-0,
-d.UIElements.Main.AbsoluteSize.X/av.UIScale-(d.UIPadding*2),
-0,
-0
-)
-G.Size=UDim2.new(
-0,
-d.UIElements.Main.AbsoluteSize.X/av.UIScale-d.UIPadding*2,
-0,
-40
-)
-end)
-
-local H={
-{
-Title="Cancel",
-Variant="Secondary",
-Callback=function()
-av.IsShowed=false
-for H,J in next,aA do
-J:Disconnect()
-end
-aA={}
-end,
-},
-{
-Title="Apply",
-
-Variant="Primary",
-Callback=function()
-av.IsShowed=false
-for H,J in next,aA do
-J:Disconnect()
-end
-aA={}
-
-ay(Color3.fromHSV(az.Hue,az.Sat,az.Vib),az.Transparency)
-end,
-},
-}
-
-for J,L in next,H do
-local M=aq(
-L.Title,
-L.Icon,
-L.Callback,
-L.Variant,
-G,
-d,
-true
-)
-M.Size=UDim2.new(0.5,-3,0,40)
-M.AutomaticSize="None"
-end
-
-local J,L,M
-if aB then
-local N=af("Frame",{
-Size=UDim2.new(1,0,1,0),
-Position=UDim2.fromOffset(0,0),
-BackgroundTransparency=1,
-})
-
-L=af("ImageLabel",{
-Size=UDim2.new(0,14,0,14),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0,0),
-ThemeTag={
-BackgroundColor3="Text",
-},
-Parent=N,
-},{
-af("UIStroke",{
-Thickness=2,
-Transparency=0.1,
-ThemeTag={
-Color="Text",
-},
-}),
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-})
-
-M=af("Frame",{
-Size=UDim2.fromScale(1,1),
-},{
-af("UIGradient",{
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0,0),
-NumberSequenceKeypoint.new(1,1),
-},
-Rotation=270,
-}),
-af("UICorner",{
-CornerRadius=UDim.new(0,6),
-}),
-})
-
-J=af("Frame",{
-Size=UDim2.fromOffset(6,192),
-Position=UDim2.fromOffset(210,40+az.TextPadding),
-Parent=d.UIElements.Main,
-BackgroundTransparency=1,
-},{
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-af("ImageLabel",{
-Image="rbxassetid://14204231522",
-ImageTransparency=0.45,
-ScaleType=Enum.ScaleType.Tile,
-TileSize=UDim2.fromOffset(40,40),
-BackgroundTransparency=1,
-Size=UDim2.fromScale(1,1),
-},{
-af("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-}),
-M,
-N,
-})
-end
-
-function az.Round(N,O,P)
-if P==0 then
-return math.floor(O)
-end
-O=tostring(O)
-return O:find"%."and tonumber(O:sub(1,O:find"%."+P))or O
-end
-
-function az.Update(N,O,P)
-if O then
-f,g,h=Color3.toHSV(O)
-else
-f,g,h=az.Hue,az.Sat,az.Vib
-end
-
-az.UIElements.SatVibMap.BackgroundColor3=Color3.fromHSV(f,1,1)
-l.Position=UDim2.new(g,0,1-h,0)
-l.BackgroundColor3=Color3.fromHSV(f,g,h)
-p.BackgroundColor3=Color3.fromHSV(f,g,h)
-v.BackgroundColor3=Color3.fromHSV(f,1,1)
-v.Position=UDim2.new(0.5,0,f,0)
-
-z.Frame.Frame.TextBox.Text="#"..Color3.fromHSV(f,g,h):ToHex()
-A.Frame.Frame.TextBox.Text=ToRGB(Color3.fromHSV(f,g,h)).R
-B.Frame.Frame.TextBox.Text=ToRGB(Color3.fromHSV(f,g,h)).G
-C.Frame.Frame.TextBox.Text=ToRGB(Color3.fromHSV(f,g,h)).B
-
-if P or aB then
-p.BackgroundTransparency=az.Transparency or P
-M.BackgroundColor3=Color3.fromHSV(f,g,h)
-L.BackgroundColor3=Color3.fromHSV(f,g,h)
-L.BackgroundTransparency=az.Transparency or P
-L.Position=UDim2.new(0.5,0,1-az.Transparency or P,0)
-F.Frame.Frame.TextBox.Text=az:Round(
-(1-az.Transparency or P)*100,
-0
-).."%"
-end
-end
-
-az:Update(az.Default,az.Transparency)
-
-local function GetRGB()
-local N=Color3.fromHSV(az.Hue,az.Sat,az.Vib)
-return{R=math.floor(N.r*255),G=math.floor(N.g*255),B=math.floor(N.b*255)}
-end
-
-
-
-local function clamp(N,O,P)
-return math.clamp(tonumber(N)or 0,O,P)
-end
-
-table.insert(
-aA,
-aa.AddSignal(z.Frame.Frame.TextBox.FocusLost,function(N)
-if N then
-local O=z.Frame.Frame.TextBox.Text:gsub("#","")
-local P,Q=pcall(Color3.fromHex,O)
-if P and typeof(Q)=="Color3"then
-az.Hue,az.Sat,az.Vib=Color3.toHSV(Q)
-az:Update()
-az.Default=Q
-end
-end
-end)
-)
-
-local function updateColorFromInput(N,O)
-aa.AddSignal(N.Frame.Frame.TextBox.FocusLost,function(P)
-if P then
-local Q=N.Frame.Frame.TextBox
-local R=GetRGB()
-local S=clamp(Q.Text,0,255)
-Q.Text=tostring(S)
-
-R[O]=S
-local T=Color3.fromRGB(R.R,R.G,R.B)
-az.Hue,az.Sat,az.Vib=Color3.toHSV(T)
-az:Update()
-end
-end)
-end
-
-updateColorFromInput(A,"R")
-updateColorFromInput(B,"G")
-updateColorFromInput(C,"B")
-
-if aB then
-aa.AddSignal(F.Frame.Frame.TextBox.FocusLost,function(N)
-if N then
-local O=F.Frame.Frame.TextBox
-local P=clamp(O.Text,0,100)
-O.Text=tostring(P)
-
-az.Transparency=1-P*0.01
-az:Update(nil,az.Transparency)
-end
-end)
-end
-
-
-
-local function UpdateSatVib(N,O)
-local P=N.AbsolutePosition.X
-local Q=P+N.AbsoluteSize.X
-local R=N.AbsolutePosition.Y
-local S=R+N.AbsoluteSize.Y
-
-local T=math.clamp(ap.X,P,Q)
-local U=math.clamp(ap.Y,R,S)
-
-O.Sat=(T-P)/(Q-P)
-O.Vib=1-((U-R)/(S-R))
-
-O:Update()
-end
-
-local function UpdateHue(N,O)
-local P=N.AbsolutePosition.Y
-local Q=P+N.AbsoluteSize.Y
-
-local R=math.clamp(ap.Y,P,Q)
-
-O.Hue=(R-P)/(Q-P)
-
-O:Update()
-end
-
-local function UpdateTransparency(N,O)
-local P=N.AbsolutePosition.Y
-local Q=P+N.AbsoluteSize.Y
-
-local R=math.clamp(ap.Y,P,Q)
-
-O.Transparency=1-((R-P)/(Q-P))
-
-O:Update()
-end
-
-local N=ax.GenerateGUID()
-
-table.insert(
-aA,
-ak.InputChanged:Connect(function(O)
-if
-O.UserInputType~=Enum.UserInputType.MouseMovement
-and O.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-
-if at=="SatVib"then
-UpdateSatVib(az.UIElements.SatVibMap,az)
-elseif at=="Hue"then
-UpdateHue(x,az)
-elseif at=="Transparency"then
-UpdateTransparency(J,az)
-end
-end)
-)
-
-table.insert(
-aA,
-az.UIElements.SatVibMap.InputBegan:Connect(function(O)
-if
-O.UserInputType~=Enum.UserInputType.MouseButton1
-and O.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-
-if ax.CurrentInput and ax.CurrentInput~=N then
-return
-end
-ax.CurrentInput=N
-
-if at and at~="SatVib"then
-return
-end
-
-at="SatVib"
-
-UpdateSatVib(az.UIElements.SatVibMap,az)
-end)
-)
-
-table.insert(
-aA,
-x.InputBegan:Connect(function(O)
-if
-O.UserInputType~=Enum.UserInputType.MouseButton1
-and O.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-
-if ax.CurrentInput and ax.CurrentInput~=N then
-return
-end
-ax.CurrentInput=N
-
-if at and at~="Hue"then
-return
-end
-
-at="Hue"
-
-UpdateHue(x,az)
-end)
-)
-
-if J then
-table.insert(
-aA,
-J.InputBegan:Connect(function(O)
-if
-O.UserInputType~=Enum.UserInputType.MouseButton1
-and O.UserInputType~=Enum.UserInputType.Touch
-then
-return
-end
-
-if ax.CurrentInput and ax.CurrentInput~=N then
-return
-end
-ax.CurrentInput=N
-
-if at and at~="Transparency"then
-return
-end
-
-at="Transparency"
-
-UpdateTransparency(J,az)
-end)
-)
-end
-
-table.insert(
-aA,
-ak.InputEnded:Connect(function(O)
-at=nil
-
-if ax.CurrentInput and ax.CurrentInput~=N then
-return
-end
-ax.CurrentInput=nil
-end)
-)
-
-return az
-end
-
-function as.New(au,av)
-local aw={
-__type="Colorpicker",
-Title=av.Title or"Colorpicker",
-Desc=av.Desc or nil,
-Locked=av.Locked or false,
-LockedTitle=av.LockedTitle,
-Default=av.Default or Color3.new(1,1,1),
-Callback=av.Callback or function()end,
-
-UIScale=av.UIScale,
-Transparency=av.Transparency,
-UIElements={},
-
-IsShowed=false,
-}
-
-local ax=true
-
-
-
-aw.ColorpickerFrame=a.load'I'{
-Title=aw.Title,
-Desc=aw.Desc,
-Parent=av.Parent,
-TextOffset=40,
-Hover=false,
-Tab=av.Tab,
-Index=av.Index,
-Window=av.Window,
-ElementTable=aw,
-ParentConfig=av,
-Tags=av.Tags,
-}
-
-aw.UIElements.Colorpicker=aa.NewRoundFrame(as.UICorner,"Squircle",{
-ImageTransparency=0,
-Active=true,
-ImageColor3=aw.Default,
-Parent=aw.ColorpickerFrame.UIElements.Main,
-Size=UDim2.new(0,26,0,26),
-AnchorPoint=Vector2.new(1,0),
-Position=UDim2.new(1,0,0,0),
-ZIndex=2,
-},{
-aa.NewRoundFrame(as.UICorner,"SquircleGlass",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="Outline",
-},
-ImageTransparency=0.55,
-}),
-},true)
-
-function aw.Lock(ay)
-aw.Locked=true
-ax=false
-return aw.ColorpickerFrame:Lock(aw.LockedTitle)
-end
-function aw.Unlock(ay)
-aw.Locked=false
-ax=true
-return aw.ColorpickerFrame:Unlock()
-end
-
-if aw.Locked then
-aw:Lock()
-end
-
-function aw.Update(ay,az,aA)
-aw.UIElements.Colorpicker.ImageTransparency=aA or 0
-aw.UIElements.Colorpicker.ImageColor3=az
-aw.Default=az
-if aA then
-aw.Transparency=aA
-end
-end
-
-function aw.Set(ay,az,aA)
-return aw:Update(az,aA)
-end
-
-aa.AddSignal(aw.UIElements.Colorpicker.MouseButton1Click,function()
-if ax and not aw.IsShowed then
-aw.IsShowed=true
-
-as:Colorpicker(aw,av.Window,av.WindUI,function(ay,az)
-aw:Update(ay,az)
-aw.Default=ay
-aw.Transparency=az
-aa.SafeCallback(aw.Callback,ay,az)
-end).ColorpickerFrame
-:Open()
-end
-end)
-
-return aw.__type,aw
-end
-
-return as end function a.Z()
-
-local aa=a.load'j'
-local af=aa.New
-local ai=aa.Tween
-
-local ak={}
-
-function ak.New(al,am)
-local an={
-__type="Section",
-Title=am.Title or"Section",
-Desc=am.Desc,
-Icon=am.Icon,
-IconThemed=am.IconThemed,
-TextXAlignment=am.TextXAlignment or"Left",
-TextSize=am.TextSize or 19,
-DescTextSize=am.DescTextSize or 16,
-Box=am.Box or false,
-BoxBorder=am.BoxBorder or false,
-FontWeight=am.FontWeight or Enum.FontWeight.SemiBold,
-DescFontWeight=am.DescFontWeight or Enum.FontWeight.Medium,
-TextTransparency=am.TextTransparency or 0.05,
-DescTextTransparency=am.DescTextTransparency or 0.4,
-Opened=am.Opened or false,
-UIElements={},
-
-HeaderSize=48,
-IconSize=20,
-Padding=10,
-
-Elements={},
-
-Expandable=false,
-}
-
-local ao
-
-function an.SetIcon(ap,aq)
-an.Icon=aq or nil
-if ao then
-ao:Destroy()
-end
-if aq then
-ao=aa.Image(
-aq,
-aq..":"..an.Title,
-0,
-am.Window.Folder,
-an.__type,
-true,
-an.IconThemed,
-"SectionIcon"
-)
-ao.Size=UDim2.new(0,an.IconSize,0,an.IconSize)
-end
-end
-
-local ap=af("Frame",{
-Size=UDim2.new(0,an.IconSize,0,an.IconSize),
-BackgroundTransparency=1,
-Visible=false,
-},{
-af("ImageLabel",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Image=aa.Icon"chevron-down"[1],
-ImageRectSize=aa.Icon"chevron-down"[2].ImageRectSize,
-ImageRectOffset=aa.Icon"chevron-down"[2].ImageRectPosition,
-ThemeTag={
-ImageTransparency="SectionExpandIconTransparency",
-ImageColor3="SectionExpandIcon",
-},
-}),
-})
-
-if an.Icon then
-an:SetIcon(an.Icon)
-end
-
-local aq=af("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-af("UIListLayout",{
-FillDirection="Vertical",
-HorizontalAlignment=an.TextXAlignment,
-VerticalAlignment="Center",
-Padding=UDim.new(0,4),
-}),
-})
-
-local ar,as
-
-local function createTitle(at,au)
-return af("TextLabel",{
-BackgroundTransparency=1,
-TextXAlignment=an.TextXAlignment,
-AutomaticSize="Y",
-TextSize=au=="Title"and an.TextSize or an.DescTextSize,
-TextTransparency=au=="Title"and an.TextTransparency or an.DescTextTransparency,
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(aa.Font,au=="Title"and an.FontWeight or an.DescFontWeight),
-
-
-Text=at,
-Size=UDim2.new(1,0,0,0),
-TextWrapped=true,
-Parent=aq,
-})
-end
-
-ar=createTitle(an.Title,"Title")
-if an.Desc then
-as=createTitle(an.Desc,"Desc")
-end
-
-local function UpdateTitleSize()
-local at=0
-if ao then
-at=at-(an.IconSize+8)
-end
-if ap.Visible then
-at=at-(an.IconSize+8)
-end
-aq.Size=UDim2.new(1,at,0,0)
-end
-
-local at=aa.NewRoundFrame(am.Window.ElementConfig.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-Parent=am.Parent,
-
-AutomaticSize="Y",
-ThemeTag={
-ImageTransparency=an.Box and"SectionBoxBackgroundTransparency"or nil,
-ImageColor3="SectionBoxBackground",
-},
-ImageTransparency=not an.Box and 1 or nil,
-},{
-aa.NewRoundFrame(am.Window.ElementConfig.UICorner-1,"SquircleOutline",{
-Size=UDim2.new(1,0,1,0),
-
-
-
-ThemeTag={
-
-ImageColor3="SectionBoxBorder",
-},
-ImageTransparency=an.Box and an.BoxBorder and 0.92 or 1,
-Name="Outline",
-ClipsDescendants=true,
-},{
-af("TextButton",{
-Size=UDim2.new(1,0,0,an.Expandable and 0 or(not as and an.HeaderSize or 0)),
-BackgroundTransparency=1,
-AutomaticSize=(not an.Expandable or as)and"Y"or nil,
-Text="",
-Name="Top",
-},{
-an.Box and af("UIPadding",{
-PaddingTop=UDim.new(
-0,
-am.Window.ElementConfig.UIPadding+(am.Window.NewElements and 4 or 0)
-),
-PaddingLeft=UDim.new(
-0,
-am.Window.ElementConfig.UIPadding+(am.Window.NewElements and 4 or 0)
-),
-PaddingRight=UDim.new(
-0,
-am.Window.ElementConfig.UIPadding+(am.Window.NewElements and 4 or 0)
-),
-PaddingBottom=UDim.new(
-0,
-am.Window.ElementConfig.UIPadding+(am.Window.NewElements and 4 or 0)
-),
-})or nil,
-ao,
-aq,
-af("UIListLayout",{
-Padding=UDim.new(0,8),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Left",
-}),
-ap,
-}),
-af("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-Name="Content",
-Visible=false,
-Position=UDim2.new(0,0,0,an.HeaderSize+10),
-},{
-an.Box and af("UIPadding",{
-PaddingLeft=UDim.new(0,am.Window.ElementConfig.UIPadding/1.5),
-PaddingRight=UDim.new(0,am.Window.ElementConfig.UIPadding/1.5),
-PaddingBottom=UDim.new(0,am.Window.ElementConfig.UIPadding/1.5),
-})or nil,
-af("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,am.Tab.Gap),
-VerticalAlignment="Top",
-}),
-}),
-}),
-})
-
-
-
-
-
-an.ElementFrame=at
-
-at.Outline.Top:GetPropertyChangedSignal"AbsoluteSize":Connect(function()
-at.Outline.Content.Position=UDim2.new(0,0,0,(at.Outline.Top.AbsoluteSize.Y/am.UIScale)+10)
-
-if an.Opened then
-an:Open(true)
-else
-an.Close(true)
-end
-end)
-
-local au=am.ElementsModule
-
-au.Load(an,at.Outline.Content,au.Elements,am.Window,am.WindUI,function()
-if not an.Expandable then
-an.Expandable=true
-ap.Visible=true
-UpdateTitleSize()
-end
-end,au,am.UIScale,am.Tab)
-
-UpdateTitleSize()
-
-function an.SetTitle(av,aw)
-an.Title=aw
-ar.Text=aw
-end
-
-function an.SetDesc(av,aw)
-an.Desc=aw
-if not as then
-as=createTitle(aw,"Desc")
-end
-as.Text=aw
-end
-
-function an.Destroy(av)
-for aw,ax in next,an.Elements do
-ax:Destroy()
-end
-
-
-
-
-
-
-
-
-at:Destroy()
-end
-
-function an.Open(av,aw)
-if an.Expandable then
-an.Opened=true
-if aw then
-at.Size=UDim2.new(
-at.Size.X.Scale,
-at.Size.X.Offset,
-0,
-at.Outline.Top.AbsoluteSize.Y/am.UIScale
-+(at.Outline.Content.AbsoluteSize.Y/am.UIScale)
-+10
-)
-ap.ImageLabel.Rotation=180
-else
-ai(at,0.33,{
-Size=UDim2.new(
-at.Size.X.Scale,
-at.Size.X.Offset,
-0,
-at.Outline.Top.AbsoluteSize.Y/am.UIScale
-+(at.Outline.Content.AbsoluteSize.Y/am.UIScale)
-+10
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-ai(
-ap.ImageLabel,
-0.2,
-{Rotation=180},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-end
-end
-function an.Close(av,aw)
-if an.Expandable then
-an.Opened=false
-if aw then
-at.Size=UDim2.new(
-at.Size.X.Scale,
-at.Size.X.Offset,
-0,
-(at.Outline.Top.AbsoluteSize.Y/am.UIScale)
-)
-ap.ImageLabel.Rotation=0
-else
-ai(at,0.26,{
-Size=UDim2.new(
-at.Size.X.Scale,
-at.Size.X.Offset,
-0,
-(at.Outline.Top.AbsoluteSize.Y/am.UIScale)
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ai(
-ap.ImageLabel,
-0.2,
-{Rotation=0},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-end
-end
-
-aa.AddSignal(at.Outline.Top.MouseButton1Click,function()
-if an.Expandable then
-if an.Opened then
-an:Close()
-else
-an:Open()
-end
-end
-end)
-
-aa.AddSignal(at.Outline.Content.UIListLayout:GetPropertyChangedSignal"AbsoluteContentSize",function()
-if an.Opened then
-an:Open(true)
-else
-an:Close(true)
-end
-end)
-
-task.defer(function()
-if an.Expandable then
-
-
-
-
-
-
-
-
-at.Size=
-UDim2.new(at.Size.X.Scale,at.Size.X.Offset,0,at.Outline.Top.AbsoluteSize.Y/am.UIScale)
-at.AutomaticSize="None"
-at.Outline.Top.Size=UDim2.new(1,0,0,(not as and an.HeaderSize or 0))
-at.Outline.Top.AutomaticSize=(not an.Expandable or as)and"Y"or"None"
-at.Outline.Content.Visible=true
-end
-if an.Opened then
-an:Open()
-else
-an:Close(true)
-end
-end)
-
-return an.__type,an
-end
-
-return ak end function a._()
-
-local aa=a.load'j'
-local af=aa.New
-
-local ai={}
-
-function ai.New(ak,al)
-local am=af("Frame",{
-Parent=al.Parent,
-Size=not table.find({"Group","HStack"},al.ParentType)and UDim2.new(1,-7,0,7*(al.Columns or 1))or UDim2.new(0,7*(al.Columns or 1),0,0),
-BackgroundTransparency=1,
-})
-
-return"Space",{__type="Space",ElementFrame=am}
-end
-
-return ai end function a.aa()
-local aa=a.load'j'
-local af=aa.New
-
-local ai={}
-
-local function ParseAspectRatio(ak)
-if type(ak)=="string"then
-local al,am=ak:match"(%d+):(%d+)"
-if al and am then
-return tonumber(al)/tonumber(am)
-end
-elseif type(ak)=="number"then
-return ak
-end
-return nil
-end
-
-function ai.New(ak,al)
-local am={
-__type="Image",
-Image=al.Image or"",
-AspectRatio=al.AspectRatio or"16:9",
-Radius=al.Radius or al.Window.ElementConfig.UICorner,
-}
-local an=aa.Image(
-am.Image,
-am.Image,
-am.Radius,
-al.Window.Folder,
-"Image",
-false
-)
-if an and an.Parent then
-an.Parent=al.Parent
-an.Size=UDim2.new(1,0,0,0)
-an.BackgroundTransparency=1
-
-
-
-
-
-
-
-
-
-
-
-
-local ao=ParseAspectRatio(am.AspectRatio)
-local ap
-
-if ao then
-ap=af("UIAspectRatioConstraint",{
-Parent=an,
-AspectRatio=ao,
-AspectType="ScaleWithParentSize",
-DominantAxis="Width"
-})
-end
-
-function am.Destroy(aq)
-an:Destroy()
-end
-end
-
-return am.__type,am
-end
-
-return ai end function a.ab()
-local aa=a.load'j'
-local af=aa.New
-
-local ai={}
-
-function ai.New(ak,al)
-local am={
-__type="Group",
-Elements={},
-ElementFrame=nil,
-}
-
-local an=af("Frame",{
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Parent=al.Parent,
-},{
-af("UIListLayout",{
-FillDirection="Horizontal",
-HorizontalAlignment="Center",
-
-Padding=UDim.new(0,al.Tab and al.Tab.Gap or(al.Window.NewElements and 1 or 6))
-}),
-})
-
-am.ElementFrame=an
-
-local ao=al.ElementsModule
-ao.Load(
-am,
-an,
-ao.Elements,
-al.Window,
-al.WindUI,
-function(ap,aq)
-local ar=al.Tab and al.Tab.Gap or(al.Window.NewElements and 1 or 6)
-
-local as={}
-local at=0
-
-for au,av in next,aq do
-if av.__type=="Space"then
-at=at+(av.ElementFrame.Size.X.Offset or 6)
-elseif av.__type=="Divider"then
-at=at+(av.ElementFrame.Size.X.Offset or 1)
-else
-table.insert(as,av)
-end
-end
-
-local au=#as
-if au==0 then return end
-
-local av=1/au
-
-local aw=ar*(au-1)
-
-local ax=-(aw+at)
-
-local ay=math.floor(ax/au)
-local az=ax-(ay*au)
-
-for aA,aB in next,as do
-local b=ay
-if aA<=math.abs(az)then
-b=b-1
-end
-
-if aB.ElementFrame then
-aB.ElementFrame.Size=UDim2.new(av,b,1,0)
-end
-end
-end,
-ao,
-al.UIScale,
-al.Tab
-)
-
-
-
-return am.__type,am
-end
-
-return ai end function a.ac()
-local aa=a.load'j'
-local af=aa.New
-
-local ai={}
-
-function ai.New(ak,al)
-local am={
-__type="HStack",
-AutoSpace=al.AutoSpace or false,
-Elements={},
-ElementFrame=nil,
-}
-
-local an=af("Frame",{
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Parent=al.Parent,
-},{
-af("UIListLayout",{
-FillDirection="Horizontal",
-HorizontalAlignment="Center",
-
-Padding=UDim.new(0,al.Tab and al.Tab.Gap or(al.Window.NewElements and 1 or 6)),
-}),
-})
-
-am.ElementFrame=an
-
-local ao=al.ElementsModule
-ao.Load(
-am,
-an,
-ao.Elements,
-al.Window,
-al.WindUI,
-function(ap,aq)
-local ar=al.Tab and al.Tab.Gap or(al.Window.NewElements and 1 or 6)
-
-local as={}
-local at=0
-
-for au,av in next,aq do
-if av.__type=="Space"then
-at=at+(av.ElementFrame.Size.X.Offset or 6)
-elseif av.__type=="Divider"then
-at=at+(av.ElementFrame.Size.X.Offset or 1)
-else
-table.insert(as,av)
-end
-end
-
-local au=#as
-if au==0 then
-return
-end
-
-local av=1/au
-
-local aw=ar*(au-1)
-
-local ax=-(aw+at)
-
-local ay=math.floor(ax/au)
-local az=ax-(ay*au)
-
-for aA,aB in next,as do
-local b=ay
-if aA<=math.abs(az)then
-b=b-1
-end
-
-if aB.ElementFrame then
-aB.ElementFrame.Size=UDim2.new(av,b,1,0)
-end
-end
-end,
-ao,
-al.UIScale,
-al.Tab
-)
-
-if am.AutoSpace then
-for ap in next,ao.Elements do
-if ap~="Space"and ap~="Divider"then
-local aq=am[ap]
-am[ap]=function(ar,as)
-if#am.Elements>0 then
-am:Space()
-end
-return aq(ar,as)
-end
-end
-end
-end
-
-return am.__type,am
-end
-
-return ai end function a.ad()
-
-local aa=a.load'j'
-local af=aa.New
-
-local ai={}
-
-function ai.New(ak,al)
-local am={
-__type="VStack",
-Elements={},
-ElementFrame=nil,
-}
-
-local an=af("Frame",{
-Size=UDim2.new(1,0,0,0),
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Parent=al.Parent,
-},{
-af("UIListLayout",{
-FillDirection="Vertical",
-HorizontalAlignment="Center",
-
-Padding=UDim.new(0,al.Tab and al.Tab.Gap or(al.Window.NewElements and 1 or 6))
-}),
-})
-
-am.ElementFrame=an
-
-local ao=al.ElementsModule
-ao.Load(
-am,
-an,
-ao.Elements,
-al.Window,
-al.WindUI,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-nil,
-ao,
-al.UIScale,
-al.Tab
-)
-
-
-
-return am.__type,am
-end
-
-return ai end function a.ae()
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local af=aa(game:GetService"UserInputService")
-
-local ai=a.load'j'
-local ak=ai.New
-
-local al={}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function al.New(am,an:ConfigType__DARKLUA_TYPE_a)
-local ao={
-__type="Viewport",
-Object=an.Object,
-Camera=an.Camera or Instance.new"Camera",
-Interactive=an.Interactive or false,
-Height=an.Height or 200,
-Focused=an.Focused~=false,
-}
-
-local ap=false
-local aq=false
-local ar,as=0
-
-local at=ai.NewRoundFrame(an.Window.ElementConfig.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,ao.Height),
-Parent=an.Parent,
-ThemeTag={
-ImageColor3="ViewportBackground",
-ImageTransparency="ViewportBackgroundTransparency",
-},
-},{
-ak("CanvasGroup",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ak("UICorner",{
-CornerRadius=UDim.new(0,an.Window.ElementConfig.UICorner),
-}),
-ak("ViewportFrame",{
-Name="Viewport",
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-CurrentCamera=ao.Camera,
-Active=ao.Interactive,
-},{
-ao.Object,
-}),
-}),
-})
-
-local function IsTouchInsideViewport(au)
-local av=at.CanvasGroup.Viewport.AbsolutePosition
-local aw=at.CanvasGroup.Viewport.AbsoluteSize
-
-return au.X>=av.X
-and au.X<=av.X+aw.X
-and au.Y>=av.Y
-and au.Y<=av.Y+aw.Y
-end
-
-local au=an.WindUI.GenerateGUID()
-
-ai.AddSignal(at.CanvasGroup.Viewport.MouseEnter,function()
-if ao.Interactive then
-an.Tab.UIElements.ContainerFrame.ScrollingEnabled=false
-end
-end)
-
-ai.AddSignal(at.CanvasGroup.Viewport.InputEnded,function(av)
-if
-av.UserInputType==Enum.UserInputType.MouseMovement
-or av.UserInputType==Enum.UserInputType.Touch
-then
-an.Tab.UIElements.ContainerFrame.ScrollingEnabled=true
-end
-end)
-
-ai.AddSignal(at.CanvasGroup.Viewport.InputBegan,function(av)
-if ao.Interactive then
-if
-(av.UserInputType==Enum.UserInputType.MouseButton1)
-or(av.UserInputType==Enum.UserInputType.Touch and not aq)
-then
-if an.WindUI.CurrentInput and an.WindUI.CurrentInput~=au then
-return
-end
-
-an.WindUI.CurrentInput=au
-
-ap=true
-as=av.Position
-end
-end
-end)
-
-ai.AddSignal(af.InputEnded,function(av)
-if ao.Interactive then
-if
-av.UserInputType==Enum.UserInputType.MouseButton1
-or av.UserInputType==Enum.UserInputType.Touch
-then
-if an.WindUI.CurrentInput and an.WindUI.CurrentInput~=au then
-return
-end
-
-an.WindUI.CurrentInput=nil
-
-ap=false
-end
-end
-end)
-
-ai.AddSignal(af.InputChanged,function(av)
-if ao.Interactive and ap and not aq then
-if
-av.UserInputType==Enum.UserInputType.MouseMovement
-or av.UserInputType==Enum.UserInputType.Touch
-then
-local aw=av.Position-as
-as=av.Position
-
-local ax=ao.Object:GetPivot().Position
-local ay=ao.Camera
-
-local az=CFrame.fromAxisAngle(Vector3.new(0,1,0),-aw.X*0.02)
-ay.CFrame=CFrame.new(ax)*az*CFrame.new(-ax)*ay.CFrame
-
-local aA=CFrame.fromAxisAngle(ay.CFrame.RightVector,-aw.Y*0.02)
-local aB=CFrame.new(ax)*aA*CFrame.new(-ax)*ay.CFrame
-
-if aB.UpVector.Y>0.1 then
-ay.CFrame=aB
-end
-end
-end
-end)
-
-ai.AddSignal(at.CanvasGroup.Viewport.InputChanged,function(av)
-if ao.Interactive then
-if av.UserInputType==Enum.UserInputType.MouseWheel then
-local aw=av.Position.Z*2
-ao.Camera.CFrame+=ao.Camera.CFrame.LookVector*aw
-end
-end
-end)
-
-ai.AddSignal(af.TouchPinch,function(av,aw,ax,ay)
-if not IsTouchInsideViewport(av[1])or not IsTouchInsideViewport(av[2])then
-return
-end
-if ao.Interactive then
-if ay==Enum.UserInputState.Begin then
-aq=true
-ap=false
-ar=(av[1]-av[2]).Magnitude
-elseif ay==Enum.UserInputState.Change then
-if aq then
-local az=(av[1]-av[2]).Magnitude
-local aA=(az-ar)*0.03
-ar=az
-ao.Camera.CFrame+=ao.Camera.CFrame.LookVector*aA
-end
-elseif ay==Enum.UserInputState.End or ay==Enum.UserInputState.Cancel then
-aq=false
-end
-end
-end)
-
-local function FocusCamera()
-local av=ao.Object:IsA"BasePart"and ao.Object.Size
-or select(2,ao.Object:GetBoundingBox(0))
-local aw=math.max(av.X,av.Y,av.Z)
-local ax=aw*2
-local ay=ao.Object:GetPivot().Position
-
-ao.Camera.CFrame=
-CFrame.new(ay+Vector3.new(0,aw/2,ax),ay)
-end
-
-if ao.Focused then
-FocusCamera()
-end
-
-function ao.SetObject(av,aw,ax)
-if ax then
-aw=aw:Clone()
-end
-if ao.Object then
-ao.Object:Destroy()
-end
-
-ao.Object=aw
-ao.Object.Parent=at.CanvasGroup.Viewport
-end
-
-function ao.SetHeight(av,aw)
-at.Size=UDim2.new(1,0,0,aw)
-end
-
-function ao.Focus(av)
-if ao.Object then
-FocusCamera()
-end
-end
-
-function ao.SetCamera(av,aw)
-ao.Camera=aw
-at.CanvasGroup.Viewport.CurrentCamera=aw
-end
-
-function ao.SetInteractive(av,aw)
-ao.Interactive=aw
-at.CanvasGroup.Viewport.Active=aw
-end
-
-ao.Main=at
-
-return ao.__type,ao
-end
-
-return al end function a.af()
-
-return{
-Elements={
-Paragraph=a.load'J',
-Button=a.load'K',
-Toggle=a.load'N',
-Slider=a.load'O',
-ProgressBar=a.load'P',
-Keybind=a.load'Q',
-Input=a.load'R',
-Dropdown=a.load'U',
-Code=a.load'X',
-Colorpicker=a.load'Y',
-Section=a.load'Z',
-Divider=a.load'S',
-Space=a.load'_',
-Image=a.load'aa',
-Group=a.load'ab',
-HStack=a.load'ac',
-VStack=a.load'ad',
-Viewport=a.load'ae',
-
-},
-Load=function(aa,af,ai,ak,al,am,an,ao,ap)
-for aq,ar in next,ai do
-aa[aq]=function(as,at)
-at=at or{}
-at.Tab=ap or aa
-at.ParentType=aa.__type
-at.ParentTable=aa
-at.Index=#aa.Elements+1
-at.GlobalIndex=#ak.AllElements+1
-at.Parent=af
-at.Window=ak
-at.WindUI=al
-at.UIScale=ao
-at.ElementsModule=an local
-
-au, av=ar:New(at)
-
-if at.Flag and typeof(at.Flag)=="string"then
-if ak.CurrentConfig then
-ak.CurrentConfig:Register(at.Flag,av)
-
-if ak.PendingConfigData and ak.PendingConfigData[at.Flag]then
-local aw=ak.PendingConfigData[at.Flag]
-
-local ax=ak.ConfigManager
-if ax.Parser[aw.__type]then
-task.defer(function()
-local ay,az=pcall(function()
-ax.Parser[aw.__type].Load(av,aw)
-end)
-
-if ay then
-ak.PendingConfigData[at.Flag]=nil
-else
-warn(
-"[ WindUI ] Failed to apply pending config for '"
-..at.Flag
-.."': "
-..tostring(az)
-)
-end
-end)
-end
-end
-else
-ak.PendingFlags=ak.PendingFlags or{}
-ak.PendingFlags[at.Flag]=av
-end
-end
-
-local aw
-for ax,ay in next,av do
-if typeof(ay)=="table"and ax~="ElementFrame"and ax:match"Frame$"then
-aw=ay
-break
-end
-end
-
-if aw then
-av.ElementFrame=aw.UIElements.Main
-function av.SetTitle(ax,ay)
-return aw.SetTitle and aw:SetTitle(ay)
-end
-function av.SetDesc(ax,ay)
-return aw.SetDesc and aw:SetDesc(ay)
-end
-function av.SetImage(ax,ay,az)
-return aw.SetImage and aw:SetImage(ay,az)
-end
-function av.SetThumbnail(ax,ay,az)
-return aw.SetThumbnail and aw:SetThumbnail(ay,az)
-end
-function av.Highlight(ax)
-aw:Highlight()
-end
-function av.Destroy(ax)
-aw:Destroy()
-
-table.remove(ak.AllElements,at.GlobalIndex)
-table.remove(aa.Elements,at.Index)
-table.remove(ap.Elements,at.Index)
-aa:UpdateAllElementShapes(aa)
-end
-end
-
-ak.AllElements[at.Index]=av
-aa.Elements[at.Index]=av
-if ap then
-ap.Elements[at.Index]=av
-end
-
-if ak.NewElements then
-aa:UpdateAllElementShapes(aa)
-end
-
-if am then
-am(av,aa.Elements)
-end
-return av
-end
-end
-function aa.UpdateAllElementShapes(aq,ar)
-for as,at in next,ar.Elements do
-local au
-for av,aw in pairs(at)do
-if typeof(aw)=="table"and av:match"Frame$"then
-au=aw
-break
-end
-end
-
-if not au and at.UpdateShape then
-au=at
-end
-
-if au then
-
-au.Index=as
-if au.UpdateShape then
-
-au.UpdateShape(ar)
-end
-end
-end
-end
-end,
-}end function a.ag()
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local af=game:GetService"Players"
-
-aa(game:GetService"UserInputService")
-local ai=af.LocalPlayer:GetMouse()
-
-local ak=a.load'j'
-local al=ak.New
-
-local am=a.load'H'.New
-local an=a.load'D'.New
-
-
-
-local ao={
-
-
-Tabs={},
-Containers={},
-SelectedTab=nil,
-TabCount=0,
-ToolTipParent=nil,
-TabHighlight=nil,
-
-OnChangeFunc=function(ao)end,
-}
-
-function ao.Init(ap,aq,ar,as)
-Window=ap
-WindUI=aq
-ao.ToolTipParent=ar
-ao.TabHighlight=as
-ao.SidebarExpanded=false
-ao.SidebarBaseWidth=Window.SideBarWidth or 72
-ao.SidebarExpandWidth=ao.SidebarBaseWidth+88
-return ao
-end
-
--- ★★★ 侧边栏展开/收起（仅图标 ⇄ 图标+名字） ★★★
-function ao.SetSidebarWidth(ap)
-local b=Window.UIElements.SideBarContainer
-local c=Window.UIElements.MainBar
-if not b or not c then return end
-local d=b.Size.Y
-local e=c.Size.Y
-ak.Tween(b,0.22,{Size=UDim2.new(0,ap,d.Scale,d.Offset)},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
-ak.Tween(c,0.22,{Size=UDim2.new(1,-ap,e.Scale,e.Offset)},Enum.EasingStyle.Quart,Enum.EasingDirection.Out):Play()
-end
-
-function ao.SetTitlesVisible(ap)
-for b,c in next,ao.Tabs do
-local d=c.UIElements.Main and c.UIElements.Main.Frame and c.UIElements.Main.Frame.TextLabel
-if d then
-d.Visible=ap
-end
-end
-end
-
-function ao.ExpandSidebar(ap)
-if ao.SidebarExpanded then return end
-ao.SidebarExpanded=true
-ao.SetTitlesVisible(true)
-ao.SetSidebarWidth(ao.SidebarExpandWidth)
-end
-
-function ao.CollapseSidebar(ap)
-if not ao.SidebarExpanded then return end
-ao.SidebarExpanded=false
-ao.SetTitlesVisible(false)
-ao.SetSidebarWidth(ao.SidebarBaseWidth)
-end
-
-function ao.New(ap,aq)
-local ar={
-__type="Tab",
-Title=ap.Title or"Tab",
-Desc=ap.Desc,
-Icon=ap.Icon,
-IconColor=ap.IconColor,
-IconShape=ap.IconShape,
-IconThemed=ap.IconThemed,
-Locked=ap.Locked,
-ShowTabTitle=ap.ShowTabTitle,
-TabTitleAlign=ap.TabTitleAlign or"Left",
-CustomEmptyPage=(ap.CustomEmptyPage and next(ap.CustomEmptyPage)~=nil)and ap.CustomEmptyPage
-or{Icon="lucide:frown",IconSize=48,Title="This tab is Empty",Desc=nil},
-Border=ap.Border,
-Selected=false,
-Index=nil,
-Parent=ap.Parent,
-UIElements={},
-Elements={},
-ContainerFrame=nil,
-UICorner=Window.UICorner-(Window.UIPadding/2),
-
-Gap=Window.NewElements and 1 or 6,
-
-TabPaddingX=4+(Window.UIPadding/2),
-TabPaddingY=3+(Window.UIPadding/2),
-TitlePaddingY=0,
-}
-
-
-
-
-
-
-
-
-
-if ar.IconShape then
-ar.TabPaddingX=2+(Window.UIPadding/4)
-ar.TabPaddingY=2+(Window.UIPadding/4)
-ar.TitlePaddingY=2+(Window.UIPadding/4)
-end
-
-ao.TabCount=ao.TabCount+1
-
-local as=ao.TabCount
-ar.Index=as
-
-ar.UIElements.Main=ak.NewRoundFrame(ar.UICorner,"Squircle",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,-7,0,0),
-AutomaticSize="Y",
-Parent=ap.Parent,
-ThemeTag={
-ImageColor3="TabBackground",
-},
-ImageTransparency=1,
-},{
-ak.NewRoundFrame(ar.UICorner-1,"Glass-1.4",{
-Size=UDim2.new(1,1,1,1),
-ThemeTag={
-ImageColor3="TabBorder",
-},
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ImageTransparency=1,
-Name="Outline",
-},{
-
-
-
-
-
-
-
-
-
-
-
-
-
-}),
-ak.NewRoundFrame(ar.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=1,
-Name="Frame",
-},{
-al("UIListLayout",{
-SortOrder="LayoutOrder",
-Padding=UDim.new(0,2+(Window.UIPadding/2)),
-FillDirection="Horizontal",
-HorizontalAlignment="Center",
-VerticalAlignment="Center",
-}),
-al("TextLabel",{
-Text=ar.Title,
-Visible=false,
-ThemeTag={
-TextColor3="TabTitle",
-},
-TextTransparency=not ar.Locked and 0.4 or 0.7,
-TextSize=15,
-Size=UDim2.new(1,0,0,0),
-FontFace=Font.new(ak.Font,Enum.FontWeight.Medium),
-TextWrapped=true,
-RichText=true,
-AutomaticSize="Y",
-LayoutOrder=2,
-TextXAlignment="Left",
-BackgroundTransparency=1,
-},{
-al("UIPadding",{
-PaddingTop=UDim.new(0,ar.TitlePaddingY),
-
-
-PaddingBottom=UDim.new(0,ar.TitlePaddingY),
-}),
-}),
-al("UIPadding",{
-PaddingTop=UDim.new(0,ar.TabPaddingY),
-PaddingLeft=UDim.new(0,ar.TabPaddingX),
-PaddingRight=UDim.new(0,ar.TabPaddingX),
-PaddingBottom=UDim.new(0,ar.TabPaddingY),
-}),
-}),
-},true)
-
-local at=0
-local au
-local av
-
-if ar.Icon then
-au=ak.Image(
-ar.Icon,
-ar.Icon..":"..ar.Title,
-0,
-Window.Folder,
-ar.__type,
-ar.IconColor and false or true,
-ar.IconThemed,
-"TabIcon"
-)
-au.Size=UDim2.new(0,26,0,26)
-if ar.IconColor then
-au.ImageLabel.ImageColor3=ar.IconColor
-end
-if not ar.IconShape then
-au.Parent=ar.UIElements.Main.Frame
-ar.UIElements.Icon=au
-au.ImageLabel.ImageTransparency=not ar.Locked and 0 or 0.7
-at=-18-(Window.UIPadding/2)
-ar.UIElements.Main.Frame.TextLabel.Size=UDim2.new(1,at,0,0)
-elseif ar.IconColor then
-ak.NewRoundFrame(
-ar.IconShape~="Circle"and(ar.UICorner+5-(2+(Window.UIPadding/4)))or 9999,
-"Squircle",
-{
-Size=UDim2.new(0,26,0,26),
-ImageColor3=ar.IconColor,
-Parent=ar.UIElements.Main.Frame,
-},
-{
-au,
-ak.NewRoundFrame(
-ar.IconShape~="Circle"and(ar.UICorner+5-(2+(Window.UIPadding/4)))or 9999,
-"Glass-1.4",
-{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="White",
-},
-ImageTransparency=0,
-Name="Outline",
-},
-{
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-),
-}
-)
-au.AnchorPoint=Vector2.new(0.5,0.5)
-au.Position=UDim2.new(0.5,0,0.5,0)
-au.ImageLabel.ImageTransparency=0
-au.ImageLabel.ImageColor3=ak.GetTextColorForHSB(ar.IconColor,0.68)
-at=-28-(Window.UIPadding/2)
-ar.UIElements.Main.Frame.TextLabel.Size=UDim2.new(1,at,0,0)
-end
-
-av=
-ak.Image(ar.Icon,ar.Icon..":"..ar.Title,0,Window.Folder,ar.__type,true,ar.IconThemed)
-av.Size=UDim2.new(0,16,0,16)
-av.ImageLabel.ImageTransparency=not ar.Locked and 0 or 0.7
-at=-30
-
-
-
-
-end
-
-ar.UIElements.ContainerFrame=al("ScrollingFrame",{
-Size=UDim2.new(1,0,1,ar.ShowTabTitle and-((Window.UIPadding*2.4)+12)or 0),
-BackgroundTransparency=1,
-ScrollBarThickness=0,
-ElasticBehavior="Never",
-CanvasSize=UDim2.new(0,0,0,0),
-AnchorPoint=Vector2.new(0,1),
-Position=UDim2.new(0,0,1,0),
-AutomaticCanvasSize="Y",
-
-ScrollingDirection="Y",
-},{
-al("UIPadding",{
-PaddingTop=UDim.new(0,not Window.HidePanelBackground and 20 or 10),
-PaddingLeft=UDim.new(0,not Window.HidePanelBackground and 20 or 10),
-PaddingRight=UDim.new(0,not Window.HidePanelBackground and 20 or 10),
-PaddingBottom=UDim.new(0,not Window.HidePanelBackground and 20 or 10),
-}),
-al("UIListLayout",{
-SortOrder="LayoutOrder",
-Padding=UDim.new(0,ar.Gap),
-HorizontalAlignment="Center",
-}),
-})
-
-
-
-
-
-ar.UIElements.ContainerFrameCanvas=al("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Visible=false,
-Parent=Window.UIElements.MainBar,
-ZIndex=5,
-},{
-ar.UIElements.ContainerFrame,
-al("Frame",{
-Size=UDim2.new(1,-14,1,-14),
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundTransparency=1,
-Name="ScrollSliderHolder",
-}),
-al("Frame",{
-Size=UDim2.new(1,0,0,((Window.UIPadding*2.4)+12)),
-BackgroundTransparency=1,
-Visible=ar.ShowTabTitle or false,
-Name="TabTitle",
-},{
-av,
-al("TextLabel",{
-Text=ar.Title,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=20,
-TextTransparency=0.1,
-Size=UDim2.new(0,0,1,0),
-FontFace=Font.new(ak.Font,Enum.FontWeight.SemiBold),
-
-RichText=true,
-LayoutOrder=2,
-TextXAlignment="Left",
-BackgroundTransparency=1,
-AutomaticSize="X",
-}),
-al("UIPadding",{
-PaddingTop=UDim.new(0,20),
-PaddingLeft=UDim.new(0,20),
-PaddingRight=UDim.new(0,20),
-PaddingBottom=UDim.new(0,20),
-}),
-al("UIListLayout",{
-SortOrder="LayoutOrder",
-Padding=UDim.new(0,10),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment=ar.TabTitleAlign,
-}),
-}),
-al("Frame",{
-Size=UDim2.new(1,0,0,1),
-BackgroundTransparency=0.9,
-ThemeTag={
-BackgroundColor3="Text",
-},
-Position=UDim2.new(0,0,0,((Window.UIPadding*2.4)+12)),
-Visible=ar.ShowTabTitle or false,
-}),
-})
-
-ao.Containers[as]=ar.UIElements.ContainerFrameCanvas
-ao.Tabs[as]=ar
-
-ar.ContainerFrame=ar.UIElements.ContainerFrameCanvas
-
-ak.AddSignal(ar.UIElements.Main.MouseButton1Click,function()
-if not ar.Locked then
-local icon=ar.UIElements.Icon
-if icon then
-ak.Tween(icon,0.08,{Size=UDim2.new(0,34,0,34)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out):Play()
-task.spawn(function()
-task.wait(0.08)
-ak.Tween(icon,0.18,{Size=UDim2.new(0,26,0,26)},Enum.EasingStyle.Back,Enum.EasingDirection.Out):Play()
-end)
-end
--- ★★★ 点击已选中图标：收起侧边栏隐藏名字；否则选中并展开 ★★★
-if ar.Selected and ao.SidebarExpanded then
-ao:CollapseSidebar()
-else
-ao:SelectTab(as)
-ao:ExpandSidebar()
-end
-end
-end)
-
-if Window.ScrollBarEnabled then
-an(
-ar.UIElements.ContainerFrame,
-ar.UIElements.ContainerFrameCanvas.ScrollSliderHolder,
-Window,
-4,
-WindUI
-)
-end
-
-local aw
-local ax
-local ay
-local az=false
-
-
-if ar.Desc then
-ak.AddSignal(ar.UIElements.Main.InputBegan,function()
-az=true
-ax=task.spawn(function()
-task.wait(0.35)
-if az and not aw then
-aw=am(ar.Desc,ao.ToolTipParent,true)
-aw.Container.AnchorPoint=Vector2.new(0.5,0.5)
-
-local function updatePosition()
-if aw then
-aw.Container.Position=UDim2.new(0,ai.X,0,ai.Y-4)
-end
-end
-
-updatePosition()
-ay=ai.Move:Connect(updatePosition)
-aw:Open()
-end
-end)
-end)
-end
-
-ak.AddSignal(ar.UIElements.Main.MouseEnter,function()
-if not ar.Locked then
-ak.SetThemeTag(ar.UIElements.Main.Frame,{
-ImageTransparency="TabBackgroundHoverTransparency",
-ImageColor3="TabBackgroundHover",
-},0.1)
-end
-end)
-ak.AddSignal(ar.UIElements.Main.InputEnded,function()
-if ar.Desc then
-az=false
-if ax then
-task.cancel(ax)
-ax=nil
-end
-if ay then
-ay:Disconnect()
-ay=nil
-end
-if aw then
-aw:Close()
-aw=nil
-end
-end
-
-if not ar.Locked then
-ak.SetThemeTag(ar.UIElements.Main.Frame,{
-ImageTransparency="TabBorderTransparency",
-},0.1)
-end
-end)
-
-function ar.ScrollToTheElement(aA,aB)
-ar.UIElements.ContainerFrame.ScrollingEnabled=false
-
-ak.Tween(ar.UIElements.ContainerFrame,0.45,{
-CanvasPosition=Vector2.new(
-0,
-ar.Elements[aB].ElementFrame.AbsolutePosition.Y
--ar.UIElements.ContainerFrame.AbsolutePosition.Y
--ar.UIElements.ContainerFrame.UIPadding.PaddingTop.Offset
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-task.spawn(function()
-task.wait(0.48)
-
-if ar.Elements[aB].Highlight then
-ar.Elements[aB]:Highlight()
-end
-ar.UIElements.ContainerFrame.ScrollingEnabled=true
-end)
-
-return ar
-end
-
-
-
-local aA=a.load'af'
-
-aA.Load(
-ar,
-ar.UIElements.ContainerFrame,
-aA.Elements,
-Window,
-WindUI,
-nil,
-aA,
-aq,
-ar
-)
-
-function ar.LockAll(aB)
-
-for b,d in next,Window.AllElements do
-if d.Tab and d.Tab.Index and d.Tab.Index==ar.Index and d.Lock then
-d:Lock()
-end
-end
-end
-function ar.UnlockAll(aB)
-for b,d in next,Window.AllElements do
-if d.Tab and d.Tab.Index and d.Tab.Index==ar.Index and d.Unlock then
-d:Unlock()
-end
-end
-end
-function ar.GetLocked(aB)
-local b={}
-
-for d,f in next,Window.AllElements do
-if f.Tab and f.Tab.Index and f.Tab.Index==ar.Index and f.Locked==true then
-table.insert(b,f)
-end
-end
-
-return b
-end
-function ar.GetUnlocked(aB)
-local b={}
-
-for d,f in next,Window.AllElements do
-if f.Tab and f.Tab.Index and f.Tab.Index==ar.Index and f.Locked==false then
-table.insert(b,f)
-end
-end
-
-return b
-end
-
-function ar.Select(aB)
-return ao:SelectTab(ar.Index)
-end
-
-task.spawn(function()
-local aB
-if ar.CustomEmptyPage.Icon then
-aB=
-ak.Image(ar.CustomEmptyPage.Icon,ar.CustomEmptyPage.Icon,0,"Temp","EmptyPage",true)
-aB.Size=
-UDim2.fromOffset(ar.CustomEmptyPage.IconSize or 48,ar.CustomEmptyPage.IconSize or 48)
-end
-
-local b=al("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,-Window.UIElements.Main.Main.Topbar.AbsoluteSize.Y),
-Parent=ar.UIElements.ContainerFrame,
-},{
-al("UIListLayout",{
-Padding=UDim.new(0,8),
-SortOrder="LayoutOrder",
-VerticalAlignment="Center",
-HorizontalAlignment="Center",
-FillDirection="Vertical",
-}),
-
-
-
-
-
-
-
-
-
-
-
-aB,
-ar.CustomEmptyPage.Title and al("TextLabel",{
-AutomaticSize="XY",
-Text=ar.CustomEmptyPage.Title,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=18,
-TextTransparency=0.5,
-BackgroundTransparency=1,
-FontFace=Font.new(ak.Font,Enum.FontWeight.Medium),
-})or nil,
-ar.CustomEmptyPage.Desc and al("TextLabel",{
-AutomaticSize="XY",
-Text=ar.CustomEmptyPage.Desc,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=15,
-TextTransparency=0.65,
-BackgroundTransparency=1,
-FontFace=Font.new(ak.Font,Enum.FontWeight.Regular),
-})or nil,
-})
-
-
-
-
-
-local d
-d=ak.AddSignal(ar.UIElements.ContainerFrame.ChildAdded,function()
-b.Visible=false
-d:Disconnect()
-end)
-end)
-
-return ar
-end
-
-function ao.OnChange(ap,aq)
-ao.OnChangeFunc=aq
-end
-
-function ao.SelectTab(ap,aq)
-if not ao.Tabs[aq].Locked then
-ao.SelectedTab=aq
-
-for ar,as in next,ao.Tabs do
-if not as.Locked then
-ak.SetThemeTag(as.UIElements.Main,{
-ImageTransparency="TabBorderTransparency",
-},0.15)
-if as.Border then
-ak.SetThemeTag(as.UIElements.Main.Outline,{
-ImageTransparency="TabBorderTransparency",
-},0.15)
-end
-ak.SetThemeTag(as.UIElements.Main.Frame.TextLabel,{
-TextTransparency="TabTextTransparency",
-},0.15)
-if as.UIElements.Icon and not as.IconColor then
-ak.SetThemeTag(as.UIElements.Icon.ImageLabel,{
-ImageTransparency="TabIconTransparency",
-},0.15)
-end
-as.Selected=false
-end
-end
-ak.SetThemeTag(ao.Tabs[aq].UIElements.Main,{
-ImageColor3="TabBackgroundActive",
-ImageTransparency="TabBackgroundActiveTransparency",
-},0.15)
-if ao.Tabs[aq].Border then
-ak.SetThemeTag(ao.Tabs[aq].UIElements.Main.Outline,{
-ImageTransparency="TabBorderTransparencyActive",
-},0.15)
-end
-ak.SetThemeTag(ao.Tabs[aq].UIElements.Main.Frame.TextLabel,{
-TextTransparency="TabTextTransparencyActive",
-},0.15)
-if ao.Tabs[aq].UIElements.Icon and not ao.Tabs[aq].IconColor then
-ak.SetThemeTag(ao.Tabs[aq].UIElements.Icon.ImageLabel,{
-ImageTransparency="TabIconTransparencyActive",
-},0.15)
-end
-ao.Tabs[aq].Selected=true
-
-task.spawn(function()
-for ar,as in next,ao.Containers do
-as.AnchorPoint=Vector2.new(0,0.05)
-as.Visible=false
-end
-ao.Containers[aq].Visible=true
-local ar=game:GetService"TweenService"
-
-local as=TweenInfo.new(0.15,Enum.EasingStyle.Quart,Enum.EasingDirection.Out)
-local at=ar:Create(ao.Containers[aq],as,{
-AnchorPoint=Vector2.new(0,0),
-})
-at:Play()
-end)
-
-ao.OnChangeFunc(aq)
-end
-end
-
-return ao end function a.ah()
-
-local aa={}
-
-
-local af=a.load'j'
-local ai=af.New
-local ak=af.Tween
-
-local al=a.load'ag'
-
-function aa.New(am,an,ao,ap,aq)
-local ar={
-Title=am.Title or"Section",
-Icon=am.Icon,
-IconThemed=am.IconThemed,
-Opened=am.Opened or false,
-
-HeaderSize=42,
-IconSize=18,
-
-Expandable=false,
-}
-
-local as
-if ar.Icon then
-as=af.Image(
-ar.Icon,
-ar.Icon,
-0,
-ao,
-"Section",
-true,
-ar.IconThemed,
-"TabSectionIcon"
-)
-
-as.Size=UDim2.new(0,ar.IconSize,0,ar.IconSize)
-as.ImageLabel.ImageTransparency=.25
-end
-
-local at=ai("Frame",{
-Size=UDim2.new(0,ar.IconSize,0,ar.IconSize),
-BackgroundTransparency=1,
-Visible=false
-},{
-ai("ImageLabel",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Image=af.Icon"chevron-down"[1],
-ImageRectSize=af.Icon"chevron-down"[2].ImageRectSize,
-ImageRectOffset=af.Icon"chevron-down"[2].ImageRectPosition,
-ThemeTag={
-ImageColor3="Icon",
-},
-ImageTransparency=.7,
-})
-})
-
-local au=ai("Frame",{
-Size=UDim2.new(1,0,0,ar.HeaderSize),
-BackgroundTransparency=1,
-Parent=an,
-ClipsDescendants=true,
-},{
-ai("TextButton",{
-Size=UDim2.new(1,0,0,ar.HeaderSize),
-BackgroundTransparency=1,
-Text="",
-},{
-as,
-ai("TextLabel",{
-Text=ar.Title,
-TextXAlignment="Left",
-Size=UDim2.new(
-1,
-as and(-ar.IconSize-10)*2
-or(-ar.IconSize-10),
-
-1,
-0
-),
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(af.Font,Enum.FontWeight.SemiBold),
-TextSize=14,
-BackgroundTransparency=1,
-TextTransparency=.7,
-
-TextWrapped=true
-}),
-ai("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-Padding=UDim.new(0,10)
-}),
-at,
-ai("UIPadding",{
-PaddingLeft=UDim.new(0,11),
-PaddingRight=UDim.new(0,11),
-})
-}),
-ai("Frame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-Name="Content",
-Visible=true,
-Position=UDim2.new(0,0,0,ar.HeaderSize)
-},{
-ai("UIListLayout",{
-FillDirection="Vertical",
-Padding=UDim.new(0,aq.Gap),
-VerticalAlignment="Bottom",
-}),
-})
-})
-
-
-function ar.Tab(av,aw)
-if not ar.Expandable then
-ar.Expandable=true
-at.Visible=true
-end
-aw.Parent=au.Content
-return al.New(aw,ap)
-end
-
-function ar.Open(av)
-if ar.Expandable then
-ar.Opened=true
-ak(au,0.33,{
-Size=UDim2.new(1,0,0,ar.HeaderSize+(au.Content.AbsoluteSize.Y/ap))
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-ak(at.ImageLabel,0.1,{Rotation=180},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end
-function ar.Close(av)
-if ar.Expandable then
-ar.Opened=false
-ak(au,0.26,{
-Size=UDim2.new(1,0,0,ar.HeaderSize)
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-ak(at.ImageLabel,0.1,{Rotation=0},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end
-
-af.AddSignal(au.TextButton.MouseButton1Click,function()
-if ar.Expandable then
-if ar.Opened then
-ar:Close()
-else
-ar:Open()
-end
-end
-end)
-
-af.AddSignal(au.Content.UIListLayout:GetPropertyChangedSignal"AbsoluteContentSize",function()
-if ar.Opened then
-ar:Open()
-end
-end)
-
-if ar.Opened then
-task.spawn(function()
-task.wait()
-ar:Open()
-end)
-end
-
-
-
-return ar
-end
-
-
-return aa end function a.ai()
-return{
-Tab="table-of-contents",
-Paragraph="type",
-Button="square-mouse-pointer",
-Toggle="toggle-right",
-Slider="sliders-horizontal",
-Keybind="command",
-Input="text-cursor-input",
-Dropdown="chevrons-up-down",
-Code="terminal",
-Colorpicker="palette",
-ProgressBar="chart-bar",
-}end function a.aj()
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-aa(game:GetService"UserInputService")
-
-local af={
-Margin=8,
-Padding=9,
-}
-
-local ai=a.load'j'
-local ak=ai.New
-local al=ai.Tween
-
-function af.new(am,an,ao)
-local ap={
-IconSize=18,
-Padding=14,
-Radius=22,
-Width=400,
-MaxHeight=380,
-
-Icons=a.load'ai',
-}
-
-local aq=ak("TextBox",{
-Text="",
-PlaceholderText="Search...",
-ThemeTag={
-PlaceholderColor3="Placeholder",
-TextColor3="Text",
-},
-Size=UDim2.new(1,-((ap.IconSize*2)+(ap.Padding*2)),0,0),
-AutomaticSize="Y",
-ClipsDescendants=true,
-ClearTextOnFocus=false,
-BackgroundTransparency=1,
-TextXAlignment="Left",
-FontFace=Font.new(ai.Font,Enum.FontWeight.Regular),
-TextSize=18,
-})
-
-local ar=ak("ImageLabel",{
-Image=ai.Icon"x"[1],
-ImageRectSize=ai.Icon"x"[2].ImageRectSize,
-ImageRectOffset=ai.Icon"x"[2].ImageRectPosition,
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Icon",
-},
-ImageTransparency=0.1,
-Size=UDim2.new(0,ap.IconSize,0,ap.IconSize),
-},{
-ak("TextButton",{
-Size=UDim2.new(1,8,1,8),
-BackgroundTransparency=1,
-Active=true,
-ZIndex=999999999,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Text="",
-}),
-})
-
-local as=ak("ScrollingFrame",{
-Size=UDim2.new(1,0,0,0),
-AutomaticCanvasSize="Y",
-ScrollingDirection="Y",
-ElasticBehavior="Never",
-ScrollBarThickness=0,
-CanvasSize=UDim2.new(0,0,0,0),
-BackgroundTransparency=1,
-Visible=false,
-},{
-ak("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-}),
-ak("UIPadding",{
-PaddingTop=UDim.new(0,ap.Padding),
-PaddingLeft=UDim.new(0,ap.Padding),
-PaddingRight=UDim.new(0,ap.Padding),
-PaddingBottom=UDim.new(0,ap.Padding),
-}),
-})
-
-local at=ai.NewRoundFrame(ap.Radius,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="WindowSearchBarBackground",
-},
-ImageTransparency=0,
-},{
-ai.NewRoundFrame(ap.Radius,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-
-Visible=false,
-ThemeTag={
-ImageColor3="White",
-},
-ImageTransparency=1,
-Name="Frame",
-},{
-ak("Frame",{
-Size=UDim2.new(1,0,0,46),
-BackgroundTransparency=1,
-},{
-
-
-
-
-
-
-
-
-ak("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-},{
-ak("ImageLabel",{
-Image=ai.Icon"search"[1],
-ImageRectSize=ai.Icon"search"[2].ImageRectSize,
-ImageRectOffset=ai.Icon"search"[2].ImageRectPosition,
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Icon",
-},
-ImageTransparency=0.1,
-Size=UDim2.new(0,ap.IconSize,0,ap.IconSize),
-}),
-aq,
-ar,
-ak("UIListLayout",{
-Padding=UDim.new(0,ap.Padding),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-ak("UIPadding",{
-PaddingLeft=UDim.new(0,ap.Padding),
-PaddingRight=UDim.new(0,ap.Padding),
-}),
-}),
-}),
-ak("Frame",{
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-Name="Results",
-},{
-ak("Frame",{
-Size=UDim2.new(1,0,0,1),
-ThemeTag={
-BackgroundColor3="Outline",
-},
-BackgroundTransparency=0.9,
-Visible=false,
-}),
-as,
-ak("UISizeConstraint",{
-MaxSize=Vector2.new(ap.Width,ap.MaxHeight),
-}),
-}),
-ak("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-}),
-}),
-})
-
-local au=ak("Frame",{
-Size=UDim2.new(0,ap.Width,0,0),
-AutomaticSize="Y",
-Parent=an,
-BackgroundTransparency=1,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-Visible=false,
-
-ZIndex=99999999,
-},{
-ak("UIScale",{
-Scale=0.9,
-}),
-at,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-})
-
-local function CreateSearchTab(av,aw,ax,ay,az,aA)
-local aB=ak("TextButton",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Parent=ay or nil,
-},{
-ai.NewRoundFrame(ap.Radius-11,"Squircle",{
-Size=UDim2.new(1,0,0,0),
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=1,
-Name="Main",
-},{
-ai.NewRoundFrame(ap.Radius-11,"Glass-1",{
-Size=UDim2.new(1,0,1,0),
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-ThemeTag={
-ImageColor3="White",
-},
-ImageTransparency=1,
-Name="Outline",
-},{
-
-
-
-
-
-
-
-
-ak("UIPadding",{
-PaddingTop=UDim.new(0,ap.Padding-2),
-PaddingLeft=UDim.new(0,ap.Padding),
-PaddingRight=UDim.new(0,ap.Padding),
-PaddingBottom=UDim.new(0,ap.Padding-2),
-}),
-ak("ImageLabel",{
-Image=ai.Icon(ax)[1],
-ImageRectSize=ai.Icon(ax)[2].ImageRectSize,
-ImageRectOffset=ai.Icon(ax)[2].ImageRectPosition,
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Icon",
-},
-ImageTransparency=0.1,
-Size=UDim2.new(0,ap.IconSize,0,ap.IconSize),
-}),
-ak("Frame",{
-Size=UDim2.new(1,-ap.IconSize-ap.Padding,0,0),
-BackgroundTransparency=1,
-},{
-ak("TextLabel",{
-Text=av,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=17,
-BackgroundTransparency=1,
-TextXAlignment="Left",
-FontFace=Font.new(ai.Font,Enum.FontWeight.Medium),
-Size=UDim2.new(1,0,0,0),
-TextTruncate="AtEnd",
-AutomaticSize="Y",
-Name="Title",
-}),
-ak("TextLabel",{
-Text=aw or"",
-Visible=aw and true or false,
-ThemeTag={
-TextColor3="Text",
-},
-TextSize=15,
-TextTransparency=0.3,
-BackgroundTransparency=1,
-TextXAlignment="Left",
-FontFace=Font.new(ai.Font,Enum.FontWeight.Medium),
-Size=UDim2.new(1,0,0,0),
-TextTruncate="AtEnd",
-AutomaticSize="Y",
-Name="Desc",
-})or nil,
-ak("UIListLayout",{
-Padding=UDim.new(0,6),
-FillDirection="Vertical",
-}),
-}),
-ak("UIListLayout",{
-Padding=UDim.new(0,ap.Padding),
-FillDirection="Horizontal",
-}),
-}),
-},true),
-ak("Frame",{
-Name="ParentContainer",
-Size=UDim2.new(1,-ap.Padding,0,0),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Visible=az,
-
-},{
-ai.NewRoundFrame(99,"Squircle",{
-Size=UDim2.new(0,2,1,0),
-BackgroundTransparency=1,
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=0.9,
-}),
-ak("Frame",{
-Size=UDim2.new(1,-ap.Padding-2,0,0),
-Position=UDim2.new(0,ap.Padding+2,0,0),
-BackgroundTransparency=1,
-},{
-ak("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-}),
-}),
-}),
-ak("UIListLayout",{
-Padding=UDim.new(0,0),
-FillDirection="Vertical",
-HorizontalAlignment="Right",
-}),
-})
-
-
-
-aB.Main.Size=UDim2.new(
-1,
-0,
-0,
-aB.Main.Outline.Frame.Desc.Visible
-and(((ap.Padding-2)*2)+aB.Main.Outline.Frame.Title.TextBounds.Y+6+aB.Main.Outline.Frame.Desc.TextBounds.Y)
-or(((ap.Padding-2)*2)+aB.Main.Outline.Frame.Title.TextBounds.Y)
-)
-
-ai.AddSignal(aB.Main.MouseEnter,function()
-al(aB.Main,0.04,{ImageTransparency=0.95}):Play()
-
-end)
-ai.AddSignal(aB.Main.InputEnded,function()
-al(aB.Main,0.08,{ImageTransparency=1}):Play()
-
-end)
-ai.AddSignal(aB.Main.MouseButton1Click,function()
-if aA then
-aA()
-end
-end)
-
-return aB
-end
-
-local function ContainsText(av,aw)
-if not aw or aw==""then
-return false
-end
-
-if not av or av==""then
-return false
-end
-
-local ax=string.lower(av)
-local ay=string.lower(aw)
-
-return string.find(ax,ay,1,true)~=nil
-end
-
-local function Search(av)
-if not av or av==""then
-return{}
-end
-
-local aw={}
-for ax,ay in next,am.Tabs do
-local az=ContainsText(ay.Title or"",av)
-local aA={}
-
-for aB,b in next,ay.Elements do
-if b.__type~="Section"then
-local d=ContainsText(b.Title or"",av)
-local f=ContainsText(b.Desc or"",av)
-
-if d or f then
-aA[aB]={
-Title=b.Title,
-Desc=b.Desc,
-Original=b,
-__type=b.__type,
-Index=aB,
-}
-end
-end
-end
-
-if az or next(aA)~=nil then
-aw[ax]={
-Tab=ay,
-Title=ay.Title,
-Icon=ay.Icon,
-Elements=aA,
-}
-end
-end
-return aw
-end
-
-ai.AddSignal(as.UIListLayout:GetPropertyChangedSignal"AbsoluteContentSize",function()
-
-al(as,0.06,{
-Size=UDim2.new(
-1,
-0,
-0,
-math.clamp(
-as.UIListLayout.AbsoluteContentSize.Y+(ap.Padding*2),
-0,
-ap.MaxHeight
-)
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
-
-
-
-
-
-
-end)
-
-function ap.Open(av)
-task.spawn(function()
-at.Frame.Visible=true
-au.Visible=true
-al(au.UIScale,0.12,{Scale=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end)
-end
-
-function ap.Close(av,aw)
-task.spawn(function()
-ao()
-at.Frame.Visible=false
-al(au.UIScale,0.12,{Scale=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-task.wait(0.12)
-au.Visible=false
-if aw then
-au:Destroy()
-end
-end)
-end
-
-ai.AddSignal(ar.TextButton.MouseButton1Click,function()
-ap:Close(true)
-end)
-
-ap:Open()
-
-function ap.Search(av,aw)
-aw=aw or""
-
-local ax=Search(aw)
-
-as.Visible=true
-at.Frame.Results.Frame.Visible=true
-for ay,az in next,as:GetChildren()do
-if az.ClassName~="UIListLayout"and az.ClassName~="UIPadding"then
-az:Destroy()
-end
-end
-
-if ax and next(ax)~=nil then
-for ay,az in next,ax do
-local aA=ap.Icons.Tab
-local aB=CreateSearchTab(az.Title,nil,aA,as,true,function()
-ap:Close()
-am:SelectTab(ay)
-end)
-if az.Elements and next(az.Elements)~=nil then
-for b,d in next,az.Elements do
-local f=ap.Icons[d.__type]
-CreateSearchTab(
-d.Title,
-d.Desc,
-f,
-aB:FindFirstChild"ParentContainer"and aB.ParentContainer.Frame
-or nil,
-false,
-function()
-ap:Close()
-am:SelectTab(ay)
-if az.Tab.ScrollToTheElement then
-
-az.Tab:ScrollToTheElement(d.Index)
-end
-
-end
-)
-
-end
-end
-end
-elseif aw~=""then
-ak("TextLabel",{
-Size=UDim2.new(1,0,0,70),
-Text="No results found",
-TextSize=16,
-ThemeTag={
-TextColor3="Text",
-},
-TextTransparency=0.2,
-BackgroundTransparency=1,
-FontFace=Font.new(ai.Font,Enum.FontWeight.Medium),
-Parent=as,
-Name="NotFound",
-})
-else
-as.Visible=false
-at.Frame.Results.Frame.Visible=false
-end
-end
-
-ai.AddSignal(aq:GetPropertyChangedSignal"Text",function()
-ap:Search(aq.Text)
-end)
-
-return ap
-end
-
-return af end function a.ak()
-
-
-
-local aa=(cloneref or clonereference or function(aa)
-return aa
-end)
-
-local af=aa(game:GetService"UserInputService")
-local ai=aa(game:GetService"RunService")
-local ak=aa(game:GetService"Players")
-
-local al=workspace.CurrentCamera
-
-local am=a.load'z'
-
-local an=a.load'j'
-local ao=an.New
-local ap=an.Tween
-
-
-local aq=a.load'C'.New
-local ar=a.load's'.New
-local as=a.load'D'.New
-local at=a.load'E'
-
-local au=a.load'F'
-
-
-
-return function(av)
-local aw={
-Title=av.Title or"UI Library",
-Author=av.Author,
-Icon=av.Icon,
-IconSize=av.IconSize or 22,
-IconThemed=av.IconThemed,
-IconRadius=av.IconRadius or 0,
-Folder=av.Folder,
-Resizable=av.Resizable~=false,
-Background=av.Background,
-BackgroundImageTransparency=av.BackgroundImageTransparency or 0,
-ShadowTransparency=av.ShadowTransparency or 0.6,
-User=av.User or{},
-Footer=av.Footer or{},
-Topbar=av.Topbar or{Height=52,ButtonsType="Default"},
-
-Size=av.Size,
-
-MinSize=av.MinSize or Vector2.new(560,350),
-MaxSize=av.MaxSize or Vector2.new(850,560),
-
-TopBarButtonIconSize=av.TopBarButtonIconSize,
-
-ToggleKey=av.ToggleKey,
-ElementsRadius=av.ElementsRadius,
-Radius=av.Radius or 16,
-Transparent=av.Transparent or false,
-HideSearchBar=av.HideSearchBar~=false,
-ScrollBarEnabled=av.ScrollBarEnabled or false,
-SideBarWidth=av.SideBarWidth or 200,
-Acrylic=av.Acrylic or false,
-NewElements=av.NewElements or false,
-IgnoreAlerts=av.IgnoreAlerts or false,
-HidePanelBackground=av.HidePanelBackground or false,
-AutoScale=av.AutoScale~=false,
-OpenButton=av.OpenButton,
-DragFrameSize=160,
-
-Position=UDim2.new(0.5,0,0.5,0),
-UICorner=16,
-UIPadding=14,
-UIElements={},
-CanDropdown=true,
-Closed=false,
-Parent=av.Parent,
-Destroyed=false,
-IsFullscreen=false,
-CanResize=av.Resizable~=false,
-IsOpenButtonEnabled=true,
-
-CurrentConfig=nil,
-ConfigManager=nil,
-AcrylicPaint=nil,
-CurrentTab=nil,
-TabModule=nil,
-
-OnOpenCallback=nil,
-OnCloseCallback=nil,
-OnDestroyCallback=nil,
-
-IsPC=false,
-
-Gap=5,
-
-TopBarButtons={},
-AllElements={},
-
-ElementConfig={},
-
-PendingFlags={},
-
-IsToggleDragging=false,
-}
-
-aw.UICorner=aw.Radius
-
-aw.TopBarButtonIconSize=aw.TopBarButtonIconSize or(aw.Topbar.ButtonsType=="Mac"and 11 or 16)
-
-aw.ElementConfig={
-UIPadding=(aw.NewElements and 10 or 13),
-UICorner=aw.ElementsRadius or(aw.NewElements and 23 or 16),
-}
-
-local ax=aw.Size or UDim2.new(0,580,0,460)
-aw.Size=UDim2.new(
-ax.X.Scale,
-math.clamp(ax.X.Offset,aw.MinSize.X,aw.MaxSize.X),
-ax.Y.Scale,
-math.clamp(ax.Y.Offset,aw.MinSize.Y,aw.MaxSize.Y)
-)
-
-if aw.Topbar=={}then
-aw.Topbar={Height=52,ButtonsType="Default"}
-end
-
-if not ai:IsStudio()and aw.Folder and writefile then
-if not isfolder("WindUI/"..aw.Folder)then
-makefolder("WindUI/"..aw.Folder)
-end
-if not isfolder("WindUI/"..aw.Folder.."/assets")then
-makefolder("WindUI/"..aw.Folder.."/assets")
-end
-if not isfolder(aw.Folder)then
-makefolder(aw.Folder)
-end
-if not isfolder(aw.Folder.."/assets")then
-makefolder(aw.Folder.."/assets")
-end
-end
-
-local ay=ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-})
-
-if aw.Folder then
-aw.ConfigManager=au:Init(aw)
-end
-
-if aw.Acrylic then local
-az=am.AcrylicPaint{UseAcrylic=aw.Acrylic}
-
-aw.AcrylicPaint=az
-end
-
-local az=ao("Frame",{
-Size=UDim2.new(0,32,0,32),
-Position=UDim2.new(1,0,1,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundTransparency=1,
-ZIndex=99,
-Active=true,
-},{
-ao("ImageLabel",{
-Size=UDim2.new(0,96,0,96),
-BackgroundTransparency=1,
-Image="rbxassetid://120997033468887",
-Position=UDim2.new(0.5,-16,0.5,-16),
-AnchorPoint=Vector2.new(0.5,0.5),
-ImageTransparency=1,
-}),
-})
-local aA=an.NewRoundFrame(aw.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-ImageColor3=Color3.new(0,0,0),
-ZIndex=98,
-Active=false,
-},{
-ao("ImageLabel",{
-Size=UDim2.new(0,70,0,70),
-Image=an.Icon"expand"[1],
-ImageRectOffset=an.Icon"expand"[2].ImageRectPosition,
-ImageRectSize=an.Icon"expand"[2].ImageRectSize,
-BackgroundTransparency=1,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-ImageTransparency=1,
-}),
-})
-
-local aB=an.NewRoundFrame(aw.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ImageTransparency=1,
-ImageColor3=Color3.new(0,0,0),
-ZIndex=999,
-Active=false,
-})
-
-
-
-
-
-
-
-
-
-aw.UIElements.SideBar=ao("ScrollingFrame",{
-Size=UDim2.new(
-1,
-aw.ScrollBarEnabled and-3-(aw.UIPadding/2)or 0,
-1,
-not aw.HideSearchBar and-45 or 0
-),
-Position=UDim2.new(0,0,1,0),
-AnchorPoint=Vector2.new(0,1),
-BackgroundTransparency=1,
-ScrollBarThickness=0,
-ElasticBehavior="Never",
-CanvasSize=UDim2.new(0,0,0,0),
-AutomaticCanvasSize="Y",
-ScrollingDirection="Y",
-ClipsDescendants=true,
-VerticalScrollBarPosition="Left",
-},{
-ao("Frame",{
-BackgroundTransparency=1,
-AutomaticSize="Y",
-Size=UDim2.new(1,0,0,0),
-Name="Frame",
-},{
-ao("UIPadding",{
-
-
-
-PaddingBottom=UDim.new(0,aw.UIPadding/2),
-}),
-ao("UIListLayout",{
-SortOrder="LayoutOrder",
-Padding=UDim.new(0,aw.Gap),
-}),
-}),
-ao("UIPadding",{
-
-PaddingLeft=UDim.new(0,aw.UIPadding/2),
-PaddingRight=UDim.new(0,aw.UIPadding/2),
-PaddingBottom=UDim.new(0,aw.UIPadding/2),
-}),
-
-})
-
-aw.UIElements.SideBarContainer=ao("Frame",{
-Size=UDim2.new(
-0,
-aw.SideBarWidth,
-1,
-aw.User.Enabled and-aw.Topbar.Height-42-(aw.UIPadding*2)or-aw.Topbar.Height
-),
-Position=UDim2.new(0,0,0,aw.Topbar.Height),
-BackgroundTransparency=1,
-Visible=true,
-},{
-ao("Frame",{
-Name="Content",
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,not aw.HideSearchBar and-45-aw.UIPadding or-aw.UIPadding/2),
-Position=UDim2.new(0,0,1,-aw.UIPadding/2),
-AnchorPoint=Vector2.new(0,1),
-}),
-aw.UIElements.SideBar,
-})
-
-if aw.ScrollBarEnabled then
-as(
-aw.UIElements.SideBar,
-aw.UIElements.SideBarContainer.Content,
-aw,
-3,
-av.WindUI
-)
-end
-
-aw.UIElements.MainBar=ao("Frame",{
-Size=UDim2.new(1,-aw.UIElements.SideBarContainer.AbsoluteSize.X,1,-aw.Topbar.Height),
-Position=UDim2.new(1,0,1,0),
-AnchorPoint=Vector2.new(1,1),
-BackgroundTransparency=1,
-},{
-an.NewRoundFrame(aw.UICorner-(aw.UIPadding/2),"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="PanelBackground",
-ImageTransparency="PanelBackgroundTransparency",
-},
-
-
-ZIndex=3,
-Name="Background",
-Visible=not aw.HidePanelBackground,
-}),
-ao("UIPadding",{
-
-PaddingLeft=UDim.new(0,aw.UIPadding/2),
-PaddingRight=UDim.new(0,aw.UIPadding/2),
-PaddingBottom=UDim.new(0,aw.UIPadding/2),
-}),
-})
-
-local b=ao("ImageLabel",{
-Image="rbxassetid://8992230677",
-ThemeTag={
-ImageColor3="WindowShadow",
-
-},
-ImageTransparency=1,
-Size=UDim2.new(1,100,1,100),
-Position=UDim2.new(0,-50,0,-50),
-ScaleType="Slice",
-SliceCenter=Rect.new(99,99,99,99),
-BackgroundTransparency=1,
-ZIndex=-999999999999999,
-Name="Blur",
-})
-
-if af.TouchEnabled and not af.KeyboardEnabled then
-aw.IsPC=false
-elseif af.KeyboardEnabled then
-aw.IsPC=true
-else
-aw.IsPC=nil
-end
-
-
-
-
-
-
-
-local d
-if aw.User then
-local function GetUserThumb()local
-f=ak:GetUserThumbnailAsync(
-aw.User.Anonymous and 1 or ak.LocalPlayer.UserId,
-Enum.ThumbnailType.HeadShot,
-Enum.ThumbnailSize.Size420x420
-)
-return f
-end
-
-d=ao("TextButton",{
-Size=UDim2.new(
-0,
-aw.UIElements.SideBarContainer.AbsoluteSize.X-(aw.UIPadding/2),
-0,
-42+aw.UIPadding
-),
-Position=UDim2.new(0,aw.UIPadding/2,1,-(aw.UIPadding/2)),
-AnchorPoint=Vector2.new(0,1),
-BackgroundTransparency=1,
-Visible=aw.User.Enabled or false,
-},{
-an.NewRoundFrame(aw.UICorner-(aw.UIPadding/2),"SquircleOutline",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=1,
-Name="Outline",
-},{
-ao("UIGradient",{
-Rotation=78,
-Color=ColorSequence.new{
-ColorSequenceKeypoint.new(0.0,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,255,255)),
-ColorSequenceKeypoint.new(1.0,Color3.fromRGB(255,255,255)),
-},
-Transparency=NumberSequence.new{
-NumberSequenceKeypoint.new(0.0,0.1),
-NumberSequenceKeypoint.new(0.5,1),
-NumberSequenceKeypoint.new(1.0,0.1),
-},
-}),
-}),
-an.NewRoundFrame(aw.UICorner-(aw.UIPadding/2),"Squircle",{
-Size=UDim2.new(1,0,1,0),
-ThemeTag={
-ImageColor3="Text",
-},
-ImageTransparency=1,
-Name="UserIcon",
-},{
-ao("ImageLabel",{
-Image=GetUserThumb(),
-BackgroundTransparency=1,
-Size=UDim2.new(0,42,0,42),
-ThemeTag={
-BackgroundColor3="Text",
-},
-BackgroundTransparency=0.93,
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(1,0),
-}),
-}),
-ao("Frame",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-},{
-ao("TextLabel",{
-Text=aw.User.Anonymous and"Anonymous"or ak.LocalPlayer.DisplayName,
-TextSize=17,
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(an.Font,Enum.FontWeight.SemiBold),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Size=UDim2.new(1,-27,0,0),
-TextTruncate="AtEnd",
-TextXAlignment="Left",
-Name="DisplayName",
-}),
-ao("TextLabel",{
-Text=aw.User.Anonymous and"anonymous"or ak.LocalPlayer.Name,
-TextSize=15,
-TextTransparency=0.6,
-ThemeTag={
-TextColor3="Text",
-},
-FontFace=Font.new(an.Font,Enum.FontWeight.Medium),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Size=UDim2.new(1,-27,0,0),
-TextTruncate="AtEnd",
-TextXAlignment="Left",
-Name="UserName",
-}),
-ao("UIListLayout",{
-Padding=UDim.new(0,4),
-HorizontalAlignment="Left",
-}),
-}),
-ao("UIListLayout",{
-Padding=UDim.new(0,aw.UIPadding),
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-ao("UIPadding",{
-PaddingLeft=UDim.new(0,aw.UIPadding/2),
-PaddingRight=UDim.new(0,aw.UIPadding/2),
-}),
-}),
-})
-
-function aw.User.Enable(f)
-aw.User.Enabled=true
-ap(
-aw.UIElements.SideBarContainer,
-0.25,
-{Size=UDim2.new(0,aw.SideBarWidth,1,-aw.Topbar.Height-42-(aw.UIPadding*2))},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-d.Visible=true
-end
-function aw.User.Disable(f)
-aw.User.Enabled=false
-ap(
-aw.UIElements.SideBarContainer,
-0.25,
-{Size=UDim2.new(0,aw.SideBarWidth,1,-aw.Topbar.Height)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-d.Visible=false
-end
-function aw.User.SetAnonymous(f,g)
-if g~=false then
-g=true
-end
-aw.User.Anonymous=g
-d.UserIcon.ImageLabel.Image=GetUserThumb()
-d.UserIcon.Frame.DisplayName.Text=g and"Anonymous"or ak.LocalPlayer.DisplayName
-d.UserIcon.Frame.UserName.Text=g and"anonymous"or ak.LocalPlayer.Name
-end
-
-if aw.User.Enabled then
-aw.User:Enable()
-else
-aw.User:Disable()
-end
-
-if aw.User.Callback then
-an.AddSignal(d.MouseButton1Click,function()
-aw.User.Callback()
-end)
-an.AddSignal(d.MouseEnter,function()
-ap(d.UserIcon,0.04,{ImageTransparency=0.95}):Play()
-ap(d.Outline,0.04,{ImageTransparency=0.85}):Play()
-end)
-an.AddSignal(d.InputEnded,function()
-ap(d.UserIcon,0.04,{ImageTransparency=1}):Play()
-ap(d.Outline,0.04,{ImageTransparency=1}):Play()
-end)
-end
-end
-
-local f
-local g
-
-local h=false
-local i
-
-local l=typeof(aw.Background)=="string"and string.match(aw.Background,"^video:(.+)")or nil
-
-local m=typeof(aw.Background)=="string"
-and not l
-and string.match(aw.Background,"^https?://.+")
-or nil
-
-local p=typeof(aw.Background)=="string"
-and not l
-and string.match(aw.Background,"^rbxassetid://%d+")
-or nil
-
-local function GetImageExtension(r)
-if not r or typeof(r)~="string"then
-return".png"
-end
-local u=r:match"^([^?#]+)"or r
-local v=u:match"%.(%w+)$"
-if v then
-v=v:lower()
-if v=="jpg"or v=="jpeg"or v=="png"or v=="webp"then
-return"."..v
-end
-end
-return".png"
-end
-
-
-
-if typeof(aw.Background)=="string"and l then
-h=true
-
-if string.find(l,"http")then
-local r=(aw.Folder or"Temp").."/assets/."..an.SanitizeFilename(l)..".webm"
-if not isfile(r)then
-local u,v=pcall(function()
-
-
-
-
-
-local u=game.HttpGet and game:HttpGet(l)
-or an.Request{
-Url=l,
-Method="GET",
-Headers={["User-Agent"]="Roblox/Exploit"},
-}.Body
-
-writefile(r,u)
-end)
-if not u then
-warn("[ WindUI.Window.Background ] Failed to download video: "..tostring(v))
-end
-end
-
-local u,v=pcall(function()
-return getcustomasset(r)
-end)
-if not u then
-warn("[ WindUI.Window.Background ] Failed to load custom asset: "..tostring(v))
-end
-warn"[ WindUI.Window.Background ] VideoFrame may not work with custom video"
-l=v
-end
-
-i=ao("VideoFrame",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,0),
-Video=l,
-Looped=true,
-Volume=0,
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-}),
-})
-i:Play()
-elseif m then
-local r=(aw.Folder or"Temp")
-.."/assets/."
-..an.SanitizeFilename(m)
-..GetImageExtension(m)
-
-if isfile and not isfile(r)then
-local u,v=pcall(function()
-local u=game.HttpGet and game:HttpGet(m)
-or an.Request{
-Url=m,
-Method="GET",
-Headers={["User-Agent"]="Roblox/Exploit"},
-}.Body
-
-writefile(r,u)
-end)
-
-if not u then
-warn("[ Window.Background ] Failed to download image: "..tostring(v))
-end
-end
-
-local u,v=pcall(function()
-return getcustomasset(r)
-end)
-
-if not u then
-warn("[ Window.Background ] Failed to load custom asset: "..tostring(v))
-end
-
-i=ao("ImageLabel",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,0),
-Image=v,
-ImageTransparency=0,
-ScaleType="Crop",
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-}),
-})
-elseif p then
-i=ao("ImageLabel",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,0),
-Image=p,
-ImageTransparency=0,
-ScaleType="Crop",
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-}),
-})
-elseif aw.Background then
-i=ao("ImageLabel",{
-BackgroundTransparency=1,
-Size=UDim2.new(1,0,1,0),
-Image=typeof(aw.Background)=="string"and aw.Background or"",
-ImageTransparency=1,
-ScaleType="Crop",
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-}),
-})
-end
-
-local r=an.NewRoundFrame(99,"Squircle",{
-ImageTransparency=0.8,
-ImageColor3=Color3.new(1,1,1),
-Size=UDim2.new(0,0,0,4),
-Position=UDim2.new(0.5,0,1,4),
-AnchorPoint=Vector2.new(0.5,0),
-},{
-ao("TextButton",{
-Size=UDim2.new(1,12,1,12),
-BackgroundTransparency=1,
-Position=UDim2.new(0.5,0,0.5,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-Active=true,
-ZIndex=99,
-Name="Frame",
-}),
-})
-
-function createAuthor(u)
-return ao("TextLabel",{
-Text=u,
-FontFace=Font.new(an.Font,Enum.FontWeight.Medium),
-BackgroundTransparency=1,
-TextTransparency=0.35,
-AutomaticSize="XY",
-Parent=aw.UIElements.Main and aw.UIElements.Main.Main.Topbar.Left.Title,
-TextXAlignment="Left",
-TextSize=13,
-LayoutOrder=2,
-ThemeTag={
-TextColor3="WindowTopbarAuthor",
-},
-Name="Author",
-})
-end
-
-local u
-local v
-
-if aw.Author then
-u=createAuthor(aw.Author)
-end
-
-local x=ao("TextLabel",{
-Text=aw.Title,
-FontFace=Font.new(an.Font,Enum.FontWeight.SemiBold),
-BackgroundTransparency=1,
-AutomaticSize="XY",
-Name="Title",
-TextXAlignment="Left",
-TextSize=16,
-ThemeTag={
-TextColor3="WindowTopbarTitle",
-},
-})
-
-aw.UIElements.Main=ao("Frame",{
-Size=UDim2.new(aw.Size.X.Scale,aw.Size.X.Offset,0,0),
-Position=aw.Position,
-BackgroundTransparency=1,
-Parent=av.Parent,
-AnchorPoint=Vector2.new(0.5,0.5),
-Active=true,
-
-},{
-av.WindUI.UIScaleObj,
-aw.AcrylicPaint and aw.AcrylicPaint.Frame or nil,
-b,
-an.NewRoundFrame(aw.UICorner,"Squircle",{
-ImageTransparency=1,
-Size=UDim2.new(1,0,1,0),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-Name="Background",
-ThemeTag={
-ImageColor3="WindowBackground",
-},
-
-},{
-i,
-r,
-az,
-}),
-
-
-
-
-ay,
-aA,
-aB,
-ao("Frame",{
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
-Name="Main",
-
-Visible=false,
-ZIndex=97,
-},{
-ao("UICorner",{
-CornerRadius=UDim.new(0,aw.UICorner),
-}),
-aw.UIElements.SideBarContainer,
-aw.UIElements.MainBar,
-
-d,
-
-g,
-ao("Frame",{
-Size=UDim2.new(1,0,0,aw.Topbar.Height),
-BackgroundTransparency=1,
-BackgroundColor3=Color3.fromRGB(50,50,50),
-Name="Topbar",
-},{
-f,
-
-
-
-
-
-
-ao("Frame",{
-AutomaticSize="X",
-Size=UDim2.new(0,0,1,0),
-BackgroundTransparency=1,
-Name="Left",
-},{
-ao("UIListLayout",{
-Padding=UDim.new(0,aw.UIPadding+4),
-SortOrder="LayoutOrder",
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-}),
-ao("Frame",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-Name="Title",
-Size=UDim2.new(0,0,1,0),
-LayoutOrder=2,
-},{
-ao("UIListLayout",{
-Padding=UDim.new(0,0),
-SortOrder="LayoutOrder",
-FillDirection="Vertical",
-VerticalAlignment="Center",
-}),
-x,
-u,
-}),
-ao("UIPadding",{
-PaddingLeft=UDim.new(0,4),
-}),
-}),
-ao("CanvasGroup",{
-Size=UDim2.new(0,0,1,0),
-BackgroundTransparency=1,
-Name="Center",
-AnchorPoint=Vector2.new(0,0.5),
-Position=UDim2.new(0,0,0.5,0),
-AutomaticSize="Y",
-Visible=false,
-},{
-
-
-
-ao("ScrollingFrame",{
-Name="Holder",
-BackgroundTransparency=1,
-AutomaticSize="Y",
-ScrollBarThickness=0,
-ScrollingDirection="X",
-AutomaticCanvasSize="X",
-CanvasSize=UDim2.new(0,0,0,0),
-Size=UDim2.new(1,0,1,0),
-
-
-},{
-
-ao("UIListLayout",{
-FillDirection="Horizontal",
-VerticalAlignment="Center",
-HorizontalAlignment="Left",
-Padding=UDim.new(0,aw.UIPadding/2),
-}),
-}),
-}),
-ao("Frame",{
-AutomaticSize="XY",
-BackgroundTransparency=1,
-Position=UDim2.new(aw.Topbar.ButtonsType=="Default"and 1 or 0,0,0.5,0),
-AnchorPoint=Vector2.new(aw.Topbar.ButtonsType=="Default"and 1 or 0,0.5),
-Name="Right",
-},{
-ao("UIListLayout",{
-Padding=UDim.new(0,aw.Topbar.ButtonsType=="Default"and 9 or 0),
-FillDirection="Horizontal",
-SortOrder="LayoutOrder",
-}),
-}),
-ao("UIPadding",{
-PaddingTop=UDim.new(0,aw.UIPadding),
-PaddingLeft=UDim.new(
-0,
-aw.Topbar.ButtonsType=="Default"and aw.UIPadding or aw.UIPadding-2
-),
-PaddingRight=UDim.new(0,8),
-PaddingBottom=UDim.new(0,aw.UIPadding),
-}),
-}),
-}),
-})
-
-an.AddSignal(aw.UIElements.Main.Main.Topbar.Left:GetPropertyChangedSignal"AbsoluteSize",function()
-local z=0
-local A=aw.UIElements.Main.Main.Topbar.Right.UIListLayout.AbsoluteContentSize.X
-/av.WindUI.UIScale
-
-z=aw.UIElements.Main.Main.Topbar.Left.AbsoluteSize.X/av.WindUI.UIScale
-if aw.Topbar.ButtonsType~="Default"then
-z=z+A+aw.UIPadding-4
-end
-
-aw.UIElements.Main.Main.Topbar.Center.Position=
-UDim2.new(0,z+(aw.UIPadding/av.WindUI.UIScale),0.5,0)
-aw.UIElements.Main.Main.Topbar.Center.Size=UDim2.new(
-1,
--z
--(aw.UIPadding/av.WindUI.UIScale)
--(aw.Topbar.ButtonsType=="Default"and A+aw.UIPadding or 0),
-1,
-0
-)
-end)
-
-if aw.Topbar.ButtonsType~="Default"then
-an.AddSignal(aw.UIElements.Main.Main.Topbar.Right:GetPropertyChangedSignal"AbsoluteSize",function()
-aw.UIElements.Main.Main.Topbar.Left.Position=UDim2.new(
-0,
-(aw.UIElements.Main.Main.Topbar.Right.AbsoluteSize.X/av.WindUI.UIScale)+aw.UIPadding-4,
-0,
-0
-)
-end)
-end
-
-function aw.CreateTopbarButton(z,A,B,C,F,G,H,J)
-local L=an.Image(
-B,
-B,
-0,
-aw.Folder,
-"WindowTopbarIcon",
-aw.Topbar.ButtonsType=="Default"and true or false,
-G,
-"WindowTopbarButtonIcon"
-)
-L.Size=aw.Topbar.ButtonsType=="Default"
-and UDim2.new(0,J or aw.TopBarButtonIconSize,0,J or aw.TopBarButtonIconSize)
-or UDim2.new(0,0,0,0)
-L.AnchorPoint=Vector2.new(0.5,0.5)
-L.Position=UDim2.new(0.5,0,0.5,0)
-L.ImageLabel.ImageTransparency=aw.Topbar.ButtonsType=="Default"and 0 or 1
-
-if aw.Topbar.ButtonsType~="Default"then
-L.ImageLabel.ImageColor3=an.GetTextColorForHSB(H)
-end
-
-local M=an.NewRoundFrame(
-aw.Topbar.ButtonsType=="Default"and aw.UICorner-(aw.UIPadding/2)or 999,
-"Squircle",
-{
-Size=aw.Topbar.ButtonsType=="Default"
-and UDim2.new(0,aw.Topbar.Height-16,0,aw.Topbar.Height-16)
-or UDim2.new(0,14,0,14),
-LayoutOrder=F or 999,
-
-
-ZIndex=9999,
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ImageColor3=aw.Topbar.ButtonsType~="Default"and(H or Color3.fromHex"#ff3030")or nil,
-ThemeTag=aw.Topbar.ButtonsType=="Default"and{
-ImageColor3="Text",
-}or nil,
-ImageTransparency=aw.Topbar.ButtonsType=="Default"and 1 or 0,
-},
-{
-
-
-
-
-
-
-
-
-
-
-
-
-L,
-ao("UIScale",{
-Scale=1,
-}),
-},
-true
-)
-
-local N=ao("Frame",{
-Size=aw.Topbar.ButtonsType~="Default"and UDim2.new(0,24,0,24)
-or UDim2.new(0,aw.Topbar.Height-16,0,aw.Topbar.Height-16),
-BackgroundTransparency=1,
-Parent=aw.UIElements.Main.Main.Topbar.Right,
-LayoutOrder=F or 999,
-},{
-M,
-})
-
-
-
-aw.TopBarButtons[100-F]={
-Name=A,
-Object=N,
-}
-
-an.AddSignal(M.MouseButton1Click,function()
-if C then
-C()
-end
-end)
-an.AddSignal(M.MouseEnter,function()
-if aw.Topbar.ButtonsType=="Default"then
-ap(M,0.15,{ImageTransparency=0.93}):Play()
-
-
-else
-
-ap(
-L.ImageLabel,
-0.1,
-{ImageTransparency=0},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ap(L,0.1,{
-Size=UDim2.new(
-0,
-J or aw.TopBarButtonIconSize,
-0,
-J or aw.TopBarButtonIconSize
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end)
-
-an.AddSignal(M.MouseButton1Down,function()
-ap(M.UIScale,0.2,{Scale=0.9},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end)
-
-an.AddSignal(M.MouseLeave,function()
-if aw.Topbar.ButtonsType=="Default"then
-ap(M,0.1,{ImageTransparency=1}):Play()
-
-
-else
-
-ap(
-L.ImageLabel,
-0.1,
-{ImageTransparency=1},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-ap(
-L,
-0.1,
-{Size=UDim2.new(0,0,0,0)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-end)
-
-an.AddSignal(M.InputEnded,function()
-ap(M.UIScale,0.2,{Scale=1},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
-end)
-
-return M
-end
-
-function aw.Topbar.Button(z,A:{
-Name:string,
-Icon:string,
-Callback:any,
-LayoutOrder:number,
-IconThemed:boolean,
-Color:Color3,
-IconSize:number,
-})
-return aw:CreateTopbarButton(
-A.Name,
-A.Icon,
-A.Callback,
-A.LayoutOrder or 0,
-A.IconThemed,
-A.Color,
-A.IconSize
-)
-end
-
-
-
-local z=an.Drag(
-aw.UIElements.Main,
-{aw.UIElements.Main.Main.Topbar,r.Frame},
-function(z,A)
-if not aw.Closed then
-if z and A==r.Frame then
-ap(r,0.1,{ImageTransparency=0.35}):Play()
-else
-ap(r,0.2,{ImageTransparency=0.8}):Play()
-end
-aw.Position=aw.UIElements.Main.Position
-aw.Dragging=z
-end
-end
-)
-
-if not h and aw.Background and typeof(aw.Background)=="table"then
-local A=ao"UIGradient"
-for B,C in next,aw.Background do
-A[B]=C
-end
-
-aw.UIElements.BackgroundGradient=an.NewRoundFrame(aw.UICorner,"Squircle",{
-Size=UDim2.new(1,0,1,0),
-Parent=aw.UIElements.Main.Background,
-ImageTransparency=aw.Transparent and av.WindUI.TransparencyValue or 0,
-},{
-A,
-})
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-aw.OpenButtonMain=a.load'G'.New(aw)
-
-task.spawn(function()
-if aw.Icon then
-local A=ao("Frame",{
-Size=UDim2.new(0,22,0,22),
-BackgroundTransparency=1,
-Parent=aw.UIElements.Main.Main.Topbar.Left,
-})
-
-v=an.Image(
-aw.Icon,
-aw.Title,
-aw.IconRadius,
-aw.Folder,
-"Window",
-true,
-aw.IconThemed,
-"WindowTopbarIcon"
-)
-v.Parent=A
-v.Size=UDim2.new(0,aw.IconSize,0,aw.IconSize)
-v.Position=UDim2.new(0.5,0,0.5,0)
-v.AnchorPoint=Vector2.new(0.5,0.5)
-
-aw.OpenButtonMain:SetIcon(aw.Icon)
-
-
-
-
-
-
-
-
-
-
-
-else
-aw.OpenButtonMain:SetIcon(aw.Icon)
-
-end
-end)
-
-function aw.SetToggleKey(A,B)
-aw.ToggleKey=B
-end
-
-function aw.SetTitle(A,B)
-aw.Title=B
-x.Text=B
-end
-
-function aw.SetAuthor(A,B)
-aw.Author=B
-if not u then
-u=createAuthor(aw.Author)
-end
-
-u.Text=B
-end
-
-function aw.SetSize(A,B)
-if typeof(B)=="UDim2"then
-aw.Size=B
-
-ap(aw.UIElements.Main,0.08,{Size=B},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end
-
-function aw.SetBackgroundImage(A,B)
-aw.UIElements.Main.Background.ImageLabel.Image=B
-end
-function aw.SetBackgroundImageTransparency(A,B)
-if i and i:IsA"ImageLabel"then
-i.ImageTransparency=math.floor(B*10+0.5)/10
-end
-aw.BackgroundImageTransparency=math.floor(B*10+0.5)/10
-end
-
-function aw.SetBackgroundTransparency(A,B)
-local C=math.floor(tonumber(B)*10+0.5)/10
-av.WindUI.TransparencyValue=C
-aw:ToggleTransparency(C>0)
-end
-
-local A
-local B
-an.Icon"minimize"
-an.Icon"maximize"
-
-aw:CreateTopbarButton(
-"Fullscreen",
-aw.Topbar.ButtonsType=="Mac"and"rbxassetid://127426072704909"or"maximize",
-function()
-aw:ToggleFullscreen()
-end,
-(aw.Topbar.ButtonsType=="Default"and 998 or 999),
-true,
-Color3.fromHex"#60C762",
-aw.Topbar.ButtonsType=="Mac"and 9 or nil
-)
-
-local function SetSize(C)
-ap(aw.UIElements.Main,0.45,{
-Size=not aw.IsFullscreen and B or UDim2.new(
-0,
-(av.WindUI.ScreenGui.AbsoluteSize.X-20)/av.WindUI.UIScale,
-0,
-(av.WindUI.ScreenGui.AbsoluteSize.Y-20-52)/av.WindUI.UIScale
-),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-ap(
-aw.UIElements.Main,
-0.45,
-{Position=not aw.IsFullscreen and A or UDim2.new(0.5,0,0.5,26)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-end
-
-function aw.ToggleFullscreen(C)
-local F=aw.IsFullscreen
-
-z:Set(F)
-
-if not F then
-A=aw.UIElements.Main.Position
-B=aw.UIElements.Main.Size
-
-aw.CanResize=false
-else
-if aw.Resizable then
-aw.CanResize=true
-end
-end
-
-aw.IsFullscreen=not F
-
-SetSize(true)
-end
-
-an.AddSignal(av.WindUI.ScreenGui:GetPropertyChangedSignal"AbsoluteSize",function()
-if aw.IsFullscreen then
-SetSize()
-end
-end)
-
-aw:CreateTopbarButton("Minimize","minus",function()
-if aw.Close then
-aw:Close()
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end,(aw.Topbar.ButtonsType=="Default"and 997 or 998),nil,Color3.fromHex"#F4C948")
-
-function aw.OnOpen(C,F)
-aw.OnOpenCallback=F
-end
-function aw.OnClose(C,F)
-aw.OnCloseCallback=F
-end
-function aw.OnDestroy(C,F)
-aw.OnDestroyCallback=F
-end
-
-if av.WindUI.UseAcrylic then
-aw.AcrylicPaint.AddParent(aw.UIElements.Main)
-end
-
-function aw.SetIconSize(C,F)
-local G
-if typeof(F)=="number"then
-G=UDim2.new(0,F,0,F)
-aw.IconSize=F
-elseif typeof(F)=="UDim2"then
-G=F
-aw.IconSize=F.X.Offset
-end
-
-if v then
-v.Size=G
-end
-end
-
-function aw.Open(C)
-if aw.Destroyed then
-return
-end
-task.spawn(function()
-if aw.OnOpenCallback then
-task.spawn(function()
-an.SafeCallback(aw.OnOpenCallback)
-end)
-end
-
-task.wait(0.06)
-aw.Closed=false
-
-aw.UIElements.Main.Size=UDim2.new(aw.Size.X.Scale,aw.Size.X.Offset,0,100)
-
-ap(aw.UIElements.Main,0.8,{
-
-Size=aw.Size,
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-if aw.UIElements.BackgroundGradient then
-ap(aw.UIElements.BackgroundGradient,0.2,{
-ImageTransparency=0,
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-
-aw.UIElements.Main.Background.ImageTransparency=1
-ap(aw.UIElements.Main.Background,0.4,{
-
-ImageTransparency=aw.Transparent and av.WindUI.TransparencyValue or 0,
-},Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
-
-if i then
-if i:IsA"VideoFrame"then
-i.Visible=true
-else
-ap(i,0.2,{
-ImageTransparency=aw.BackgroundImageTransparency,
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end
-
-if aw.OpenButtonMain and aw.IsOpenButtonEnabled then
-aw.OpenButtonMain:Visible(false)
-end
-
-
-
-
-
-
-
-
-
-ap(
-b,
-0.25,
-{ImageTransparency=aw.ShadowTransparency},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-
-
-
-
-ap(
-r,
-0.45,
-{Size=UDim2.new(0,aw.DragFrameSize,0,4),ImageTransparency=0.8},
-Enum.EasingStyle.Exponential,
-Enum.EasingDirection.Out
-):Play()
-z:Set(true)
-
-if aw.Resizable then
-ap(
-az.ImageLabel,
-0.45,
-{ImageTransparency=0.8},
-Enum.EasingStyle.Exponential,
-Enum.EasingDirection.Out
-):Play()
-aw.CanResize=true
-end
-
-aw.CanDropdown=true
-aw.UIElements.Main.Visible=true
-
-
-
-aw.UIElements.Main:WaitForChild"Main".Visible=true
-
-av.WindUI:ToggleAcrylic(true)
-
-end)
-end
-function aw.Close(C)
-if aw.Destroyed then
-return
-end
-
-local F={}
-
-if aw.OnCloseCallback then
-task.spawn(function()
-an.SafeCallback(aw.OnCloseCallback)
-end)
-end
-
-av.WindUI:ToggleAcrylic(false)
-
-if aw.UIElements.Main and aw.UIElements.Main:WaitForChild"Main"then
-aw.UIElements.Main.Main.Visible=false
-end
-
-aw.CanDropdown=false
-aw.Closed=true
-
-ap(aw.UIElements.Main,0.9,{
-
-Size=UDim2.new(aw.Size.X.Scale,aw.Size.X.Offset,0,0),
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-if aw.UIElements.BackgroundGradient then
-ap(aw.UIElements.BackgroundGradient,0.2,{
-ImageTransparency=1,
-},Enum.EasingStyle.Quint,Enum.EasingDirection.InOut):Play()
-end
-
-ap(aw.UIElements.Main.Background,0.3,{
-
-ImageTransparency=1,
-},Enum.EasingStyle.Exponential,Enum.EasingDirection.InOut):Play()
-
-
-
-
-
-
-
-
-if i then
-if i:IsA"VideoFrame"then
-i.Visible=false
-else
-ap(i,0.3,{
-ImageTransparency=1,
-},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-end
-end
-ap(b,0.25,{ImageTransparency=1},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-
-
-
-
-ap(
-r,
-0.3,
-{Size=UDim2.new(0,0,0,4),ImageTransparency=1},
-Enum.EasingStyle.Exponential,
-Enum.EasingDirection.InOut
-):Play()
-ap(
-az.ImageLabel,
-0.3,
-{ImageTransparency=1},
-Enum.EasingStyle.Exponential,
-Enum.EasingDirection.Out
-):Play()
-z:Set(false)
-aw.CanResize=false
-
-task.spawn(function()
-task.wait(0.4)
-
-if not aw.Closed then
-return
-end
-
-aw.UIElements.Main.Visible=false
-
-if aw.OpenButtonMain and not aw.Destroyed and not aw.IsPC and aw.IsOpenButtonEnabled then
-aw.OpenButtonMain:Visible(true)
-end
-end)
-
-function F.Destroy(G)
-task.spawn(function()
-if aw.OnDestroyCallback then
-task.spawn(function()
-an.SafeCallback(aw.OnDestroyCallback)
-end)
-end
-
-if aw.AcrylicPaint and aw.AcrylicPaint.Model then
-aw.AcrylicPaint.Model:Destroy()
-end
-
-aw.Destroyed=true
-
-task.wait(0.4)
-
-av.WindUI.ScreenGui:Destroy()
-av.WindUI.NotificationGui:Destroy()
-av.WindUI.DropdownGui:Destroy()
-av.WindUI.TooltipGui:Destroy()
-
-an.DisconnectAll()
-
-return
-end)
-end
-
-return F
-end
-function aw.Destroy(C)
-return aw:Close():Destroy()
-end
-function aw.Toggle(C)
-if aw.Closed then
-aw:Open()
-else
-aw:Close()
-end
-end
-
-function aw.ToggleTransparency(C,F)
-
-aw.Transparent=F
-av.WindUI.Transparent=F
-
-aw.UIElements.Main.Background.ImageTransparency=F and av.WindUI.TransparencyValue or 0
-
-
-end
-
-function aw.LockAll(C)
-for F,G in next,aw.AllElements do
-if G.Lock then
-G:Lock()
-end
-end
-end
-function aw.UnlockAll(C)
-for F,G in next,aw.AllElements do
-if G.Unlock then
-G:Unlock()
-end
-end
-end
-function aw.GetLocked(C)
-local F={}
-
-for G,H in next,aw.AllElements do
-if H.Locked then
-table.insert(F,H)
-end
-end
-
-return F
-end
-function aw.GetUnlocked(C)
-local F={}
-
-for G,H in next,aw.AllElements do
-if H.Locked==false then
-table.insert(F,H)
-end
-end
-
-return F
-end
-
-function aw.GetUIScale(C,F)
-return av.WindUI.UIScale
-end
-
-function aw.SetUIScale(C,F)
-av.WindUI.UIScale=F
-ap(av.WindUI.UIScaleObj,0.2,{Scale=F},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()
-return aw
-end
-
-function aw.SetToTheCenter(C)
-ap(
-aw.UIElements.Main,
-0.45,
-{Position=UDim2.new(0.5,0,0.5,0)},
-Enum.EasingStyle.Quint,
-Enum.EasingDirection.Out
-):Play()
-return aw
-end
-
-function aw.SetCurrentConfig(C,F)
-aw.CurrentConfig=F
-end
-
-do
-local C=40
-local F=al.ViewportSize
-local G=Vector2.new(aw.Size.X.Offset,aw.Size.Y.Offset)
-
-if not aw.IsFullscreen and aw.AutoScale then
-local H=F.X-(C*2)
-local J=F.Y-(C*2)
-
-local L=H/G.X
-local M=J/G.Y
-
-local N=math.min(L,M)
-
-local O=0.3
-local P=1.0
-
-local Q=math.clamp(N,O,P)
-
-local R=aw:GetUIScale()or 1
-local S=0.05
-
-if math.abs(Q-R)>S then
-aw:SetUIScale(Q)
-end
-end
-end
-
-if aw.OpenButtonMain and aw.OpenButtonMain.Button then
-an.AddSignal(aw.OpenButtonMain.Button.TextButton.MouseButton1Click,function()
-
-
-aw:Open()
-end)
-end
-
-an.AddSignal(af.InputBegan,function(C,F)
-if F then
-return
-end
-
-if aw.ToggleKey then
-if C.KeyCode==aw.ToggleKey then
-aw:Toggle()
-end
-end
-end)
-
-task.spawn(function()
-
-aw:Open()
-end)
-
-function aw.EditOpenButton(C,F)
-return aw.OpenButtonMain:Edit(F)
-end
-
-if aw.OpenButton and typeof(aw.OpenButton)=="table"then
-aw:EditOpenButton(aw.OpenButton)
-end
-
-local C=a.load'ag'
-local F=a.load'ah'
-local G=C.Init(aw,av.WindUI,av.WindUI.TooltipGui)
-G:OnChange(function(H)
-aw.CurrentTab=H
-end)
-
-aw.TabModule=G
-
-function aw.Tab(H,J)
-J.Parent=aw.UIElements.SideBar.Frame
-return G.New(J,av.WindUI.UIScale)
-end
-
-function aw.SelectTab(H,J)
-G:SelectTab(J)
-end
-
-function aw.Section(H,J)
-return F.New(
-J,
-aw.UIElements.SideBar.Frame,
-aw.Folder,
-av.WindUI.UIScale,
-aw
-)
-end
-
-function aw.IsResizable(H,J)
-aw.Resizable=J
-aw.CanResize=J
-end
-
-function aw.SetPanelBackground(H,J)
-if typeof(J)=="boolean"then
-aw.HidePanelBackground=J
-
-aw.UIElements.MainBar.Background.Visible=J
-
-if G then
-for L,M in next,G.Containers do
-M.ScrollingFrame.UIPadding.PaddingTop=UDim.new(0,aw.HidePanelBackground and 20 or 10)
-M.ScrollingFrame.UIPadding.PaddingLeft=
-UDim.new(0,aw.HidePanelBackground and 20 or 10)
-M.ScrollingFrame.UIPadding.PaddingRight=
-UDim.new(0,aw.HidePanelBackground and 20 or 10)
-M.ScrollingFrame.UIPadding.PaddingBottom=
-UDim.new(0,aw.HidePanelBackground and 20 or 10)
-end
-end
-end
-end
-
-function aw.Divider(H)
-local J=ao("Frame",{
-Size=UDim2.new(1,0,0,1),
-Position=UDim2.new(0.5,0,0,0),
-AnchorPoint=Vector2.new(0.5,0),
-BackgroundTransparency=0.9,
-ThemeTag={
-BackgroundColor3="Text",
-},
-})
-local L=ao("Frame",{
-Parent=aw.UIElements.SideBar.Frame,
-
-Size=UDim2.new(1,-7,0,5),
-BackgroundTransparency=1,
-},{
-J,
-})
-
-return L
-end
-
-local H=a.load'u'
-function aw.Dialog(J,L)
-local M={
-Title=L.Title or"Dialog",
-Width=L.Width or 320,
-Content=L.Content,
-Buttons=L.Buttons or{},
-
-TextPadding=14,
-}
-local N=H.Create(false,"Dialog",aw,av.WindUI,aw.UIElements.Main.Main)
-
-N.UIElements.Main.Size=UDim2.new(0,M.Width,0,0)
-
-local O=ao("Frame",{
-Size=UDim2.new(1,0,1,0),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Parent=N.UIElements.Main,
-},{
-ao("UIListLayout",{
-FillDirection="Vertical",
-
-Padding=UDim.new(0,N.UIPadding),
-}),
-})
-
-local P=ao("Frame",{
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-BackgroundTransparency=1,
-Parent=O,
-},{
-ao("UIListLayout",{
-FillDirection="Horizontal",
-Padding=UDim.new(0,N.UIPadding),
-VerticalAlignment="Center",
-}),
-ao("UIPadding",{
-PaddingTop=UDim.new(0,M.TextPadding/2),
-PaddingLeft=UDim.new(0,M.TextPadding/2),
-PaddingRight=UDim.new(0,M.TextPadding/2),
-}),
-})
-
-local Q
-if L.Icon then
-Q=an.Image(
-L.Icon,
-M.Title..":"..L.Icon,
-0,
-aw,
-"Dialog",
-true,
-L.IconThemed
-)
-Q.Size=UDim2.new(0,22,0,22)
-Q.Parent=P
-end
-
-N.UIElements.UIListLayout=ao("UIListLayout",{
-Padding=UDim.new(0,12),
-FillDirection="Vertical",
-HorizontalAlignment="Left",
-VerticalFlex="SpaceBetween",
-Parent=N.UIElements.Main,
-})
-
-ao("UISizeConstraint",{
-MinSize=Vector2.new(180,20),
-MaxSize=Vector2.new(400,math.huge),
-Parent=N.UIElements.Main,
-})
-
-N.UIElements.Title=ao("TextLabel",{
-Text=M.Title,
-TextSize=20,
-FontFace=Font.new(an.Font,Enum.FontWeight.SemiBold),
-TextXAlignment="Left",
-TextWrapped=true,
-RichText=true,
-Size=UDim2.new(1,Q and-26-N.UIPadding or 0,0,0),
-AutomaticSize="Y",
-ThemeTag={
-TextColor3="Text",
-},
-BackgroundTransparency=1,
-Parent=P,
-})
-if M.Content then
-ao("TextLabel",{
-Text=M.Content,
-TextSize=18,
-TextTransparency=0.4,
-TextWrapped=true,
-RichText=true,
-FontFace=Font.new(an.Font,Enum.FontWeight.Medium),
-TextXAlignment="Left",
-Size=UDim2.new(1,0,0,0),
-AutomaticSize="Y",
-LayoutOrder=2,
-ThemeTag={
-TextColor3="Text",
-},
-BackgroundTransparency=1,
-Parent=O,
-},{
-ao("UIPadding",{
-PaddingLeft=UDim.new(0,M.TextPadding/2),
-PaddingRight=UDim.new(0,M.TextPadding/2),
-PaddingBottom=UDim.new(0,M.TextPadding/2),
-}),
-})
-end
-
-local R=ao("UIListLayout",{
-Padding=UDim.new(0,6),
-FillDirection="Horizontal",
-HorizontalAlignment="Center",
-HorizontalFlex="Fill",
-})
-
-local S=ao("Frame",{
-Size=UDim2.new(1,0,0,36),
-AutomaticSize="None",
-BackgroundTransparency=1,
-Parent=N.UIElements.Main,
-LayoutOrder=4,
-},{
-R,
-
-
-
-
-
-
-})
-
-local T={}
-
-for U,V in next,M.Buttons do
-local W=
-ar(V.Title,V.Icon,V.Callback,V.Variant,S,N,true)
-table.insert(T,W)
-W.Size=UDim2.new(1,0,1,0)
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-N:Open()
-
-return N
-end
-
-local J=false
-
-aw:CreateTopbarButton("Close","x",function()
-if not J then
-if not aw.IgnoreAlerts then
-J=true
-
-aw:Dialog{
-
-Title="Close Window",
-Content="Do you want to close this window? You will not be able to open it again.",
-Buttons={
-{
-Title="Cancel",
-
-Callback=function()
-J=false
-end,
-Variant="Secondary",
-},
-{
-Title="Close Window",
-
-Callback=function()
-J=false
-aw:Destroy()
-end,
-Variant="Primary",
-},
-},
-}
-else
-aw:Destroy()
-end
-end
-end,(aw.Topbar.ButtonsType=="Default"and 999 or 997),nil,Color3.fromHex"#F4695F")
-
-function aw.Tag(L,M)
-if aw.UIElements.Main.Main.Topbar.Center.Visible==false then
-aw.UIElements.Main.Main.Topbar.Center.Visible=true
-end
-M.Window=aw
-return at:New(M,aw.UIElements.Main.Main.Topbar.Center.Holder)
-end
-
-local L=av.WindUI.GenerateGUID()
-
-local function startResizing(M)
-if aw.CanResize then
-isResizing=true
-aA.Active=true
-initialSize=aw.UIElements.Main.Size
-initialInputPosition=M.Position
-
-
-ap(az.ImageLabel,0.1,{ImageTransparency=0.35}):Play()
-
-an.AddSignal(M.Changed,function()
-if M.UserInputState==Enum.UserInputState.End then
-if av.WindUI.CurrentInput and av.WindUI.CurrentInput~=L then
-return
-end
-
-av.WindUI.CurrentInput=nil
-
-isResizing=false
-aA.Active=false
-
-
-ap(az.ImageLabel,0.17,{ImageTransparency=0.8}):Play()
-end
-end)
-end
-end
-
-an.AddSignal(az.InputBegan,function(M)
-if
-M.UserInputType==Enum.UserInputType.MouseButton1
-or M.UserInputType==Enum.UserInputType.Touch
-then
-if av.WindUI.CurrentInput and av.WindUI.CurrentInput~=L then
-return
-end
-av.WindUI.CurrentInput=L
-
-if aw.CanResize then
-startResizing(M)
-end
-end
-end)
-
-an.AddSignal(af.InputChanged,function(M)
-if
-M.UserInputType==Enum.UserInputType.MouseMovement
-or M.UserInputType==Enum.UserInputType.Touch
-then
-if isResizing and aw.CanResize then
-local N=M.Position-initialInputPosition
-local O=UDim2.new(0,initialSize.X.Offset+N.X*2,0,initialSize.Y.Offset+N.Y*2)
-
-O=UDim2.new(
-O.X.Scale,
-math.clamp(O.X.Offset,aw.MinSize.X,aw.MaxSize.X),
-O.Y.Scale,
-math.clamp(O.Y.Offset,aw.MinSize.Y,aw.MaxSize.Y)
-)
-
-ap(aw.UIElements.Main,0.08,{
-Size=O,
-},Enum.EasingStyle.Quad,Enum.EasingDirection.Out):Play()
-
-aw.Size=O
-end
-end
-end)
-
-an.AddSignal(az.MouseEnter,function()
-if av.WindUI.CurrentInput and av.WindUI.CurrentInput~=L then
-return
-end
-if not isResizing then
-ap(az.ImageLabel,0.1,{ImageTransparency=0.35}):Play()
-end
-end)
-an.AddSignal(az.MouseLeave,function()
-if av.WindUI.CurrentInput and av.WindUI.CurrentInput~=L then
-return
-end
-if not isResizing then
-ap(az.ImageLabel,0.17,{ImageTransparency=0.8}):Play()
-end
-end)
-
-
-
-local M=0
-local N=0.4
-local O
-local P=0
-
-function onDoubleClick()
-aw:SetToTheCenter()
-end
-
-an.AddSignal(r.Frame.MouseButton1Up,function()
-local Q=tick()
-local R=aw.Position
-
-P=P+1
-
-if P==1 then
-M=Q
-O=R
-
-task.spawn(function()
-task.wait(N)
-if P==1 then
-P=0
-O=nil
-end
-end)
-elseif P==2 then
-if Q-M<=N and R==O then
-onDoubleClick()
-end
-
-P=0
-O=nil
-M=0
-else
-P=1
-M=Q
-O=R
-end
-end)
-
-
-
-if not aw.HideSearchBar then
-local Q=a.load'aj'
-local R=false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-local S=aq("Search","search",aw.UIElements.SideBarContainer,true)
-S.Size=UDim2.new(1,-aw.UIPadding/2,0,39)
-S.Position=UDim2.new(0,aw.UIPadding/2,0,0)
-
-an.AddSignal(S.MouseButton1Click,function()
-if R then
-return
-end
-
-Q.new(aw.TabModule,aw.UIElements.Main,function()
-
-R=false
-if aw.Resizable then
-aw.CanResize=true
-end
-
-ap(aB,0.1,{ImageTransparency=1}):Play()
-aB.Active=false
-end)
-ap(aB,0.1,{ImageTransparency=0.65}):Play()
-aB.Active=true
-
-R=true
-aw.CanResize=false
-end)
-end
-
-
-
-function aw.DisableTopbarButtons(Q,R)
-for S,T in next,R do
-for U,V in next,aw.TopBarButtons do
-if V.Name==T then
-V.Object.Visible=false
-end
-end
-end
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-return aw
-end end end
-
-local aa={
-Window=nil,
-Theme=nil,
-Creator=a.load'j',
-LocalizationModule=a.load'k',
-NotificationModule=a.load'l',
-Themes=nil,
-Transparent=false,
-
-TransparencyValue=0.15,
-
-UIScale=1,
-
-ConfigManager=nil,
-Version="0.0.0",
-
-Services=a.load'q',
-
-OnThemeChangeFunction=nil,
-
-cloneref=nil,
-UIScaleObj=nil,
-
-CreateWindow=nil,
-
-CurrentInput=nil,
-}
-
-local af=(cloneref or clonereference or function(af)
-return af
-end)
-
-aa.cloneref=af
-
-local ai=af(game:GetService"HttpService")
-local ak=af(game:GetService"Players")
-local al=af(game:GetService"CoreGui")
-local am=af(game:GetService"RunService")
-local an=af(game:GetService"UserInputService")
-
-function aa.GenerateGUID()
-return ai:GenerateGUID(false)
-end
-
-local ao=aa.GenerateGUID()
-
-an.InputBegan:Connect(function(ap,aq)
-
-
-
-
-task.defer(function()
-if
-ap.UserInputType==Enum.UserInputType.MouseButton1
-or ap.UserInputType==Enum.UserInputType.Touch
-then
-if aa.CurrentInput and aa.CurrentInput~=ao then
-return
-end
-
-aa.CurrentInput=ao
-
-
-end
-end)
-end)
-an.InputEnded:Connect(function(ap,aq)
-if ap.UserInputType==Enum.UserInputType.MouseButton1 or ap.UserInputType==Enum.UserInputType.Touch then
-if aa.CurrentInput and aa.CurrentInput~=ao then
-return
-end
-
-aa.CurrentInput=nil
-end
-end)
-
-local ap=ak.LocalPlayer or nil
-
-local aq=ai:JSONDecode(a.load'r')
-if aq then
-aa.Version=aq.version
-end
-
-local ar=a.load'v'
-
-local as=aa.Creator
-
-local at=as.New
-
-
-
-
-local au=a.load'z'
-
-local av=protectgui or(syn and syn.protect_gui)or function()end
-
-local aw=gethui and gethui()or(al or ap:WaitForChild"PlayerGui")
-
-local ax=at("UIScale",{
-Scale=aa.UIScale,
-})
-
-aa.UIScaleObj=ax
-
-aa.ScreenGui=at("ScreenGui",{
-Name="WindUI",
-Parent=aw,
-IgnoreGuiInset=true,
-ScreenInsets="None",
-DisplayOrder=-99999,
-},{
-
-at("Folder",{
-Name="Window",
-}),
-
-
-
-
-
-
-at("Folder",{
-Name="KeySystem",
-}),
-at("Folder",{
-Name="Popups",
-}),
-at("Folder",{
-Name="ToolTips",
-}),
-})
-
-aa.NotificationGui=at("ScreenGui",{
-Name="WindUI/Notifications",
-Parent=aw,
-IgnoreGuiInset=true,
-})
-aa.DropdownGui=at("ScreenGui",{
-Name="WindUI/Dropdowns",
-Parent=aw,
-IgnoreGuiInset=true,
-})
-aa.TooltipGui=at("ScreenGui",{
-Name="WindUI/Tooltips",
-Parent=aw,
-IgnoreGuiInset=true,
-})
-av(aa.ScreenGui)
-av(aa.NotificationGui)
-av(aa.DropdownGui)
-av(aa.TooltipGui)
-
-as.Init(aa)
-
-function aa.SetParent(ay,az)
-if aa.ScreenGui then
-aa.ScreenGui.Parent=az
-end
-if aa.NotificationGui then
-aa.NotificationGui.Parent=az
-end
-if aa.DropdownGui then
-aa.DropdownGui.Parent=az
-end
-if aa.TooltipGui then
-aa.TooltipGui.Parent=az
-end
-end
-math.clamp(aa.TransparencyValue,0,1)
-
-local ay=aa.NotificationModule.Init(aa.NotificationGui)
-
-function aa.Notify(az,aA)
-aA.Holder=ay.Frame
-aA.Window=aa.Window
-
-return aa.NotificationModule.New(aA)
-end
-
-function aa.SetNotificationLower(az,aA)
-ay.SetLower(aA)
-end
-
-function aa.SetFont(az,aA)
-as.UpdateFont(aA)
-end
-
-function aa.OnThemeChange(az,aA)
-aa.OnThemeChangeFunction=aA
-end
-
-function aa.AddTheme(az,aA)
-aa.Themes[aA.Name]=aA
-return aA
-end
-
-function aa.SetTheme(az,aA)
-if aa.Themes[aA]then
-aa.Theme=aa.Themes[aA]
-as.SetTheme(aa.Themes[aA])
-
-if aa.OnThemeChangeFunction then
-aa.OnThemeChangeFunction(aA)
-end
-
-return aa.Themes[aA]
-end
-return nil
-end
-
-function aa.GetThemes(az)
-return aa.Themes
-end
-function aa.GetCurrentTheme(az)
-return aa.Theme.Name
-end
-function aa.GetTransparency(az)
-return aa.Transparent or false
-end
-function aa.GetWindowSize(az)
-return aa.Window.UIElements.Main.Size
-end
-function aa.Localization(az,aA)
-return aa.LocalizationModule:New(aA,as)
-end
-
-function aa.SetLanguage(az,aA)
-if as.Localization then
-return as.SetLanguage(aA)
-end
-return false
-end
-
-function aa.ToggleAcrylic(az,aA)
-if aa.Window and aa.Window.AcrylicPaint and aa.Window.AcrylicPaint.Model then
-aa.Window.Acrylic=aA
-aa.Window.AcrylicPaint.Model.Transparency=aA and 0.98 or 1
-if aA then
-au.Enable()
-else
-au.Disable()
-end
-end
-end
-
-function aa.Gradient(az,aA,aB)
-local b={}
-local d={}
-
-for f,g in next,aA do
-local h=tonumber(f)
-if h then
-h=math.clamp(h/100,0,1)
-
-local i=g.Color
-if typeof(i)=="string"and string.sub(i,1,1)=="#"then
-i=Color3.fromHex(i)
-end
-
-local l=g.Transparency or 0
-
-table.insert(b,ColorSequenceKeypoint.new(h,i))
-table.insert(d,NumberSequenceKeypoint.new(h,l))
-end
-end
-
-table.sort(b,function(f,g)
-return f.Time<g.Time
-end)
-table.sort(d,function(f,g)
-return f.Time<g.Time
-end)
-
-if#b<2 then
-table.insert(b,ColorSequenceKeypoint.new(1,b[1].Value))
-table.insert(d,NumberSequenceKeypoint.new(1,d[1].Value))
-end
-
-local f={
-Color=ColorSequence.new(b),
-Transparency=NumberSequence.new(d),
-}
-
-if aB then
-for g,h in pairs(aB)do
-f[g]=h
-end
-end
-
-return f
-end
-
-function aa.Popup(az,aA)
-aA.WindUI=aa
-return a.load'A'.new(aA,aa.ScreenGui.Popups)
-end
-
-aa.Themes=a.load'B'(aa,as)
-
-as.Themes=aa.Themes
-
-aa:SetTheme"Dark"
-aa:SetLanguage(as.Language)
-
-function aa.CreateWindow(az,aA)
-local aB=a.load'ak'
-
-if not am:IsStudio()and writefile then
-if not isfolder"WindUI"then
-makefolder"WindUI"
-end
-if aA.Folder then
-makefolder(aA.Folder)
-else
-makefolder(aA.Title)
-end
-end
-
-aA.WindUI=aa
-aA.Window=aa.Window
-aA.Parent=aa.ScreenGui.Window
-
-if aa.Window then
-warn"You cannot create more than one window"
-return
-end
-
-local b=true
-
-local d=aa.Themes[aA.Theme or"Dark"]
-
-
-as.SetTheme(d)
-
-local f=gethwid or function()
-return ak.LocalPlayer.UserId
-end
-
-local g=f()
-
-if aA.KeySystem then
-b=false
-
-local function loadKeysystem()
-ar.new(aA,g,function(h)
-b=h
-end)
-end
-
-local h=(aA.Folder or"Temp").."/"..g..".key"
-
-if aA.KeySystem.KeyValidator then
-if aA.KeySystem.SaveKey and isfile(h)then
-local i=readfile(h)
-local l=aA.KeySystem.KeyValidator(i)
-
-if l then
-b=true
-else
-loadKeysystem()
-end
-else
-loadKeysystem()
-end
-elseif not aA.KeySystem.API then
-if aA.KeySystem.SaveKey and isfile(h)then
-local i=readfile(h)
-local l=(type(aA.KeySystem.Key)=="table")and table.find(aA.KeySystem.Key,i)
-or tostring(aA.KeySystem.Key)==tostring(i)
-
-if l then
-b=true
-else
-loadKeysystem()
-end
-else
-loadKeysystem()
-end
-else
-if isfile(h)then
-local i=readfile(h)
-local l=false
-
-for m,p in next,aA.KeySystem.API do
-local r=aa.Services[p.Type]
-if r then
-local u={}
-for v,x in next,r.Args do
-table.insert(u,p[x])
-end
-
-local v=r.New(table.unpack(u))
-local x=v.Verify(i)
-if x then
-l=true
-break
-end
-end
-end
-
-b=l
-if not l then
-loadKeysystem()
-end
-else
-loadKeysystem()
-end
-end
-
-repeat
-task.wait()
-until b
-end
-
-local h=aB(aA)
-
-aa.Transparent=aA.Transparent
-aa.Window=h
-
-if aA.Acrylic then
-au.init()
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-return h
-end
-
-local WindUI = aa
-
-local Window = WindUI:CreateWindow({
-    Title    = "难度模式 自动挂机助手",
-    Icon     = "swords",
-    Author   = "自动化引擎",
-    Folder   = "MyScript",
-
-    Size     = UDim2.new(0, 620, 0, 480),
-    MinSize  = Vector2.new(520, 340),
-    MaxSize  = Vector2.new(1000, 700),
-
-    Resizable = true,
-    AutoScale = true,
-    Acrylic   = false,
-
-    SideBarWidth  = 72,
-    HideSearchBar = false,
-    Radius        = 16,
-    ElementsRadius = 16,
-
-    Background = "rbxassetid://90331823252393",
-    BackgroundImageTransparency = 0.55,
-
-    OpenButton = { Enabled = false },
-})
-
 -- ============================================================
--- 共享状态（界面与自动化引擎共用，默认全开，可在「设置」页逐项调整）
+-- UI 加载
 -- ============================================================
-local AUTO = {
-    -- 流程（可在「设置」页自由开关）
-    AutoOpenVote  = true,    -- 大厅自动打开投票界面（相当于点击 GUI）
-    AutoVote      = true,    -- 自动投票选难度模式
-    AutoStart     = true,    -- 自动开单人局（MainHandler StartSolo）
-    AutoEquipChar = true,    -- 自动装备你在「玩家」页选的角色（不判断强弱）
-    Character     = "",      -- 玩家自选角色名，空 = 不自动装备
-    AutoSkipVote  = true,    -- 自动跟着投跳波票
-    AutoReady     = true,    -- 大厅自动点新版 UI 准备按钮（点不动才发 GetReadyRemote）
-    AutoSkip      = true,    -- 自动开启跳波设置
-    AutoSkipHeli  = true,    -- 自动跳过直升机过场
-    AutoSettings  = true,    -- 自动打开游戏内快速过场等设置
-    AutoFight     = true,    -- 自动锁敌 + 开火
-    AutoAim       = true,    -- 自动瞄准
-    AutoTeleport  = true,    -- 敌人太远时直接瞬移到脸上
-    AutoSkill     = true,    -- 自动放技能
-    AutoRevive    = true,    -- 自动救倒地队友
-    AutoRespawn   = true,    -- 无限复活：残血自动重置角色，立刻重生
-    ReviveHp      = 35,      -- 血量百分比低于这个值就触发复活重置
-    AutoDodge     = true,    -- 瞬移躲投射物（导弹/投掷物朝你飞来时侧向瞬移）
-    AutoContinue  = true,    -- 结算自动准备下一局
-    AutoApproach  = true,    -- 敌人太远自动靠近
-    AntiAfk       = true,    -- 防踢
-    -- 内部数值
-    Range         = 400,     -- 锁敌半径
-    SkillTick     = 0.2,     -- 技能检查频率（每个技能按自己的冷却独立触发）
-    VoteGap       = 5,       -- 重复投票间隔
-    TeleportDist  = 90,      -- 超过这个距离直接瞬移
-    TurnDist      = 110,     -- 超过这个距离开始瞬移
-    VoteMode      = "",      -- 空 = 自动投当前票数最高的模式
-    -- 运行数据
-    Phase         = "启动中",
-    LastReason    = "就绪",
-    Target        = nil,
-    VoteState     = "—",
-    Running       = true,
-    Paused        = false,
-    Actions       = {},
-    Logs          = {},
+-- ↓↓↓ 把这里换成你 UI 文件的直链（GitHub raw / 图床 / 任意可 HttpGet 的链接）
+local UILINK = "https://raw.githubusercontent.com/sxxxhjjj/ideal-robot/refs/heads/main/6adc21d1d2a3c5977bcbd30c_%E9%9A%BE%E5%BA%A6%E6%A8%A1%E5%BC%8F_UI.lua"
+
+local function loadUISource()
+    if UILINK and UILINK ~= "" and not string.find(UILINK, "example.com", 1, true) then
+        return game:HttpGet(UILINK)
+    end
+    -- 没填链接时尝试本地文件（注入器支持 readfile 时可用）
+    local ok, data = pcall(readfile, "难度模式_UI.lua")
+    if ok and type(data) == "string" and data ~= "" then
+        return data
+    end
+    error("[难度模式] 请先在 UILINK 填入 UI 文件的直链")
+end
+
+local UI = loadstring(loadUISource())()
+
+local AUTO             = UI.AUTO
+local WindUI           = UI.WindUI
+local StatusPara       = UI.Status
+local LogPara          = UI.Log
+local Players          = UI.Players
+local TweenService     = UI.TweenService
+local UserInputService = UI.UserInputService
+local RunService       = UI.RunService
+local player           = UI.player
+local camera           = UI.camera
+
+if not AUTO then
+    error("[难度模式] UI 加载失败：没有拿到 AUTO 表")
+end
+
+-- 引擎侧默认值：链接 UI 是旧版、缺少新字段时也不会报错，功能仍需在菜单里手动开启
+local ENGINE_DEFAULTS = {
+    AutoFarm = false, FarmMode = "Normal Mode", FarmPos = "Above", FarmMove = "Teleport",
+    CircleRadius = 6, FarmHeight = 0, SkillDelay = 1, SafeHp = 30,
+    GodMode = false, GodHp = 30, ResetWave = false, ResetWaveValue = 10,
+    BypassJeffrey = false, AntiJeffrey = false, AntiJeffreyRange = 50,
+    FlushAura = false, FlushAuraRange = 5,
+    ESPPlayer = false, ESPItem = false, ESPItems = {},
+    AutoBuyWeapon = false, WeaponName = "Stungun",
+    AutoBuyMisc = false, MiscName = "HeadPhone",
+    AutoRequest = false, RequestName = "Titan-Request",
+    UpgradeTitanSpeaker = false, TitanUpgrades = {},
+    UpgradeUTCM = false, UTCMUpgrades = {},
+    UpgradeTV = false, TVUpgrades = {},
+    AutoHourly = false, HourlyItems = {}, HourlyAmount = 1,
+    AutoUseItem = false, UseItemName = "Presents",
+    NoClip = false, Fly = false, FlySpeed = 1, FlyHeight = 10,
+    InfiniteJump = false, LockMoveStats = false, WalkSpeed = 16, JumpPower = 50,
+    FullBright = false, NoFog = false, CameraMode = "Classic", NoBarrier = false,
+    CombatDebug = false, AutoCollect = false, CollectItems = {},
+    CollectMode = "Clean", CollectMove = "Teleport",
+    AutoSave = false, AutoSaveDelay = 15, SelectedCodes = {}, SelectedPasses = {},
+    AutoVoteInGame = false, GameMode = "Normal", AutoGameModeLobby = false,
 }
-
--- ============================================================
--- 界面：只展示状态，不提供任何需要玩家调整的配置
--- ============================================================
--- 界面：老版本布局（信息 / 主要 / 玩家 / 游戏模式 / 日志），全部自动，无开关
--- ============================================================
-local InfoTab = Window:Tab({ Title = "信息", Icon = "info" })
-local MainTab = Window:Tab({ Title = "主要", Icon = "rocket" })
-local PlayerTab = Window:Tab({ Title = "玩家", Icon = "user" })
-local ModeTab = Window:Tab({ Title = "游戏模式", Icon = "gamepad-2" })
-local LogTab  = Window:Tab({ Title = "日志", Icon = "scroll-text" })
-
-local SecInfo = InfoTab:Section({
-    Title = "难度模式 至尊版",
-    TextXAlignment = "Center",
-    TextSize = 17,
-})
-
-SecInfo:Paragraph({
-    Title = "说明",
-    Desc  = "全自动：进大厅自动准备、自动投票、自动开单人局；局内自动锁敌开火、瞬移贴脸、瞬移躲投射物、无限复活、自动技能、自动救人、结算继续。所有功能默认全开，不需要你设置任何开关。",
-})
-
-local SecStatus = MainTab:Section({
-    Title = "运行状态",
-    Desc  = "全自动运行中 · 无需设置",
-    Icon  = "activity",
-})
-
-local StatusPara = SecStatus:Paragraph({
-    Title = "实时数据",
-    Desc  = "正在读取游戏数据...",
-})
-
-local SecPlan = MainTab:Section({
-    Title = "内部策略",
-    Desc  = "已固定，玩家不用改",
-    Icon  = "brain",
-})
-
-SecPlan:Paragraph({
-    Title = "开局",
-    Desc  = "进大厅装备你选的角色 → 自动投票 → 点新版 UI 准备按钮 → 用 MainHandler 直接开单人局",
-})
-
-SecPlan:Paragraph({
-    Title = "战斗",
-    Desc  = "自动锁定最近敌人并持续瞄准射击 → 技能冷却好就自动放 → 敌人太远直接瞬移贴脸打",
-})
-
-SecPlan:Paragraph({
-    Title = "生存",
-    Desc  = "残血 / 倒地自动等待 → 附近有队友倒地会自动按住救人 → 跳波投票自动跟随 → 结算界面自动准备下一局",
-})
-
-local SecLife = PlayerTab:Section({
-    Title = "生存 / 无限复活",
-    Desc  = "残血自动重置角色，瞬间重生",
-    Icon  = "heart-pulse",
-})
-
-SecLife:Paragraph({
-    Title = "无限复活",
-    Desc  = string.format("血量低于 %d%% 时自动卸掉角色部件重置 → 立刻重新出生，冷却 2 秒，不会真死", AUTO.ReviveHp),
-})
-
-SecLife:Paragraph({
-    Title = "救队友",
-    Desc  = "附近队友倒地时自动按住救人交互，救完继续打",
-})
-
-SecLife:Button({
-    Title = "立即复活一次",
-    Desc  = "手动触发一次重置重生",
-    Icon  = "heart-pulse",
-    Callback = function()
-        if AUTO.Actions.Respawn then AUTO.Actions.Respawn() end
-    end,
-})
-
-local SecChar = PlayerTab:Section({
-    Title = "角色（你自己选）",
-    Desc  = "脚本不判断谁强，只装备你选的那个",
-    Icon  = "swords",
-})
-
-local _lp = game:GetService("Players").LocalPlayer
-local charList = {}
-do
-    local ud = _lp and _lp:FindFirstChild("UnlockData")
-    if ud then
-        for _, c in ipairs(ud:GetChildren()) do
-            table.insert(charList, c.Name)
-        end
-    end
-    table.sort(charList)
-    if #charList == 0 then
-        charList = { "（进游戏后重新执行脚本即可读到角色）" }
-    end
+for k, v in pairs(ENGINE_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
 end
-
-SecChar:Paragraph({
-    Title = "说明",
-    Desc  = "下面是你账号里已解锁的角色（读自 UnlockData）。脚本不知道哪个最强，也不会替你判断，只会装备你在下拉框里选中的那个。",
-})
-
-SecChar:Dropdown({
-    Title = "选择要装备的角色",
-    Desc  = "点开选择；选中后点下面按钮装备。默认显示第一个，想换就点开重选",
-    Values = charList,
-    Multi = false,
-    Value = charList[1],
-    Callback = function(v)
-        if v and not string.find(v, "^（") then
-            AUTO.Character = v
-            AUTO.LastReason = "已选择角色：" .. v
-            pcall(function()
-                WindUI:Notify({ Title = "角色", Content = "已选择：" .. v, Duration = 2, Icon = "swords" })
-            end)
-        end
-    end,
-})
-
-SecChar:Button({
-    Title = "装备所选角色",
-    Desc  = "立即用 ForChangeCharacter 换成下拉框里选的角色（战斗中不换）",
-    Icon = "swords",
-    Callback = function()
-        if AUTO.Character == "" then
-            pcall(function()
-                WindUI:Notify({ Title = "装备角色", Content = "请先在下拉框里选一个角色", Duration = 2, Icon = "swords" })
-            end)
-            return
-        end
-        if AUTO.Actions.Equip then AUTO.Actions.Equip() end
-    end,
-})
-
--- ============================================================
--- 游戏模式页：只展示投票信息 + 两个补枪按钮
--- ============================================================
-local SecMode = ModeTab:Section({
-    Title = "投票信息",
-    TextXAlignment = "Center",
-    TextSize = 17,
-})
-
-SecMode:Paragraph({
-    Title = "自动投票",
-    Desc  = "大厅自动读 workspace.Vote 的实时票数，把票投给票数最高的模式；全都没票就投 Normal。投票界面由脚本自己打开、投完自己收起，不需要你操作。",
-})
-
-SecMode:Paragraph({
-    Title = "自动开局",
-    Desc  = "投完票直接调 MainHandler 发起单人开局（StartSolo），不用等别人、不用等倒计时。",
-})
-
-local SecMode2 = ModeTab:Section({ Title = "补一枪", Icon = "gamepad-2" })
-
-SecMode2:Button({
-    Title = "立即投票",
-    Desc  = "马上按当前票数最高的模式投一票",
-    Icon = "check",
-    Callback = function()
-        if AUTO.Actions.Vote then AUTO.Actions.Vote() end
-    end,
-})
-
-SecMode2:Button({
-    Title = "立即开单人局",
-    Desc  = "立刻用 MainHandler 发起 StartSolo",
-    Icon = "rocket",
-    Callback = function()
-        if AUTO.Actions.StartSolo then AUTO.Actions.StartSolo() end
-    end,
-})
-
-local SecLog = LogTab:Section({
-    Title = "运行日志",
-    Desc  = "最近 14 条",
-    Icon  = "scroll-text",
-})
-
-local LogPara = SecLog:Paragraph({
-    Title = "日志",
-    Desc  = "等待引擎启动...",
-})
-
-local SecTool = MainTab:Section({
-    Title = "工具",
-    Desc  = "平时不需要动",
-    Icon  = "wrench",
-})
-
-SecTool:Button({
-    Title = "暂停 / 继续",
-    Desc  = "暂停后不再瞄准、开火、放技能",
-    Icon  = "pause",
-    Callback = function()
-        if AUTO.Actions.TogglePause then AUTO.Actions.TogglePause() end
-    end,
-})
-
-SecTool:Button({
-    Title = "刷新状态",
-    Desc  = "立即读取波数 / 生命 / 敌人数",
-    Icon  = "refresh-cw",
-    Callback = function()
-        if AUTO.Actions.Refresh then AUTO.Actions.Refresh() end
-    end,
-})
-
-SecTool:Button({
-    Title = "立即锁敌开火",
-    Desc  = "手动触发一次锁定 + 开火 + 技能",
-    Icon  = "crosshair",
-    Callback = function()
-        if AUTO.Actions.Fight then AUTO.Actions.Fight() end
-    end,
-})
-
-SecTool:Button({
-    Title = "立即打开界面并投票",
-    Desc  = "手动触发一次：打开投票界面 + 投票",
-    Icon = "list-checks",
-    Callback = function()
-        if AUTO.Actions.Vote then AUTO.Actions.Vote() end
-    end,
-})
-
-SecTool:Button({
-    Title = "装备「玩家」页所选角色",
-    Desc  = "把下拉框里选的角色装备上（不判断强弱）",
-    Icon = "swords",
-    Callback = function()
-        if AUTO.Character == "" then
-            pcall(function()
-                WindUI:Notify({ Title = "装备角色", Content = "先去「玩家」页选一个角色", Duration = 2, Icon = "swords" })
-            end)
-            return
-        end
-        if AUTO.Actions.Equip then AUTO.Actions.Equip() end
-    end,
-})
-
-SecTool:Button({
-    Title = "立即尝试准备",
-    Desc  = "立刻点一次新版 UI 准备按钮（点不动改发 GetReadyRemote）",
-    Icon = "house",
-    Callback = function()
-        if AUTO.Actions.Ready then AUTO.Actions.Ready() end
-    end,
-})
-
-SecTool:Button({
-    Title = "环境自检",
-    Desc = "检查角色 / 技能 / 敌人识别 / 遥控是否正常",
-    Icon = "stethoscope",
-    Callback = function()
-        if AUTO.Actions.Diag then AUTO.Actions.Diag() end
-    end,
-})
-
-SecTool:Button({
-    Title = "重新进入当前服务器",
-    Desc  = "重新传送到当前 PlaceId",
-    Icon  = "log-out",
-    Callback = function()
-        pcall(function()
-            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
-        end)
-    end,
-})
-
-SecTool:Button({
-    Title = "停止并卸载脚本",
-    Desc  = "关闭界面与所有自动化",
-    Icon  = "power",
-    Callback = function()
-        AUTO.Running = false
-        pcall(function() Window:Destroy() end)
-    end,
-})
-
-print("[难度模式 自动化] 界面已加载")
-
--- ============================================================
--- ▼▼ 内嵌自定义悬浮窗（替换内置 OpenButton）▼▼
--- ============================================================
-
---[[
-    ================================================================
-    独立悬浮窗（最终版 - 自动清理 + 自动保存）
-    - 主悬浮窗：纯黑色背景 + 彩虹文字 + 左侧按钮（保持不变）
-    - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）
-      - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）
-      - 自动换图关闭：背景根据当前时间自动切换（6张时段图）
-      - 单点互动开启：鼠标悬停扩张（仅鼠标）
-    - 左侧按钮：亮度调高（透明度 0.3→0.05），尺寸略大（50→56）
-    - 弹出面板：左右毛玻璃子面板（开关 / 时间 + 问候语）
-    - 右边子面板所有文字：白色（时间/星期/问候语）
-    - 所有功能：拖拽、边缘检测、双击展开、Toggle控制、按钮动画
-    - 启动时自动删除旧的同名悬浮窗，保证只有一个
-    - 每10秒自动保存状态，下次启动自动恢复
-    ================================================================
-]]
-
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-
--- ============================================================
--- Creator（工具类）
--- ============================================================
-local Creator = {}
-Creator.Font = "rbxassetid://12187365364"
-Creator.Signals = {}
-
-Creator.DefaultProperties = {
-    Frame = { BorderSizePixel = 0, BackgroundColor3 = Color3.new(1,1,1) },
-    TextLabel = { BorderSizePixel = 0, Text = "", RichText = true, TextColor3 = Color3.new(1,1,1), TextSize = 14, BackgroundColor3 = Color3.new(1,1,1) },
-    TextButton = { BorderSizePixel = 0, Text = "", AutoButtonColor = false, TextColor3 = Color3.new(1,1,1), TextSize = 14, BackgroundColor3 = Color3.new(1,1,1) },
-    ImageLabel = { BackgroundTransparency = 1, BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0 },
-    ImageButton = { BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0, AutoButtonColor = false },
-    UIListLayout = { SortOrder = "LayoutOrder" },
-    UICorner = {}, UIGradient = {}, UIScale = {}, UIPadding = {}, UIStroke = {},
-    CanvasGroup = { BorderSizePixel = 0, BackgroundColor3 = Color3.new(1,1,1) },
-    ViewportFrame = { BackgroundTransparency = 1 },
-    TextBox = { BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0, ClearTextOnFocus = false, Text = "", TextColor3 = Color3.new(0,0,0), TextSize = 14 },
-}
-
-function Creator.New(className, props, children)
-    local obj = Instance.new(className)
-    local defaults = Creator.DefaultProperties[className]
-    if defaults then
-        for k, v in pairs(defaults) do
-            obj[k] = v
-        end
-    end
-    if props then
-        for k, v in pairs(props) do
-            if k ~= "FontFace" then
-                obj[k] = v
-            end
-        end
-    end
-    if children then
-        for _, c in ipairs(children) do
-            if c then
-                c.Parent = obj
-            end
-        end
-    end
-    if props and props.FontFace then
-        obj.FontFace = Font.new(Creator.Font, props.FontFace.Weight, props.FontFace.Style)
-    end
-    return obj
-end
-
-function Creator.Tween(obj, duration, properties, style, direction)
-    return TweenService:Create(obj, TweenInfo.new(duration or 0.2, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out), properties)
-end
-
-function Creator.AddSignal(connection, callback)
-    local conn = connection:Connect(callback)
-    table.insert(Creator.Signals, conn)
-    return conn
-end
-
-function Creator.Image(icon)
-    return Creator.New("ImageLabel", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Image = icon,
-        ScaleType = "Crop",
-    })
-end
-
--- ============================================================
--- ★★★ 缩小版 Toggle 组件（高度26，整体缩小） ★★★
--- ============================================================
-local function CreateToggle(parent, title, defaultValue)
-    local state = (defaultValue ~= nil) and defaultValue or true
-    local callback = nil
-
-    local container = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 0, 26),
-        BackgroundTransparency = 1,
-        Parent = parent,
-    })
-
-    local label = Creator.New("TextLabel", {
-        Text = title,
-        TextSize = 13,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        TextColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, -50, 1, 0),
-        TextXAlignment = "Left",
-        Parent = container,
-    })
-
-    local bg = Creator.New("Frame", {
-        Size = UDim2.new(0, 36, 0, 20),
-        Position = UDim2.new(1, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(1, 0.5),
-        BackgroundColor3 = state and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(120, 120, 120),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        Parent = container,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-    })
-
-    local thumb = Creator.New("Frame", {
-        Size = UDim2.new(0, 14, 0, 14),
-        Position = state and UDim2.new(1, -18, 0.5, 0) or UDim2.new(0, 3, 0.5, 0),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        Parent = bg,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        Creator.New("UIScale", { Scale = 1 }),
-    })
-
-    local btn = Creator.New("TextButton", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "",
-        Parent = bg,
-    })
-
-    local function SetState(newState)
-        if state == newState then return end
-        state = newState
-        local targetColor = state and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(120, 120, 120)
-        local targetPos = state and UDim2.new(1, -18, 0.5, 0) or UDim2.new(0, 3, 0.5, 0)
-        Creator.Tween(bg, 0.2, { BackgroundColor3 = targetColor }):Play()
-        Creator.Tween(thumb, 0.25, { Position = targetPos }, Enum.EasingStyle.Back):Play()
-        if callback then callback(state) end
-    end
-
-    Creator.AddSignal(btn.MouseButton1Click, function()
-        SetState(not state)
-    end)
-
-    local obj = {}
-    function obj:SetState(newState)
-        SetState(newState)
-    end
-    function obj:GetState()
-        return state
-    end
-    function obj:OnChanged(cb)
-        callback = cb
-    end
-    return obj
-end
-
--- ============================================================
--- 面板（常用功能）—— 4个开关，逻辑完全照抄你的脚本
--- ============================================================
-local function CreatePopupPanel(parent)
-    local panelObj = {}
-    panelObj.isOpen = false
-
-    local panel = Creator.New("Frame", {
-        Size = UDim2.new(0, 420, 0, 180),
-        Position = UDim2.new(0, 0, 1, 8),
-        BackgroundTransparency = 1,
-        Visible = false,
-        ZIndex = 100,
-        Parent = parent,
-    })
-
-    local panelScale = Creator.New("UIScale", { Scale = 0.85, Parent = panel })
-
-    -- ★★★ 底板：透明，内部包含图片背景和覆盖层 ★★★
-    local panelBg = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Parent = panel,
-    }, {
-        Creator.New("ImageLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Image = "rbxassetid://137413437808718",
-            ImageColor3 = Color3.fromRGB(62, 64, 76),   -- 压暗背景图，避免过亮
-            ScaleType = Enum.ScaleType.Crop,
-            Name = "BackgroundImage",
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-        }),
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(6, 7, 12),
-            BackgroundTransparency = 0.68,               -- 再加一层深色遮罩
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-        }),
-        Creator.New("UIStroke", {
-            Thickness = 1.5,
-            ApplyStrokeMode = "Border",
-            Color = Color3.fromRGB(60, 60, 80),
-            Transparency = 0.5,
-        }),
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-    })
-
-    local bgImage = panelBg:FindFirstChild("BackgroundImage")
-
-    -- ★★★ 图片列表（6张时段图） ★★★
-    local imageList = {
-        "137413437808718",   -- 凌晨
-        "104923767129650",   -- 日出
-        "93074867292976",    -- 中午
-        "134557272690355",   -- 下午
-        "112101675518147",   -- 傍晚
-        "124884282551441",   -- 晚上
-    }
-    local currentIndex = 1
-
-    -- ★★★ 根据当前时间获取对应的图片ID ★★★
-    local function getImageIdForHour(hour)
-        if hour >= 0 and hour < 5 then
-            return "137413437808718"
-        elseif hour >= 5 and hour < 9 then
-            return "104923767129650"
-        elseif hour >= 9 and hour < 12 then
-            return "93074867292976"
-        elseif hour >= 12 and hour < 14 then
-            return "93074867292976"
-        elseif hour >= 14 and hour < 18 then
-            return "134557272690355"
-        elseif hour >= 18 and hour < 20 then
-            return "112101675518147"
-        else
-            return "124884282551441"
-        end
-    end
-
-    -- ★★★ 根据当前时间更新背景（时间模式） ★★★
-    local function updateBackgroundByTime()
-        if not bgImage then return end
-        local hour = tonumber(os.date("%H"))
-        local imageId = getImageIdForHour(hour)
-        bgImage.Image = "rbxassetid://" .. imageId
-        for i, id in ipairs(imageList) do
-            if id == imageId then
-                currentIndex = i
-                break
-            end
-        end
-    end
-
-    -- ★★★ 切换到下一张图片（循环模式） ★★★
-    local function cycleToNextImage()
-        if not bgImage then return end
-        currentIndex = currentIndex % #imageList + 1
-        bgImage.Image = "rbxassetid://" .. imageList[currentIndex]
-        print("🔄 切换背景 ->", imageList[currentIndex])
-    end
-
-    -- ★★★ 核心：根据当前模式更新背景 ★★★
-    local function updateBackground()
-        if panelObj.autoSwitchEnabled then
-            -- 开启“自动换图”：切换到下一张
-            cycleToNextImage()
-        else
-            -- 关闭“自动换图”：根据当前时间恢复
-            updateBackgroundByTime()
-        end
-    end
-
-    -- 内容容器
-    local container = Creator.New("Frame", {
-        Size = UDim2.new(1, -20, 1, -20),
-        Position = UDim2.new(0, 10, 0, 10),
-        BackgroundTransparency = 1,
-        Parent = panel,
-    }, {
-        Creator.New("UIListLayout", {
-            FillDirection = "Horizontal",
-            VerticalAlignment = "Center",
-            Padding = UDim.new(0, 12),
-        }),
-    })
-
-    -- 左边毛玻璃子面板（4个开关）
-    local leftPanel = Creator.New("Frame", {
-        Size = UDim2.new(0, 185, 1, 0),
-        BackgroundTransparency = 1,
-        LayoutOrder = 1,
-        Parent = container,
-    })
-
-    local leftGlass = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(12, 14, 20),
-        BackgroundTransparency = 0.12,
-        BorderSizePixel = 0,
-        Parent = leftPanel,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        Creator.New("UIStroke", {
-            Thickness = 1,
-            Color = Color3.fromRGB(120, 130, 160),
-            Transparency = 0.6,
-        }),
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency = 0.35,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        }),
-        Creator.New("UIGradient", {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(14, 16, 24)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(34, 38, 52)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 16, 24)),
-            }),
-            Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.15),
-                NumberSequenceKeypoint.new(0.5, 0.35),
-                NumberSequenceKeypoint.new(1, 0.15),
-            }),
-        }),
-    })
-
-    local leftContent = Creator.New("Frame", {
-        Size = UDim2.new(1, -16, 1, -16),
-        Position = UDim2.new(0, 8, 0, 8),
-        BackgroundTransparency = 1,
-        Parent = leftPanel,
-    }, {
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 6),
-            FillDirection = "Vertical",
-            VerticalAlignment = "Center",
-        }),
-        Creator.New("TextLabel", {
-            Text = "功能开关",
-            TextSize = 14,
-            FontFace = Font.new(Creator.Font, Enum.FontWeight.SemiBold),
-            TextColor3 = Color3.new(1, 1, 1),
-            TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-            TextStrokeTransparency = 0.55,
-            BackgroundTransparency = 1,
-            AutomaticSize = "XY",
-        }),
-    })
-
-    -- ★★★ 3个开关（已移除手动吸附） ★★★
-    local toggle1 = CreateToggle(leftContent, "自动吸附", true)
-    local toggle3 = CreateToggle(leftContent, "自动换图", false)   -- 默认关闭 = 时间控制
-    local toggle4 = CreateToggle(leftContent, "单点互动", false)
-    panelObj.toggles = { toggle1, toggle3, toggle4 }
-
-    -- ★★★ 自动换图开关控制（逻辑完全照抄你的脚本） ★★★
-    panelObj.autoSwitchEnabled = false
-
-    toggle3:OnChanged(function(v)
-        panelObj.autoSwitchEnabled = v
-        updateBackground()
-    end)
-
-    -- 右边毛玻璃子面板（时间 + 星期 + 问候语）
-    local rightPanel = Creator.New("Frame", {
-        Size = UDim2.new(1, -197, 1, 0),
-        BackgroundTransparency = 1,
-        LayoutOrder = 2,
-        Parent = container,
-    })
-
-    local rightGlass = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(12, 14, 20),
-        BackgroundTransparency = 0.08,
-        BorderSizePixel = 0,
-        Parent = rightPanel,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        Creator.New("UIStroke", {
-            Thickness = 1,
-            Color = Color3.fromRGB(130, 140, 170),
-            Transparency = 0.55,
-        }),
-        -- 深色遮罩层：压住背景图亮度，保证白色文字清晰
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency = 0.28,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        }),
-        Creator.New("UIGradient", {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 12, 18)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 34, 46)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 12, 18)),
-            }),
-            Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.1),
-                NumberSequenceKeypoint.new(0.5, 0.3),
-                NumberSequenceKeypoint.new(1, 0.1),
-            }),
-        }),
-    })
-
-    local rightContent = Creator.New("Frame", {
-        Size = UDim2.new(1, -16, 1, -16),
-        Position = UDim2.new(0, 8, 0, 8),
-        BackgroundTransparency = 1,
-        Parent = rightPanel,
-    }, {
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 4),
-            FillDirection = "Vertical",
-            VerticalAlignment = "Center",
-            HorizontalAlignment = "Center",
-        }),
-    })
-
-    -- 时间（白色 + 描边，深色底上更清晰）
-    local timeLabel = Creator.New("TextLabel", {
-        Text = "00:00:00",
-        TextSize = 32,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.55,
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-    })
-
-    -- 星期（白色）
-    local weekdayLabel = Creator.New("TextLabel", {
-        Text = "Monday",
-        TextSize = 16,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.6,
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-    })
-
-    -- 问候语（白色半透明）
-    local greetingLabel = Creator.New("TextLabel", {
-        Text = "",
-        TextSize = 13,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.65,
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-        TextTransparency = 0.15,
-    })
-
-    -- ============================================================
-    -- 问候语、时间、星期更新（完全照抄你的脚本）
-    -- ============================================================
-    local function getGreeting(hour)
-        if hour >= 0 and hour < 5 then
-            return { "🌙 凌晨好", "夜深人静，正是思考的好时候" }
-        elseif hour >= 5 and hour < 9 then
-            return { "🌅 早上好", "一日之计在于晨，今天也要加油哦" }
-        elseif hour >= 9 and hour < 12 then
-            return { "☀️ 上午好", "把握黄金时光，做最重要的事" }
-        elseif hour >= 12 and hour < 14 then
-            return { "🌤️ 中午好", "午间小憩片刻，下午精神百倍" }
-        elseif hour >= 14 and hour < 18 then
-            return { "🌇 下午好", "继续前行，莫负好时光" }
-        elseif hour >= 18 and hour < 20 then
-            return { "🌆 傍晚好", "暮色温柔，适合放慢脚步" }
-        else
-            return { "🌙 晚上好", "放下疲惫，好好休息吧" }
-        end
-    end
-
-    local function updateGreeting()
-        local hour = tonumber(os.date("%H"))
-        local greeting, advice = unpack(getGreeting(hour))
-        greetingLabel.Text = greeting .. "  " .. advice
-    end
-    updateGreeting()
-
-    local function updateTimeAndGreeting()
-        local now = os.time()
-        timeLabel.Text = os.date("%H:%M:%S", now)
-        weekdayLabel.Text = os.date("%A", now)
-        updateGreeting()
-        -- 只有在“关闭”状态（时间模式）时才自动更新背景
-        if not panelObj.autoSwitchEnabled then
-            updateBackgroundByTime()
-        end
-    end
-    updateTimeAndGreeting()
-
-    local timeUpdater
-    timeUpdater = RunService.Heartbeat:Connect(function()
-        if math.floor(tick()) ~= math.floor(tick() - 0.05) then
-            updateTimeAndGreeting()
-        end
-    end)
-    table.insert(Creator.Signals, timeUpdater)
-
-    function panelObj:Open()
-        if self.isOpen then return end
-        self.isOpen = true
-        panel.Visible = true
-        panelScale.Scale = 0.85
-        Creator.Tween(panelScale, 0.18, { Scale = 1 }, Enum.EasingStyle.Back):Play()
-        Creator.Tween(panelBg, 0.12, { BackgroundTransparency = 0 }):Play()
-        updateBackground()
-    end
-
-    function panelObj:Close()
-        if not self.isOpen then return end
-        self.isOpen = false
-        Creator.Tween(panelScale, 0.12, { Scale = 0.85 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In):Play()
-        Creator.Tween(panelBg, 0.1, { BackgroundTransparency = 1 }):Play()
-        task.wait(0.12)
-        panel.Visible = false
-    end
-
-    function panelObj:Toggle()
-        if self.isOpen then self:Close() else self:Open() end
-    end
-
-    local globalConn = nil
-    local function isInside(frame, x, y)
-        local pos = frame.AbsolutePosition
-        local size = frame.AbsoluteSize
-        return x >= pos.X and x <= pos.X + size.X and y >= pos.Y and y <= pos.Y + size.Y
-    end
-
-    local function setupGlobalClose()
-        if globalConn then globalConn:Disconnect() end
-        globalConn = UserInputService.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if not panelObj.isOpen then return end
-                local px, py = input.Position.X, input.Position.Y
-                if isInside(panel, px, py) then return end    -- 点在面板内部：不关闭
-                if isInside(parent, px, py) then return end   -- 点在悬浮窗本体（含左侧按钮）：不关闭，交给 Toggle 处理
-                panelObj:Close()
-            end
-        end)
-    end
-
-    local oldOpen = panelObj.Open
-    panelObj.Open = function(self, ...)
-        oldOpen(self, ...)
-        setupGlobalClose()
-    end
-
-    local oldClose = panelObj.Close
-    panelObj.Close = function(self, ...)
-        oldClose(self, ...)
-        if globalConn then
-            globalConn:Disconnect()
-            globalConn = nil
-        end
-    end
-
-    return panelObj
-end
-
--- ============================================================
--- ★★★ 悬停效果管理（单点互动） ★★★
--- ============================================================
-local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
-    local self = {}
-    scaleMultiplier = scaleMultiplier or 1.08
-    local scaleObj = nil
-    local enterConn = nil
-    local leaveConn = nil
-    local touchBeganConn = nil
-    local touchEndedConn = nil
-    local isEnabled = false
-
-    local function ensureScaleObj()
-        if not scaleObj then
-            scaleObj = targetContainer:FindFirstChild("HoverScale")
-            if not scaleObj then
-                scaleObj = Creator.New("UIScale", {
-                    Name = "HoverScale",
-                    Scale = 1,
-                    Parent = targetContainer,
-                })
-            end
-        end
-    end
-
-    local function bindEvents()
-        if enterConn then enterConn:Disconnect() end
-        if leaveConn then leaveConn:Disconnect() end
-        if touchBeganConn then touchBeganConn:Disconnect() end
-        if touchEndedConn then touchEndedConn:Disconnect() end
-
-        enterConn = Creator.AddSignal(textButton.MouseEnter, function()
-            if isEnabled then
-                Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
-            end
-        end)
-        leaveConn = Creator.AddSignal(textButton.MouseLeave, function()
-            if isEnabled then
-                Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-            end
-        end)
-
-        -- 手机端没有鼠标悬停，用触摸按下/抬起模拟“单点互动”的扩张/回缩
-        touchBeganConn = Creator.AddSignal(textButton.InputBegan, function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
-                Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
-            end
-        end)
-        touchEndedConn = Creator.AddSignal(textButton.InputEnded, function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
-                Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-            end
-        end)
-    end
-
-    function self:Enable()
-        if isEnabled then return end
-        isEnabled = true
-        ensureScaleObj()
-        bindEvents()
-    end
-
-    function self:Disable()
-        if not isEnabled then return end
-        isEnabled = false
-        if scaleObj then
-            Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-        end
-        if enterConn then enterConn:Disconnect(); enterConn = nil end
-        if leaveConn then leaveConn:Disconnect(); leaveConn = nil end
-        if touchBeganConn then touchBeganConn:Disconnect(); touchBeganConn = nil end
-        if touchEndedConn then touchEndedConn:Disconnect(); touchEndedConn = nil end
-    end
-
-    function self:Destroy()
-        self:Disable()
-        if scaleObj then
-            scaleObj:Destroy()
-            scaleObj = nil
-        end
-    end
-
-    return self
-end
-
--- ============================================================
--- 主函数（悬浮窗）—— 纯黑色背景，不添加图片
--- ============================================================
-local function CreateFloatingButton(config)
-    config = config or {}
-    local parent = config.Parent or player.PlayerGui
-    local title = config.Title or "至尊版"
-    local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen  -- 右侧标题单击 → 打开主面板；双击不触发
-
-    local button = {}
-
-    -- ============================================================
-    -- 1. UI 构建（悬浮窗本体：三层结构，纯黑色）
-    -- ============================================================
-    local ICON_DEFAULT = "rbxassetid://134285175074723"
-    local ICON_ACTIVE = "rbxassetid://116112495652693"
-
-    local ai = Creator.New("TextLabel", {
-        Text = title,
-        TextSize = 17,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        TextColor3 = Color3.new(1, 1, 1),
-    })
-
-    local rainbowGrad = Creator.New("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.0, Color3.fromHSV(0, 1, 1)),
-            ColorSequenceKeypoint.new(0.17, Color3.fromHSV(1/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.33, Color3.fromHSV(2/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromHSV(3/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.67, Color3.fromHSV(4/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.83, Color3.fromHSV(5/6, 1, 1)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromHSV(1, 1, 1)),
-        }),
-        Rotation = 0,
-        Offset = Vector2.new(0, 0),
-        Parent = ai,
-    })
-
-    local rainbowOffset = 0
-    Creator.AddSignal(RunService.Heartbeat, function(dt)
-        rainbowOffset = rainbowOffset + 0.3 * dt
-        if rainbowOffset > 1 then rainbowOffset = rainbowOffset - 1 end
-        rainbowGrad.Offset = Vector2.new(rainbowOffset, 0)
-    end)
-
-    local aj = Creator.New("ImageButton", {
-        Image = ICON_DEFAULT,
-        Size = UDim2.new(0, 56, 0, 56),
-        BackgroundTransparency = 1,
-        ScaleType = Enum.ScaleType.Fit,
-        ImageTransparency = 0.05,
-        ImageColor3 = Color3.new(1, 1, 1),
-        Name = "Drag",
-    })
-
-    local ajScale = Creator.New("UIScale", { Scale = 1, Parent = aj })
-    aj.Rotation = 0
-
-    local ak = Creator.New("Frame", {
-        Size = UDim2.new(0, 1, 1, 0),
-        Position = UDim2.new(0, 56, 0.5, 0),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0.9,
-    })
-
-    local al = Creator.New("Frame", {
-        Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0, 0, 0, 28),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundTransparency = 1,
-        Active = true,
-        Visible = false,
-        Parent = parent,
-    })
-    -- 统一坐标体系：Position 一律用 Offset（悬浮窗中心相对 parent 左上角的像素偏移）。
-    -- 不再用 X.Scale=0.5 居中——否则拖动把 Position 写回 Scale=0 时，X 会从“居中”猛地跳到
-    -- “手指移动几十像素”，再被钳到贴边，这就是“一拖就往那面闪”的根因。
-    -- X 的实际居中值在启动块里、等 parent.AbsoluteSize 已知后再设置（见文件末尾）。
-
-    local am = Creator.New("UIScale", { Scale = 1, Parent = al })
-
-    -- ★★★ 第1层：黑色底层（纯黑色背景） ★★★
-    local borderGrad = Creator.New("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(0.20, Color3.fromRGB(160, 0, 0)),
-            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(220, 30, 30)),
-            ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 80, 80)),
-            ColorSequenceKeypoint.new(0.55, Color3.fromRGB(220, 30, 30)),
-            ColorSequenceKeypoint.new(0.70, Color3.fromRGB(160, 0, 0)),
-            ColorSequenceKeypoint.new(0.90, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(80, 0, 0)),
-        }),
-        Rotation = 0,
-        Offset = Vector2.new(0, 0),
-    })
-
-    local borderOffset = 0
-    Creator.AddSignal(RunService.Heartbeat, function(dt)
-        borderOffset = borderOffset + 0.5 * dt
-        if borderOffset > 1 then borderOffset = borderOffset - 1 end
-        borderGrad.Offset = Vector2.new(borderOffset, 0)
-    end)
-
-    -- 底层容器（纯黑色，无图片）
-    local bgFrame = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ZIndex = 0,
-        Parent = al,
-    }, {
-        -- 纯黑色背景
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.new(0, 0, 0),
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        }),
-        -- 边框（UIStroke + UIGradient）
-        Creator.New("UIStroke", {
-            Thickness = 2,
-            ApplyStrokeMode = "Border",
-            Color = Color3.new(1, 1, 1),
-            Transparency = 0,
-        }, { borderGrad }),
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-    })
-
-    -- ★★★ 第2层：主体框架（背景透明，容纳控件） ★★★
-    local an = Creator.New("Frame", {
-        Size = UDim2.new(0, 0, 0, 44),
-        AutomaticSize = "X",
-        BackgroundTransparency = 1,
-        BackgroundColor3 = Color3.new(0, 0, 0),
-        ZIndex = 99,
-        Active = false,
-        Parent = al,
-    }, {
-        am,
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        aj,
-        ak,
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 4),
-            FillDirection = "Horizontal",
-            VerticalAlignment = "Center",
-        }),
-    })
-
-    -- ★★★ 第3层：交互与文字层 ★★★
-    local textButton = Creator.New("TextButton", {
-        AutomaticSize = "XY",
-        Active = true,
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 0, 0, 36),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        Parent = an,
-    })
-
-    Creator.New("UICorner", {
-        CornerRadius = UDim.new(1, -4),
-        Parent = textButton,
-    })
-
-    Creator.New("UIListLayout", {
-        Padding = UDim.new(0, uipadding),
-        FillDirection = "Horizontal",
-        VerticalAlignment = "Center",
-        Parent = textButton,
-    })
-
-    local stretchPadding = Creator.New("UIPadding", {
-        Name = "StretchPadding",
-        PaddingLeft = UDim.new(0, 50),
-        PaddingRight = UDim.new(0, 50),
-        Parent = textButton,
-    })
-
-    ai.Parent = textButton
-
-    -- 弹出面板
-    local popupPanel = CreatePopupPanel(al)
-    local toggles = popupPanel.toggles
-    -- toggles[1]=自动吸附, [2]=自动换图, [3]=单点互动
-
-    -- ★★★ 创建悬停效果（单点互动） ★★★
-    local hoverEffect = CreateHoverEffect(textButton, al, 1.1)
-
-    -- ★★★ 单点互动开关控制 ★★★
-    toggles[3]:OnChanged(function(v)
-        if v then
-            hoverEffect:Enable()
-        else
-            hoverEffect:Disable()
-        end
-    end)
-
-    -- ★★★ 恢复「an.AbsoluteSize → al.Size」实时绑定 ★★★
-    -- 靠边吸附时内容 padding 会 50↔120 自动伸缩，这里实时把内容尺寸同步给拖动根 al，
-    -- 黑色背景/边框才会跟着一起平滑展开；al 是 AnchorPoint(0.5,0.5)，以中心对称伸缩（参考版行为）。
-    Creator.AddSignal(an:GetPropertyChangedSignal("AbsoluteSize"), function()
-        if an.AbsoluteSize.X > 0 then
-            al.Size = UDim2.new(0, an.AbsoluteSize.X, 0, an.AbsoluteSize.Y)
-        end
-    end)
-
-    Creator.AddSignal(textButton.MouseEnter, function()
-        Creator.Tween(textButton, 0.1, { BackgroundTransparency = 0.93 }):Play()
-    end)
-    Creator.AddSignal(textButton.MouseLeave, function()
-        Creator.Tween(textButton, 0.1, { BackgroundTransparency = 1 }):Play()
-    end)
-
-    -- ============================================================
-    -- 2. 共享状态
-    -- ============================================================
-    local state = {
-        autoSnapEnabled = true,
-        autoSwitchEnabled = false,   -- ★★★ 自动换图开关状态 ★★★
-        singleClickEnabled = false,  -- ★★★ 单点互动开关状态 ★★★
-        edgeActive = false,
-        currentPadding = 50,
-        positionX = 0,
-        positionY = 0,
-        scale = 1,
-    }
-
-    -- ============================================================
-    -- 根尺寸同步：只在布局安定后调用一次，绝不在拖动/自动布局过程中逐帧写回。
-    -- 拖动根 al 只负责 Position / 拖动 / 吸附，尺寸由这里在安定点校准。
-    -- ============================================================
-    local function syncRootSize()
-        if not an or not an.Parent then return end
-        local w = an.AbsoluteSize.X
-        local h = an.AbsoluteSize.Y
-        if w <= 0 or h <= 0 then return end
-        al.Size = UDim2.new(0, w, 0, h)
-    end
-    task.defer(syncRootSize)
-
-    -- ============================================================
-    -- ★★★ 3. 自动保存/加载 ★★★
-    -- ============================================================
-    -- 独立存档：与原始悬浮窗版区分，避免读到另一套坐标体系的旧位置
-    local SAVE_FILE = "IntegralFloating_" .. title .. ".json"
-    local SAVE_VERSION = 2   -- 坐标体系版本：与旧版（左上角体系）不兼容，据此跳过旧存档的位置
-
-    local function saveState()
-        state.positionX = al.Position.X.Offset
-        state.positionY = al.Position.Y.Offset
-        state.scale = am.Scale
-        state.autoSwitchEnabled = toggles[2]:GetState()
-        state.singleClickEnabled = toggles[3]:GetState()
-
-        local data = {
-            schemaVersion = SAVE_VERSION,
-            autoSnapEnabled = state.autoSnapEnabled,
-            autoSwitchEnabled = state.autoSwitchEnabled,
-            singleClickEnabled = state.singleClickEnabled,
-            positionX = state.positionX,
-            positionY = state.positionY,
-            scale = state.scale,
-        }
-
-        local json = game:GetService("HttpService"):JSONEncode(data)
-        if writefile then
-            pcall(function()
-                writefile(SAVE_FILE, json)
-            end)
-        end
-    end
-
-    local function loadState()
-        -- 返回 true 表示「位置可用，可恢复」；返回 false 表示「不恢复位置」
-        if isfile and isfile(SAVE_FILE) then
-            local success, data = pcall(function()
-                local content = readfile(SAVE_FILE)
-                return game:GetService("HttpService"):JSONDecode(content)
-            end)
-            if success and type(data) == "table" then
-                -- 开关与缩放始终恢复（与坐标无关）
-                state.autoSnapEnabled = data.autoSnapEnabled ~= false
-                state.autoSwitchEnabled = data.autoSwitchEnabled == true
-                state.singleClickEnabled = data.singleClickEnabled == true
-                state.scale = (type(data.scale) == "number") and data.scale or 1
-
-                -- 位置仅当「版本一致 + 坐标是数字」才恢复，否则保持默认居中并忽略旧值
-                if data.schemaVersion == SAVE_VERSION
-                   and type(data.positionX) == "number"
-                   and type(data.positionY) == "number" then
-                    state.positionX = data.positionX
-                    state.positionY = data.positionY
-                    return true
-                end
-                return false
-            end
-        end
-        return false
-    end
-
-    -- 加载保存的状态（有存档才覆盖位置，避免新用户悬浮窗被定到左上角）
-    local loaded = loadState()
-
-    -- 应用加载的状态到 UI
-    if loaded then
-        al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
-    end
-    am.Scale = state.scale
-    toggles[1]:SetState(state.autoSnapEnabled)
-    toggles[2]:SetState(state.autoSwitchEnabled)
-    toggles[3]:SetState(state.singleClickEnabled)
-    popupPanel.autoSwitchEnabled = state.autoSwitchEnabled
-
-    -- 恢复悬停效果
-    if state.singleClickEnabled then
-        hoverEffect:Enable()
-    else
-        hoverEffect:Disable()
-    end
-
-    -- ============================================================
-    -- 拖动/靠边展开共享状态（提前声明，供 updateEdgeState / 拖拽模块共用）
-    -- ============================================================
-    local isDragging = false      -- 是否正在拖动
-
-    -- ============================================================
-    -- 4. applyLayout
-    -- ============================================================
-    local function applyLayout()
-        local targetPadding = 50
-        if state.autoSnapEnabled and state.edgeActive then
-            targetPadding = 120
-        end
-        if targetPadding ~= state.currentPadding then
-            state.currentPadding = targetPadding
-            Creator.Tween(stretchPadding, 0.2, {
-                PaddingLeft = UDim.new(0, targetPadding),
-                PaddingRight = UDim.new(0, targetPadding),
-            }, Enum.EasingStyle.Quad):Play()
-            -- Padding 动画结束后再同步一次根尺寸，且只同步这一次，
-            -- 避免动画期间根尺寸被连续改写、与吸附/拖动抢位置
-            task.delay(0.22, syncRootSize)
-        end
-    end
-
-    -- ============================================================
-    -- 5. 边缘检测
-    -- ============================================================
-    local function updateEdgeState()
-        if not state.autoSnapEnabled then
-            if state.edgeActive then
-                state.edgeActive = false
-                applyLayout()
-            end
-            return
-        end
-
-        if not al or not al.Parent or al.AbsoluteSize.X <= 0 then
-            state.edgeActive = false
-            return
-        end
-
-        local pos = al.AbsolutePosition
-        local size = al.AbsoluteSize
-        local vp = camera.ViewportSize
-
-        local newEdge = (pos.Y <= 2) or
-                        (pos.Y + size.Y >= vp.Y - 2) or
-                        (pos.X <= 2) or
-                        (pos.X + size.X >= vp.X - 2)
-
-        if newEdge ~= state.edgeActive then
-            state.edgeActive = newEdge
-            applyLayout()
-        end
-    end
-
-    local edgeHeartbeat
-    local function startEdgeDetection()
-        if edgeHeartbeat then return end
-        edgeHeartbeat = RunService.Heartbeat:Connect(updateEdgeState)
-    end
-    startEdgeDetection()
-
-    -- ============================================================
-    -- 6. 拖拽模块（先定义位置钳制函数，供自动吸附复用）
-    -- ============================================================
-    local function clampPosition(offsetX, offsetY)
-        local parentSize = parent.AbsoluteSize
-        local alSize = al.AbsoluteSize
-        if parentSize.X == 0 or parentSize.Y == 0 or alSize.X == 0 or alSize.Y == 0 then
-            return offsetX, offsetY
-        end
-        -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
-        -- 故合法范围为 [half, parent - half]，避免悬浮窗半个被拖出屏幕
-        local halfW = alSize.X / 2
-        local halfH = alSize.Y / 2
-        return math.clamp(offsetX, halfW, parentSize.X - halfW),
-               math.clamp(offsetY, halfH, parentSize.Y - halfH)
-    end
-
-    -- （自动吸附已还原为“靠边自动展开”，物理“吸附到边缘”的 snapToEdge 已移除）
-
-    Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
-        task.wait(0.05)
-        -- 屏幕旋转/尺寸变化：只把位置钳制回屏幕内，不强制吸附到边缘
-        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
-        al.Position = UDim2.new(0, cx, 0, cy)
-        updateEdgeState()
-    end)
-
-    -- 拖拽：以按下时 al.Position(Offset) 为基准，随手指/鼠标位移移动，实时钳制 + 靠边展开。
-    -- Position 一律用 Offset（中心点坐标），不再混用 Scale 居中，避免拖动时坐标跳动。
-    local dragInput = nil          -- 当前负责拖动的输入对象（鼠标左键 / 某根手指 Touch）
-    local pressStartPos = nil      -- 按下瞬间手指屏幕坐标（阈值判定用）
-    local dragStartMouse = nil     -- 按下瞬间手指屏幕坐标（拖动基准）
-    local dragStartPos = nil       -- 按下瞬间 al.Position（拖动基准）
-    local DRAG_THRESHOLD = 5
-    local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
-
-    -- 改为监听 UserInputService.InputBegan + 命中检测：
-    -- 原先挂在 an.InputBegan 上，但 an 是「透明 + Active=false」的内容容器，
-    -- 命中不到它，而且子按钮(textButton/aj)会抢走输入，导致 an.InputBegan 根本不触发 → 拖不动。
-    -- 现在只要按在悬浮窗本体(al)范围内（无论按在图标还是文字上）都能启动拖动。
-    local function isPointerOnWindow(input)
-        if not al or not al.Visible then return false end
-        local p = input.Position
-        local pos = al.AbsolutePosition
-        local size = al.AbsoluteSize
-        if size.X <= 0 or size.Y <= 0 then return false end
-        return p.X >= pos.X and p.X <= pos.X + size.X
-           and p.Y >= pos.Y and p.Y <= pos.Y + size.Y
-    end
-
-    Creator.AddSignal(UserInputService.InputBegan, function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
-           input.UserInputType ~= Enum.UserInputType.Touch then
-            return
-        end
-        if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
-        if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
-        dragInput = input
-        pressStartPos = input.Position
-        isDragging = false
-        dragStartPos = al.Position
-        dragStartMouse = input.Position
-    end)
-
-    Creator.AddSignal(UserInputService.InputChanged, function(input)
-        local isMove = input.UserInputType == Enum.UserInputType.MouseMovement or
-                       input.UserInputType == Enum.UserInputType.Touch
-        if not isMove then return end
-
-        -- 只响应「当前这一次按下」的输入：触屏靠同一 InputObject 引用识别；
-        -- 鼠标移动是持续的新对象，用“左键仍按下”判断，避免别的输入抢拖动
-        local belongs
-        if input.UserInputType == Enum.UserInputType.Touch then
-            belongs = (dragInput ~= nil and input == dragInput)
-        else
-            belongs = (dragInput ~= nil
-                and dragInput.UserInputType == Enum.UserInputType.MouseButton1
-                and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1))
-        end
-        if not belongs then return end
-
-        if pressStartPos then
-            local delta = (input.Position - pressStartPos).Magnitude
-            if delta > DRAG_THRESHOLD then
-                isDragging = true
-                pressStartPos = nil
-            end
-        end
-
-        if isDragging then
-            -- 以按下时 al.Position(Offset) 为基准，加上手指位移，再钳制回屏幕内
-            local newX = dragStartPos.X.Offset + (input.Position.X - dragStartMouse.X)
-            local newY = dragStartPos.Y.Offset + (input.Position.Y - dragStartMouse.Y)
-            local clampedX, clampedY = clampPosition(newX, newY)
-            al.Position = UDim2.new(0, clampedX, 0, clampedY)
-            updateEdgeState()  -- 拖动中实时靠边展开
-        end
-    end)
-
-    Creator.AddSignal(UserInputService.InputEnded, function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
-           input.UserInputType ~= Enum.UserInputType.Touch then
-            return
-        end
-        -- 只有「负责拖动」的那个输入结束，才结束拖动
-        if not dragInput or input ~= dragInput then return end
-        dragInput = nil
-
-        if isDragging then
-            isDragging = false
-            suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
-            task.wait(0.05)
-            updateEdgeState()
-            syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
-            return
-        end
-        pressStartPos = nil
-        dragStartPos = nil
-        dragStartMouse = nil
-    end)
-
-    -- ============================================================
-    -- 7. 右侧标题文字 → 单击打开主面板；双击不触发任何操作
-    -- ============================================================
-    local DOUBLE_CLICK_GAP = 0.3   -- 两次点击间隔小于此值视为双击
-    local lastClickTime = 0
-    local pendingOpen = false
-
-    Creator.AddSignal(textButton.MouseButton1Click, function()
-        if isDragging then return end                -- 拖拽松手时不算点击
-        if tick() < suppressClickUntil then return end  -- 拖拽刚结束的短暂窗口内忽略
-
-        local now = tick()
-        if now - lastClickTime <= DOUBLE_CLICK_GAP and pendingOpen then
-            -- 第二次点击 = 双击：取消即将执行的“单击打开”，什么都不做
-            pendingOpen = false
-            lastClickTime = 0
-            return
-        end
-
-        lastClickTime = now
-        pendingOpen = true
-        task.delay(DOUBLE_CLICK_GAP, function()
-            if pendingOpen then
-                pendingOpen = false
-                lastClickTime = 0
-                if onOpen then onOpen() end
-            end
-        end)
-    end)
-
-    -- ============================================================
-    -- 8. Toggle 控制
-    -- ============================================================
-    toggles[1]:OnChanged(function(v)
-        state.autoSnapEnabled = v
-        if not v then
-            state.edgeActive = false
-        else
-            task.wait(0.05)
-            updateEdgeState()
-        end
-        applyLayout()
-    end)
-
-    -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
-
-    -- ============================================================
-    -- 9. 左侧圆形按钮点击事件（单击 → 弹出/收起功能面板）
-    -- ============================================================
-    Creator.AddSignal(aj.MouseButton1Click, function()
-        local scaleDown = Creator.Tween(ajScale, 0.12, { Scale = 0.75 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local rotateLeft = Creator.Tween(aj, 0.12, { Rotation = -15 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local pulseColor = Creator.Tween(aj, 0.1, { ImageColor3 = Color3.fromRGB(255, 255, 255) })
-
-        local scaleUp = Creator.Tween(ajScale, 0.2, { Scale = 1 }, Enum.EasingStyle.Back)
-        local rotateBack = Creator.Tween(aj, 0.2, { Rotation = 0 }, Enum.EasingStyle.Back)
-        local resetColor = Creator.Tween(aj, 0.15, { ImageColor3 = Color3.new(1, 1, 1) })
-
-        scaleDown:Play()
-        rotateLeft:Play()
-        pulseColor:Play()
-
-        task.delay(0.13, function()
-            scaleUp:Play()
-            rotateBack:Play()
-            resetColor:Play()
-        end)
-
-        popupPanel:Toggle()
-        if popupPanel.isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
-    end)
-
-    -- ============================================================
-    -- ★★★ 10. 自动保存（每10秒） ★★★
-    -- ============================================================
-    local function startAutoSave()
-        task.spawn(function()
-            while true do
-                task.wait(10)
-                saveState()
-            end
-        end)
-    end
-    startAutoSave()
-
-    -- 角色离开时保存一次
-    Creator.AddSignal(player.CharacterRemoving, function()
-        saveState()
-    end)
-
-    -- ============================================================
-    -- 11. 对外 API
-    -- ============================================================
-    function button:Visible(visible)
-        al.Visible = visible
-    end
-
-    function button:SetScale(newScale)
-        am.Scale = newScale
-    end
-
-    function button:GetState()
-        return state
-    end
-
-    button.Button = an
-    button.Popup = al
-    button.Panel = popupPanel
-
-    -- 启动：等尺寸已知后，先同步根尺寸；无存档则 X 居中（Offset 体系）；最后钳制回合法范围再做边缘检测
-    task.spawn(function()
-        task.wait(0.1)
-        syncRootSize()
-        -- 无有效存档位置时，X 居中（相对 parent 左上角的像素偏移），Y 保持 28
-        if not loaded then
-            al.Position = UDim2.new(0, parent.AbsoluteSize.X / 2, 0, 28)
-        end
-        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
-        al.Position = UDim2.new(0, cx, 0, cy)
-        updateEdgeState()
-    end)
-
-    return button
-end
-
--- ============================================================
--- ★★★ 启动（自动清理多余的悬浮窗） ★★★
--- ============================================================
-local existingGui = player.PlayerGui:FindFirstChild("FloatingButton")
-if existingGui then
-    existingGui:Destroy()
-end
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FloatingButton"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player.PlayerGui
-
-local btn = CreateFloatingButton({
-    Parent = screenGui,
-    Title = "至尊版",
-    UIPadding = 9,
-    OnOpen = function()
-        -- 右侧标题“单击”已由悬浮窗内部区分：单击打开主面板，双击不触发
-        -- 这里只负责真正打开主面板（重复点击时不再二次打开）
-        if not Window.Closed then return end
-        Window:Open()
-    end,
-})
-
--- ★★★ 一体化联动：悬浮窗始终显示（无论主面板打开/关闭） ★★★
--- 主面板销毁时，悬浮窗一起销毁
-Window:OnDestroy(function()
-    if screenGui and screenGui.Parent then
-        screenGui:Destroy()
-    end
-end)
-
--- 悬浮窗保持可见，不再随主面板开合而隐藏
-btn:Visible(true)
-
-print("✅ 加载完成")
-print("   - 悬浮窗本体：纯黑色背景")
-print("   - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）")
-print("   - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）")
-print("   - 自动换图关闭：背景根据当前时间自动切换（6张时段图）")
-print("   - 单点互动开启：鼠标悬停 / 手机触摸按下时扩张")
-print("   - 右侧标题：单击打开主面板，双击不触发")
-print("   - 自动吸附：拖到边缘附近自动吸附到最近边缘")
-print("   - 悬浮窗始终显示，不随主面板开合而隐藏")
-print("   - 自动清理、自动保存状态")
-
 
 -- ============================================================
 -- ▼▼ 难度模式 自动化引擎 ▼▼
@@ -19235,6 +127,11 @@ local function every(key, gap)
         return true
     end
     return false
+end
+
+-- 手动按钮用：清掉某个节流计时，让对应动作立刻执行
+local function resetClock(key)
+    clockTimes[key] = 0
 end
 
 local function nameOf(inst)
@@ -19315,7 +212,8 @@ local function nearestEnemy(maxDist)
     if not folder then return nil, nil end
     local best, bestD = nil, maxDist or math.huge
     for _, m in ipairs(folder:GetChildren()) do
-        if isEnemy(m) then
+        local skip = AUTO.AutoFarm and AUTO.FarmMode == "Astro Holdout Mode" and m.Name == "Giant ST toilet"
+        if not skip and isEnemy(m) then
             local p = hrpOf(m)
             if p then
                 local d = (p.Position - base.Position).Magnitude
@@ -19587,7 +485,7 @@ local function inMatch()
     local lv = living()
     if me and lv and me.Parent == lv then return true end
     if enemyCount() > 0 then return true end
-    -- 站在准备垫附近 = 还在大厅
+    -- 站在准备区域附近 = 还在大厅
     local pad = workspace:FindFirstChild("AutoReady")
     local base = hrpOf(me)
     if pad and base and (base.Position - pad.Position).Magnitude < 90 then
@@ -19785,17 +683,22 @@ end
 
 local lastVotedMode = nil
 
--- 自动开单人局：和参考脚本一样直接调 MainHandler
+-- 自动开单人局：优先老版 MainHandler；新版源码里改成了 QuestFuse({ "StartSolo" })
 local lastStart = 0
 local function autoStartSolo()
     if votePhase() then return false end
     local now = os.clock()
     if now - lastStart < 8 then return false end
     local mh = RS:FindFirstChild("MainHandler")
-    if not mh then return false end
+    local qf = RS:FindFirstChild("QuestFuse")
+    if not mh and not qf then return false end
     local mode = bestMode()
     lastStart = now
-    pcall(function() mh:FireServer({ [1] = "StartSolo", [2] = mode }) end)
+    if mh then
+        pcall(function() mh:FireServer({ [1] = "StartSolo", [2] = mode }) end)
+    else
+        pcall(function() qf:FireServer({ "StartSolo" }) end)
+    end
     AUTO.LastReason = "已发起单人开局：" .. mode
     log("已自动开单人局：" .. mode)
     return true
@@ -19810,15 +713,24 @@ local function autoVote()
     if not remote then return false end
     local mode, why = bestMode()
 
-    -- 先按真实界面点：模式卡片 → VoteButton；点不动再退回遥控
+    -- 先按真实界面点：新版投票卡片 Play.VoteScreen.Panel.Cards.<模式>（ImageButton，点了就投）
+    -- 点不动退回旧版 模式卡片 → VoteButton；再点不动才发遥控
     local clicked = false
     local playGui = pg:FindFirstChild("Play")
-    local main = playGui and playGui:FindFirstChild("Main")
-    if main then
-        local card = main:FindFirstChild(mode)
-        local voteBtn = main:FindFirstChild("VoteButton")
-        if card and voteBtn and clickGui(card) and clickGui(voteBtn) then
+    if playGui then
+        local cards = findPath(playGui, { "VoteScreen", "Panel", "Cards" })
+        local card = cards and cards:FindFirstChild(mode)
+        if card and clickGui(card) then
             clicked = true
+        else
+            local main = playGui:FindFirstChild("Main")
+            if main then
+                local oldCard = main:FindFirstChild(mode)
+                local voteBtn = main:FindFirstChild("VoteButton")
+                if oldCard and voteBtn and clickGui(oldCard) and clickGui(voteBtn) then
+                    clicked = true
+                end
+            end
         end
     end
     if not clicked then
@@ -19957,28 +869,13 @@ local function autoSkipHeli()
 end
 
 ----------------------------------------------------------------
--- 自动领奖（每日登录 / 团队奖励）
-----------------------------------------------------------------
-local lastClaim = 0
-local function autoClaim()
-    local now = os.clock()
-    if now - lastClaim < 60 then return end
-    lastClaim = now
-    for _, name in ipairs({ "LoginRemote", "GroupRewardRemote" }) do
-        local r = RS:FindFirstChild(name)
-        if r and r:IsA("RemoteFunction") then
-            pcall(function() r:InvokeServer("Claim") end)
-        end
-    end
-end
-
-----------------------------------------------------------------
 -- 无限复活：残血直接重置角色，立刻重新出生
 -- 和参考脚本同一套原理：卸掉 Head / Torso 让本地角色判死 → 服务端重发 CharacterAdded
+-- manual = true 时忽略开关（玩家手动点按钮触发）
 ----------------------------------------------------------------
 local lastReset = 0
-local function forceRespawn(reason)
-    if not AUTO.AutoRespawn then return false end
+local function forceRespawn(reason, manual)
+    if not manual and not AUTO.AutoRespawn then return false end
     local now = os.clock()
     if now - lastReset < 2 then return false end
     local char = player.Character
@@ -20003,6 +900,239 @@ local function forceRespawn(reason)
     AUTO.LastReason = "无限复活触发：" .. tostring(reason)
     log("无限复活触发：" .. tostring(reason))
     return true
+end
+
+----------------------------------------------------------------
+-- 队友识别（给队友透视用）
+----------------------------------------------------------------
+local function isAlly(m)
+    if not m or not m:IsA("Model") then return false end
+    local plr = Players:GetPlayerFromCharacter(m)
+    return plr ~= nil and plr ~= player
+end
+
+----------------------------------------------------------------
+-- 奖励 / 收集自动化
+----------------------------------------------------------------
+local function claimRemote(name)
+    local r = RS:FindFirstChild(name)
+    if not r or not r:IsA("RemoteFunction") then return false end
+    local ok, res = pcall(function() return r:InvokeServer("Claim") end)
+    if not ok then return false end
+    if type(res) == "table" and res.Ok == false then return false end
+    return true
+end
+
+local function autoClaimRewards()
+    local did = false
+    if AUTO.AutoClaimLogin and every("claimlogin", 25) then
+        if claimRemote("LoginRemote") then did = true end
+    end
+    if AUTO.AutoClaimGroup and every("claimgroup", 25) then
+        if claimRemote("GroupRewardRemote") then did = true end
+    end
+    if did then
+        AUTO.LastReason = "已自动领取登录 / 团队奖励"
+        log("自动领取：已请求登录 / 团队奖励")
+    end
+    return did
+end
+
+-- 自动点界面上所有 Claim / Collect / 领取 按钮（每个按钮 3 秒冷却）
+local CLAIM_WORDS = { "claim", "collect", "领取", "claim all", "领取全部" }
+local claimClickedAt = {}
+local function autoClickClaim()
+    if not AUTO.AutoClickClaim then return end
+    if not every("clickclaim", 1.5) then return end
+    local now = os.clock()
+    local n = 0
+    for _, gui in ipairs(pg:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Enabled then
+            for _, d in ipairs(gui:GetDescendants()) do
+                if d:IsA("GuiButton") and d.Enabled and deepVisible(d) then
+                    local lowName = string.lower(d.Name or "")
+                    local lowText = ""
+                    if d:IsA("TextButton") then lowText = string.lower(d.Text or "") end
+                    local hit = false
+                    for _, w in ipairs(CLAIM_WORDS) do
+                        if string.find(lowText, w, 1, true) or string.find(lowName, w, 1, true) then
+                            hit = true
+                            break
+                        end
+                    end
+                    if hit and (claimClickedAt[d] or 0) + 3 <= now then
+                        claimClickedAt[d] = now
+                        if clickGui(d) then n = n + 1 end
+                    end
+                end
+            end
+        end
+    end
+    if n > 0 then log("自动领取：点击了 " .. n .. " 个领取按钮") end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 抽奖 / 胶囊（只在大厅做）
+----------------------------------------------------------------
+local function autoGacha()
+    if inMatch() then return false end
+    local did = false
+    if AUTO.AutoGachaChar and every("gachachar", 4) then
+        local r = RS:FindFirstChild("GachaCharacter")
+        if r then
+            pcall(function() r:FireServer(AUTO.GachaSpin) end)
+            log("自动抽角色：" .. tostring(AUTO.GachaSpin))
+            did = true
+        end
+    end
+    if AUTO.AutoGachaSkin and every("gachaskin", 4) then
+        local r = RS:FindFirstChild("GachaSkins")
+        if r then
+            pcall(function() r:FireServer(AUTO.GachaSpin) end)
+            log("自动抽皮肤：" .. tostring(AUTO.GachaSpin))
+            did = true
+        end
+    end
+    if AUTO.AutoCapsule and every("capsule", 4) then
+        local r = RS:FindFirstChild("GachaCapsule")
+        if r then
+            pcall(function() r:FireServer() end)
+            log("自动开胶囊")
+            did = true
+        end
+    end
+    return did
+end
+
+----------------------------------------------------------------
+-- G-Squad 小队任务
+----------------------------------------------------------------
+local squadCfg = nil
+local function getSquadCfg()
+    if squadCfg then return squadCfg end
+    local m = RS:FindFirstChild("GSquadQuestConfig")
+    if m then
+        local ok, res = pcall(require, m)
+        if ok and type(res) == "table" then squadCfg = res end
+    end
+    return squadCfg
+end
+
+local function autoSquadQuest()
+    if inMatch() then return false end
+    if not every("squad", 6) then return false end
+    local cfg = getSquadCfg()
+    local r = RS:FindFirstChild("GSquadQuest")
+    if not cfg or not r then return false end
+    local ud = player:FindFirstChild("UnlockData")
+    local n = 0
+    for _, m in ipairs(cfg.Missions or {}) do
+        if m.Id and (not m.Need or (ud and ud:FindFirstChild(m.Need))) then
+            pcall(function() r:FireServer("Accept", m.Id) end)
+            pcall(function() r:FireServer("Complete", m.Id) end)
+            n = n + 1
+        end
+    end
+    if n > 0 then log("小队任务：已请求 " .. n .. " 个任务") end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 重新开局投票
+----------------------------------------------------------------
+local function autoRestartVote()
+    if not every("restart", 3) then return false end
+    local voteFolder = workspace:FindFirstChild("Vote")
+    local rg = voteFolder and voteFolder:FindFirstChild("RestartGame")
+    if not rg then return false end
+    local r = RS:FindFirstChild("VoteRestartGame")
+    if r then
+        pcall(function() r:FireServer("Yes") end)
+        AUTO.LastReason = "已投重新开始票（Yes）"
+        log("重新开局投票：Yes")
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 称号
+----------------------------------------------------------------
+local function equipTitle(name)
+    if name == nil or name == "" then return false, "没填称号名" end
+    local r = RS:FindFirstChild("Title")
+    if not r then return false, "缺少 Title 遥控" end
+    local folder = player:FindFirstChild("TitlesFolder")
+    if folder and not folder:FindFirstChild(name) then
+        return false, "未解锁：" .. tostring(name)
+    end
+    pcall(function() r:FireServer(name) end)
+    log("已装备称号：" .. tostring(name))
+    return true, name
+end
+
+----------------------------------------------------------------
+-- 商店 / 消耗品
+----------------------------------------------------------------
+local buyHpNext, potionNext, moneyNext, boostNext = 0, 0, 0, 0
+
+local function buyHP()
+    if os.clock() < buyHpNext then return false end
+    local r = RS:FindFirstChild("ShopSystem")
+    if not r then return false end
+    buyHpNext = os.clock() + 3
+    pcall(function() r:FireServer("Buy", "FillHP") end)
+    log("商店：已请求购买补血（FillHP）")
+    return true
+end
+
+local function usePotion()
+    if os.clock() < potionNext then return false end
+    local r = RS:FindFirstChild("Potions")
+    if not r then return false end
+    potionNext = os.clock() + 3
+    pcall(function() r:FireServer(AUTO.PotionName) end)
+    log("药水：已请求使用 " .. tostring(AUTO.PotionName))
+    return true
+end
+
+local function useMoneyBag()
+    if os.clock() < moneyNext then return false end
+    local r = RS:FindFirstChild("UseItems")
+    if not r then return false end
+    moneyNext = os.clock() + 6
+    pcall(function() r:FireServer("Money") end)
+    log("道具：已请求使用金钱袋")
+    return true
+end
+
+local function useBoost()
+    if os.clock() < boostNext then return false end
+    if AUTO.BoostName == nil or AUTO.BoostName == "" then return false end
+    local r = RS:FindFirstChild("Boosts")
+    if not r then return false end
+    boostNext = os.clock() + 60
+    pcall(function() r:FireServer(AUTO.BoostName) end)
+    log("加速：已请求使用 " .. tostring(AUTO.BoostName))
+    return true
+end
+
+----------------------------------------------------------------
+-- 技能树自动升级
+----------------------------------------------------------------
+local function autoSkillTree()
+    if not every("skilltree", 12) then return false end
+    local r = RS:FindFirstChild("SkillTrees")
+    local folder = player:FindFirstChild("SkillTreesFolder")
+    if not r or not folder then return false end
+    local n = 0
+    for _, v in ipairs(folder:GetChildren()) do
+        pcall(function() r:FireServer(v.Name) end)
+        n = n + 1
+    end
+    if n > 0 then log("技能树：已尝试升级 " .. n .. " 个技能") end
+    return n > 0
 end
 
 ----------------------------------------------------------------
@@ -20118,11 +1248,8200 @@ local function dodgeProjectile(base)
     return true
 end
 
+----------------------------------------------------------------
+-- ========== 扩展自动化（角色 / 刷怪 / 商店 / 收集 / 杂项） ==========
+----------------------------------------------------------------
+local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
+local function firstNumber(text)
+    local n = tostring(text or ""):match("(%d+)")
+    return n and tonumber(n) or nil
+end
+
+local function waveNumber()
+    return firstNumber(waveText())
+end
+
+local function fireRemote(name, ...)
+    local r = RS:FindFirstChild(name)
+    if not r or not r:IsA("RemoteEvent") then return false end
+    local args = { ... }
+    return pcall(function() r:FireServer(table.unpack(args)) end)
+end
+
+local function moveChar(dest, lookAt, moveMode)
+    local c = myChar()
+    local b = hrpOf(c)
+    if not c or not b or not dest then return false end
+    local cf = CFrame.new(dest)
+    if lookAt then
+        local flat = Vector3.new(lookAt.X, dest.Y, lookAt.Z)
+        if (flat - dest).Magnitude > 0.05 then
+            cf = CFrame.lookAt(dest, flat)
+        end
+    end
+    if moveMode == "Tween" or moveMode == "补间" then
+        local tw = TweenService:Create(b, TweenInfo.new(0.28, Enum.EasingStyle.Linear), { CFrame = cf })
+        tw:Play()
+    else
+        pcall(function() c:PivotTo(cf) end)
+        pcall(function()
+            b.AssemblyLinearVelocity = Vector3.zero
+            b.AssemblyAngularVelocity = Vector3.zero
+        end)
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 无碰撞 / 锁定移速 / 无限跳跃
+----------------------------------------------------------------
+local noClipSaved, noClipOn = {}, false
+
+task.spawn(function()
+    while AUTO.Running do
+        local want = AUTO.NoClip == true
+        if want ~= noClipOn then
+            noClipOn = want
+            if not want then
+                for p in pairs(noClipSaved) do
+                    if p.Parent then
+                        pcall(function() p.CanCollide = true end)
+                    end
+                end
+                noClipSaved = {}
+            end
+        end
+        if want then
+            local me = myChar()
+            if me then
+                for _, d in ipairs(me:GetDescendants()) do
+                    if d:IsA("BasePart") and d.CanCollide then
+                        noClipSaved[d] = true
+                        pcall(function() d.CanCollide = false end)
+                    end
+                end
+            end
+            task.wait(0.15)
+        else
+            task.wait(0.5)
+        end
+    end
+end)
+
+task.spawn(function()
+    while AUTO.Running do
+        if AUTO.LockMoveStats then
+            local h = humOf(myChar())
+            if h then
+                local ws = tonumber(AUTO.WalkSpeed) or 16
+                local jp = tonumber(AUTO.JumpPower) or 50
+                if h.WalkSpeed ~= ws then pcall(function() h.WalkSpeed = ws end) end
+                if h.JumpPower ~= jp then pcall(function() h.JumpPower = jp end) end
+            end
+        end
+        task.wait(0.4)
+    end
+end)
+
+pcall(function()
+    UserInputService.JumpRequest:Connect(function()
+        if not AUTO.InfiniteJump then return end
+        local h = humOf(myChar())
+        if h and h.Health > 0 then
+            pcall(function()
+                h:ChangeState(Enum.HumanoidStateType.Jumping)
+            end)
+        end
+    end)
+end)
+
+----------------------------------------------------------------
+-- 飞行
+----------------------------------------------------------------
+local flyConn, flyVel, flyGyro, flyActive = nil, nil, nil, false
+
+local function stopFly()
+    flyActive = false
+    if flyConn then flyConn:Disconnect(); flyConn = nil end
+    if flyVel then pcall(function() flyVel:Destroy() end); flyVel = nil end
+    if flyGyro then pcall(function() flyGyro:Destroy() end); flyGyro = nil end
+    local h = humOf(myChar())
+    if h then
+        pcall(function() h.PlatformStand = false end)
+        pcall(function() h:ChangeState(Enum.HumanoidStateType.Running) end)
+    end
+end
+
+local function startFly()
+    local c = myChar()
+    local h = humOf(c)
+    if not c or not h then return false end
+    local torso = c:FindFirstChild("UpperTorso") or c:FindFirstChild("Torso") or hrpOf(c)
+    if not torso then return false end
+    stopFly()
+    flyActive = true
+    pcall(function()
+        h.PlatformStand = true
+        local gyro = Instance.new("BodyGyro")
+        gyro.P = 9e4
+        gyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        gyro.CFrame = torso.CFrame
+        gyro.Parent = torso
+        flyGyro = gyro
+        local vel = Instance.new("BodyVelocity")
+        vel.Velocity = Vector3.new(0, 0.1, 0)
+        vel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        vel.Parent = torso
+        flyVel = vel
+    end)
+    local speed = (tonumber(AUTO.FlySpeed) or 1) * 50
+    local vSpeed = tonumber(AUTO.FlyHeight) or 10
+    if flyConn then flyConn:Disconnect() end
+    flyConn = RunService.RenderStepped:Connect(function()
+        local ch = myChar()
+        if not ch or ch ~= c or not ch.Parent then
+            stopFly()
+            return
+        end
+        local hum = humOf(ch)
+        local vel = flyVel
+        local gyro = flyGyro
+        if not hum or not vel or not gyro then return end
+        local cam = workspace.CurrentCamera
+        if not cam then return end
+        local vertical = 0
+        pcall(function()
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                vertical = vertical + 1
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                vertical = vertical - 1
+            end
+        end)
+        local dir = hum.MoveDirection + Vector3.new(0, vertical * vSpeed, 0)
+        if dir.Magnitude > 0 then dir = dir.Unit end
+        vel.Velocity = dir * speed
+        gyro.CFrame = cam.CFrame
+    end)
+    AUTO.LastReason = "飞行已开启"
+    return true
+end
+
+task.spawn(function()
+    local was = false
+    while AUTO.Running do
+        local want = AUTO.Fly == true
+        if want and not flyActive then startFly() end
+        if not want and flyActive then stopFly() end
+        was = want
+        task.wait(0.5)
+    end
+    if was then stopFly() end
+end)
+
+----------------------------------------------------------------
+-- 全亮 / 无雾
+----------------------------------------------------------------
+local fullBrightOn, noFogOn = false, false
+local lightSaved, fogSaved, effectSaved = nil, nil, nil
+
+local function applyLighting()
+    if AUTO.FullBright and not fullBrightOn then
+        fullBrightOn = true
+        pcall(function()
+            lightSaved = {
+                Brightness = Lighting.Brightness,
+                GlobalShadows = Lighting.GlobalShadows,
+                ClockTime = Lighting.ClockTime,
+                Ambient = Lighting.Ambient,
+                ColorShift_Top = Lighting.ColorShift_Top,
+                ColorShift_Bottom = Lighting.ColorShift_Bottom,
+                EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale,
+                EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale,
+            }
+            effectSaved = {}
+            Lighting.Brightness = 2
+            Lighting.GlobalShadows = false
+            Lighting.ClockTime = 12
+            Lighting.Ambient = Color3.new(1, 1, 1)
+            Lighting.ColorShift_Top = Color3.new(1, 1, 1)
+            Lighting.ColorShift_Bottom = Color3.new(1, 1, 1)
+            Lighting.EnvironmentDiffuseScale = 1
+            Lighting.EnvironmentSpecularScale = 1
+            for _, ch in ipairs(Lighting:GetChildren()) do
+                if ch:IsA("BloomEffect") or ch:IsA("SunRaysEffect") or ch:IsA("ColorCorrectionEffect") then
+                    effectSaved[ch] = ch.Enabled
+                    ch.Enabled = false
+                end
+            end
+        end)
+    elseif not AUTO.FullBright and fullBrightOn then
+        fullBrightOn = false
+        pcall(function()
+            if lightSaved then
+                for k, v in pairs(lightSaved) do
+                    Lighting[k] = v
+                end
+                lightSaved = nil
+            end
+            if effectSaved then
+                for ch, en in pairs(effectSaved) do
+                    if ch.Parent then ch.Enabled = en end
+                end
+                effectSaved = nil
+            end
+        end)
+    end
+
+    if AUTO.NoFog and not noFogOn then
+        noFogOn = true
+        pcall(function()
+            fogSaved = { FogStart = Lighting.FogStart, FogEnd = Lighting.FogEnd }
+            Lighting.FogEnd = 100000
+            Lighting.FogStart = 100000
+        end)
+    elseif not AUTO.NoFog and noFogOn then
+        noFogOn = false
+        pcall(function()
+            if fogSaved then
+                Lighting.FogStart = fogSaved.FogStart
+                Lighting.FogEnd = fogSaved.FogEnd
+                fogSaved = nil
+            end
+        end)
+    end
+end
+
+task.spawn(function()
+    while AUTO.Running do
+        applyLighting()
+        task.wait(0.6)
+    end
+end)
+
+----------------------------------------------------------------
+-- 相机模式
+----------------------------------------------------------------
+local camConn, camModeApplied = nil, nil
+
+local function applyCameraMode()
+    local mode = AUTO.CameraMode or "Classic"
+    if camModeApplied == mode then return end
+    camModeApplied = mode
+    if camConn then camConn:Disconnect(); camConn = nil end
+    camera.CameraType = Enum.CameraType.Custom
+    pcall(function() camera.CameraSubject = humOf(myChar()) end)
+    if mode == "Manual" then
+        camConn = RunService.RenderStepped:Connect(function()
+            local b = hrpOf(myChar())
+            if not b then return end
+            camera.CameraType = Enum.CameraType.Scriptable
+            camera.CFrame = CFrame.lookAt(b.Position + Vector3.new(0, 18, -24), b.Position)
+        end)
+    end
+end
+
+task.spawn(function()
+    while AUTO.Running do
+        applyCameraMode()
+        task.wait(1)
+    end
+end)
+
+----------------------------------------------------------------
+-- 绕过屏障
+----------------------------------------------------------------
+local barrierSaved, barrierOn = {}, false
+
+task.spawn(function()
+    while AUTO.Running do
+        local want = AUTO.NoBarrier == true
+        if want ~= barrierOn then
+            barrierOn = want
+            if want then
+                for _, d in ipairs(workspace:GetDescendants()) do
+                    if d:IsA("BasePart") and d.CanCollide then
+                        local low = string.lower(d.Name)
+                        if string.find(low, "barrier", 1, true) or string.find(low, "invisible", 1, true) then
+                            barrierSaved[d] = true
+                            pcall(function() d.CanCollide = false end)
+                        end
+                    end
+                end
+                log("绕过屏障：已关闭 " .. tostring(#workspace:GetChildren()) .. " 区域内的隐形墙碰撞")
+            else
+                for p in pairs(barrierSaved) do
+                    pcall(function() if p.Parent then p.CanCollide = true end end)
+                end
+                barrierSaved = {}
+            end
+        end
+        task.wait(1.2)
+    end
+end)
+
+----------------------------------------------------------------
+-- 刷怪：位置 / 移动方式 / Jeffrey / 冲刷 / 重置波次
+----------------------------------------------------------------
+local orbitAngle = 0
+
+local function farmDestination(basePos, targetPos)
+    local pos = AUTO.FarmPos or "Above"
+    local height = tonumber(AUTO.FarmHeight) or 0
+    if pos == "Under" or pos == "下方" then
+        return targetPos + Vector3.new(0, -math.abs(height) - 4, 0)
+    elseif pos == "Orbit" or pos == "环绕" then
+        orbitAngle = (orbitAngle + math.rad(32)) % (math.pi * 2)
+        local r = tonumber(AUTO.CircleRadius) or 6
+        return targetPos + Vector3.new(math.cos(orbitAngle) * r, height + 4, math.sin(orbitAngle) * r)
+    else
+        return targetPos + Vector3.new(0, math.abs(height) + 6, 0)
+    end
+end
+
+local lastFarmAt = 0
+local function farmStep(enemy, dist)
+    if not AUTO.AutoFarm or AUTO.Paused then return end
+    if AUTO.FarmMode == "Normal Mode" and not AUTO.AntiJeffrey and every("normalfarm", 30) then
+        log("提示：普通模式刷怪建议同时开启 Anti Jeffrey")
+    end
+    local now = os.clock()
+    if now - lastFarmAt < 0.3 then return end
+    lastFarmAt = now
+    local b = hrpOf(myChar())
+    if not b then return end
+    local p = enemy and hrpOf(enemy)
+    local dest
+    if p then
+        dest = farmDestination(b.Position, p.Position)
+    else
+        local pad = workspace:FindFirstChild("AutoReady")
+        dest = pad and (pad.Position + Vector3.new(0, 6, 0)) or nil
+    end
+    if dest then
+        moveChar(dest, p and p.Position, AUTO.FarmMove)
+        AUTO.LastReason = p and ("自动刷怪：" .. enemy.Name) or "自动刷怪：等待目标"
+        if AUTO.CombatDebug and every("farmdbg", 3) then
+            log(AUTO.LastReason .. string.format("（%d 格）", math.floor(dist or 0)))
+        end
+    end
+end
+
+task.spawn(function()
+    local last = nil
+    while AUTO.Running do
+        local want = AUTO.AutoFarm == true
+        if want ~= last then
+            last = want
+            local h = humOf(myChar())
+            if h then
+                pcall(function() h.AutoRotate = not want end)
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+local function retreatSafe(reason)
+    local pad = workspace:FindFirstChild("AutoReady")
+    local b = hrpOf(myChar())
+    if pad and b then
+        moveChar(pad.Position + Vector3.new(0, 6, 0), nil, "Teleport")
+    end
+    if AUTO.AutoBuyHP then buyHP() end
+    if AUTO.AutoPotion then usePotion() end
+    AUTO.LastReason = "安全模式撤退：" .. tostring(reason)
+    if every("safelog", 3) then log("安全模式撤退：" .. tostring(reason)) end
+end
+
+local jeffreyCache, jeffreyStamp = {}, 0
+local function scanJeffrey()
+    jeffreyCache = {}
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("Model") and string.find(string.lower(d.Name), "jeffrey", 1, true) then
+            local p = hrpOf(d)
+            if p then table.insert(jeffreyCache, { model = d, part = p }) end
+        end
+    end
+    jeffreyStamp = os.clock()
+end
+
+local lastJeffrey = 0
+local function jeffreyStep()
+    if not (AUTO.BypassJeffrey or AUTO.AntiJeffrey) then return end
+    local now = os.clock()
+    if now - lastJeffrey < 1 then return end
+    lastJeffrey = now
+    if now - jeffreyStamp > 4 then scanJeffrey() end
+    local b = hrpOf(myChar())
+    if not b then return end
+    local range = tonumber(AUTO.AntiJeffreyRange) or 50
+    local near, nearD = nil, math.huge
+    for _, it in ipairs(jeffreyCache) do
+        if it.part.Parent then
+            local d = (it.part.Position - b.Position).Magnitude
+            if d < nearD then near, nearD = it, d end
+        end
+    end
+    if not near or nearD > range then return end
+    local away = b.Position - near.part.Position
+    away = Vector3.new(away.X, 0, away.Z)
+    if away.Magnitude < 0.1 then away = Vector3.new(1, 0, 0) end
+    if AUTO.BypassJeffrey then
+        moveChar(b.Position + away.Unit * 60 + Vector3.new(0, 20, 0), nil, "Teleport")
+        AUTO.LastReason = "绕过 Jeffrey：已拉开距离"
+        if every("jefflog", 4) then log("绕过 Jeffrey：已拉开距离") end
+    elseif AUTO.AntiJeffrey then
+        moveChar(b.Position + away.Unit * 8 + Vector3.new(0, 4, 0), nil, "Teleport")
+        AUTO.LastReason = "Anti Jeffrey：已弹开"
+    end
+end
+
+local flushCache, flushStamp, lastFlush = {}, 0, 0
+local function rebuildFlush()
+    flushCache = {}
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then
+            local n = string.lower(d.Name .. " " .. (d.Parent and d.Parent.Name or ""))
+            if string.find(n, "flush", 1, true) or string.find(n, "toilet", 1, true) or string.find(n, "冲刷", 1, true) then
+                table.insert(flushCache, d)
+            end
+        end
+    end
+    flushStamp = os.clock()
+end
+
+local function flushStep()
+    if not AUTO.FlushAura then return end
+    local now = os.clock()
+    if now - lastFlush < 0.4 then return end
+    lastFlush = now
+    if now - flushStamp > 6 then rebuildFlush() end
+    local b = hrpOf(myChar())
+    if not b then return end
+    local range = tonumber(AUTO.FlushAuraRange) or 5
+    for _, pr in ipairs(flushCache) do
+        if pr.Parent then
+            local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstAncestorWhichIsA("BasePart")
+            if part and (part.Position - b.Position).Magnitude <= range then
+                pcall(function()
+                    pr.HoldDuration = 0
+                    pr.MaxActivationDistance = 50
+                    if fireproximityprompt then fireproximityprompt(pr) end
+                    pr:InputHoldBegin()
+                    task.wait(0.03)
+                    pr:InputHoldEnd()
+                end)
+            end
+        end
+    end
+end
+
+local resetWaveLast = nil
+local function resetWaveStep()
+    if not AUTO.ResetWave then return end
+    local w = waveNumber()
+    if not w then return end
+    local target = tonumber(AUTO.ResetWaveValue) or 10
+    if w >= target and resetWaveLast ~= w then
+        resetWaveLast = w
+        task.spawn(function()
+            local c = myChar()
+            if c then
+                pcall(function() c:PivotTo(CFrame.new(1250, 500, 1250)) end)
+                task.wait(1.8)
+                AUTO.LastReason = string.format("重置波次：第 %d 波回到安全点", w)
+                log(string.format("重置波次：第 %d 波回到安全点", w))
+            end
+        end)
+    elseif w < target then
+        resetWaveLast = nil
+    end
+end
+
+----------------------------------------------------------------
+-- 自动收集
+----------------------------------------------------------------
+local collectCache, collectStamp, lastCollect = {}, 0, 0
+
+local function collectNameMatches(name)
+    local list = AUTO.CollectItems or {}
+    if #list == 0 then return false end
+    local low = string.lower(tostring(name or ""))
+    for _, w in ipairs(list) do
+        local pat = string.lower(tostring(w))
+        if pat ~= "" then
+            if low == pat then return true end
+            if #low > #pat and low:sub(1, #pat) == pat then
+                local ch = low:sub(#pat + 1, #pat + 1)
+                if ch == " " or ch == "#" or ch == "_" or ch == "-" then return true end
+            end
+        end
+    end
+    return false
+end
+
+local function rebuildCollect()
+    collectCache = {}
+    if #(AUTO.CollectItems or {}) == 0 then return end
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("Model") or d:IsA("BasePart") then
+            if collectNameMatches(d.Name) then
+                local root = d:IsA("BasePart") and d or d.PrimaryPart or d:FindFirstChildWhichIsA("BasePart", true)
+                if root then
+                    table.insert(collectCache, { obj = d, root = root })
+                end
+            end
+        end
+    end
+    collectStamp = os.clock()
+end
+
+local function collectStep()
+    if not AUTO.AutoCollect or AUTO.Paused then return false end
+    if not inMatch() then return false end
+    local now = os.clock()
+    if now - lastCollect < 1.2 then return false end
+    lastCollect = now
+    if now - collectStamp > 3 then rebuildCollect() end
+    local b = hrpOf(myChar())
+    if not b then return false end
+    local best, bestD = nil, nil
+    for _, it in ipairs(collectCache) do
+        if it.obj.Parent and it.root.Parent then
+            local d = (it.root.Position - b.Position).Magnitude
+            if not bestD or d < bestD then
+                best, bestD = it, d
+            end
+        end
+    end
+    if not best then return false end
+    moveChar(best.root.Position + Vector3.new(0, 3, 0), best.root.Position, AUTO.CollectMove)
+    for _, d in ipairs(best.obj:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then
+            pcall(function()
+                d.HoldDuration = 0
+                d.MaxActivationDistance = 50
+                if fireproximityprompt then fireproximityprompt(d) end
+                d:InputHoldBegin()
+            end)
+            task.delay(0.05, function()
+                pcall(function() d:InputHoldEnd() end)
+            end)
+        end
+    end
+    AUTO.LastReason = "自动收集：" .. best.obj.Name
+    if every("collectlog", 3) then log("自动收集：" .. best.obj.Name) end
+    return true
+end
+
+----------------------------------------------------------------
+-- 商店：武器 / 杂项 / 请求 / 升级 / 小时购
+----------------------------------------------------------------
+local lastShop = 0
+
+local function shopFire(item)
+    if item == nil or item == "" then return false end
+    return fireRemote("ShopSystem", "Buy", item)
+end
+
+local function shopStep()
+    local heavy = AUTO.AutoBuyWeapon or AUTO.AutoBuyMisc or AUTO.AutoRequest
+        or AUTO.UpgradeTitanSpeaker or AUTO.UpgradeUTCM or AUTO.UpgradeTV or AUTO.AutoHourly
+    if not heavy then return false end
+    local now = os.clock()
+    if now - lastShop < 12 then return false end
+    lastShop = now
+    local n = 0
+    if AUTO.AutoBuyWeapon then
+        if shopFire(AUTO.WeaponName) then n = n + 1 end
+    end
+    if AUTO.AutoBuyMisc then
+        if shopFire(AUTO.MiscName) then n = n + 1 end
+    end
+    if AUTO.AutoRequest then
+        local w = waveNumber() or 0
+        if w >= 10 then
+            if shopFire(AUTO.RequestName) then n = n + 1 end
+        elseif every("reqwarn", 20) then
+            log("自动请求：需要第 10 波或更高")
+        end
+    end
+    if AUTO.UpgradeTitanSpeaker then
+        for _, u in ipairs(AUTO.TitanUpgrades or {}) do
+            fireRemote("ChangeUpgradedTitanSpeaker", u)
+        end
+    end
+    if AUTO.UpgradeUTCM then
+        for _, u in ipairs(AUTO.UTCMUpgrades or {}) do
+            fireRemote("ForUpgradeUTCM", u)
+        end
+    end
+    if AUTO.UpgradeTV then
+        for _, u in ipairs(AUTO.TVUpgrades or {}) do
+            fireRemote("ForUpgradeTV", u)
+        end
+    end
+    if AUTO.AutoHourly then
+        local amount = math.max(1, math.floor(tonumber(AUTO.HourlyAmount) or 1))
+        for _, item in ipairs(AUTO.HourlyItems or {}) do
+            fireRemote("BuyItemFromShopHourly", item, amount)
+        end
+        if AUTO.HourlyCustom and AUTO.HourlyCustom ~= "" then
+            fireRemote("BuyItemFromShopHourly", AUTO.HourlyCustom, amount)
+        end
+    end
+    if n > 0 then log("商店：已请求购买 " .. n .. " 件物品") end
+    return true
+end
+
+local function useAutoItem()
+    if not AUTO.AutoUseItem then return false end
+    if not every("useitem", 3) then return false end
+    if AUTO.UseItemName == "Presents" then
+        if fireRemote("GachaCapsule") then
+            log("自动使用物品：礼物（开胶囊）")
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 自动游戏模式（大厅）
+----------------------------------------------------------------
+local function autoGameModeLobby()
+    if not AUTO.AutoGameModeLobby or AUTO.Paused then return end
+    if inMatch() then return end
+    if not every("agmloop", 1.5) then return end
+
+    local playGui = pg:FindFirstChild("Play")
+    local playBtn = nil
+    local forGui = workspace:FindFirstChild("ForGui")
+    if forGui and forGui:FindFirstChild("SurfaceGui") then
+        local frame = forGui.SurfaceGui:FindFirstChild("Frame")
+        playBtn = frame and frame:FindFirstChild("Play")
+    end
+    if playBtn and not (playGui and playGui.Enabled) then
+        clickGui(playBtn)
+    end
+
+    if playGui and playGui.Enabled then
+        local classic = playGui:FindFirstChild("Classic")
+        if classic then clickGui(classic) end
+    end
+
+    local modeGui = pg:FindFirstChild("mode select2")
+    if modeGui and modeGui.Enabled then
+        local diff = findPath(modeGui, { "MainFrame", "DiffMode" })
+        if diff then clickGui(diff) end
+    end
+
+    local lobby = pg:FindFirstChild("Lobby")
+    if lobby and lobby.Enabled then
+        local btn = findPath(lobby, { "MainFrame", "Frame", "Create", "TrackQuestButton" })
+        if btn and btn.Visible then
+            clickGui(btn)
+        end
+        if AUTO.GameMode ~= "" and every("autogamemode", 4) then
+            AUTO.VoteMode = AUTO.GameMode
+            local mh = RS:FindFirstChild("MainHandler")
+            if mh and mh:IsA("RemoteEvent") then
+                pcall(function()
+                    mh:FireServer({ [1] = "StartSolo", [2] = AUTO.GameMode })
+                end)
+                log("自动游戏模式：已创建 " .. tostring(AUTO.GameMode))
+            else
+                local qf = RS:FindFirstChild("QuestFuse")
+                if qf then
+                    pcall(function() qf:FireServer({ "StartSolo" }) end)
+                    log("自动游戏模式：已发起单人开局")
+                end
+            end
+        end
+    end
+end
+
+----------------------------------------------------------------
+-- 兑换码 / 通行证 / 配置 / 服务器
+----------------------------------------------------------------
+local REDEEM_ALL = {
+    "100MVisit2", "100MVisit1", "CamArmada", "CCTVBase",
+    "ADelayedGameIsEventuallyGoodButRushedGameIsForeverBad",
+}
+
+local function redeemCodes(codes)
+    local n = 0
+    for _, code in ipairs(codes or {}) do
+        if code and code ~= "" then
+            if fireRemote("RedeemCode", code) then n = n + 1 end
+            task.wait(0.25)
+        end
+    end
+    return n
+end
+
+local function unlockPasses(list)
+    local gd = player:FindFirstChild("GachaData")
+    if not gd then
+        gd = Instance.new("Folder")
+        gd.Name = "GachaData"
+        gd.Parent = player
+    end
+    local names = {}
+    for _, v in ipairs(list or {}) do
+        if v == "全部" or v == "All" then
+            names = { "LuckyBoost", "RareLuckyBoost", "LegendaryLuckyBoost" }
+            break
+        else
+            table.insert(names, v)
+        end
+    end
+    local n = 0
+    for _, name in ipairs(names) do
+        local bv = gd:FindFirstChild(name)
+        if not bv then
+            bv = Instance.new("BoolValue")
+            bv.Name = name
+            bv.Parent = gd
+        end
+        bv.Value = true
+        n = n + 1
+    end
+    return n
+end
+
+local CONFIG_FILE = "难度模式_配置.json"
+local CONFIG_SKIP = {
+    Actions = true, Logs = true, Running = true, Paused = true,
+    Phase = true, LastReason = true, VoteState = true, Target = true,
+}
+
+local function configSnapshot()
+    local data = {}
+    for k, v in pairs(AUTO) do
+        local tv = type(v)
+        if not CONFIG_SKIP[k] then
+            if tv == "boolean" or tv == "number" or tv == "string" then
+                data[k] = v
+            elseif tv == "table" then
+                if k == "ESPItems" or k == "ESPSettings" or k == "TitanUpgrades"
+                    or k == "UTCMUpgrades" or k == "TVUpgrades" or k == "HourlyItems"
+                    or k == "CollectItems" or k == "SelectedCodes" or k == "SelectedPasses" then
+                    data[k] = v
+                end
+            end
+        end
+    end
+    return data
+end
+
+local function saveConfig()
+    if type(writefile) ~= "function" then return false end
+    return pcall(function()
+        writefile(CONFIG_FILE, HttpService:JSONEncode(configSnapshot()))
+    end)
+end
+
+local function jumpServer()
+    local ok, res = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
+        ))
+    end)
+    local list = {}
+    if ok and res and res.data then
+        for _, s in ipairs(res.data) do
+            if s.id ~= game.JobId and s.playing < s.maxPlayers then
+                table.insert(list, s.id)
+            end
+        end
+    end
+    if #list > 0 then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, list[math.random(1, #list)], player)
+        return true
+    end
+    return false
+end
+
+task.spawn(function()
+    while AUTO.Running do
+        local d = tonumber(AUTO.AutoSaveDelay) or 15
+        if d < 1 then d = 1 end
+        task.wait(d)
+        if AUTO.AutoSave and AUTO.Running then
+            pcall(saveConfig)
+        end
+    end
+end)
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 II：目标 / 走位 / 保命 / 武器（全部默认关闭）
+-- ============================================================
+----------------------------------------------------------------
+AUTO.Logs = AUTO.Logs or {}
+AUTO._RT = AUTO._RT or {}
+AUTO.Stats = AUTO.Stats or {}
+
+local X_DEFAULTS = {
+    -- 目标与战斗
+    AutoTargetPriority = false, TargetPriority = "智能",
+    AutoFocusBoss = false, BossRange = 150, BossKeywords = { "boss", "giant", "titan", "king", "queen", "elite" },
+    AutoKite = false, KiteMin = 12, KiteMax = 38, KiteGap = 0.35,
+    AutoOrbit = false, OrbitRadius = 14, OrbitSpeed = 0.9, OrbitHeight = 4,
+    AutoStrafe = false, StrafeDistance = 7, StrafeGap = 0.8,
+    AutoJumpDodge = false, JumpDodgeRange = 20, JumpDodgeGap = 0.7,
+    AutoRetreatHeal = false, RetreatHp = 25, RetreatDistance = 50,
+    AutoEmergencyTeleport = false, EmergencyHp = 12, EmergencyDistance = 80,
+    AutoBossWarn = false, BossWarnRange = 200,
+    AutoWaveMonitor = false,
+    AutoAssistAlly = false, AssistRange = 60,
+    AutoReviveChain = false, ReviveChainRange = 120,
+    AutoWeaponSwitch = false, WeaponPriority = {}, WeaponMinScore = 0,
+    AutoSkillBurst = false, BurstWindow = 2.2, BurstCount = 2, BurstGap = 0.18,
+    AutoSkillHold = false, SkillMinEnemies = 3, SkillHoldBoss = false,
+    AutoAmmoCheck = false, AutoReload = true,
+    AutoLowHpNotify = false, LowHpNotifyValue = 30,
+    AutoHealAlly = false, HealAllyHp = 40,
+}
+
+for k, v in pairs(X_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+----------------------------------------------------------------
+-- 扩展框架：通用工具（不与旧函数重名）
+----------------------------------------------------------------
+local function xSt(name)
+    local t = AUTO._RT[name]
+    if not t then
+        t = {}
+        AUTO._RT[name] = t
+    end
+    return t
+end
+
+local function xClamp(n, lo, hi)
+    n = tonumber(n) or lo
+    if n < lo then return lo end
+    if n > hi then return hi end
+    return n
+end
+
+local function xRound(n)
+    n = tonumber(n) or 0
+    if n >= 0 then return math.floor(n + 0.5) end
+    return math.ceil(n - 0.5)
+end
+
+local function xFmt(n)
+    n = tonumber(n) or 0
+    if n >= 100000000 then return string.format("%.2f亿", n / 100000000) end
+    if n >= 10000 then return string.format("%.2f万", n / 10000) end
+    return tostring(xRound(n))
+end
+
+function xFindRemote(name)
+    if not name or name == "" then return nil end
+    local direct = RS:FindFirstChild(name)
+    if direct then return direct end
+    local ok, found = pcall(function()
+        return RS:FindFirstChild(name, true)
+    end)
+    if ok then return found end
+    return nil
+end
+
+function xFire(name, ...)
+    local r = xFindRemote(name)
+    if not r or not r:IsA("RemoteEvent") then return false end
+    local args = { n = select("#", ...), ... }
+    local ok = pcall(function()
+        r:FireServer(table.unpack(args, 1, args.n))
+    end)
+    return ok
+end
+
+function xInvoke(name, ...)
+    local r = xFindRemote(name)
+    if not r or not r:IsA("RemoteFunction") then return false end
+    local args = { n = select("#", ...), ... }
+    local ok = pcall(function()
+        r:InvokeServer(table.unpack(args, 1, args.n))
+    end)
+    return ok
+end
+
+function xHum2()
+    local c = player.Character
+    if not c or not c.Parent then return nil end
+    return c:FindFirstChildOfClass("Humanoid")
+end
+
+function xRoot2()
+    local c = player.Character
+    if not c or not c.Parent then return nil end
+    return c:FindFirstChild("HumanoidRootPart") or c.PrimaryPart
+end
+
+function xAlive2()
+    local h = xHum2()
+    return h ~= nil and h.Health > 0
+end
+
+function xHpPct()
+    local h = xHum2()
+    if not h or h.MaxHealth <= 0 then return 0 end
+    return h.Health / h.MaxHealth * 100
+end
+
+function xPosOf(inst)
+    if not inst then return nil end
+    if inst:IsA("Model") then
+        local p = inst:FindFirstChild("HumanoidRootPart") or inst.PrimaryPart
+        if p then return p.Position end
+        local ok, found = pcall(function() return inst:FindFirstChildWhichIsA("BasePart", true) end)
+        if ok and found then return found.Position end
+        return nil
+    end
+    if inst:IsA("BasePart") then return inst.Position end
+    return nil
+end
+
+function xDistTo(pos)
+    local base = xRoot2()
+    if not base or not pos then return math.huge end
+    return (pos - base.Position).Magnitude
+end
+
+function xEnemyList(maxDist, cacheKey)
+    local list = {}
+    local folder = living()
+    if not folder then return list end
+    local base = xRoot2()
+    if not base then return list end
+    local limit = tonumber(maxDist) or math.huge
+    local key = cacheKey or "default"
+    local cache = xSt("enemyCache")
+    local now = os.clock()
+    if cache[key] and now - cache[key].t < 0.2 then
+        return cache[key].list
+    end
+    for _, m in ipairs(folder:GetChildren()) do
+        if isEnemy(m) then
+            local p = xPosOf(m)
+            if p then
+                local d = (p - base.Position).Magnitude
+                if d <= limit then
+                    table.insert(list, { model = m, pos = p, dist = d })
+                end
+            end
+        end
+    end
+    cache[key] = { t = now, list = list }
+    return list
+end
+
+function xAllyList(maxDist)
+    local list = {}
+    local base = xRoot2()
+    if not base then return list end
+    local limit = tonumber(maxDist) or math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local h = plr.Character:FindFirstChildOfClass("Humanoid")
+            local p = xPosOf(plr.Character)
+            if h and p then
+                local d = (p - base.Position).Magnitude
+                if d <= limit then
+                    table.insert(list, {
+                        player = plr, model = plr.Character, hum = h,
+                        pos = p, dist = d, hp = h.Health, maxhp = h.MaxHealth,
+                    })
+                end
+            end
+        end
+    end
+    table.sort(list, function(a, b) return a.dist < b.dist end)
+    return list
+end
+
+function xIsBoss(m)
+    if not m then return false end
+    local keys = AUTO.BossKeywords or {}
+    local low = string.lower(m.Name)
+    for _, k in ipairs(keys) do
+        if string.find(low, string.lower(tostring(k)), 1, true) then return true end
+    end
+    local h = m:FindFirstChildOfClass("Humanoid")
+    if h and h.MaxHealth >= (tonumber(AUTO.BossHpThreshold) or 5000) then return true end
+    local ok, v = pcall(function() return m:GetAttribute("IsBoss") end)
+    if ok and v == true then return true end
+    return false
+end
+
+function xTargetScore(entry, mode)
+    if not entry then return -math.huge end
+    local h = entry.model:FindFirstChildOfClass("Humanoid")
+    local hp = h and h.Health or 1
+    local maxhp = h and h.MaxHealth or 1
+    local score = 0
+    if mode == "最近" then
+        score = -entry.dist
+    elseif mode == "最远" then
+        score = entry.dist
+    elseif mode == "残血" then
+        score = 10000 - (hp / math.max(1, maxhp)) * 1000 - entry.dist * 0.01
+    elseif mode == "高血量" then
+        score = hp * 0.01 - entry.dist * 0.01
+    elseif mode == "Boss优先" then
+        score = (xIsBoss(entry.model) and 100000 or 0) + maxhp * 0.01 - entry.dist * 0.01
+    else
+        local base = 0
+        if xIsBoss(entry.model) then base = base + 50000 end
+        if maxhp > 0 then base = base + (hp / maxhp) * 300 end
+        base = base + math.max(0, 60 - entry.dist) * 6
+        score = base
+    end
+    return score
+end
+
+function xPickTarget(maxDist, mode)
+    local list = xEnemyList(maxDist)
+    local best, bestScore = nil, -math.huge
+    local useMode = mode or AUTO.TargetPriority or "智能"
+    for _, e in ipairs(list) do
+        if AUTO.AutoFarm and AUTO.FarmMode == "Astro Holdout Mode" and e.model.Name == "Giant ST toilet" then
+            -- 坚守模式忽略这个目标
+        else
+            local s = xTargetScore(e, useMode)
+            if s > bestScore then
+                best, bestScore = e, s
+            end
+        end
+    end
+    return best
+end
+
+function xTp(pos, lookPos)
+    if not pos then return false end
+    local c = player.Character
+    if not c then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local ok = pcall(function()
+        if lookPos then
+            c:PivotTo(CFrame.lookAt(pos, lookPos))
+        else
+            c:PivotTo(CFrame.new(pos))
+        end
+    end)
+    if not ok then
+        pcall(function() base.CFrame = lookPos and CFrame.lookAt(pos, lookPos) or CFrame.new(pos) end)
+    end
+    pcall(function()
+        base.AssemblyLinearVelocity = Vector3.zero
+        base.AssemblyAngularVelocity = Vector3.zero
+    end)
+    return true
+end
+
+function xWalkTo(pos)
+    local h = xHum2()
+    if not h or not pos then return false end
+    pcall(function() h:MoveTo(pos) end)
+    return true
+end
+
+function xJump()
+    local h = xHum2()
+    if not h then return false end
+    pcall(function() h.Jump = true end)
+    pcall(function() h:ChangeState(Enum.HumanoidStateType.Jumping) end)
+    return true
+end
+
+function xSetSpeed(v)
+    local h = xHum2()
+    if not h then return false end
+    pcall(function() h.WalkSpeed = tonumber(v) or 16 end)
+    return true
+end
+
+function xStatAdd(key, n)
+    if not key then return end
+    AUTO.Stats[key] = (tonumber(AUTO.Stats[key]) or 0) + (tonumber(n) or 1)
+end
+
+function xToast(key, title, text, gap)
+    local s = xSt("toast")
+    local now = os.clock()
+    local wait = tonumber(gap) or 8
+    if (s[key] or 0) + wait > now then return false end
+    s[key] = now
+    notify(title, text)
+    return true
+end
+
+function xSafePoint(awayPos, distance)
+    local base = xRoot2()
+    if not base then return nil end
+    local away = Vector3.new(0, 0, 0)
+    local n = 0
+    for _, e in ipairs(xEnemyList(200)) do
+        local d = e.pos - base.Position
+        if d.Magnitude > 0 then
+            away = away - d.Unit
+            n = n + 1
+        end
+    end
+    if n > 0 and away.Magnitude > 0 then
+        away = away.Unit
+    elseif awayPos then
+        local d = base.Position - awayPos
+        away = d.Magnitude > 0 and d.Unit or Vector3.new(0, 0, 1)
+    else
+        away = Vector3.new(0, 0, 1)
+    end
+    local dist = tonumber(distance) or 45
+    return base.Position + away * dist + Vector3.new(0, 4, 0)
+end
+
+function xFindTool(keyword)
+    local c = player.Character
+    if not c then return nil end
+    local low = string.lower(tostring(keyword or ""))
+    for _, t in ipairs(c:GetChildren()) do
+        if t:IsA("Tool") then
+            if low == "" or string.find(string.lower(t.Name), low, 1, true) then
+                return t
+            end
+        end
+    end
+    return nil
+end
+
+function xEquipTool(tool)
+    if not tool then return false end
+    local h = xHum2()
+    if not h then return false end
+    if tool.Parent == player.Character then
+        local cur = player.Character:FindFirstChildOfClass("Tool")
+        if cur == tool then return true end
+    end
+    local ok = pcall(function() h:EquipTool(tool) end)
+    if ok then xStatAdd("换武器", 1) end
+    return ok
+end
+
+function xItemCount(name)
+    local bp = player:FindFirstChild("Backpack")
+    local p = player:FindFirstChild("PlayerGui")
+    local count = 0
+    if bp then
+        for _, t in ipairs(bp:GetChildren()) do
+            if t:IsA("Tool") and (name == nil or t.Name == name) then
+                count = count + 1
+            end
+        end
+    end
+    if p then
+        local ok, found = pcall(function() return p:FindFirstChild("Inventory") end)
+        if ok and found then
+            for _, obj in ipairs(found:GetDescendants()) do
+                if obj:IsA("TextLabel") and obj.Text and tonumber(obj.Text) then
+                    -- 只作为界面数字参考，不强行使用
+                end
+            end
+        end
+    end
+    return count
+end
+
+function xNearPrompts(radius)
+    local cache = xSt("promptCache")
+    local now = os.clock()
+    if cache.t and now - cache.t < 1.5 then return cache.list end
+    local base = xRoot2()
+    if not base then return {} end
+    local list = {}
+    local ok = pcall(function()
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") and obj.Enabled then
+                local part = obj.Parent
+                if part and part:IsA("BasePart") then
+                    local d = (part.Position - base.Position).Magnitude
+                    if d <= (tonumber(radius) or 20) then
+                        table.insert(list, { prompt = obj, part = part, dist = d, name = part.Name })
+                    end
+                end
+            end
+        end
+    end)
+    if not ok then list = {} end
+    table.sort(list, function(a, b) return a.dist < b.dist end)
+    cache.t = now
+    cache.list = list
+    return list
+end
+
+function xUsePrompt(prompt, hold)
+    if not prompt then return false end
+    local ok = pcall(function()
+        if hold ~= nil then
+            prompt:InputHoldBegin()
+            task.delay(tonumber(prompt.HoldDuration) or 0.2, function()
+                pcall(function() prompt:InputHoldEnd() end)
+            end)
+        else
+            prompt:InputHoldBegin()
+            task.wait(0.05)
+            prompt:InputHoldEnd()
+        end
+    end)
+    if ok then xStatAdd("互动", 1) end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 1. 目标优先级
+----------------------------------------------------------------
+function autoTargetPriority()
+    if not AUTO.AutoTargetPriority then return false end
+    if AUTO.Paused then return false end
+    if not every("x_target", 0.35) then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 500, AUTO.TargetPriority)
+    if not pick then
+        AUTO.PriorityTarget = nil
+        return false
+    end
+    AUTO.PriorityTarget = pick.model.Name
+    AUTO.PriorityTargetHp = 0
+    local h = pick.model:FindFirstChildOfClass("Humanoid")
+    if h then AUTO.PriorityTargetHp = xRound(h.Health) end
+    AUTO.Target = pick.model.Name
+    AUTO.LastReason = string.format("优先级[%s]：%s（%d 格）",
+        tostring(AUTO.TargetPriority), pick.model.Name, xRound(pick.dist))
+    return true
+end
+
+----------------------------------------------------------------
+-- 2. 自动集火 Boss
+----------------------------------------------------------------
+function autoFocusBoss()
+    if not AUTO.AutoFocusBoss then return false end
+    if AUTO.Paused then return false end
+    if not every("x_boss", 0.6) then return false end
+    local range = tonumber(AUTO.BossRange) or 150
+    local best = nil
+    for _, e in ipairs(xEnemyList(range)) do
+        if xIsBoss(e.model) then
+            if not best or e.dist < best.dist then best = e end
+        end
+    end
+    if not best then
+        AUTO.BossTarget = nil
+        return false
+    end
+    AUTO.BossTarget = best.model.Name
+    AUTO.BossDistance = xRound(best.dist)
+    if AUTO.AutoAim then
+        aimAt(best.pos + Vector3.new(0, 1.2, 0))
+    end
+    if AUTO.AutoFight then
+        ensureFire()
+    end
+    if AUTO.AutoSkill then
+        useSkills(best.pos)
+    end
+    AUTO.LastReason = string.format("集火 Boss：%s（%d 格）", best.model.Name, xRound(best.dist))
+    if xToast("boss_focus", "Boss 集火", "已锁定 " .. best.model.Name, 10) then
+        log("Boss 集火：" .. best.model.Name)
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 3. 风筝走位：太近后退，太远靠近
+----------------------------------------------------------------
+function autoKite()
+    if not AUTO.AutoKite then return false end
+    if AUTO.Paused then return false end
+    if not every("x_kite", tonumber(AUTO.KiteGap) or 0.35) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if not pick then return false end
+    local minD = tonumber(AUTO.KiteMin) or 12
+    local maxD = tonumber(AUTO.KiteMax) or 38
+    if pick.dist < minD then
+        local away = base.Position - pick.pos
+        if away.Magnitude <= 0.01 then away = Vector3.new(0, 0, 1) end
+        local dest = base.Position + away.Unit * (minD + 4)
+        if AUTO.KiteTeleport ~= false then
+            xTp(dest, pick.pos)
+        else
+            xWalkTo(dest)
+        end
+        AUTO.LastReason = string.format("风筝：%s 太近（%d 格），后撤", pick.model.Name, xRound(pick.dist))
+        xStatAdd("风筝后撤", 1)
+        return true
+    elseif pick.dist > maxD then
+        local dir = (pick.pos - base.Position).Unit
+        local dest = pick.pos - dir * (maxD - 4) + Vector3.new(0, 4, 0)
+        if AUTO.KiteTeleport ~= false then
+            xTp(dest, pick.pos)
+        else
+            xWalkTo(dest)
+        end
+        AUTO.LastReason = string.format("风筝：接近 %s（%d 格）", pick.model.Name, xRound(pick.dist))
+        xStatAdd("风筝接近", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 4. 环绕走位
+----------------------------------------------------------------
+function autoOrbit()
+    if not AUTO.AutoOrbit then return false end
+    if AUTO.Paused then return false end
+    if not every("x_orbit", 0.12) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if not pick then return false end
+    local state = xSt("orbit")
+    state.angle = (state.angle or 0) + (tonumber(AUTO.OrbitSpeed) or 0.9) * 0.12
+    local radius = tonumber(AUTO.OrbitRadius) or 14
+    local height = tonumber(AUTO.OrbitHeight) or 4
+    local offset = Vector3.new(
+        math.cos(state.angle) * radius,
+        height,
+        math.sin(state.angle) * radius
+    )
+    local dest = pick.pos + offset
+    if AUTO.OrbitTeleport ~= false then
+        xTp(dest, pick.pos)
+    else
+        xWalkTo(dest)
+    end
+    AUTO.LastReason = string.format("环绕：%s（半径 %d）", pick.model.Name, xRound(radius))
+    xStatAdd("环绕", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 5. 左右横移（躲避瞄准）
+----------------------------------------------------------------
+function autoStrafe()
+    if not AUTO.AutoStrafe then return false end
+    if AUTO.Paused then return false end
+    if not every("x_strafe", tonumber(AUTO.StrafeGap) or 0.8) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 200, AUTO.TargetPriority)
+    if not pick then return false end
+    local delta = pick.pos - base.Position
+    if delta.Magnitude <= 0.01 then return false end
+    local dir = delta.Unit
+    local right = Vector3.new(dir.Z, 0, -dir.X)
+    local state = xSt("strafe")
+    state.side = (state.side == 1) and -1 or 1
+    local dist = tonumber(AUTO.StrafeDistance) or 7
+    local dest = base.Position + right * (dist * state.side)
+    if AUTO.StrafeTeleport ~= false then
+        xTp(dest, pick.pos)
+    else
+        xWalkTo(dest + dir * 2)
+    end
+    AUTO.LastReason = state.side == 1 and "横移：向右" or "横移：向左"
+    xStatAdd("横移", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 6. 跳跃闪避（近身 / 投射物）
+----------------------------------------------------------------
+function autoJumpDodge()
+    if not AUTO.AutoJumpDodge then return false end
+    if AUTO.Paused then return false end
+    if not every("x_jumpdodge", tonumber(AUTO.JumpDodgeGap) or 0.7) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.JumpDodgeRange) or 20
+    local danger = false
+    local list = xEnemyList(range)
+    if #list > 0 then danger = true end
+    if not danger then
+        local incoming = findIncoming and findIncoming(base)
+        if incoming then danger = true end
+    end
+    if not danger then return false end
+    xJump()
+    local pick = list[1]
+    if pick then
+        local dir = (base.Position - pick.pos)
+        if dir.Magnitude > 0.01 then
+            xTp(base.Position + dir.Unit * 5 + Vector3.new(0, 3, 0), pick.pos)
+        end
+    end
+    xStatAdd("跳跃闪避", 1)
+    AUTO.LastReason = "跳跃闪避：拉开距离"
+    return true
+end
+
+----------------------------------------------------------------
+-- 7. 低血撤退（保留治疗窗口）
+----------------------------------------------------------------
+function autoRetreatHeal()
+    if not AUTO.AutoRetreatHeal then return false end
+    if AUTO.Paused then return false end
+    if not every("x_retreat", 0.8) then return false end
+    local hp = xHpPct()
+    local threshold = tonumber(AUTO.RetreatHp) or 25
+    if hp > threshold then
+        xSt("retreat").active = false
+        return false
+    end
+    local pos = xSafePoint(nil, tonumber(AUTO.RetreatDistance) or 50)
+    if not pos then return false end
+    xTp(pos)
+    xSt("retreat").active = true
+    xStatAdd("撤退", 1)
+    AUTO.LastReason = string.format("低血撤退：%.0f%% → 安全点", hp)
+    if xToast("retreat", "保命", string.format("血量 %.0f%%，已撤退", hp), 6) then
+        log("低血撤退：血量 " .. xRound(hp) .. "%")
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 8. 紧急传送（濒死）
+----------------------------------------------------------------
+function autoEmergencyTeleport()
+    if not AUTO.AutoEmergencyTeleport then return false end
+    if AUTO.Paused then return false end
+    if not every("x_emergency", 0.5) then return false end
+    local hp = xHpPct()
+    local critical = tonumber(AUTO.EmergencyHp) or 12
+    if hp > critical then
+        xSt("emergency").active = false
+        return false
+    end
+    local state = xSt("emergency")
+    if state.active then return false end
+    local pos = xSafePoint(nil, tonumber(AUTO.EmergencyDistance) or 80)
+    if not pos then return false end
+    xTp(pos)
+    state.active = true
+    xStatAdd("紧急传送", 1)
+    AUTO.LastReason = string.format("紧急传送：血量 %.0f%%", hp)
+    notify("紧急保命", string.format("血量 %.0f%%，已传送到安全点", hp))
+    return true
+end
+
+----------------------------------------------------------------
+-- 9. Boss 出现提醒
+----------------------------------------------------------------
+function autoBossWarn()
+    if not AUTO.AutoBossWarn then return false end
+    if not every("x_bosswarn", 2) then return false end
+    local range = tonumber(AUTO.BossWarnRange) or 200
+    for _, e in ipairs(xEnemyList(range)) do
+        if xIsBoss(e.model) then
+            local key = "boss_" .. e.model.Name
+            if xToast(key, "Boss 警报", string.format("%s 出现在 %d 格外", e.model.Name, xRound(e.dist)), 30) then
+                log("Boss 警报：" .. e.model.Name)
+                xStatAdd("Boss警报", 1)
+            end
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 10. 波次监测（记录波次变化 / 击杀节奏）
+----------------------------------------------------------------
+function autoWaveMonitor()
+    if not AUTO.AutoWaveMonitor then return false end
+    if not every("x_wave", 1) then return false end
+    local w = waveNumber and waveNumber()
+    if not w then return false end
+    local state = xSt("wave")
+    if state.last ~= w then
+        if state.last ~= nil then
+            local elapsed = os.clock() - (state.start or os.clock())
+            log(string.format("波次监测：第 %s 波结束，用时 %.1f 秒", tostring(state.last), elapsed))
+            xStatAdd("波次", 1)
+        end
+        state.last = w
+        state.start = os.clock()
+        AUTO.WaveNow = w
+        AUTO.WaveStartAt = os.clock()
+        if xToast("wave_up", "波次", "进入第 " .. tostring(w) .. " 波", 3) then
+            log("波次监测：进入第 " .. tostring(w) .. " 波")
+        end
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 11. 协助队友（队友附近有敌人时帮忙清）
+----------------------------------------------------------------
+function autoAssistAlly()
+    if not AUTO.AutoAssistAlly then return false end
+    if AUTO.Paused then return false end
+    if not every("x_assist", 0.6) then return false end
+    local range = tonumber(AUTO.AssistRange) or 60
+    local target = nil
+    for _, a in ipairs(xAllyList(range)) do
+        if a.hp > 0 and a.hp < a.maxhp * 0.8 then
+            target = a
+            break
+        end
+    end
+    if not target then return false end
+    local enemy, dist = nearestEnemy(range)
+    if not enemy then return false end
+    local ep = hrpOf(enemy)
+    if not ep then return false end
+    if AUTO.AutoAim then aimAt(ep.Position + Vector3.new(0, 1.2, 0)) end
+    if AUTO.AutoFight then ensureFire() end
+    AUTO.LastReason = string.format("协助队友 %s（敌人 %s，%d 格）",
+        target.player.Name, enemy.Name, xRound(dist or 0))
+    xStatAdd("协助队友", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 12. 复活链（优先救最近的倒地队友）
+----------------------------------------------------------------
+function autoReviveChain()
+    if not AUTO.AutoReviveChain then return false end
+    if AUTO.Paused then return false end
+    if not every("x_revivechain", 0.5) then return false end
+    local range = tonumber(AUTO.ReviveChainRange) or 120
+    local best = nil
+    for _, a in ipairs(xAllyList(range)) do
+        if a.hp <= 0 then
+            if not best or a.dist < best.dist then best = a end
+        end
+    end
+    if not best then return false end
+    local base = xRoot2()
+    if not base then return false end
+    if best.dist > 8 then
+        local dir = (best.pos - base.Position)
+        if dir.Magnitude > 0.01 then
+            xTp(best.pos - dir.Unit * 3 + Vector3.new(0, 3, 0), best.pos)
+        end
+    end
+    local n = 0
+    pcall(function() n = tryRevive() end)
+    AUTO.LastReason = string.format("复活链：赶往 %s（%d 格）", best.player.Name, xRound(best.dist))
+    if n and n > 0 then xStatAdd("复活队友", n) end
+    return true
+end
+
+----------------------------------------------------------------
+-- 13. 自动换武器（按优先词 / 评分）
+----------------------------------------------------------------
+function autoWeaponSwitch()
+    if not AUTO.AutoWeaponSwitch then return false end
+    if AUTO.Paused then return false end
+    if not every("x_weapon", 1.2) then return false end
+    local c = player.Character
+    if not c then return false end
+    local tools = {}
+    for _, t in ipairs(c:GetChildren()) do
+        if t:IsA("Tool") then table.insert(tools, t) end
+    end
+    local bp = player:FindFirstChild("Backpack")
+    if bp then
+        for _, t in ipairs(bp:GetChildren()) do
+            if t:IsA("Tool") then table.insert(tools, t) end
+        end
+    end
+    if #tools == 0 then return false end
+    local priority = AUTO.WeaponPriority or {}
+    local function score(t)
+        local s = tonumber(AUTO.WeaponMinScore) or 0
+        for i, w in ipairs(priority) do
+            if string.lower(t.Name) == string.lower(tostring(w)) then
+                s = s + 1000 - i
+            elseif string.find(string.lower(t.Name), string.lower(tostring(w)), 1, true) then
+                s = s + 500 - i
+            end
+        end
+        local ok, dmg = pcall(function()
+            local v = t:GetAttribute("Damage") or t:GetAttribute("DamageValue")
+            return tonumber(v) or 0
+        end)
+        if ok then s = s + dmg end
+        local low = string.lower(t.Name)
+        if string.find(low, "launcher", 1, true) or string.find(low, "rpg", 1, true) then s = s + 80 end
+        if string.find(low, "shotgun", 1, true) then s = s + 60 end
+        if string.find(low, "rifle", 1, true) or string.find(low, "gun", 1, true) then s = s + 50 end
+        if string.find(low, "sword", 1, true) or string.find(low, "katana", 1, true) then s = s + 40 end
+        return s
+    end
+    local best, bestScore = nil, -math.huge
+    for _, t in ipairs(tools) do
+        local s = score(t)
+        if s > bestScore then best, bestScore = t, s end
+    end
+    if not best then return false end
+    if best.Parent ~= c then
+        if xEquipTool(best) then
+            AUTO.LastReason = "换武器：" .. best.Name
+            log("自动换武器：" .. best.Name .. "（评分 " .. xRound(bestScore) .. "）")
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 14. 技能爆发（短窗口内连续释放）
+----------------------------------------------------------------
+function autoSkillBurst()
+    if not AUTO.AutoSkillBurst then return false end
+    if AUTO.Paused then return false end
+    local state = xSt("burst")
+    local now = os.clock()
+    if state.until_ and now < state.until_ then
+        if every("x_burst_cast", tonumber(AUTO.BurstGap) or 0.18) then
+            local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+            if pick then
+                useSkills(pick.pos)
+                xStatAdd("爆发施法", 1)
+            end
+        end
+        return true
+    end
+    if not every("x_burst_check", 1) then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 300)
+    local need = tonumber(AUTO.BurstCount) or 2
+    local boss = false
+    for _, e in ipairs(list) do
+        if xIsBoss(e.model) then boss = true break end
+    end
+    if #list >= need or boss then
+        state.until_ = now + (tonumber(AUTO.BurstWindow) or 2.2)
+        local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+        if pick then
+            useSkills(pick.pos)
+            AUTO.LastReason = string.format("技能爆发：%s", pick.model.Name)
+            log("技能爆发：目标 " .. pick.model.Name)
+        end
+        xStatAdd("爆发次数", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 15. 技能保留（敌人太少时不开技能）
+----------------------------------------------------------------
+function xCanCastSkills()
+    if not AUTO.AutoSkillHold then return true end
+    local need = tonumber(AUTO.SkillMinEnemies) or 3
+    local list = xEnemyList(tonumber(AUTO.Range) or 300)
+    if #list >= need then return true end
+    if AUTO.SkillHoldBoss then
+        for _, e in ipairs(list) do
+            if xIsBoss(e.model) then return true end
+        end
+    end
+    return false
+end
+
+function autoSkillHold()
+    if not AUTO.AutoSkillHold then return false end
+    if AUTO.Paused then return false end
+    AUTO._HoldSkills = not xCanCastSkills()
+    if every("x_skillhold_log", 15) then
+        log("技能保留：" .. (AUTO._HoldSkills and "暂不开技能（敌人不足）" or "允许开技能"))
+    end
+    return AUTO._HoldSkills
+end
+
+----------------------------------------------------------------
+-- 16. 弹药检查 / 自动换弹
+----------------------------------------------------------------
+local xFindPromptByKeyword
+
+function autoAmmoCheck()
+    if not AUTO.AutoAmmoCheck then return false end
+    if AUTO.Paused then return false end
+    if not every("x_ammo", 0.8) then return false end
+    local c = player.Character
+    if not c then return false end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ammo = nil
+    for _, key in ipairs({ "Ammo", "AmmoCount", "AmmoValue", "Bullets", "Magazine" }) do
+        local ok, v = pcall(function() return tool:GetAttribute(key) end)
+        if ok and tonumber(v) then
+            ammo = tonumber(v)
+            break
+        end
+    end
+    if ammo == nil then return false end
+    if ammo > 0 then return false end
+    if AUTO.AutoReload then
+        if xFire("Reload") or xFire("ReloadWeapon") then
+            log("弹药检查：已请求换弹")
+            xStatAdd("换弹", 1)
+            return true
+        end
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("reload")
+        if prompt then
+            xUsePrompt(prompt)
+            log("弹药检查：已触发换弹提示")
+            xStatAdd("换弹", 1)
+            return true
+        end
+    end
+    if AUTO.AutoWeaponSwitch then
+        local other = nil
+        local bp = player:FindFirstChild("Backpack")
+        if bp then
+            for _, t in ipairs(bp:GetChildren()) do
+                if t:IsA("Tool") and t ~= tool then other = t break end
+            end
+        end
+        if other and xEquipTool(other) then
+            log("弹药检查：弹匣空了，切换到 " .. other.Name)
+            xStatAdd("空弹切换", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 17. 低血提醒（语音式日志 + 通知）
+----------------------------------------------------------------
+function autoLowHpNotify()
+    if not AUTO.AutoLowHpNotify then return false end
+    if not every("x_lowhp", 1) then return false end
+    local hp = xHpPct()
+    local threshold = tonumber(AUTO.LowHpNotifyValue) or 30
+    local state = xSt("lowhp")
+    if hp > 0 and hp <= threshold then
+        if not state.on then
+            state.on = true
+            notify("血量警告", string.format("当前血量 %.0f%%，注意补血", hp))
+            log(string.format("血量警告：%.0f%%", hp))
+            xStatAdd("低血警告", 1)
+        end
+    elseif hp > threshold + 5 then
+        state.on = false
+    end
+    return state.on == true
+end
+
+-- 供弹药检查使用的提示查找（在批量扫描里按名字找）
+xFindPromptByKeyword = function(keyword)
+    local list = xNearPrompts(30)
+    local low = string.lower(tostring(keyword or ""))
+    for _, p in ipairs(list) do
+        if string.find(string.lower(tostring(p.name)), low, 1, true) then
+            return p.prompt
+        end
+    end
+    return nil
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 III：补给 / 治疗 / 状态 / 技能 / 科技点
+-- ============================================================
+----------------------------------------------------------------
+local X2_DEFAULTS = {
+    AutoFood = false, FoodNames = { "Food", "Burger", "Pizza", "Apple", "Meat" }, FoodHp = 55,
+    AutoBandage = false, BandageNames = { "Bandage", "Medkit", "FirstAid" }, BandageHp = 45,
+    AutoShieldItem = false, ShieldNames = { "Shield", "ArmorPlate", "Barrier" }, ShieldHp = 50, ShieldGap = 18,
+    AutoCleanse = false, CleanseNames = { "Cleanse", "Antidote", "Cure" }, CleanseHp = 60,
+    AutoHealAlly = false, HealAllyHp = 40, HealAllyRange = 60, HealAllyGap = 4,
+    AutoRegenWait = false, RegenHp = 30, RegenExitHp = 75, RegenWaitTime = 8,
+    AutoPotionCombo = false, ComboPotions = { "Heal", "Regen", "Shield" }, ComboGap = 2.5,
+    AutoAntiVoid = false, VoidY = -80, VoidSafeY = 30,
+    AutoFallGuard = false, FallSpeed = 90, FallLift = 12,
+    AutoBurnGuard = false, BurnDropPct = 18, BurnWindow = 1.5,
+    AutoStatusWatch = false, StatusWatchGap = 2,
+    AutoSkillPriority = false, SkillPriority = {}, SkillPriorityGap = 0.14,
+    AutoTechSpend = false, TechPriority = {}, TechReserve = 0, TechGap = 1.5,
+    AutoUnlockCheap = false, UnlockCheapMax = 999999,
+    AutoSaveTech = false, TechSaveAmount = 50,
+    AutoPrestigeCheck = false, PrestigeLevel = 100, PrestigeRemote = "Prestige",
+    AutoPassiveToggle = false, PassiveName = "Passive", PassiveGap = 30,
+    AutoSkillQueue = false, SkillQueueSize = 4, SkillQueueGap = 0.35,
+    AutoCooldownReport = false, CooldownReportGap = 20,
+    AutoUltimateTracker = false, UltimateNotify = true,
+    AutoManaCheck = false, ManaNames = { "Mana", "Energy", "Stamina" }, ManaMinPct = 20,
+    AutoBuffRefresh = false, BuffNames = {}, BuffRefreshGap = 45,
+    AutoArmorRepair = false, ArmorNames = { "Armor", "ArmorValue", "Shield" }, ArmorMinPct = 25, ArmorRepairItem = "Armor",
+}
+
+for k, v in pairs(X2_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+function xNumAttr(obj, names)
+    if not obj then return nil end
+    for _, n in ipairs(names or {}) do
+        local ok, v = pcall(function() return obj:GetAttribute(n) end)
+        if ok and tonumber(v) ~= nil then return tonumber(v), n end
+    end
+    return nil, nil
+end
+
+function xFindPlayerAttrNumber(names)
+    local v, key = xNumAttr(player, names)
+    if v ~= nil then return v, key end
+    local ls = player:FindFirstChild("leaderstats")
+    if ls then
+        for _, n in ipairs(names or {}) do
+            local obj = ls:FindFirstChild(n)
+            if obj and tonumber(obj.Value) then return tonumber(obj.Value), n end
+        end
+    end
+    return nil, nil
+end
+
+function xUseNamedRemote(remoteName, names, extra)
+    local r = xFindRemote(remoteName)
+    if not r then return 0 end
+    local used = 0
+    for _, n in ipairs(names or {}) do
+        if n ~= nil and tostring(n) ~= "" then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then
+                    if extra ~= nil then
+                        r:InvokeServer(n, extra)
+                    else
+                        r:InvokeServer(n)
+                    end
+                elseif r:IsA("RemoteEvent") then
+                    if extra ~= nil then
+                        r:FireServer(n, extra)
+                    else
+                        r:FireServer(n)
+                    end
+                end
+            end)
+            if ok then used = used + 1 end
+        end
+    end
+    return used
+end
+
+function xToolByName(names)
+    local bp = player:FindFirstChild("Backpack")
+    local c = player.Character
+    for _, n in ipairs(names or {}) do
+        local low = string.lower(tostring(n))
+        local holders = { c, bp }
+        for _, holder in ipairs(holders) do
+            if holder then
+                for _, t in ipairs(holder:GetChildren()) do
+                    if t:IsA("Tool") and string.find(string.lower(t.Name), low, 1, true) then
+                        return t
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+function xActivateTool(tool)
+    if not tool then return false end
+    if tool.Parent ~= player.Character then
+        if not xEquipTool(tool) then return false end
+    end
+    local ok = pcall(function() tool:Activate() end)
+    if ok then xStatAdd("使用道具", 1) end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 18. 自动吃东西
+----------------------------------------------------------------
+function autoFood()
+    if not AUTO.AutoFood then return false end
+    if AUTO.Paused then return false end
+    if not every("x_food", 1.2) then return false end
+    local hp = xHpPct()
+    if hp <= 0 or hp > (tonumber(AUTO.FoodHp) or 55) then return false end
+    local names = AUTO.FoodNames or {}
+    local n = xUseNamedRemote("UseItems", names)
+    if n == 0 then
+        local tool = xToolByName(names)
+        if tool then xActivateTool(tool) n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = string.format("自动进食：血量 %.0f%%", hp)
+        log(string.format("自动进食：血量 %.0f%%，已使用食物", hp))
+        xStatAdd("进食", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 19. 自动绷带 / 医疗包
+----------------------------------------------------------------
+function autoBandage()
+    if not AUTO.AutoBandage then return false end
+    if AUTO.Paused then return false end
+    if not every("x_bandage", 1.4) then return false end
+    local hp = xHpPct()
+    if hp <= 0 or hp > (tonumber(AUTO.BandageHp) or 45) then return false end
+    local names = AUTO.BandageNames or {}
+    local n = xUseNamedRemote("Potions", names)
+    if n == 0 then
+        local tool = xToolByName(names)
+        if tool then xActivateTool(tool) n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = string.format("自动包扎：血量 %.0f%%", hp)
+        log(string.format("自动包扎：血量 %.0f%%，已使用医疗用品", hp))
+        xStatAdd("包扎", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 20. 自动护盾道具
+----------------------------------------------------------------
+function autoShieldItem()
+    if not AUTO.AutoShieldItem then return false end
+    if AUTO.Paused then return false end
+    local hp = xHpPct()
+    if hp <= 0 or hp > (tonumber(AUTO.ShieldHp) or 50) then return false end
+    if not every("x_shield", tonumber(AUTO.ShieldGap) or 18) then return false end
+    local names = AUTO.ShieldNames or {}
+    local n = xUseNamedRemote("Potions", names)
+    if n == 0 then n = xUseNamedRemote("Boosts", names) end
+    if n == 0 then
+        local tool = xToolByName(names)
+        if tool then xActivateTool(tool) n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "护盾：已开启防护"
+        log("自动护盾：已尝试使用护盾道具")
+        xStatAdd("护盾", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 21. 自动净化（中毒 / 燃烧 / 减速）
+----------------------------------------------------------------
+function autoCleanse()
+    if not AUTO.AutoCleanse then return false end
+    if AUTO.Paused then return false end
+    if not every("x_cleanse", 2) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local bad = false
+    for _, st in ipairs({
+        Enum.HumanoidStateType.FallingDown,
+        Enum.HumanoidStateType.Ragdoll,
+        Enum.HumanoidStateType.PlatformStanding,
+    }) do
+        if h:GetState() == st then bad = true break end
+    end
+    if not bad then
+        for _, n in ipairs({ "Poison", "Burn", "Burning", "Slow", "Stun", "Frozen" }) do
+            local ok, v = pcall(function() return player:GetAttribute(n) or h:GetAttribute(n) end)
+            if ok and v ~= nil and v ~= false and tonumber(v) ~= 0 then
+                bad = true
+                break
+            end
+        end
+    end
+    if not bad then return false end
+    if xHpPct() > (tonumber(AUTO.CleanseHp) or 60) then return false end
+    local n = xUseNamedRemote("Potions", AUTO.CleanseNames or {})
+    if n > 0 then
+        AUTO.LastReason = "净化：已解除异常状态"
+        log("自动净化：已使用净化道具")
+        xStatAdd("净化", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 22. 自动治疗队友
+----------------------------------------------------------------
+function autoHealAlly()
+    if not AUTO.AutoHealAlly then return false end
+    if AUTO.Paused then return false end
+    if not every("x_healally", tonumber(AUTO.HealAllyGap) or 4) then return false end
+    local range = tonumber(AUTO.HealAllyRange) or 60
+    local need = tonumber(AUTO.HealAllyHp) or 40
+    local target = nil
+    for _, a in ipairs(xAllyList(range)) do
+        if a.hp > 0 and a.hp < a.maxhp * (need / 100) then
+            target = a
+            break
+        end
+    end
+    if not target then return false end
+    local n = 0
+    local r = xFindRemote("HealAlly") or xFindRemote("Heal")
+    if r then
+        pcall(function()
+            if r:IsA("RemoteEvent") then
+                r:FireServer(target.player)
+            else
+                r:InvokeServer(target.player)
+            end
+        end)
+        n = n + 1
+    end
+    local r2 = xFindRemote("Potions")
+    if r2 then
+        for _, name in ipairs(AUTO.HealAllyPotions or { "Heal", "Medkit" }) do
+            local ok = pcall(function() r2:FireServer(name, target.player) end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = string.format("治疗队友：%s（%.0f%%）", target.player.Name, target.hp / target.maxhp * 100)
+        log("自动治疗队友：" .. target.player.Name)
+        xStatAdd("治疗队友", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 23. 低血挂机回血（后撤等待）
+----------------------------------------------------------------
+function autoRegenWait()
+    if not AUTO.AutoRegenWait then return false end
+    if AUTO.Paused then return false end
+    local state = xSt("regenwait")
+    local hp = xHpPct()
+    local enterHp = tonumber(AUTO.RegenHp) or 30
+    local exitHp = tonumber(AUTO.RegenExitHp) or 75
+    if hp <= 0 then
+        state.active = false
+        return false
+    end
+    if not state.active then
+        if hp <= enterHp then
+            state.active = true
+            state.since = os.clock()
+            state.point = xSafePoint(nil, tonumber(AUTO.RetreatDistance) or 50)
+            if state.point then xTp(state.point) end
+            notify("回血模式", string.format("血量 %.0f%%，已进入回血等待", hp))
+            log(string.format("回血模式：血量 %.0f%%，进入安全点", hp))
+        end
+        return false
+    end
+    if hp >= exitHp then
+        state.active = false
+        AUTO.LastReason = string.format("回血完成：%.0f%%", hp)
+        log(string.format("回血完成：血量 %.0f%%", hp))
+        return false
+    end
+    AUTO._HoldCombat = true
+    if every("x_regen_heal", 2) then
+        buyHP()
+        usePotion()
+    end
+    if state.point and every("x_regen_keep", 1.5) then
+        local cur = xRoot2()
+        if cur and (cur.Position - state.point).Magnitude > 12 then
+            xTp(state.point)
+        end
+    end
+    AUTO.LastReason = string.format("回血等待：%.0f%%（目标 %d%%）", hp, xRound(exitHp))
+    return true
+end
+
+----------------------------------------------------------------
+-- 24. 药水连招（依次使用多种）
+----------------------------------------------------------------
+function autoPotionCombo()
+    if not AUTO.AutoPotionCombo then return false end
+    if AUTO.Paused then return false end
+    local state = xSt("potioncombo")
+    local now = os.clock()
+    if state.next_ and now < state.next_ then return false end
+    local hp = xHpPct()
+    if hp <= 0 or hp > (tonumber(AUTO.RetreatHp) or 25) + 20 then
+        state.index = nil
+        return false
+    end
+    local list = AUTO.ComboPotions or {}
+    if #list == 0 then return false end
+    state.index = (state.index or 0) + 1
+    if state.index > #list then state.index = 1 end
+    local name = list[state.index]
+    local r = xFindRemote("Potions")
+    if not r then return false end
+    local ok = pcall(function() r:FireServer(name) end)
+    if not ok then return false end
+    state.next_ = now + (tonumber(AUTO.ComboGap) or 2.5)
+    AUTO.LastReason = "药水连招：" .. tostring(name)
+    log("药水连招：已使用 " .. tostring(name))
+    xStatAdd("药水连招", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 25. 防掉虚空
+----------------------------------------------------------------
+function autoAntiVoid()
+    if not AUTO.AutoAntiVoid then return false end
+    if AUTO.Paused then return false end
+    if not every("x_void", 0.5) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local state = xSt("void")
+    local voidY = tonumber(AUTO.VoidY) or -80
+    local safeY = tonumber(AUTO.VoidSafeY) or 30
+    if base.Position.Y > voidY + 20 then
+        state.safe = base.Position
+        return false
+    end
+    local dest = state.safe
+    if not dest or dest.Y < voidY then
+        dest = Vector3.new(base.Position.X, safeY, base.Position.Z)
+    end
+    xTp(dest + Vector3.new(0, 4, 0))
+    AUTO.LastReason = "防掉虚空：已拉回安全高度"
+    if xToast("void", "防掉虚空", "已把角色拉回安全高度", 5) then
+        log("防掉虚空：角色过低了，已拉回")
+    end
+    xStatAdd("防掉虚空", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 26. 坠落保护
+----------------------------------------------------------------
+function autoFallGuard()
+    if not AUTO.AutoFallGuard then return false end
+    if AUTO.Paused then return false end
+    if not every("x_fall", 0.2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local v = base.AssemblyLinearVelocity
+    local limit = tonumber(AUTO.FallSpeed) or 90
+    if v.Y > -limit then return false end
+    local lift = tonumber(AUTO.FallLift) or 12
+    xTp(base.Position + Vector3.new(0, lift, 0))
+    xStatAdd("坠落保护", 1)
+    AUTO.LastReason = "坠落保护：已减速并抬升"
+    return true
+end
+
+----------------------------------------------------------------
+-- 27. 急速掉血保护（疑似中毒 / 集火）
+----------------------------------------------------------------
+function autoBurnGuard()
+    if not AUTO.AutoBurnGuard then return false end
+    if AUTO.Paused then return false end
+    if not every("x_burn", 0.25) then return false end
+    local state = xSt("burn")
+    local hp = xHpPct()
+    local now = os.clock()
+    if state.lastHp == nil or now - (state.lastAt or now) < 0.2 then
+        state.lastHp = hp
+        state.lastAt = now
+        return false
+    end
+    local dt = math.max(0.2, now - (state.lastAt or now))
+    local dropPerSec = ((state.lastHp or hp) - hp) / dt
+    state.lastHp = hp
+    state.lastAt = now
+    local threshold = (tonumber(AUTO.BurnDropPct) or 18) / (tonumber(AUTO.BurnWindow) or 1.5)
+    if dropPerSec < threshold then return false end
+    if hp <= 0 then return false end
+    local ok = xUseNamedRemote("Potions", AUTO.CleanseNames or {})
+    local pos = xSafePoint(nil, tonumber(AUTO.RetreatDistance) or 50)
+    if pos then xTp(pos) end
+    if AUTO.AutoBuyHP then buyHP() end
+    if AUTO.AutoPotion then usePotion() end
+    AUTO.LastReason = string.format("急速掉血：%.0f%%/秒，已后撤并治疗", dropPerSec)
+    if xToast("burn", "掉血警告", string.format("瞬间掉血 %.0f%%/秒，已保护", dropPerSec), 6) then
+        log(string.format("急速掉血保护：%.0f%%/秒", dropPerSec))
+    end
+    xStatAdd("掉血保护", 1)
+    return ok or true
+end
+
+----------------------------------------------------------------
+-- 28. 状态监视（记录异常状态变化）
+----------------------------------------------------------------
+function autoStatusWatch()
+    if not AUTO.AutoStatusWatch then return false end
+    if not every("x_status", tonumber(AUTO.StatusWatchGap) or 2) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local state = xSt("status")
+    local cur = tostring(h:GetState())
+    if state.lastState ~= cur then
+        log("状态监视：Humanoid 状态 " .. tostring(state.lastState) .. " → " .. cur)
+        state.lastState = cur
+        xStatAdd("状态变化", 1)
+    end
+    local attrs = {}
+    for _, obj in ipairs({ player, h, player.Character }) do
+        if obj then
+            local ok, list = pcall(function() return obj:GetAttributes() end)
+            if ok and type(list) == "table" then
+                for k, v in pairs(list) do
+                    local tv = type(v)
+                    if tv == "boolean" or tv == "number" or tv == "string" then
+                        attrs[k] = v
+                    end
+                end
+            end
+        end
+    end
+    for k, v in pairs(attrs) do
+        if state.attrs[k] ~= v then
+            if state.attrs[k] ~= nil then
+                log(string.format("状态监视：%s = %s", tostring(k), tostring(v)))
+                xStatAdd("属性变化", 1)
+            end
+            state.attrs[k] = v
+        end
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 29. 技能优先级施放
+----------------------------------------------------------------
+function xCastSkillById(id, hitPos, keyName)
+    local act = RS:FindFirstChild("SkillActivate")
+    if not act or not id or not hitPos then return false end
+    local cam = workspace.CurrentCamera
+    local look = cam and cam.CFrame.LookVector or Vector3.new(0, 0, -1)
+    local ok = pcall(function()
+        act:FireServer(id, hitPos, look, "press", keyName or "M1")
+        task.delay(0.15, function()
+            pcall(function() act:FireServer(id, hitPos, look, "release", keyName or "M1") end)
+        end)
+    end)
+    return ok
+end
+
+function autoSkillPriority()
+    if not AUTO.AutoSkillPriority then return false end
+    if AUTO.Paused then return false end
+    if not every("x_skillprio", tonumber(AUTO.SkillPriorityGap) or 0.14) then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if not pick then return false end
+    local list = AUTO.SkillPriority or {}
+    local map = {}
+    for _, id in pairs(skills) do map[id] = true end
+    local fired = 0
+    for _, want in ipairs(list) do
+        local low = string.lower(tostring(want))
+        for id, info in pairs(skillInfo) do
+            if map[id] and info and info.name and string.lower(tostring(info.name)) == low then
+                if os.clock() >= (skillNext[id] or 0) then
+                    skillNext[id] = os.clock() + (info.cd or 2.5)
+                    if xCastSkillById(id, pick.pos, info.name) then
+                        fired = fired + 1
+                        xStatAdd("优先技能", 1)
+                    end
+                end
+                map[id] = nil
+            end
+        end
+    end
+    if fired > 0 then
+        AUTO.LastReason = string.format("优先技能：%s（%d 个）", pick.model.Name, fired)
+    end
+    return fired > 0
+end
+
+----------------------------------------------------------------
+-- 30. 自动花科技点
+----------------------------------------------------------------
+function autoTechSpend()
+    if not AUTO.AutoTechSpend then return false end
+    if AUTO.Paused then return false end
+    if not every("x_tech", tonumber(AUTO.TechGap) or 1.5) then return false end
+    local points, key = xFindPlayerAttrNumber({ "TechPoints", "TechPoint", "SkillPoints", "Technology" })
+    if points == nil then return false end
+    local reserve = tonumber(AUTO.TechReserve) or 0
+    if points <= reserve then return false end
+    local folder = player:FindFirstChild("SkillTreesFolder")
+    local r = xFindRemote("SkillTrees")
+    if not folder or not r then return false end
+    local nodes = {}
+    for _, node in ipairs(folder:GetChildren()) do
+        local cost = tonumber(node:GetAttribute("Cost")) or tonumber(node:GetAttribute("Price")) or 1
+        table.insert(nodes, { obj = node, name = node.Name, cost = cost })
+    end
+    table.sort(nodes, function(a, b) return a.cost < b.cost end)
+    local priority = AUTO.TechPriority or {}
+    local n = 0
+    local spent = 0
+    for _, want in ipairs(priority) do
+        for _, node in ipairs(nodes) do
+            if string.find(string.lower(node.name), string.lower(tostring(want)), 1, true) then
+                if points - spent >= node.cost then
+                    local ok = pcall(function() r:FireServer(node.name) end)
+                    if ok then
+                        n = n + 1
+                        spent = spent + node.cost
+                        xStatAdd("科技点消费", node.cost)
+                    end
+                end
+            end
+        end
+    end
+    if n == 0 then
+        for _, node in ipairs(nodes) do
+            if points - spent >= node.cost then
+                local ok = pcall(function() r:FireServer(node.name) end)
+                if ok then
+                    n = n + 1
+                    spent = spent + node.cost
+                    xStatAdd("科技点消费", node.cost)
+                end
+                if n >= 3 then break end
+            end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = string.format("科技点：消耗 %d，升级 %d 个节点", spent, n)
+        log(string.format("科技点：%s=%d，已消费 %d，升级 %d 个节点", tostring(key), points, spent, n))
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 31. 自动解锁最便宜节点
+----------------------------------------------------------------
+function autoUnlockCheap()
+    if not AUTO.AutoUnlockCheap then return false end
+    if AUTO.Paused then return false end
+    if not every("x_cheap", 2) then return false end
+    local folder = player:FindFirstChild("SkillTreesFolder")
+    local r = xFindRemote("SkillTrees")
+    if not folder or not r then return false end
+    local best, bestCost = nil, tonumber(AUTO.UnlockCheapMax) or 999999
+    for _, node in ipairs(folder:GetChildren()) do
+        local cost = tonumber(node:GetAttribute("Cost")) or tonumber(node:GetAttribute("Price"))
+        if cost and cost <= bestCost then
+            best, bestCost = node, cost
+        end
+    end
+    if not best then return false end
+    local ok = pcall(function() r:FireServer(best.Name) end)
+    if ok then
+        AUTO.LastReason = "解锁节点：" .. best.Name
+        log(string.format("自动解锁：%s（花费 %d）", best.Name, bestCost))
+        xStatAdd("解锁节点", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 32. 科技点保留（低于阈值不花）
+----------------------------------------------------------------
+function autoSaveTech()
+    if not AUTO.AutoSaveTech then return false end
+    if not every("x_savetech", 5) then return false end
+    local points = xFindPlayerAttrNumber({ "TechPoints", "TechPoint", "SkillPoints", "Technology" })
+    local save = tonumber(AUTO.TechSaveAmount) or 50
+    if points == nil then
+        AUTO.TechSavedEnough = false
+        return false
+    end
+    AUTO.TechSavedEnough = points >= save
+    if every("x_savetech_log", 30) then
+        log(string.format("科技点保留：%d / %d（%s）", points, save,
+            AUTO.TechSavedEnough and "已达标" or "继续积累"))
+    end
+    return AUTO.TechSavedEnough
+end
+
+----------------------------------------------------------------
+-- 33. 转生 / 重置检查
+----------------------------------------------------------------
+function autoPrestigeCheck()
+    if not AUTO.AutoPrestigeCheck then return false end
+    if AUTO.Paused then return false end
+    if not every("x_prestige", 5) then return false end
+    local remote = xFindRemote(AUTO.PrestigeRemote or "Prestige")
+    if not remote then
+        if xToast("prestige_none", "转生", "当前游戏没有转生接口", 60) then
+            log("转生检查：未找到转生接口，已跳过")
+        end
+        return false
+    end
+    local level = xFindPlayerAttrNumber({ "Level", "RebirthLevel", "Prestige", "Stage" })
+    local need = tonumber(AUTO.PrestigeLevel) or 100
+    if level == nil or level < need then
+        AUTO.PrestigeReady = false
+        return false
+    end
+    AUTO.PrestigeReady = true
+    local ok = pcall(function()
+        if remote:IsA("RemoteFunction") then remote:InvokeServer()
+        else remote:FireServer() end
+    end)
+    if ok then
+        AUTO.LastReason = "转生：已请求重置"
+        notify("转生", string.format("等级 %d ≥ %d，已请求转生", level, need))
+        log(string.format("转生：等级 %d，已请求转生", level))
+        xStatAdd("转生", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 34. 自动被动开关
+----------------------------------------------------------------
+function autoPassiveToggle()
+    if not AUTO.AutoPassiveToggle then return false end
+    if AUTO.Paused then return false end
+    if not every("x_passive", tonumber(AUTO.PassiveGap) or 30) then return false end
+    local name = AUTO.PassiveName or "Passive"
+    local ok = xFire("Passive", name) or xFire("TogglePassive", name) or xFire("SkillPassive", name)
+    if ok then
+        AUTO.LastReason = "被动：" .. tostring(name)
+        log("自动被动：已切换 " .. tostring(name))
+        xStatAdd("被动切换", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 35. 技能队列（按顺序释放）
+----------------------------------------------------------------
+function autoSkillQueue()
+    if not AUTO.AutoSkillQueue then return false end
+    if AUTO.Paused then return false end
+    local state = xSt("skillqueue")
+    local now = os.clock()
+    if state.next_ and now < state.next_ then return false end
+    if state.queue and #state.queue > 0 then
+        local item = table.remove(state.queue, 1)
+        local ok = xCastSkillById(item.id, item.pos, item.name)
+        state.next_ = now + (tonumber(AUTO.SkillQueueGap) or 0.35)
+        if ok then xStatAdd("队列技能", 1) end
+        return ok
+    end
+    if not every("x_queue_build", 2) then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if not pick then return false end
+    local maxN = tonumber(AUTO.SkillQueueSize) or 4
+    local queue = {}
+    local ids = {}
+    for id in pairs(skillInfo) do table.insert(ids, id) end
+    table.sort(ids, function(a, b) return tostring(a) < tostring(b) end)
+    for _, id in ipairs(ids) do
+        if os.clock() >= (skillNext[id] or 0) then
+            local info = skillInfo[id]
+            if info then
+                skillNext[id] = os.clock() + (info.cd or 2.5)
+                table.insert(queue, { id = id, pos = pick.pos, name = info.name })
+                if #queue >= maxN then break end
+            end
+        end
+    end
+    if #queue == 0 then return false end
+    state.queue = queue
+    state.next_ = now
+    AUTO.LastReason = string.format("技能队列：%d 个技能待释放", #queue)
+    log("技能队列：已排队 " .. #queue .. " 个技能")
+    return true
+end
+
+----------------------------------------------------------------
+-- 36. 技能冷却报告
+----------------------------------------------------------------
+function autoCooldownReport()
+    if not AUTO.AutoCooldownReport then return false end
+    if not every("x_cdreport", tonumber(AUTO.CooldownReportGap) or 20) then return false end
+    local now = os.clock()
+    local parts = {}
+    for id, info in pairs(skillInfo) do
+        local left = math.max(0, (skillNext[id] or 0) - now)
+        table.insert(parts, string.format("%s:%.1fs", tostring(info.name), left))
+        if #parts >= 8 then break end
+    end
+    if #parts == 0 then
+        log("冷却报告：还没有读取到技能")
+        return false
+    end
+    table.sort(parts)
+    log("冷却报告：" .. table.concat(parts, "  "))
+    return true
+end
+
+----------------------------------------------------------------
+-- 37. 大招就绪追踪
+----------------------------------------------------------------
+function autoUltimateTracker()
+    if not AUTO.AutoUltimateTracker then return false end
+    if not every("x_ult", 1) then return false end
+    local state = xSt("ult")
+    local now = os.clock()
+    local bestId, bestCd = nil, -1
+    for id, info in pairs(skillInfo) do
+        if info.cd and info.cd > bestCd then
+            bestCd = info.cd
+            bestId = id
+        end
+    end
+    if not bestId then return false end
+    local ready = now >= (skillNext[bestId] or 0)
+    local name = skillInfo[bestId].name or tostring(bestId)
+    AUTO.UltimateName = name
+    AUTO.UltimateReady = ready
+    if ready and state.wasReady == false then
+        if AUTO.UltimateNotify then
+            notify("大招就绪", "终极技能 " .. tostring(name) .. " 已就绪")
+        end
+        log("大招就绪：" .. tostring(name))
+        xStatAdd("大招就绪", 1)
+    end
+    state.wasReady = ready
+    return ready
+end
+
+----------------------------------------------------------------
+-- 38. 蓝量 / 能量检查
+----------------------------------------------------------------
+function autoManaCheck()
+    if not AUTO.AutoManaCheck then return false end
+    if AUTO.Paused then return false end
+    if not every("x_mana", 1.5) then return false end
+    local h = xHum2()
+    local cur, key = xNumAttr(player, AUTO.ManaNames or {})
+    if cur == nil then cur, key = xNumAttr(h, AUTO.ManaNames or {}) end
+    if cur == nil then
+        cur, key = xFindPlayerAttrNumber(AUTO.ManaNames or {})
+    end
+    if cur == nil then
+        AUTO.ManaPct = nil
+        return false
+    end
+    local max = nil
+    local maxNames = {}
+    for _, n in ipairs(AUTO.ManaNames or {}) do
+        table.insert(maxNames, tostring(n) .. "Max")
+        table.insert(maxNames, "Max" .. tostring(n))
+    end
+    if key then
+        table.insert(maxNames, 1, tostring(key) .. "Max")
+        table.insert(maxNames, 1, "Max" .. tostring(key))
+    end
+    max = xNumAttr(player, maxNames)
+    if max == nil then max = xNumAttr(h, maxNames) end
+    local pct = (max and max > 0) and (cur / max * 100) or nil
+    AUTO.ManaNow = cur
+    AUTO.ManaPct = pct
+    if pct and pct <= (tonumber(AUTO.ManaMinPct) or 20) then
+        local n = xUseNamedRemote("Potions", AUTO.ManaNames or {})
+        if n > 0 then
+            AUTO.LastReason = string.format("能量不足：%.0f%%，已补充", pct)
+            log(string.format("蓝量检查：%.0f%%，已使用恢复道具", pct))
+            xStatAdd("补充能量", n)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 39. 自动续 Buff
+----------------------------------------------------------------
+function autoBuffRefresh()
+    if not AUTO.AutoBuffRefresh then return false end
+    if AUTO.Paused then return false end
+    if not every("x_buff", tonumber(AUTO.BuffRefreshGap) or 45) then return false end
+    local list = AUTO.BuffNames or {}
+    if #list == 0 and AUTO.BoostName and AUTO.BoostName ~= "" then
+        list = { AUTO.BoostName }
+    end
+    if #list == 0 then return false end
+    local n = 0
+    local r = xFindRemote("Boosts")
+    if r then
+        for _, name in ipairs(list) do
+            local ok = pcall(function() r:FireServer(name) end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "续 Buff：" .. tostring(list[1])
+        log("自动续 Buff：已使用 " .. n .. " 个增益")
+        xStatAdd("续Buff", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 40. 自动修甲
+----------------------------------------------------------------
+function autoArmorRepair()
+    if not AUTO.AutoArmorRepair then return false end
+    if AUTO.Paused then return false end
+    if not every("x_armor", 3) then return false end
+    local h = xHum2()
+    local cur, key = xNumAttr(player, AUTO.ArmorNames or {})
+    if cur == nil then cur, key = xNumAttr(h, AUTO.ArmorNames or {}) end
+    if cur == nil then return false end
+    local max = nil
+    if key then
+        max = xNumAttr(player, { tostring(key) .. "Max", "Max" .. tostring(key) })
+        if max == nil then max = xNumAttr(h, { tostring(key) .. "Max", "Max" .. tostring(key) }) end
+    end
+    local pct = (max and max > 0) and (cur / max * 100) or cur
+    if max == nil and cur > (tonumber(AUTO.ArmorMinPct) or 25) then return false end
+    if max ~= nil and pct > (tonumber(AUTO.ArmorMinPct) or 25) then return false end
+    local item = AUTO.ArmorRepairItem or "Armor"
+    local ok = fireRemote("ShopSystem", "Buy", item)
+    if ok then
+        AUTO.LastReason = "修甲：" .. tostring(item)
+        log(string.format("自动修甲：%s=%.0f，已请求购买 %s", tostring(key), cur, tostring(item)))
+        xStatAdd("修甲", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 IV：任务 / 日常 / 经济 / 商店 / 扭蛋
+-- ============================================================
+----------------------------------------------------------------
+local X3_DEFAULTS = {
+    AutoQuestAccept = false, QuestAcceptGap = 3,
+    AutoQuestComplete = false, QuestCompleteGap = 3,
+    AutoDailyClaim = false, DailyClaimGap = 30,
+    AutoWeeklyClaim = false, WeeklyClaimGap = 60,
+    AutoQuestTrack = false, QuestTrackGap = 5,
+    AutoQuestSkip = false, QuestSkipGap = 5, QuestSkipMax = 999999,
+    AutoSquadLoop = false, SquadLoopGap = 2,
+    AutoQuestReport = false, QuestReportGap = 30,
+    AutoSellJunk = false, SellGap = 8, SellNames = {}, SellKeep = {},
+    AutoBudgetBuy = false, BudgetBuyGap = 10, BudgetReserve = 1000, BudgetItems = {},
+    AutoRestock = false, RestockGap = 30, RestockItems = {}, RestockAmount = 1,
+    AutoCrateOpen = false, CrateGap = 12, CrateKeywords = { "crate", "chest", "box", "reward" },
+    AutoGachaPlan = false, GachaGap = 15, GachaReserve = 5000, GachaMode = "角色",
+    AutoMoneyPickup = false, MoneyPickupGap = 1.2, MoneyPickupRange = 60,
+    AutoInventorySort = false, InventorySortGap = 60,
+    AutoGiftSend = false, GiftNames = {}, GiftGap = 30,
+    AutoShopScan = false, ShopScanGap = 60,
+    AutoDiscountBuy = false, DiscountGap = 12, DiscountReserve = 0,
+    AutoCurrencyWatch = false, CurrencyNames = { "Money", "Cash", "Coins", "Gold" },
+    AutoFreeChest = false, FreeChestGap = 20,
+    AutoQuestAutoEquip = false, QuestAutoEquipGap = 6,
+}
+
+for k, v in pairs(X3_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+function xRemoteList(candidates)
+    local out = {}
+    for _, name in ipairs(candidates or {}) do
+        local r = xFindRemote(name)
+        if r then table.insert(out, r) end
+    end
+    return out
+end
+
+function xTryRemoteAction(candidates, action, arg)
+    local list = xRemoteList(candidates)
+    local okAny = false
+    for _, r in ipairs(list) do
+        local ok = pcall(function()
+            if r:IsA("RemoteFunction") then
+                if arg ~= nil then
+                    r:InvokeServer(action, arg)
+                else
+                    r:InvokeServer(action)
+                end
+            else
+                if arg ~= nil then
+                    r:FireServer(action, arg)
+                else
+                    r:FireServer(action)
+                end
+            end
+        end)
+        if ok then okAny = true end
+    end
+    return okAny
+end
+
+function xQuestFolder()
+    local names = { "QuestConfig", "QuestFuse", "QuestSystem", "Quests", "Quest" }
+    for _, n in ipairs(names) do
+        local r = xFindRemote(n)
+        if r then return r end
+    end
+    return nil
+end
+
+----------------------------------------------------------------
+-- 41. 自动接任务
+----------------------------------------------------------------
+function autoQuestAccept()
+    if not AUTO.AutoQuestAccept then return false end
+    if AUTO.Paused then return false end
+    if not every("x_questaccept", tonumber(AUTO.QuestAcceptGap) or 3) then return false end
+    local ok = xTryRemoteAction({ "QuestFuse", "Quest", "QuestSystem", "QuestHandler", "QuestRemote" }, "Accept")
+    if not ok then ok = xTryRemoteAction({ "QuestFuse", "Quest" }, "Start") end
+    if not ok then
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("quest")
+        if prompt then
+            xUsePrompt(prompt)
+            ok = true
+        end
+    end
+    if ok then
+        AUTO.LastReason = "任务：已请求接取"
+        log("自动任务：已请求接取任务")
+        xStatAdd("接任务", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 42. 自动交任务
+----------------------------------------------------------------
+function autoQuestComplete()
+    if not AUTO.AutoQuestComplete then return false end
+    if AUTO.Paused then return false end
+    if not every("x_questcomplete", tonumber(AUTO.QuestCompleteGap) or 3) then return false end
+    local ok = xTryRemoteAction({ "QuestFuse", "Quest", "QuestSystem", "QuestHandler", "QuestRemote" }, "Complete")
+    if not ok then ok = xTryRemoteAction({ "QuestFuse", "Quest" }, "Claim") end
+    if not ok then
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("claim")
+        if prompt then
+            xUsePrompt(prompt)
+            ok = true
+        end
+    end
+    if ok then
+        AUTO.LastReason = "任务：已请求交付"
+        log("自动任务：已请求交付任务")
+        xStatAdd("交任务", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 43. 自动领每日
+----------------------------------------------------------------
+function autoDailyClaim()
+    if not AUTO.AutoDailyClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_daily", tonumber(AUTO.DailyClaimGap) or 30) then return false end
+    local n = 0
+    for _, name in ipairs({ "DailyReward", "DailyRemote", "Daily", "LoginRemote" }) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then
+                    local res = r:InvokeServer("Claim")
+                    if res ~= nil then n = n + 1 end
+                else
+                    r:FireServer("Claim")
+                    n = n + 1
+                end
+            end)
+            if ok then n = n + 0 end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "每日：已领取"
+        log("每日奖励：已请求领取 " .. n .. " 个")
+        xStatAdd("每日奖励", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 44. 自动领每周
+----------------------------------------------------------------
+function autoWeeklyClaim()
+    if not AUTO.AutoWeeklyClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_weekly", tonumber(AUTO.WeeklyClaimGap) or 60) then return false end
+    local n = 0
+    for _, name in ipairs({ "WeeklyReward", "WeeklyRemote", "Weekly", "WeekReward" }) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then
+                    r:InvokeServer("Claim")
+                else
+                    r:FireServer("Claim")
+                end
+            end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "每周：已领取"
+        log("每周奖励：已请求领取 " .. n .. " 个")
+        xStatAdd("每周奖励", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 45. 自动点任务追踪
+----------------------------------------------------------------
+function autoQuestTrack()
+    if not AUTO.AutoQuestTrack then return false end
+    if AUTO.Paused then return false end
+    if not every("x_questtrack", tonumber(AUTO.QuestTrackGap) or 5) then return false end
+    local clicked = 0
+    local roots = { pg, workspace }
+    for _, root in ipairs(roots) do
+        if root then
+            local ok = pcall(function()
+                for _, d in ipairs(root:GetDescendants()) do
+                    if d:IsA("GuiButton") and d.Visible then
+                        local low = string.lower(d.Name)
+                        if string.find(low, "quest", 1, true) or string.find(low, "track", 1, true) then
+                            if deepVisible(d) then
+                                if d.FireServer then
+                                    pcall(function() d.FireServer(d) end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            if not ok then clicked = clicked + 0 end
+        end
+    end
+    local btn = pg:FindFirstChild("Lobby")
+    if btn then
+        local track = findPath(btn, { "MainFrame", "Frame", "Create", "TrackQuestButton" })
+        if track and track.Visible then
+            clickGui(track)
+            clicked = clicked + 1
+        end
+    end
+    if clicked > 0 then
+        AUTO.LastReason = "任务追踪：已点击"
+        log("任务追踪：已点击追踪按钮")
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 46. 放弃低收益任务
+----------------------------------------------------------------
+function autoQuestSkip()
+    if not AUTO.AutoQuestSkip then return false end
+    if AUTO.Paused then return false end
+    if not every("x_questskip", tonumber(AUTO.QuestSkipGap) or 5) then return false end
+    local r = xQuestFolder()
+    if not r then return false end
+    local limit = tonumber(AUTO.QuestSkipMax) or 999999
+    local skipped = 0
+    local ok = pcall(function()
+        local missions = r:FindFirstChild("Missions") or r:FindFirstChild("QuestList")
+        if missions then
+            for _, m in ipairs(missions:GetChildren()) do
+                local reward = tonumber(m:GetAttribute("Reward")) or 0
+                if reward > 0 and reward < limit then
+                    if r:IsA("RemoteFunction") then
+                        pcall(function() r:InvokeServer("Abandon", m.Name) end)
+                    else
+                        pcall(function() r:FireServer("Abandon", m.Name) end)
+                    end
+                    skipped = skipped + 1
+                end
+            end
+        end
+    end)
+    if ok and skipped > 0 then
+        AUTO.LastReason = "任务：放弃 " .. skipped .. " 个低收益任务"
+        log("自动任务：放弃 " .. skipped .. " 个低收益任务")
+        xStatAdd("放弃任务", skipped)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 47. 小队任务循环（接取 → 完成 → 再接）
+----------------------------------------------------------------
+function autoSquadLoop()
+    if not AUTO.AutoSquadLoop then return false end
+    if AUTO.Paused then return false end
+    if not every("x_squadloop", tonumber(AUTO.SquadLoopGap) or 2) then return false end
+    local r = xFindRemote("GSquadQuest")
+    local cfg = getSquadCfg and getSquadCfg()
+    if not r or not cfg then return false end
+    local accepted, completed = 0, 0
+    for _, m in ipairs(cfg:GetChildren()) do
+        local id = m:GetAttribute("Id") or m:GetAttribute("ID") or m.Name
+        local need = tonumber(m:GetAttribute("Need")) or 1
+        local now = tonumber(m:GetAttribute("Progress")) or 0
+        if now >= need then
+            local ok = pcall(function() r:FireServer("Complete", id) end)
+            if ok then completed = completed + 1 end
+        elseif now == 0 then
+            local ok = pcall(function() r:FireServer("Accept", id) end)
+            if ok then accepted = accepted + 1 end
+        end
+    end
+    if accepted + completed > 0 then
+        AUTO.LastReason = string.format("小队任务：接 %d / 交 %d", accepted, completed)
+        log(string.format("小队任务循环：接取 %d 个，完成 %d 个", accepted, completed))
+        xStatAdd("小队循环", accepted + completed)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 48. 任务统计报告
+----------------------------------------------------------------
+function autoQuestReport()
+    if not AUTO.AutoQuestReport then return false end
+    if not every("x_questreport", tonumber(AUTO.QuestReportGap) or 30) then return false end
+    local lines = {
+        "接取 " .. tostring(AUTO.Stats["接任务"] or 0),
+        "交付 " .. tostring(AUTO.Stats["交任务"] or 0),
+        "放弃 " .. tostring(AUTO.Stats["放弃任务"] or 0),
+        "小队 " .. tostring(AUTO.Stats["小队循环"] or 0),
+    }
+    log("任务统计：" .. table.concat(lines, "   "))
+    return true
+end
+
+----------------------------------------------------------------
+-- 49. 自动出售杂物
+----------------------------------------------------------------
+function autoSellJunk()
+    if not AUTO.AutoSellJunk then return false end
+    if AUTO.Paused then return false end
+    if not every("x_sell", tonumber(AUTO.SellGap) or 8) then return false end
+    local keep = {}
+    for _, n in ipairs(AUTO.SellKeep or {}) do keep[string.lower(tostring(n))] = true end
+    local target = {}
+    for _, n in ipairs(AUTO.SellNames or {}) do target[string.lower(tostring(n))] = true end
+    local bp = player:FindFirstChild("Backpack")
+    if not bp then return false end
+    local sold = 0
+    for _, t in ipairs(bp:GetChildren()) do
+        if t:IsA("Tool") then
+            local low = string.lower(t.Name)
+            local shouldSell = false
+            if next(target) then
+                for name in pairs(target) do
+                    if string.find(low, name, 1, true) then shouldSell = true break end
+                end
+            else
+                shouldSell = not keep[low]
+            end
+            if shouldSell and not keep[low] then
+                local ok = fireRemote("ShopSystem", "Sell", t.Name)
+                if not ok then ok = xFire("Sell", t.Name) end
+                if ok then sold = sold + 1 end
+            end
+        end
+    end
+    if sold > 0 then
+        AUTO.LastReason = "出售杂物：" .. sold .. " 件"
+        log("自动出售：已出售 " .. sold .. " 件杂物")
+        xStatAdd("出售杂物", sold)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 50. 预算购买
+----------------------------------------------------------------
+function autoBudgetBuy()
+    if not AUTO.AutoBudgetBuy then return false end
+    if AUTO.Paused then return false end
+    if not every("x_budget", tonumber(AUTO.BudgetBuyGap) or 10) then return false end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    if money == nil then return false end
+    local reserve = tonumber(AUTO.BudgetReserve) or 1000
+    if money <= reserve then
+        AUTO.BudgetBlocked = true
+        return false
+    end
+    AUTO.BudgetBlocked = false
+    local items = AUTO.BudgetItems or {}
+    if #items == 0 then return false end
+    local budget = money - reserve
+    local bought = 0
+    for _, item in ipairs(items) do
+        local name, price = item, 0
+        if type(item) == "table" then
+            name = item.name or item[1]
+            price = tonumber(item.price or item[2]) or 0
+        end
+        if name and budget >= price then
+            local ok = fireRemote("ShopSystem", "Buy", name)
+            if ok then
+                bought = bought + 1
+                budget = budget - price
+            end
+        end
+    end
+    if bought > 0 then
+        AUTO.LastReason = string.format("预算购买：%d 件（余额 %s）", bought, xFmt(money))
+        log(string.format("预算购买：已买 %d 件，余额 %s", bought, xFmt(money)))
+        xStatAdd("预算购买", bought)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 51. 自动补货
+----------------------------------------------------------------
+function autoRestock()
+    if not AUTO.AutoRestock then return false end
+    if AUTO.Paused then return false end
+    if not every("x_restock", tonumber(AUTO.RestockGap) or 30) then return false end
+    local items = AUTO.RestockItems or {}
+    if #items == 0 then return false end
+    local amount = math.max(1, math.floor(tonumber(AUTO.RestockAmount) or 1))
+    local n = 0
+    for _, item in ipairs(items) do
+        local ok = fireRemote("BuyItemFromShopHourly", item, amount)
+        if not ok then ok = fireRemote("ShopSystem", "Buy", item) end
+        if ok then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "补货：" .. n .. " 种"
+        log("自动补货：已请求购买 " .. n .. " 种物品 × " .. amount)
+        xStatAdd("补货", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 52. 自动开箱
+----------------------------------------------------------------
+function autoCrateOpen()
+    if not AUTO.AutoCrateOpen then return false end
+    if AUTO.Paused then return false end
+    if not every("x_crate", tonumber(AUTO.CrateGap) or 12) then return false end
+    local keywords = AUTO.CrateKeywords or {}
+    local prompt = nil
+    local list = xNearPrompts(tonumber(AUTO.CollectRange) or 30)
+    for _, p in ipairs(list) do
+        local low = string.lower(tostring(p.name))
+        for _, k in ipairs(keywords) do
+            if string.find(low, string.lower(tostring(k)), 1, true) then
+                prompt = p.prompt
+                break
+            end
+        end
+        if prompt then break end
+    end
+    if prompt then
+        xUsePrompt(prompt)
+        AUTO.LastReason = "开箱：已触发"
+        log("自动开箱：已触发附近的箱子")
+        xStatAdd("开箱", 1)
+        return true
+    end
+    local remotes = { "OpenCrate", "CrateRemote", "OpenChest", "ChestRemote", "ClaimChest" }
+    for _, name in ipairs(remotes) do
+        if xFire(name) then
+            AUTO.LastReason = "开箱：" .. name
+            log("自动开箱：已请求 " .. name)
+            xStatAdd("开箱", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 53. 扭蛋计划（按余额控制）
+----------------------------------------------------------------
+function autoGachaPlan()
+    if not AUTO.AutoGachaPlan then return false end
+    if AUTO.Paused then return false end
+    if not every("x_gachaplan", tonumber(AUTO.GachaGap) or 15) then return false end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    local reserve = tonumber(AUTO.GachaReserve) or 5000
+    if money ~= nil and money <= reserve then
+        AUTO.GachaBlocked = true
+        return false
+    end
+    AUTO.GachaBlocked = false
+    local mode = AUTO.GachaMode or "角色"
+    local ok = false
+    if mode == "皮肤" then
+        ok = xFire("GachaSkins", 1)
+        if not ok then ok = xFire("GachaSkins", "spin") end
+    elseif mode == "胶囊" then
+        ok = xFire("GachaCapsule")
+    else
+        ok = xFire("GachaCharacter", 1)
+        if not ok then ok = xFire("GachaCharacter", "spin") end
+    end
+    if ok then
+        AUTO.LastReason = "扭蛋：" .. tostring(mode)
+        log("扭蛋计划：已抽取 " .. tostring(mode))
+        xStatAdd("扭蛋", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 54. 自动捡钱
+----------------------------------------------------------------
+function autoMoneyPickup()
+    if not AUTO.AutoMoneyPickup then return false end
+    if AUTO.Paused then return false end
+    if not every("x_moneypick", tonumber(AUTO.MoneyPickupGap) or 1.2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.MoneyPickupRange) or 60
+    local best, bestDist = nil, range
+    local ok = pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("BasePart") or d:IsA("Model") then
+                local low = string.lower(d.Name)
+                if string.find(low, "money", 1, true) or string.find(low, "coin", 1, true)
+                    or string.find(low, "cash", 1, true) or string.find(low, "gold", 1, true) then
+                    local p = xPosOf(d)
+                    if p then
+                        local dist = (p - base.Position).Magnitude
+                        if dist < bestDist then
+                            best, bestDist = { obj = d, pos = p }, dist
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    if not ok or not best then return false end
+    xTp(best.pos + Vector3.new(0, 3, 0))
+    AUTO.LastReason = string.format("捡钱：%s（%d 格）", best.obj.Name, xRound(bestDist))
+    xStatAdd("捡钱", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 55. 背包整理
+----------------------------------------------------------------
+function autoInventorySort()
+    if not AUTO.AutoInventorySort then return false end
+    if AUTO.Paused then return false end
+    if not every("x_sort", tonumber(AUTO.InventorySortGap) or 60) then return false end
+    local names = { "SortInventory", "InventorySort", "Sort" }
+    local ok = false
+    for _, n in ipairs(names) do
+        if xFire(n) then ok = true break end
+    end
+    if not ok then ok = fireRemote("ShopSystem", "Sort") end
+    if ok then
+        AUTO.LastReason = "背包整理：已请求"
+        log("背包整理：已请求整理背包")
+        xStatAdd("背包整理", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 56. 自动送礼
+----------------------------------------------------------------
+function autoGiftSend()
+    if not AUTO.AutoGiftSend then return false end
+    if AUTO.Paused then return false end
+    if not every("x_gift", tonumber(AUTO.GiftGap) or 30) then return false end
+    local names = AUTO.GiftNames or {}
+    if #names == 0 then return false end
+    local n = 0
+    for _, name in ipairs(names) do
+        if xFire("Gift", name) or xFire("SendGift", name) then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "送礼：" .. n .. " 个"
+        log("自动送礼：已送出 " .. n .. " 个礼物")
+        xStatAdd("送礼", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 57. 商店扫描（记录可购买物品）
+----------------------------------------------------------------
+function autoShopScan()
+    if not AUTO.AutoShopScan then return false end
+    if not every("x_shopscan", tonumber(AUTO.ShopScanGap) or 60) then return false end
+    local seen = {}
+    local ok = pcall(function()
+        for _, d in ipairs(pg:GetDescendants()) do
+            if d:IsA("GuiButton") or d:IsA("TextLabel") then
+                if d.Visible and d.Name ~= "" then
+                    local low = string.lower(d.Name)
+                    if string.find(low, "buy", 1, true) or string.find(low, "purchase", 1, true) then
+                        seen[d.Name] = true
+                    end
+                end
+            end
+        end
+    end)
+    if not ok then return false end
+    local list = {}
+    for name in pairs(seen) do table.insert(list, name) end
+    table.sort(list)
+    AUTO.ShopScanCount = #list
+    if #list > 0 then
+        log("商店扫描：发现 " .. #list .. " 个购买按钮 → " .. table.concat(list, ", ", 1, math.min(#list, 10)))
+        xStatAdd("商店扫描", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 58. 折扣购买（检测折扣标签）
+----------------------------------------------------------------
+function autoDiscountBuy()
+    if not AUTO.AutoDiscountBuy then return false end
+    if AUTO.Paused then return false end
+    if not every("x_discount", tonumber(AUTO.DiscountGap) or 12) then return false end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    local reserve = tonumber(AUTO.DiscountReserve) or 0
+    if money ~= nil and money <= reserve then return false end
+    local found = nil
+    local ok = pcall(function()
+        for _, d in ipairs(pg:GetDescendants()) do
+            if d:IsA("TextLabel") and d.Visible and d.Text then
+                local txt = string.lower(tostring(d.Text))
+                if string.find(txt, "%", 1, false) and
+                    (string.find(txt, "off", 1, true) or string.find(txt, "折", 1, true)) then
+                    local parent = d.Parent
+                    while parent and parent ~= pg do
+                        if parent:IsA("GuiButton") then
+                            found = parent
+                            break
+                        end
+                        parent = parent.Parent
+                    end
+                end
+            end
+            if found then break end
+        end
+    end)
+    if ok and found then
+        clickGui(found)
+        AUTO.LastReason = "折扣购买：已点击折扣商品"
+        log("折扣购买：发现折扣标签，已点击")
+        xStatAdd("折扣购买", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 59. 货币监控
+----------------------------------------------------------------
+function autoCurrencyWatch()
+    if not AUTO.AutoCurrencyWatch then return false end
+    if not every("x_currency", 5) then return false end
+    local state = xSt("currency")
+    local now = os.clock()
+    local parts = {}
+    for _, n in ipairs(AUTO.CurrencyNames or {}) do
+        local v = xFindPlayerAttrNumber({ n })
+        if v ~= nil then
+            parts[#parts + 1] = string.format("%s=%s", n, xFmt(v))
+            local prev = state[n]
+            if prev ~= nil and v ~= prev then
+                local delta = v - prev
+                local perMin = delta / math.max(1, (now - (state.lastAt or now)) / 60)
+                if every("x_currency_log_" .. n, 20) then
+                    log(string.format("货币监控：%s %s（%s/分钟）", n,
+                        (delta >= 0 and "+" or "") .. xFmt(delta), xFmt(perMin)))
+                end
+                xStatAdd("货币变化", 1)
+            end
+            state[n] = v
+        end
+    end
+    state.lastAt = now
+    AUTO.CurrencyLine = table.concat(parts, "  ")
+    if #parts > 0 and every("x_currency_log", 60) then
+        log("货币监控：" .. AUTO.CurrencyLine)
+    end
+    return #parts > 0
+end
+
+----------------------------------------------------------------
+-- 60. 免费宝箱
+----------------------------------------------------------------
+function autoFreeChest()
+    if not AUTO.AutoFreeChest then return false end
+    if AUTO.Paused then return false end
+    if not every("x_freechest", tonumber(AUTO.FreeChestGap) or 20) then return false end
+    local names = { "FreeChest", "FreeReward", "ClaimFree", "DailyChest", "FreeGift" }
+    for _, name in ipairs(names) do
+        if xFire(name) or xInvoke(name) then
+            AUTO.LastReason = "免费宝箱：" .. name
+            log("免费宝箱：已请求领取（" .. name .. "）")
+            xStatAdd("免费宝箱", 1)
+            return true
+        end
+    end
+    local prompt = xFindPromptByKeyword and xFindPromptByKeyword("free")
+    if prompt then
+        xUsePrompt(prompt)
+        log("免费宝箱：已触发免费领取提示")
+        xStatAdd("免费宝箱", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 V：大厅 / 波次 / 服务器 / 互动 / 收集 / 移动
+-- ============================================================
+----------------------------------------------------------------
+local X4_DEFAULTS = {
+    AutoLobbyLoop = false, LobbyLoopGap = 1.5,
+    AutoServerHop = false, ServerHopMinPlayers = 3, ServerHopDelay = 45, ServerHopPing = 250,
+    AutoRejoinGuard = false, RejoinCheckGap = 20,
+    AutoKickGuard = false, KickGuardGap = 60,
+    AutoVoteStrategy = false, VoteStrategyGap = 2,
+    AutoQueueMode = false, QueueModeName = "Normal", QueueModeGap = 4,
+    AutoResultContinuePlus = false, ResultPlusGap = 2.5,
+    AutoWaveSkipEnhanced = false, WaveSkipPlusGap = 1.2,
+    AutoWaveReward = false, WaveRewardGap = 6,
+    AutoInteractPrompts = false, InteractRange = 25, InteractGap = 3, InteractKeywords = {},
+    AutoChestHunt = false, ChestRange = 150, ChestGap = 8,
+    AutoNPCTalk = false, NPCRange = 40, NPCGap = 6,
+    AutoElevatorUse = false, ElevatorRange = 30, ElevatorGap = 5,
+    AutoOrbCollect = false, OrbRange = 120, OrbGap = 2,
+    AutoNearbyPickup = false, PickupRange = 40, PickupGap = 2,
+    AutoPathToTarget = false, PathGap = 1.5, PathStopDistance = 8,
+    AutoStuckDetect = false, StuckSeconds = 6, StuckDistance = 3,
+    AutoFollowAlly = false, FollowAllyRange = 200, FollowDistance = 12,
+    AutoStayInZone = false, ZoneRadius = 120,
+    AutoHeightControl = false, MinHeight = -20, MaxHeight = 200, HeightGap = 1,
+}
+
+for k, v in pairs(X4_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+function xPing()
+    local ok, v = pcall(function() return player:GetNetworkPing() end)
+    if ok and tonumber(v) then return tonumber(v) * 1000 end
+    return 0
+end
+
+function xPlayerCount()
+    local n = 0
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p and p.Parent then n = n + 1 end
+    end
+    return n
+end
+
+function xSpawnPos()
+    local pad = workspace:FindFirstChild("AutoReady")
+    if pad and pad:IsA("BasePart") then return pad.Position end
+    local spawn = workspace:FindFirstChildOfClass("SpawnLocation")
+    if spawn then return spawn.Position end
+    local base = xRoot2()
+    return base and base.Position or Vector3.new(0, 20, 0)
+end
+
+function xClickButtonByName(root, names, gapKey, gap)
+    if not root then return false end
+    if gapKey and not every(gapKey, gap or 2) then return false end
+    local ok = pcall(function()
+        for _, d in ipairs(root:GetDescendants()) do
+            if d:IsA("GuiButton") and d.Visible then
+                local low = string.lower(d.Name)
+                for _, n in ipairs(names) do
+                    if string.find(low, string.lower(tostring(n)), 1, true) and deepVisible(d) then
+                        clickGui(d)
+                        return true
+                    end
+                end
+            end
+        end
+    end)
+    return ok or false
+end
+
+----------------------------------------------------------------
+-- 61. 大厅循环（投票 → 准备 → 开局）
+----------------------------------------------------------------
+function autoLobbyLoop()
+    if not AUTO.AutoLobbyLoop then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then return false end
+    if not every("x_lobbyloop", tonumber(AUTO.LobbyLoopGap) or 1.5) then return false end
+    local did = false
+    if AUTO.AutoOpenVote then
+        openVoteGui()
+        did = true
+    end
+    if AUTO.AutoVote then
+        if autoVote() then did = true end
+    end
+    if AUTO.AutoReady then
+        autoReady()
+        did = true
+    end
+    if AUTO.AutoStart then
+        autoStartSolo()
+        did = true
+    end
+    if did then
+        AUTO.LastReason = "大厅循环：投票 / 准备 / 开局"
+        xStatAdd("大厅循环", 1)
+    end
+    return did
+end
+
+----------------------------------------------------------------
+-- 62. 自动跳服（人少 / 延迟高）
+----------------------------------------------------------------
+function autoServerHop()
+    if not AUTO.AutoServerHop then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then
+        xSt("serverhop").since = nil
+        return false
+    end
+    if not every("x_serverhop", 5) then return false end
+    local state = xSt("serverhop")
+    local n = xPlayerCount()
+    local ping = xPing()
+    local lowPlayers = n < (tonumber(AUTO.ServerHopMinPlayers) or 3)
+    local highPing = ping >= (tonumber(AUTO.ServerHopPing) or 250)
+    if not (lowPlayers or highPing) then
+        state.since = nil
+        return false
+    end
+    state.since = state.since or os.clock()
+    local waited = os.clock() - state.since
+    local delay = tonumber(AUTO.ServerHopDelay) or 45
+    if waited < delay then
+        AUTO.LastReason = string.format("跳服等待：%d 人 / %d ms（%d/%d 秒）",
+            n, xRound(ping), xRound(waited), xRound(delay))
+        return false
+    end
+    state.since = nil
+    log(string.format("自动跳服：人数 %d，延迟 %d ms，准备跳服", n, xRound(ping)))
+    notify("自动跳服", string.format("人数 %d / 延迟 %d ms，正在寻找新服务器", n, xRound(ping)))
+    local ok = jumpServer()
+    if not ok then
+        log("自动跳服：没有找到合适的服务器")
+    else
+        xStatAdd("跳服", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 63. 重连保护
+----------------------------------------------------------------
+function autoRejoinGuard()
+    if not AUTO.AutoRejoinGuard then return false end
+    if not every("x_rejoin", tonumber(AUTO.RejoinCheckGap) or 20) then return false end
+    local state = xSt("rejoin")
+    if state.placeId == nil then state.placeId = game.PlaceId end
+    if state.jobId == nil then state.jobId = game.JobId end
+    if game.PlaceId ~= state.placeId then
+        state.placeId = game.PlaceId
+        state.jobId = game.JobId
+        return false
+    end
+    if game.JobId == "" and state.jobId and state.jobId ~= "" then
+        log("重连保护：检测到掉线，尝试重新加入")
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(state.placeId, state.jobId, player)
+        end)
+        xStatAdd("重连", 1)
+        return true
+    end
+    state.jobId = game.JobId
+    return false
+end
+
+----------------------------------------------------------------
+-- 64. 防踢加强（定期微动 / 相机抖动）
+----------------------------------------------------------------
+function autoKickGuard()
+    if not AUTO.AutoKickGuard then return false end
+    if not every("x_kickguard", tonumber(AUTO.KickGuardGap) or 60) then return false end
+    local cam = workspace.CurrentCamera
+    pcall(function()
+        if cam then
+            VirtualUser:Button2Down(Vector2.new(0, 0), cam.CFrame)
+            task.wait(0.5)
+            VirtualUser:Button2Up(Vector2.new(0, 0), cam.CFrame)
+        end
+    end)
+    pcall(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(0, 0))
+    end)
+    xStatAdd("防踢", 1)
+    AUTO.LastReason = "防踢：已模拟输入"
+    return true
+end
+
+----------------------------------------------------------------
+-- 65. 投票策略（选票数最高的模式）
+----------------------------------------------------------------
+function autoVoteStrategy()
+    if not AUTO.AutoVoteStrategy then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then return false end
+    if not every("x_votestrategy", tonumber(AUTO.VoteStrategyGap) or 2) then return false end
+    local voteGui = workspace:FindFirstChild("Vote") or workspace:FindFirstChild("Voteing")
+    if not voteGui then return false end
+    local bestName, bestCount = nil, -1
+    local ok = pcall(function()
+        for _, d in ipairs(voteGui:GetDescendants()) do
+            local low = string.lower(d.Name)
+            if string.find(low, "count", 1, true) or string.find(low, "vote", 1, true) then
+                if d:IsA("TextLabel") then
+                    local n = tonumber(string.match(d.Text or "", "%d+"))
+                    if n and n > bestCount then
+                        bestCount = n
+                        local parent = d.Parent
+                        while parent and parent ~= voteGui do
+                            if parent.Name ~= "Vote" and parent.Name ~= "Voteing" then
+                                bestName = parent.Name
+                            end
+                            parent = parent.Parent
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    if not ok or not bestName then
+        local mode = AUTO.GameMode
+        if mode and mode ~= "" then
+            AUTO.VoteMode = mode
+            pcall(function()
+                local r = RS:FindFirstChild("Vote")
+                if r then r:FireServer(mode) end
+            end)
+            return true
+        end
+        return false
+    end
+    AUTO.VoteMode = bestName
+    AUTO.LastReason = "投票策略：" .. bestName .. "（" .. bestCount .. " 票）"
+    log(string.format("投票策略：选择票数最高的 %s（%d 票）", bestName, bestCount))
+    pcall(function()
+        local r = RS:FindFirstChild("Vote")
+        if r then r:FireServer(bestName) end
+    end)
+    xStatAdd("策略投票", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 66. 自动选择游戏模式
+----------------------------------------------------------------
+function autoQueueMode()
+    if not AUTO.AutoQueueMode then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then return false end
+    if not every("x_queuemode", tonumber(AUTO.QueueModeGap) or 4) then return false end
+    local gui = pg:FindFirstChild("mode select2")
+    if not gui or not gui.Enabled then return false end
+    local want = string.lower(tostring(AUTO.QueueModeName or ""))
+    local clicked = false
+    pcall(function()
+        for _, d in ipairs(gui:GetDescendants()) do
+            if d:IsA("GuiButton") and d.Visible then
+                if string.find(string.lower(d.Name), want, 1, true) then
+                    clickGui(d)
+                    clicked = true
+                    break
+                end
+            end
+        end
+    end)
+    if clicked then
+        AUTO.LastReason = "游戏模式：" .. tostring(AUTO.QueueModeName)
+        log("自动选择模式：" .. tostring(AUTO.QueueModeName))
+        xStatAdd("选择模式", 1)
+    end
+    return clicked
+end
+
+----------------------------------------------------------------
+-- 67. 结算界面增强（继续 / 再来一局 / 领取）
+----------------------------------------------------------------
+function autoResultContinuePlus()
+    if not AUTO.AutoResultContinuePlus then return false end
+    if not every("x_resultplus", tonumber(AUTO.ResultPlusGap) or 2.5) then return false end
+    local result = pg:FindFirstChild("ModeResult")
+    if not result or not result.Enabled then return false end
+    local names = { "Continue", "Next", "PlayAgain", "Restart", "Claim", "OK", "Confirm" }
+    local clicked = xClickButtonByName(result, names, "x_resultbtn", 2)
+    if clicked then
+        AUTO.Phase = "结算"
+        AUTO.LastReason = "结算增强：已点击继续"
+        log("结算增强：已点击结算按钮")
+        xStatAdd("结算继续", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 68. 跳波增强（自动找同意按钮）
+----------------------------------------------------------------
+function autoWaveSkipEnhanced()
+    if not AUTO.AutoWaveSkipEnhanced then return false end
+    if AUTO.Paused then return false end
+    if not inMatch() then return false end
+    if not every("x_waveskip", tonumber(AUTO.WaveSkipPlusGap) or 1.2) then return false end
+    local roots = { pg, workspace }
+    local names = { "Skip", "Yes", "同意", "跳过" }
+    for _, root in ipairs(roots) do
+        if xClickButtonByName(root, names, "x_waveskipbtn", 1.2) then
+            AUTO.LastReason = "跳波增强：已点同意"
+            log("跳波增强：已点击同意的按钮")
+            xStatAdd("跳波", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 69. 波次奖励领取
+----------------------------------------------------------------
+function autoWaveReward()
+    if not AUTO.AutoWaveReward then return false end
+    if AUTO.Paused then return false end
+    if not every("x_wavereward", tonumber(AUTO.WaveRewardGap) or 6) then return false end
+    local names = { "Claim", "Reward", "Collect", "领取" }
+    local clicked = false
+    for _, root in ipairs({ pg, workspace }) do
+        if xClickButtonByName(root, names, "x_waverewardbtn", 6) then
+            clicked = true
+            break
+        end
+    end
+    if clicked then
+        AUTO.LastReason = "波次奖励：已领取"
+        log("波次奖励：已点击领取")
+        xStatAdd("波次奖励", 1)
+    end
+    return clicked
+end
+
+----------------------------------------------------------------
+-- 70. 自动互动（通用 ProximityPrompt）
+----------------------------------------------------------------
+function autoInteractPrompts()
+    if not AUTO.AutoInteractPrompts then return false end
+    if AUTO.Paused then return false end
+    if not every("x_interact", tonumber(AUTO.InteractGap) or 3) then return false end
+    local list = xNearPrompts(tonumber(AUTO.InteractRange) or 25)
+    if #list == 0 then return false end
+    local keywords = AUTO.InteractKeywords or {}
+    local skipWords = { "buy", "purchase", "sell", "claim", "reward", "quest" }
+    for _, p in ipairs(list) do
+        local low = string.lower(tostring(p.name))
+        local blocked = false
+        for _, w in ipairs(skipWords) do
+            if string.find(low, w, 1, true) then blocked = true break end
+        end
+        if not blocked then
+            local match = (#keywords == 0)
+            if not match then
+                for _, k in ipairs(keywords) do
+                    if string.find(low, string.lower(tostring(k)), 1, true) then match = true break end
+                end
+            end
+            if match then
+                xUsePrompt(p.prompt)
+                AUTO.LastReason = "自动互动：" .. p.name
+                log("自动互动：已触发 " .. p.name)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 71. 自动找宝箱
+----------------------------------------------------------------
+function autoChestHunt()
+    if not AUTO.AutoChestHunt then return false end
+    if AUTO.Paused then return false end
+    if not every("x_chesthunt", tonumber(AUTO.ChestGap) or 8) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.ChestRange) or 150
+    local best, bestDist = nil, range
+    local keywords = { "chest", "crate", "treasure", "box", "宝箱" }
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            local low = string.lower(d.Name)
+            for _, k in ipairs(keywords) do
+                if string.find(low, string.lower(k), 1, true) then
+                    local p = xPosOf(d)
+                    if p then
+                        local dist = (p - base.Position).Magnitude
+                        if dist < bestDist then
+                            best, bestDist = { obj = d, pos = p }, dist
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end)
+    if not best then return false end
+    xTp(best.pos + Vector3.new(0, 3, 0))
+    local prompt = nil
+    for _, p in ipairs(xNearPrompts(12)) do
+        prompt = p.prompt
+        break
+    end
+    if prompt then xUsePrompt(prompt) end
+    AUTO.LastReason = string.format("宝箱：%s（%d 格）", best.obj.Name, xRound(bestDist))
+    log(string.format("自动找宝箱：%s（%d 格）", best.obj.Name, xRound(bestDist)))
+    xStatAdd("找宝箱", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 72. 自动和 NPC 对话
+----------------------------------------------------------------
+function autoNPCTalk()
+    if not AUTO.AutoNPCTalk then return false end
+    if AUTO.Paused then return false end
+    if not every("x_npc", tonumber(AUTO.NPCGap) or 6) then return false end
+    local range = tonumber(AUTO.NPCRange) or 40
+    for _, p in ipairs(xNearPrompts(range)) do
+        local low = string.lower(tostring(p.name))
+        if string.find(low, "talk", 1, true) or string.find(low, "dialog", 1, true)
+            or string.find(low, "npc", 1, true) or string.find(low, "speak", 1, true) then
+            xUsePrompt(p.prompt)
+            AUTO.LastReason = "NPC 对话：" .. p.name
+            log("自动对话：已触发 " .. p.name)
+            xStatAdd("NPC对话", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 73. 自动使用电梯 / 传送点
+----------------------------------------------------------------
+function autoElevatorUse()
+    if not AUTO.AutoElevatorUse then return false end
+    if AUTO.Paused then return false end
+    if not every("x_elevator", tonumber(AUTO.ElevatorGap) or 5) then return false end
+    local range = tonumber(AUTO.ElevatorRange) or 30
+    for _, p in ipairs(xNearPrompts(range)) do
+        local low = string.lower(tostring(p.name))
+        if string.find(low, "elevator", 1, true) or string.find(low, "lift", 1, true)
+            or string.find(low, "teleport", 1, true) or string.find(low, "portal", 1, true) then
+            xUsePrompt(p.prompt)
+            AUTO.LastReason = "电梯 / 传送：" .. p.name
+            log("自动电梯：已触发 " .. p.name)
+            xStatAdd("电梯传送", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 74. 自动收集宝石 / 能量球
+----------------------------------------------------------------
+function autoOrbCollect()
+    if not AUTO.AutoOrbCollect then return false end
+    if AUTO.Paused then return false end
+    if not every("x_orb", tonumber(AUTO.OrbGap) or 2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.OrbRange) or 120
+    local best, bestDist = nil, range
+    local keywords = { "orb", "gem", "crystal", "shard", "core", "energy" }
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            local low = string.lower(d.Name)
+            for _, k in ipairs(keywords) do
+                if string.find(low, k, 1, true) then
+                    local p = xPosOf(d)
+                    if p then
+                        local dist = (p - base.Position).Magnitude
+                        if dist < bestDist then
+                            best, bestDist = { obj = d, pos = p }, dist
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end)
+    if not best then return false end
+    xTp(best.pos + Vector3.new(0, 3, 0))
+    AUTO.LastReason = string.format("收集宝石：%s（%d 格）", best.obj.Name, xRound(bestDist))
+    xStatAdd("收集宝石", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 75. 自动拾取附近掉落
+----------------------------------------------------------------
+function autoNearbyPickup()
+    if not AUTO.AutoNearbyPickup then return false end
+    if AUTO.Paused then return false end
+    if not every("x_pickup", tonumber(AUTO.PickupGap) or 2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.PickupRange) or 40
+    local best, bestDist = nil, range
+    local keywords = { "pickup", "drop", "loot", "collect", "item", "reward" }
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            local low = string.lower(d.Name)
+            for _, k in ipairs(keywords) do
+                if string.find(low, k, 1, true) then
+                    local p = xPosOf(d)
+                    if p then
+                        local dist = (p - base.Position).Magnitude
+                        if dist < bestDist then
+                            best, bestDist = { obj = d, pos = p }, dist
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end)
+    if not best then return false end
+    xTp(best.pos + Vector3.new(0, 2, 0))
+    AUTO.LastReason = string.format("拾取：%s（%d 格）", best.obj.Name, xRound(bestDist))
+    xStatAdd("拾取", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 76. 路径点移动
+----------------------------------------------------------------
+function autoPathToTarget()
+    if not AUTO.AutoPathToTarget then return false end
+    if AUTO.Paused then return false end
+    local dest = AUTO.Waypoint
+    if type(dest) ~= "table" or not dest.Position then
+        local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+        dest = pick and pick.pos or nil
+    end
+    if not dest then return false end
+    if not every("x_path", tonumber(AUTO.PathGap) or 1.5) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local stop = tonumber(AUTO.PathStopDistance) or 8
+    local d = (dest - base.Position)
+    if d.Magnitude <= stop then return false end
+    xWalkTo(dest)
+    AUTO.LastReason = string.format("路径：前往目标（剩余 %d 格）", xRound(d.Magnitude))
+    xStatAdd("路径移动", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 77. 卡住检测
+----------------------------------------------------------------
+function autoStuckDetect()
+    if not AUTO.AutoStuckDetect then return false end
+    if AUTO.Paused then return false end
+    if not every("x_stuck", 1) then return false end
+    local state = xSt("stuck")
+    local base = xRoot2()
+    if not base then return false end
+    local pos = base.Position
+    local now = os.clock()
+    if state.lastPos == nil then
+        state.lastPos = pos
+        state.lastAt = now
+        return false
+    end
+    local moved = (pos - state.lastPos).Magnitude
+    if moved > (tonumber(AUTO.StuckDistance) or 3) then
+        state.lastPos = pos
+        state.lastAt = now
+        state.count = 0
+        return false
+    end
+    local waited = now - (state.lastAt or now)
+    if waited < (tonumber(AUTO.StuckSeconds) or 6) then return false end
+    state.count = (state.count or 0) + 1
+    state.lastAt = now
+    state.lastPos = pos
+    xJump()
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if pick then
+        local dir = pick.pos - pos
+        if dir.Magnitude > 0.01 then
+            xTp(pos + dir.Unit * 8 + Vector3.new(0, 4, 0), pick.pos)
+        end
+    end
+    AUTO.LastReason = "防卡住：已跳跃 / 小幅传送"
+    if xToast("stuck", "防卡住", "检测到角色卡住，已尝试脱困", 10) then
+        log("防卡住：检测到位置不动，已尝试脱困")
+    end
+    xStatAdd("防卡住", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 78. 跟随队友
+----------------------------------------------------------------
+function autoFollowAlly()
+    if not AUTO.AutoFollowAlly then return false end
+    if AUTO.Paused then return false end
+    if not every("x_follow", 1) then return false end
+    local range = tonumber(AUTO.FollowAllyRange) or 200
+    local list = xAllyList(range)
+    if #list == 0 then
+        AUTO.FollowTarget = nil
+        return false
+    end
+    local target = list[1]
+    AUTO.FollowTarget = target.player.Name
+    local keep = tonumber(AUTO.FollowDistance) or 12
+    if target.dist <= keep then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local dir = target.pos - base.Position
+    if dir.Magnitude <= 0.01 then return false end
+    xWalkTo(target.pos - dir.Unit * (keep * 0.6))
+    AUTO.LastReason = string.format("跟随队友：%s（%d 格）", target.player.Name, xRound(target.dist))
+    xStatAdd("跟随队友", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 79. 区域限制（不跑出安全区）
+----------------------------------------------------------------
+function autoStayInZone()
+    if not AUTO.AutoStayInZone then return false end
+    if AUTO.Paused then return false end
+    if not every("x_zone", 1.5) then return false end
+    local state = xSt("zone")
+    if not state.center then
+        state.center = xSpawnPos()
+    end
+    local base = xRoot2()
+    if not base or not state.center then return false end
+    local radius = tonumber(AUTO.ZoneRadius) or 120
+    local d = (base.Position - state.center).Magnitude
+    if d <= radius then return false end
+    local dir = (state.center - base.Position)
+    if dir.Magnitude <= 0.01 then return false end
+    xTp(state.center + dir.Unit * (radius * 0.6) + Vector3.new(0, 4, 0))
+    AUTO.LastReason = string.format("区域限制：拉回安全区（%d 格）", xRound(d))
+    xStatAdd("区域限制", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 80. 高度控制
+----------------------------------------------------------------
+function autoHeightControl()
+    if not AUTO.AutoHeightControl then return false end
+    if AUTO.Paused then return false end
+    if not every("x_height", tonumber(AUTO.HeightGap) or 1) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local y = base.Position.Y
+    local minY = tonumber(AUTO.MinHeight) or -20
+    local maxY = tonumber(AUTO.MaxHeight) or 200
+    local dest = nil
+    if y < minY then
+        dest = Vector3.new(base.Position.X, minY + 10, base.Position.Z)
+    elseif y > maxY then
+        dest = Vector3.new(base.Position.X, maxY - 10, base.Position.Z)
+    end
+    if not dest then return false end
+    xTp(dest)
+    AUTO.LastReason = string.format("高度控制：%.0f → %.0f", y, dest.Y)
+    xStatAdd("高度控制", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 VI：统计 / 日志 / 配置 / 模块注册表 / 聊天命令
+-- ============================================================
+----------------------------------------------------------------
+local X5_DEFAULTS = {
+    AutoStats = false, StatsGap = 30,
+    AutoSessionReport = false, SessionReportGap = 180,
+    AutoConfigBackup = false, ConfigBackupGap = 120,
+    AutoConfigRestore = false,
+    AutoLagWatch = false, LagWatchGap = 10, LagWarnMs = 300,
+    AutoMemoryClean = false, MemoryCleanGap = 180,
+    AutoLogRotate = false, LogRotateMax = 200,
+    AutoProfile = false, ProfileReportGap = 60,
+    AutoNotifyDigest = false, DigestGap = 300,
+    AutoCrashGuard = false, CrashGuardGap = 15,
+    AutoSelfTest = false,
+    ChatCommands = true, ChatPrefix = ";dm",
+}
+
+for k, v in pairs(X5_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+----------------------------------------------------------------
+-- 81. 会话统计（击杀 / 治疗 / 时间）
+----------------------------------------------------------------
+function autoStats()
+    if not AUTO.AutoStats then return false end
+    if not every("x_stats", 0.5) then return false end
+    local state = xSt("stats")
+    state.start = state.start or os.clock()
+    state.seen = state.seen or {}
+    local folder = living()
+    if folder then
+        local now = {}
+        for _, m in ipairs(folder:GetChildren()) do
+            if m:IsA("Model") then
+                now[m] = true
+                if state.seen[m] == nil then
+                    state.seen[m] = true
+                    local h = m:FindFirstChildOfClass("Humanoid")
+                    if h then
+                        local ok = pcall(function()
+                            h.Died:Connect(function()
+                                if isEnemy(m) then
+                                    xStatAdd("击杀", 1)
+                                end
+                            end)
+                        end)
+                        if not ok then
+                            -- 无法连接死亡事件时交给下面的数量差检测
+                        end
+                    end
+                end
+            end
+        end
+        for m in pairs(state.seen) do
+            if not now[m] then
+                state.seen[m] = nil
+            end
+        end
+    end
+    AUTO.SessionSeconds = os.clock() - (state.start or os.clock())
+    if every("x_stats_log", tonumber(AUTO.StatsGap) or 30) then
+        local parts = {}
+        for _, key in ipairs({ "击杀", "治疗队友", "复活队友", "跳服", "任务", "扭蛋" }) do
+            local v = tonumber(AUTO.Stats[key])
+            if v and v > 0 then
+                parts[#parts + 1] = key .. "=" .. tostring(v)
+            end
+        end
+        if #parts > 0 then
+            log("统计：" .. table.concat(parts, "  ") ..
+                string.format("  在线 %.0f 分钟", (AUTO.SessionSeconds or 0) / 60))
+            xStatAdd("统计输出", 1)
+        end
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 82. 会话报告
+----------------------------------------------------------------
+function autoSessionReport()
+    if not AUTO.AutoSessionReport then return false end
+    if not every("x_session", tonumber(AUTO.SessionReportGap) or 180) then return false end
+    local mins = (AUTO.SessionSeconds or 0) / 60
+    local kills = tonumber(AUTO.Stats["击杀"] or 0)
+    local rate = mins > 0 and kills / mins or 0
+    local lines = {
+        string.format("在线 %.1f 分钟", mins),
+        string.format("击杀 %d（%.1f/分钟）", kills, rate),
+        "复活 " .. tostring(AUTO.Stats["复活队友"] or 0),
+        "治疗 " .. tostring(AUTO.Stats["治疗队友"] or 0),
+        "跳服 " .. tostring(AUTO.Stats["跳服"] or 0),
+        "技能 " .. tostring((AUTO.Stats["优先技能"] or 0) + (AUTO.Stats["队列技能"] or 0)),
+    }
+    local text = table.concat(lines, "  ")
+    log("会话报告：" .. text)
+    AUTO.LastReport = text
+    if AUTO.NotifyReport then notify("会话报告", text) end
+    return true
+end
+
+----------------------------------------------------------------
+-- 83. 配置备份
+----------------------------------------------------------------
+function autoConfigBackup()
+    if not AUTO.AutoConfigBackup then return false end
+    if not every("x_backup", tonumber(AUTO.ConfigBackupGap) or 120) then return false end
+    if type(writefile) ~= "function" or type(configSnapshot) ~= "function" then return false end
+    local ok = pcall(function()
+        writefile("难度模式_配置备份.json", HttpService:JSONEncode(configSnapshot()))
+    end)
+    if ok then
+        AUTO.LastBackupAt = os.time()
+        log("配置备份：已写入 难度模式_配置备份.json")
+        xStatAdd("配置备份", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 84. 配置恢复
+----------------------------------------------------------------
+function autoConfigRestore()
+    if not AUTO.AutoConfigRestore then return false end
+    if xSt("restore").done then return false end
+    xSt("restore").done = true
+    if type(readfile) ~= "function" then
+        log("配置恢复：当前注入器不支持 readfile")
+        return false
+    end
+    local ok, data = pcall(readfile, "难度模式_配置备份.json")
+    if not ok or type(data) ~= "string" or data == "" then
+        log("配置恢复：没有找到备份文件")
+        return false
+    end
+    local ok2, obj = pcall(function() return HttpService:JSONDecode(data) end)
+    if not ok2 or type(obj) ~= "table" then
+        log("配置恢复：备份文件解析失败")
+        return false
+    end
+    local n = 0
+    for k, v in pairs(obj) do
+        if AUTO[k] ~= nil then
+            AUTO[k] = v
+            n = n + 1
+        end
+    end
+    log("配置恢复：已恢复 " .. n .. " 项")
+    notify("配置恢复", "已从备份恢复 " .. n .. " 项设置")
+    return true
+end
+
+----------------------------------------------------------------
+-- 85. 延迟监控
+----------------------------------------------------------------
+function autoLagWatch()
+    if not AUTO.AutoLagWatch then return false end
+    if not every("x_lag", tonumber(AUTO.LagWatchGap) or 10) then return false end
+    local ping = xPing()
+    AUTO.CurrentPing = xRound(ping)
+    local warn = tonumber(AUTO.LagWarnMs) or 300
+    if ping >= warn then
+        if xToast("lag", "延迟警告", string.format("当前延迟 %d ms", xRound(ping)), 20) then
+            log("延迟监控：" .. xRound(ping) .. " ms（偏高）")
+            xStatAdd("高延迟", 1)
+        end
+        return true
+    end
+    if every("x_lag_log", 120) then
+        log("延迟监控：稳定在 " .. xRound(ping) .. " ms")
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 86. 内存清理
+----------------------------------------------------------------
+function autoMemoryClean()
+    if not AUTO.AutoMemoryClean then return false end
+    if not every("x_clean", tonumber(AUTO.MemoryCleanGap) or 180) then return false end
+    local cleaned = 0
+    local rt = AUTO._RT
+    if rt and rt.promptCache then
+        rt.promptCache.list = {}
+        rt.promptCache.t = 0
+        cleaned = cleaned + 1
+    end
+    if rt and rt.enemyCache then
+        for key in pairs(rt.enemyCache) do
+            rt.enemyCache[key] = nil
+            cleaned = cleaned + 1
+        end
+    end
+    if type(collectgarbage) == "function" then
+        pcall(collectgarbage, "collect")
+    end
+    log("内存清理：清理 " .. cleaned .. " 个缓存区")
+    xStatAdd("内存清理", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 87. 日志轮转
+----------------------------------------------------------------
+function autoLogRotate()
+    if not AUTO.AutoLogRotate then return false end
+    if not every("x_logrotate", 30) then return false end
+    local maxN = tonumber(AUTO.LogRotateMax) or 200
+    if #AUTO.Logs <= maxN then return false end
+    local archive = {}
+    for i = maxN + 1, #AUTO.Logs do
+        table.insert(archive, AUTO.Logs[i])
+    end
+    for i = #AUTO.Logs, maxN + 1, -1 do
+        table.remove(AUTO.Logs, i)
+    end
+    if type(appendfile) == "function" then
+        pcall(function()
+            appendfile("难度模式_日志.txt", table.concat(archive, "\n") .. "\n")
+        end)
+    end
+    log("日志轮转：归档 " .. #archive .. " 条")
+    return true
+end
+
+----------------------------------------------------------------
+-- 88. 性能分析
+----------------------------------------------------------------
+function autoProfile()
+    if not AUTO.AutoProfile then return false end
+    if not every("x_profile", tonumber(AUTO.ProfileReportGap) or 60) then return false end
+    local profile = xSt("profile")
+    local rows = {}
+    for name, t in pairs(profile) do
+        if type(t) == "table" and t.calls and t.calls > 0 and t.time then
+            local avg = t.time / t.calls * 1000
+            rows[#rows + 1] = { name = name, avg = avg, calls = t.calls }
+        end
+    end
+    if #rows == 0 then return false end
+    table.sort(rows, function(a, b) return a.avg > b.avg end)
+    local parts = {}
+    for i = 1, math.min(6, #rows) do
+        parts[#parts + 1] = string.format("%s %.2fms×%d", rows[i].name, rows[i].avg, rows[i].calls)
+    end
+    log("性能分析：" .. table.concat(parts, "  "))
+    if every("x_profile_reset", 300) then
+        for k in pairs(profile) do profile[k] = nil end
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 89. 摘要通知
+----------------------------------------------------------------
+function autoNotifyDigest()
+    if not AUTO.AutoNotifyDigest then return false end
+    if not every("x_digest", tonumber(AUTO.DigestGap) or 300) then return false end
+    local msg = string.format("在线 %.0f 分钟 · 击杀 %d · 波次 %s · 延迟 %s ms",
+        (AUTO.SessionSeconds or 0) / 60,
+        tonumber(AUTO.Stats["击杀"] or 0),
+        tostring(AUTO.WaveNow or "-"),
+        tostring(AUTO.CurrentPing or "-"))
+    notify("挂机摘要", msg)
+    log("摘要通知：" .. msg)
+    return true
+end
+
+----------------------------------------------------------------
+-- 90. 崩溃保护
+----------------------------------------------------------------
+function autoCrashGuard()
+    if not AUTO.AutoCrashGuard then return false end
+    if not every("x_crash", tonumber(AUTO.CrashGuardGap) or 15) then return false end
+    AUTO.LoopErrors = tonumber(AUTO.LoopErrors) or 0
+    local state = xSt("crash")
+    if AUTO.LoopErrors > (state.lastCount or 0) then
+        local delta = AUTO.LoopErrors - (state.lastCount or 0)
+        state.lastCount = AUTO.LoopErrors
+        log("崩溃保护：检测到 " .. delta .. " 次循环异常，已记录")
+        if AUTO.LoopErrors >= 20 then
+            stopFire()
+            stopAim()
+            notify("崩溃保护", "异常过多，已停止战斗动作，请查看日志")
+            AUTO.LastReason = "崩溃保护：已停止战斗动作"
+            xStatAdd("崩溃保护", 1)
+        end
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 91. 环境自检增强
+----------------------------------------------------------------
+function autoSelfTest()
+    if not AUTO.AutoSelfTest then return false end
+    if xSt("selftest").done then return false end
+    xSt("selftest").done = true
+    local checks = {
+        { "Remote", "Vote" }, { "Remote", "GetReadyRemote" }, { "Remote", "QuestFuse" },
+        { "Remote", "ShopSystem" }, { "Remote", "Potions" }, { "Remote", "SkillActivate" },
+        { "Remote", "MainHandler" }, { "UI", "PlayerGui" }, { "Workspace", "Living" },
+    }
+    local okN, badN = 0, 0
+    for _, c in ipairs(checks) do
+        local found = nil
+        if c[1] == "Remote" then found = xFindRemote(c[2])
+        elseif c[1] == "UI" then found = pg:FindFirstChild(c[2])
+        elseif c[1] == "Workspace" then found = workspace:FindFirstChild(c[2]) end
+        if found then okN = okN + 1 else badN = badN + 1 end
+    end
+    log(string.format("环境自检：可用 %d 项，缺失 %d 项（缺失不影响已实现功能）", okN, badN))
+    notify("环境自检", string.format("可用 %d 项 / 缺失 %d 项", okN, badN))
+    return true
+end
+
+----------------------------------------------------------------
+-- 模块注册表：聊天命令与状态面板共用
+----------------------------------------------------------------
+local MODULE_REGISTRY = {}
+
+function reg(key, title, group, kind, desc)
+    table.insert(MODULE_REGISTRY, { key = key, title = title, group = group, kind = kind or "bool", desc = desc or "" })
+end
+
+-- 战斗 / 目标
+reg("AutoTargetPriority", "目标优先级", "战斗", "bool", "按智能 / 最近 / 残血 / 高血量 / Boss 选择目标")
+reg("TargetPriority", "优先级策略", "战斗", "string", "智能 / 最近 / 最远 / 残血 / 高血量 / Boss优先")
+reg("AutoFocusBoss", "集火Boss", "战斗", "bool", "优先锁定 Boss 并释放技能")
+reg("AutoKite", "风筝走位", "战斗", "bool", "保持与敌人的距离区间")
+reg("AutoOrbit", "环绕走位", "战斗", "bool", "围绕目标转圈")
+reg("AutoStrafe", "左右横移", "战斗", "bool", "左右横移降低被命中率")
+reg("AutoJumpDodge", "跳跃闪避", "战斗", "bool", "近距离或投射物靠近时跳跃拉开")
+reg("AutoRetreatHeal", "低血撤退", "战斗", "bool", "低于阈值撤到安全点")
+reg("AutoEmergencyTeleport", "紧急传送", "战斗", "bool", "濒死时传送到远处")
+reg("AutoBossWarn", "Boss警报", "战斗", "bool", "Boss 出现时提醒")
+reg("AutoWaveMonitor", "波次监测", "战斗", "bool", "记录每波用时和变化")
+reg("AutoAssistAlly", "协助队友", "战斗", "bool", "队友掉血时帮忙清怪")
+reg("AutoReviveChain", "复活链", "战斗", "bool", "优先赶往最近倒地队友")
+reg("AutoWeaponSwitch", "自动换武器", "战斗", "bool", "按优先级和使用场景自动换武器")
+reg("AutoSkillBurst", "技能爆发", "战斗", "bool", "短窗口连续释放技能")
+reg("AutoSkillHold", "技能保留", "战斗", "bool", "敌人太少时保留技能")
+reg("AutoAmmoCheck", "弹药检查", "战斗", "bool", "空弹自动换弹或换武器")
+reg("AutoReload", "自动换弹", "战斗", "bool", "空弹时请求换弹")
+reg("AutoLowHpNotify", "低血提醒", "战斗", "bool", "低血时通知一次")
+-- 补给 / 生存
+reg("AutoFood", "自动进食", "补给", "bool", "低血自动吃东西")
+reg("AutoBandage", "自动包扎", "补给", "bool", "低血使用医疗包")
+reg("AutoShieldItem", "自动护盾", "补给", "bool", "低血使用护盾道具")
+reg("AutoCleanse", "自动净化", "补给", "bool", "异常状态时使用净化")
+reg("AutoHealAlly", "治疗队友", "补给", "bool", "队友低血时治疗")
+reg("AutoRegenWait", "回血等待", "补给", "bool", "低血后撤等待回血")
+reg("AutoPotionCombo", "药水连招", "补给", "bool", "依次使用多种药水")
+reg("AutoAntiVoid", "防掉虚空", "生存", "bool", "角色过低时拉回")
+reg("AutoFallGuard", "坠落保护", "生存", "bool", "高速下坠时减速抬升")
+reg("AutoBurnGuard", "急速掉血保护", "生存", "bool", "瞬间掉血时后撤治疗")
+reg("AutoStatusWatch", "状态监视", "生存", "bool", "记录状态和属性变化")
+-- 技能 / 科技
+reg("AutoSkillPriority", "技能优先级", "技能", "bool", "按列表顺序释放技能")
+reg("AutoSkillQueue", "技能队列", "技能", "bool", "排队逐个释放技能")
+reg("AutoCooldownReport", "冷却报告", "技能", "bool", "定时输出技能冷却")
+reg("AutoUltimateTracker", "大招追踪", "技能", "bool", "大招就绪时提醒")
+reg("AutoManaCheck", "能量检查", "技能", "bool", "蓝量低时补充")
+reg("AutoTechSpend", "自动花科技点", "科技", "bool", "自动升级技能树节点")
+reg("AutoUnlockCheap", "解锁最便宜", "科技", "bool", "优先解锁花费最低的节点")
+reg("AutoSaveTech", "科技点保留", "科技", "bool", "低于保留值时记录提示")
+reg("AutoPrestigeCheck", "转生检查", "科技", "bool", "满足条件时请求转生")
+reg("AutoPassiveToggle", "自动被动", "科技", "bool", "定时切换被动")
+reg("AutoBuffRefresh", "自动续Buff", "科技", "bool", "定时续增益")
+reg("AutoArmorRepair", "自动修甲", "科技", "bool", "护甲低时购买修复")
+-- 任务 / 经济
+reg("AutoQuestAccept", "自动接任务", "任务", "bool", "自动接取任务")
+reg("AutoQuestComplete", "自动交任务", "任务", "bool", "自动交付任务")
+reg("AutoDailyClaim", "自动每日", "任务", "bool", "领取每日奖励")
+reg("AutoWeeklyClaim", "自动每周", "任务", "bool", "领取每周奖励")
+reg("AutoQuestTrack", "任务追踪", "任务", "bool", "点任务追踪按钮")
+reg("AutoQuestSkip", "放弃低收益", "任务", "bool", "放弃低奖励任务")
+reg("AutoSquadLoop", "小队任务循环", "任务", "bool", "接取并完成小队任务")
+reg("AutoQuestReport", "任务统计", "任务", "bool", "定时输出任务统计")
+reg("AutoSellJunk", "出售杂物", "经济", "bool", "自动出售背包杂物")
+reg("AutoBudgetBuy", "预算购买", "经济", "bool", "保留余额后按预算购买")
+reg("AutoRestock", "自动补货", "经济", "bool", "定时补购消耗品")
+reg("AutoCrateOpen", "自动开箱", "经济", "bool", "靠近并开启箱子")
+reg("AutoGachaPlan", "扭蛋计划", "经济", "bool", "余额足够时扭蛋")
+reg("AutoMoneyPickup", "自动捡钱", "经济", "bool", "传送拾取钱币")
+reg("AutoInventorySort", "背包整理", "经济", "bool", "定时整理背包")
+reg("AutoGiftSend", "自动送礼", "经济", "bool", "定时送出礼物")
+reg("AutoShopScan", "商店扫描", "经济", "bool", "记录商店购买按钮")
+reg("AutoDiscountBuy", "折扣购买", "经济", "bool", "发现折扣时点击")
+reg("AutoCurrencyWatch", "货币监控", "经济", "bool", "记录货币变化速度")
+reg("AutoFreeChest", "免费宝箱", "经济", "bool", "领取免费奖励")
+-- 大厅 / 服务器
+reg("AutoLobbyLoop", "大厅循环", "大厅", "bool", "投票准备开局一条龙")
+reg("AutoServerHop", "自动跳服", "大厅", "bool", "人少或高延迟时跳服")
+reg("AutoRejoinGuard", "重连保护", "大厅", "bool", "掉线时尝试重连")
+reg("AutoKickGuard", "防踢加强", "大厅", "bool", "定时模拟输入")
+reg("AutoVoteStrategy", "投票策略", "大厅", "bool", "选择票数最高的模式")
+reg("AutoQueueMode", "选择模式", "大厅", "bool", "自动点击指定模式")
+reg("AutoResultContinuePlus", "结算增强", "大厅", "bool", "结算界面自动继续")
+reg("AutoWaveSkipEnhanced", "跳波增强", "大厅", "bool", "自动点跳波同意")
+reg("AutoWaveReward", "波次奖励", "大厅", "bool", "自动领取波次奖励")
+-- 互动 / 收集 / 移动
+reg("AutoInteractPrompts", "自动互动", "互动", "bool", "触发附近通用提示")
+reg("AutoChestHunt", "自动找宝箱", "互动", "bool", "寻找并打开宝箱")
+reg("AutoNPCTalk", "NPC对话", "互动", "bool", "自动和 NPC 对话")
+reg("AutoElevatorUse", "电梯传送", "互动", "bool", "自动使用电梯或传送点")
+reg("AutoOrbCollect", "收集宝石", "收集", "bool", "收集宝石 / 能量球")
+reg("AutoNearbyPickup", "拾取掉落", "收集", "bool", "拾取附近掉落物")
+reg("AutoPathToTarget", "路径移动", "移动", "bool", "朝目标路径点移动")
+reg("AutoStuckDetect", "防卡住", "移动", "bool", "卡住时跳跃脱困")
+reg("AutoFollowAlly", "跟随队友", "移动", "bool", "跟着最近的队友")
+reg("AutoStayInZone", "区域限制", "移动", "bool", "跑太远时拉回安全区")
+reg("AutoHeightControl", "高度控制", "移动", "bool", "把角色保持在高度范围内")
+-- 统计 / 系统
+reg("AutoStats", "会话统计", "系统", "bool", "统计击杀和在线时长")
+reg("AutoSessionReport", "会话报告", "系统", "bool", "定时输出版报告")
+reg("AutoConfigBackup", "配置备份", "系统", "bool", "定时备份配置")
+reg("AutoConfigRestore", "配置恢复", "系统", "bool", "启动时恢复备份")
+reg("AutoLagWatch", "延迟监控", "系统", "bool", "记录延迟并警告")
+reg("AutoMemoryClean", "内存清理", "系统", "bool", "定时清理缓存")
+reg("AutoLogRotate", "日志轮转", "系统", "bool", "日志过多时归档")
+reg("AutoProfile", "性能分析", "系统", "bool", "统计各模块耗时")
+reg("AutoNotifyDigest", "挂机摘要", "系统", "bool", "定时推送摘要")
+reg("AutoCrashGuard", "崩溃保护", "系统", "bool", "异常过多时停止战斗")
+reg("AutoSelfTest", "环境自检", "系统", "bool", "检查关键接口")
+-- 老版核心功能也纳入注册表，方便聊天命令控制
+reg("AutoFarm", "自动刷怪", "核心", "bool", "自动找怪并刷怪")
+reg("AutoSkill", "自动技能", "核心", "bool", "自动释放技能")
+reg("AutoAim", "自动瞄准", "核心", "bool", "锁定敌人")
+reg("AutoFight", "自动开火", "核心", "bool", "自动开火")
+reg("AutoRevive", "自动救人", "核心", "bool", "自动救倒地队友")
+reg("AutoRespawn", "无限复活", "核心", "bool", "残血自动重置角色")
+reg("AutoBuyHP", "自动补血", "核心", "bool", "低血购买补血")
+reg("AutoPotion", "自动喝药", "核心", "bool", "低血喝药")
+reg("AutoBoost", "自动加速", "核心", "bool", "定时续加速")
+reg("AutoUseMoney", "自动金钱袋", "核心", "bool", "使用金钱袋")
+reg("AutoSkillTree", "自动技能树", "核心", "bool", "升级技能树")
+reg("AutoGacha", "自动抽奖", "核心", "bool", "自动抽角色 / 皮肤")
+reg("AutoSquadQuest", "自动小队任务", "核心", "bool", "完成小队任务")
+reg("AutoRestartVote", "自动重开投票", "核心", "bool", "发起重开投票")
+reg("AutoTitle", "自动称号", "核心", "bool", "自动装备称号")
+reg("AutoCollect", "自动收集", "核心", "bool", "自动收集地图物品")
+reg("AutoVote", "自动投票", "核心", "bool", "大厅自动投票")
+reg("AutoReady", "自动准备", "核心", "bool", "自动准备")
+reg("AutoStart", "自动单人开局", "核心", "bool", "自动开单人局")
+reg("AutoOpenVote", "自动开投票界面", "核心", "bool", "打开投票界面")
+reg("AutoSkipVote", "自动跳波投票", "核心", "bool", "自动跟跳波票")
+reg("AutoContinue", "结算继续", "核心", "bool", "结算自动准备下一局")
+reg("AutoEquipChar", "自动装备角色", "核心", "bool", "装备指定角色")
+reg("AutoSkipHeli", "跳过直升机", "核心", "bool", "跳过直升机过场")
+reg("AutoAntiAfk", "防踢", "核心", "bool", "防止 AFK 踢出")
+reg("AutoSave", "自动保存", "核心", "bool", "定时保存配置")
+reg("AutoGameModeLobby", "大厅自动模式", "核心", "bool", "大厅自动选模式")
+
+----------------------------------------------------------------
+-- 92. 聊天命令系统
+----------------------------------------------------------------
+local CHAT_HELP_LINES = {
+    "难度模式 聊天命令（前缀 " .. tostring(AUTO.ChatPrefix) .. "）",
+    AUTO.ChatPrefix .. " 帮助                  显示本帮助",
+    AUTO.ChatPrefix .. " 状态                  输出当前状态",
+    AUTO.ChatPrefix .. " 统计                  输出统计",
+    AUTO.ChatPrefix .. " 列表 [分组]           列出模块与开关",
+    AUTO.ChatPrefix .. " 开 <模块名>           打开模块",
+    AUTO.ChatPrefix .. " 关 <模块名>           关闭模块",
+    AUTO.ChatPrefix .. " 切换 <模块名>         反向切换",
+    AUTO.ChatPrefix .. " 设置 <键> <值>        修改参数",
+    AUTO.ChatPrefix .. " 执行 <模块名>         立即执行一次",
+    AUTO.ChatPrefix .. " 全部关                关闭所有模块",
+    AUTO.ChatPrefix .. " 保存 / 读配置         保存或恢复配置",
+    AUTO.ChatPrefix .. " 报告                  写入会话报告",
+    "模块名可以用中文标题或英文键名，支持模糊匹配",
+}
+
+function xFindModule(name)
+    if not name or name == "" then return nil end
+    local low = string.lower(tostring(name))
+    for _, m in ipairs(MODULE_REGISTRY) do
+        if string.lower(m.key) == low or string.lower(m.title) == low then
+            return m
+        end
+    end
+    for _, m in ipairs(MODULE_REGISTRY) do
+        if string.find(string.lower(m.key), low, 1, true) or string.find(string.lower(m.title), low, 1, true) then
+            return m
+        end
+    end
+    return nil
+end
+
+function xRegistryLines(group)
+    local lines = {}
+    for _, m in ipairs(MODULE_REGISTRY) do
+        if not group or group == "" or m.group == group then
+            local val = AUTO[m.key]
+            local mark = "关"
+            if m.kind == "bool" then
+                mark = val and "开" or "关"
+            else
+                mark = tostring(val)
+            end
+            lines[#lines + 1] = string.format("[%s] %s（%s）= %s", m.group, m.title, m.key, mark)
+        end
+    end
+    return lines
+end
+
+function xReportToFile()
+    local lines = {}
+    lines[#lines + 1] = "难度模式 会话报告"
+    lines[#lines + 1] = "时间：" .. os.date("%Y-%m-%d %H:%M:%S")
+    lines[#lines + 1] = string.format("在线：%.1f 分钟", (AUTO.SessionSeconds or 0) / 60)
+    lines[#lines + 1] = "阶段：" .. tostring(AUTO.Phase or "-")
+    lines[#lines + 1] = "波次：" .. tostring(AUTO.WaveNow or "-")
+    lines[#lines + 1] = "延迟：" .. tostring(AUTO.CurrentPing or "-") .. " ms"
+    lines[#lines + 1] = "统计："
+    local keys = {}
+    for k in pairs(AUTO.Stats) do keys[#keys + 1] = k end
+    table.sort(keys)
+    for _, k in ipairs(keys) do
+        lines[#lines + 1] = string.format("  %s = %s", k, tostring(AUTO.Stats[k]))
+    end
+    lines[#lines + 1] = "模块："
+    for _, l in ipairs(xRegistryLines(nil)) do lines[#lines + 1] = "  " .. l end
+    local text = table.concat(lines, "\n")
+    if type(writefile) == "function" then
+        pcall(function() writefile("难度模式_会话报告.txt", text) end)
+        notify("会话报告", "已写入 难度模式_会话报告.txt")
+    else
+        print(text)
+        notify("会话报告", "已输出到控制台")
+    end
+    return text
+end
+
+function xHandleChatCommand(raw)
+    if type(raw) ~= "string" then return end
+    local prefix = tostring(AUTO.ChatPrefix or ";dm")
+    if raw:sub(1, #prefix) ~= prefix then return end
+    local body = raw:sub(#prefix + 1)
+    body = body:gsub("^%s+", "")
+    local cmd, rest = body:match("^(%S*)%s*(.*)$")
+    cmd = tostring(cmd or "")
+    rest = tostring(rest or "")
+    local function say(text)
+        notify("聊天命令", tostring(text))
+        log("聊天命令：" .. tostring(text))
+    end
+    if cmd == "" or cmd == "帮助" or cmd == "help" then
+        local text = table.concat(CHAT_HELP_LINES, "\n")
+        notify("聊天帮助", "共 " .. #CHAT_HELP_LINES .. " 条命令，详见日志")
+        for _, line in ipairs(CHAT_HELP_LINES) do log(line) end
+        return text
+    end
+    if cmd == "状态" or cmd == "status" then
+        refreshStatus()
+        say(string.format("阶段 %s · 波次 %s · 击杀 %s · 在线 %.0f 分钟",
+            tostring(AUTO.Phase or "-"), tostring(AUTO.WaveNow or "-"),
+            tostring(AUTO.Stats["击杀"] or 0), (AUTO.SessionSeconds or 0) / 60))
+        return
+    end
+    if cmd == "统计" or cmd == "stats" then
+        local keys = {}
+        for k in pairs(AUTO.Stats) do keys[#keys + 1] = k end
+        table.sort(keys)
+        local parts = {}
+        for _, k in ipairs(keys) do
+            parts[#parts + 1] = k .. "=" .. tostring(AUTO.Stats[k])
+        end
+        say(#parts > 0 and table.concat(parts, "  ") or "暂无统计")
+        return
+    end
+    if cmd == "列表" or cmd == "list" then
+        local lines = xRegistryLines(rest)
+        for _, l in ipairs(lines) do log(l) end
+        say("共 " .. #lines .. " 个模块" .. (rest ~= "" and ("（分组 " .. rest .. "）") or ""))
+        return
+    end
+    if cmd == "开" or cmd == "关" or cmd == "切换" or cmd == "on" or cmd == "off" or cmd == "toggle" then
+        local m = xFindModule(rest)
+        if not m then
+            say("没有找到模块：" .. rest)
+            return
+        end
+        local want
+        if cmd == "开" or cmd == "on" then want = true
+        elseif cmd == "关" or cmd == "off" then want = false
+        else want = not AUTO[m.key] end
+        AUTO[m.key] = want
+        say(string.format("%s 已%s", m.title, want and "打开" or "关闭"))
+        return
+    end
+    if cmd == "设置" or cmd == "set" then
+        local k, v = rest:match("^(%S+)%s+(.+)$")
+        if not k then
+            say("用法：" .. prefix .. " 设置 <键> <值>")
+            return
+        end
+        local target = nil
+        for _, m in ipairs(MODULE_REGISTRY) do
+            if string.lower(m.key) == string.lower(k) then target = m break end
+        end
+        if not target then
+            -- 允许直接设置任意存在的键
+            if AUTO[k] == nil then
+                say("没有这个参数：" .. k)
+                return
+            end
+        end
+        local old = AUTO[k]
+        local newVal = v
+        if type(old) == "number" then
+            newVal = tonumber(v) or old
+        elseif type(old) == "boolean" then
+            newVal = (v == "true" or v == "开" or v == "1" or v == "on")
+        end
+        AUTO[k] = newVal
+        say(string.format("%s = %s", k, tostring(newVal)))
+        return
+    end
+    if cmd == "执行" or cmd == "run" then
+        local m = xFindModule(rest)
+        if not m then
+            say("没有找到模块：" .. rest)
+            return
+        end
+        local runner = MODULE_RUNNERS[m.key]
+        if not runner then
+            say("这个模块没有独立执行入口：" .. m.title)
+            return
+        end
+        local old = AUTO[m.key]
+        AUTO[m.key] = true
+        local ok, err = pcall(runner)
+        if not old then AUTO[m.key] = old end
+        say(ok and ("已执行 " .. m.title) or ("执行失败：" .. tostring(err)))
+        return
+    end
+    if cmd == "全部关" or cmd == "alloff" then
+        local n = 0
+        for _, m in ipairs(MODULE_REGISTRY) do
+            if m.kind == "bool" and AUTO[m.key] then
+                AUTO[m.key] = false
+                n = n + 1
+            end
+        end
+        stopFire()
+        stopAim()
+        say("已关闭 " .. n .. " 个模块")
+        return
+    end
+    if cmd == "保存" or cmd == "save" then
+        local ok = saveConfig and saveConfig()
+        say(ok and "配置已保存" or "当前注入器不支持保存")
+        return
+    end
+    if cmd == "读配置" or cmd == "load" then
+        AUTO.AutoConfigRestore = true
+        xSt("restore").done = false
+        autoConfigRestore()
+        say("已尝试从备份恢复配置")
+        return
+    end
+    if cmd == "报告" or cmd == "report" then
+        xReportToFile()
+        say("会话报告已生成")
+        return
+    end
+    if cmd == "暂停" or cmd == "pause" then
+        AUTO.Paused = not AUTO.Paused
+        if AUTO.Paused then
+            stopFire()
+            stopAim()
+        end
+        say(AUTO.Paused and "已暂停" or "已继续")
+        return
+    end
+    say("未知命令：" .. cmd .. "，输入 " .. prefix .. " 帮助 查看用法")
+end
+
+pcall(function()
+    player.Chatted:Connect(function(msg)
+        if AUTO.ChatCommands == false then return end
+        xHandleChatCommand(msg)
+    end)
+end)
+
+-- 供执行入口使用的模块表（键名 → 函数）
+MODULE_RUNNERS = {
+    AutoTargetPriority = autoTargetPriority,
+    AutoFocusBoss = autoFocusBoss,
+    AutoKite = autoKite,
+    AutoOrbit = autoOrbit,
+    AutoStrafe = autoStrafe,
+    AutoJumpDodge = autoJumpDodge,
+    AutoRetreatHeal = autoRetreatHeal,
+    AutoEmergencyTeleport = autoEmergencyTeleport,
+    AutoBossWarn = autoBossWarn,
+    AutoWaveMonitor = autoWaveMonitor,
+    AutoAssistAlly = autoAssistAlly,
+    AutoReviveChain = autoReviveChain,
+    AutoWeaponSwitch = autoWeaponSwitch,
+    AutoSkillBurst = autoSkillBurst,
+    AutoSkillHold = autoSkillHold,
+    AutoAmmoCheck = autoAmmoCheck,
+    AutoLowHpNotify = autoLowHpNotify,
+    AutoFood = autoFood,
+    AutoBandage = autoBandage,
+    AutoShieldItem = autoShieldItem,
+    AutoCleanse = autoCleanse,
+    AutoHealAlly = autoHealAlly,
+    AutoRegenWait = autoRegenWait,
+    AutoPotionCombo = autoPotionCombo,
+    AutoAntiVoid = autoAntiVoid,
+    AutoFallGuard = autoFallGuard,
+    AutoBurnGuard = autoBurnGuard,
+    AutoStatusWatch = autoStatusWatch,
+    AutoSkillPriority = autoSkillPriority,
+    AutoSkillQueue = autoSkillQueue,
+    AutoCooldownReport = autoCooldownReport,
+    AutoUltimateTracker = autoUltimateTracker,
+    AutoManaCheck = autoManaCheck,
+    AutoTechSpend = autoTechSpend,
+    AutoUnlockCheap = autoUnlockCheap,
+    AutoSaveTech = autoSaveTech,
+    AutoPrestigeCheck = autoPrestigeCheck,
+    AutoPassiveToggle = autoPassiveToggle,
+    AutoBuffRefresh = autoBuffRefresh,
+    AutoArmorRepair = autoArmorRepair,
+    AutoQuestAccept = autoQuestAccept,
+    AutoQuestComplete = autoQuestComplete,
+    AutoDailyClaim = autoDailyClaim,
+    AutoWeeklyClaim = autoWeeklyClaim,
+    AutoQuestTrack = autoQuestTrack,
+    AutoQuestSkip = autoQuestSkip,
+    AutoSquadLoop = autoSquadLoop,
+    AutoQuestReport = autoQuestReport,
+    AutoSellJunk = autoSellJunk,
+    AutoBudgetBuy = autoBudgetBuy,
+    AutoRestock = autoRestock,
+    AutoCrateOpen = autoCrateOpen,
+    AutoGachaPlan = autoGachaPlan,
+    AutoMoneyPickup = autoMoneyPickup,
+    AutoInventorySort = autoInventorySort,
+    AutoGiftSend = autoGiftSend,
+    AutoShopScan = autoShopScan,
+    AutoDiscountBuy = autoDiscountBuy,
+    AutoCurrencyWatch = autoCurrencyWatch,
+    AutoFreeChest = autoFreeChest,
+    AutoLobbyLoop = autoLobbyLoop,
+    AutoServerHop = autoServerHop,
+    AutoRejoinGuard = autoRejoinGuard,
+    AutoKickGuard = autoKickGuard,
+    AutoVoteStrategy = autoVoteStrategy,
+    AutoQueueMode = autoQueueMode,
+    AutoResultContinuePlus = autoResultContinuePlus,
+    AutoWaveSkipEnhanced = autoWaveSkipEnhanced,
+    AutoWaveReward = autoWaveReward,
+    AutoInteractPrompts = autoInteractPrompts,
+    AutoChestHunt = autoChestHunt,
+    AutoNPCTalk = autoNPCTalk,
+    AutoElevatorUse = autoElevatorUse,
+    AutoOrbCollect = autoOrbCollect,
+    AutoNearbyPickup = autoNearbyPickup,
+    AutoPathToTarget = autoPathToTarget,
+    AutoStuckDetect = autoStuckDetect,
+    AutoFollowAlly = autoFollowAlly,
+    AutoStayInZone = autoStayInZone,
+    AutoHeightControl = autoHeightControl,
+    AutoStats = autoStats,
+    AutoSessionReport = autoSessionReport,
+    AutoConfigBackup = autoConfigBackup,
+    AutoConfigRestore = autoConfigRestore,
+    AutoLagWatch = autoLagWatch,
+    AutoMemoryClean = autoMemoryClean,
+    AutoLogRotate = autoLogRotate,
+    AutoProfile = autoProfile,
+    AutoNotifyDigest = autoNotifyDigest,
+    AutoCrashGuard = autoCrashGuard,
+    AutoSelfTest = autoSelfTest,
+}
+
+----------------------------------------------------------------
+-- 统一调度：大厅 / 战斗 / 常驻
+----------------------------------------------------------------
+local LOBBY_QUEUE = {
+    "AutoLobbyLoop", "AutoVoteStrategy", "AutoQueueMode", "AutoQuestAccept", "AutoQuestComplete",
+    "AutoDailyClaim", "AutoWeeklyClaim", "AutoQuestTrack", "AutoQuestSkip", "AutoSquadLoop",
+    "AutoQuestReport", "AutoSellJunk", "AutoBudgetBuy", "AutoRestock", "AutoGachaPlan",
+    "AutoInventorySort", "AutoGiftSend", "AutoShopScan", "AutoDiscountBuy", "AutoCurrencyWatch",
+    "AutoFreeChest", "AutoCrateOpen", "AutoNPCTalk", "AutoInteractPrompts", "AutoSelfTest",
+    "AutoConfigRestore",
+}
+
+local COMBAT_QUEUE = {
+    "AutoTargetPriority", "AutoFocusBoss", "AutoKite", "AutoOrbit", "AutoStrafe",
+    "AutoJumpDodge", "AutoRetreatHeal", "AutoEmergencyTeleport", "AutoBossWarn",
+    "AutoWaveMonitor", "AutoAssistAlly", "AutoReviveChain", "AutoWeaponSwitch",
+    "AutoSkillBurst", "AutoSkillHold", "AutoAmmoCheck", "AutoLowHpNotify",
+    "AutoFood", "AutoBandage", "AutoShieldItem", "AutoCleanse", "AutoHealAlly",
+    "AutoRegenWait", "AutoPotionCombo", "AutoAntiVoid", "AutoFallGuard",
+    "AutoBurnGuard", "AutoStatusWatch", "AutoSkillPriority", "AutoSkillQueue",
+    "AutoCooldownReport", "AutoUltimateTracker", "AutoManaCheck", "AutoTechSpend",
+    "AutoUnlockCheap", "AutoSaveTech", "AutoPrestigeCheck", "AutoPassiveToggle",
+    "AutoBuffRefresh", "AutoArmorRepair", "AutoChestHunt", "AutoOrbCollect",
+    "AutoNearbyPickup", "AutoPathToTarget", "AutoStuckDetect", "AutoFollowAlly",
+    "AutoStayInZone", "AutoHeightControl", "AutoMoneyPickup", "AutoCrateOpen",
+}
+
+local ALWAYS_QUEUE = {
+    "AutoServerHop", "AutoRejoinGuard", "AutoKickGuard", "AutoResultContinuePlus",
+    "AutoWaveSkipEnhanced", "AutoWaveReward", "AutoStats", "AutoSessionReport",
+    "AutoConfigBackup", "AutoLagWatch", "AutoMemoryClean", "AutoLogRotate",
+    "AutoProfile", "AutoNotifyDigest", "AutoCrashGuard",
+}
+
+function xRunQueue(queue, phase)
+    for _, key in ipairs(queue) do
+        if AUTO[key] then
+            local fn = MODULE_RUNNERS[key]
+            if fn then
+                local t0 = os.clock()
+                local ok, err = pcall(fn)
+                local dt = os.clock() - t0
+                if AUTO.AutoProfile then
+                    local p = xSt("profile")
+                    local rec = p[key]
+                    if not rec then
+                        rec = { calls = 0, time = 0 }
+                        p[key] = rec
+                    end
+                    rec.calls = rec.calls + 1
+                    rec.time = rec.time + dt
+                end
+                if not ok then
+                    AUTO.LoopErrors = (tonumber(AUTO.LoopErrors) or 0) + 1
+                    if every("x_moderr_" .. key, 30) then
+                        log("模块异常[" .. key .. "]：" .. tostring(err))
+                    end
+                end
+            end
+        end
+    end
+end
+
+function xRunLobbyModules()
+    xRunQueue(LOBBY_QUEUE, "lobby")
+end
+
+function xRunCombatModules()
+    xRunQueue(COMBAT_QUEUE, "combat")
+end
+
+function xRunAlwaysModules()
+    xRunQueue(ALWAYS_QUEUE, "always")
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 VII：高级战斗 / 预判 / 区域规避 / 巡逻
+-- ============================================================
+----------------------------------------------------------------
+local X6_DEFAULTS = {
+    AutoAimLead = false, AimLeadFactor = 0.18, AimLeadMax = 40,
+    AutoDodgeZone = false, ZoneCheckGap = 0.4, ZoneDodgeDistance = 12,
+    AutoInterrupt = false, InterruptGap = 0.8, InterruptSkills = {},
+    AutoTauntBoss = false, TauntRange = 120, TauntGap = 5,
+    AutoTeamBuff = false, TeamBuffRange = 80, TeamBuffGap = 20, TeamBuffNames = {},
+    AutoShieldAlly = false, ShieldAllyHp = 35, ShieldAllyGap = 12,
+    AutoLastStand = false, LastStandHp = 12, LastStandGap = 4,
+    AutoThreatTable = false, ThreatGap = 1,
+    AutoTerrainAdapt = false, TerrainCheckGap = 1.5, BadMaterials = { "Water", "Lava", "Acid" },
+    AutoAntiFling = false, FlingSpeed = 350, FlingGap = 0.5,
+    AutoPatrol = false, PatrolRadius = 60, PatrolPoints = 4, PatrolGap = 3,
+    AutoReturnHome = false, HomeIdleTime = 25, HomeGap = 2,
+    AutoGroupUp = false, GroupGap = 4, GroupDistance = 10,
+    AutoKillConfirm = false, KillConfirmGap = 0.6,
+    AutoCombatLog = false, CombatLogGap = 10,
+    AutoRespawnWait = false, RespawnWaitGap = 1.5,
+    AutoSelfRevive = false, SelfReviveGap = 1,
+}
+
+for k, v in pairs(X6_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+----------------------------------------------------------------
+-- 93. 预判瞄准（按目标速度提前量）
+----------------------------------------------------------------
+function autoAimLead()
+    if not AUTO.AutoAimLead then return false end
+    if AUTO.Paused then return false end
+    if not every("x_aimlead", 0.05) then return false end
+    local pick = xPickTarget(tonumber(AUTO.Range) or 300, AUTO.TargetPriority)
+    if not pick then return false end
+    local part = pick.model:FindFirstChild("HumanoidRootPart") or pick.model.PrimaryPart
+    if not part then return false end
+    local vel = part.AssemblyLinearVelocity
+    local factor = tonumber(AUTO.AimLeadFactor) or 0.18
+    local maxLead = tonumber(AUTO.AimLeadMax) or 40
+    local lead = vel * factor
+    if lead.Magnitude > maxLead then
+        lead = lead.Unit * maxLead
+    end
+    local aimPos = part.Position + lead + Vector3.new(0, 1.2, 0)
+    aimAt(aimPos)
+    AUTO.LastReason = string.format("预判瞄准：%s（提前 %.1f 格）", pick.model.Name, lead.Magnitude)
+    return true
+end
+
+----------------------------------------------------------------
+-- 94. 躲区域伤害（红圈 / 毒圈 / 轰炸区）
+----------------------------------------------------------------
+function autoDodgeZone()
+    if not AUTO.AutoDodgeZone then return false end
+    if AUTO.Paused then return false end
+    if not every("x_zone_dodge", tonumber(AUTO.ZoneCheckGap) or 0.4) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local keywords = { "zone", "aoe", "circle", "bomb", "beam", "danger", "hazard", "poison" }
+    local danger = nil
+    local dangerDist = math.huge
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("BasePart") and d.Transparency < 1 then
+                local low = string.lower(d.Name)
+                local hit = false
+                for _, k in ipairs(keywords) do
+                    if string.find(low, k, 1, true) then hit = true break end
+                end
+                if hit then
+                    local dist = (d.Position - base.Position).Magnitude
+                    local size = math.max(d.Size.X, d.Size.Z)
+                    if dist < size + 6 and dist < dangerDist then
+                        danger, dangerDist = d, dist
+                    end
+                end
+            end
+        end
+    end)
+    if not danger then
+        xSt("zonedodge").active = false
+        return false
+    end
+    local away = base.Position - danger.Position
+    if away.Magnitude <= 0.01 then away = Vector3.new(0, 0, 1) end
+    local dist = tonumber(AUTO.ZoneDodgeDistance) or 12
+    local dest = base.Position + away.Unit * (dist + 6) + Vector3.new(0, 5, 0)
+    xTp(dest)
+    xSt("zonedodge").active = true
+    AUTO.LastReason = "躲区域：" .. danger.Name
+    if xToast("zonedodge", "区域规避", "检测到 " .. danger.Name .. "，已离开", 4) then
+        log("躲区域：检测到 " .. danger.Name .. "，已离开")
+    end
+    xStatAdd("躲区域", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 95. 打断施法
+----------------------------------------------------------------
+function autoInterrupt()
+    if not AUTO.AutoInterrupt then return false end
+    if AUTO.Paused then return false end
+    if not every("x_interrupt", tonumber(AUTO.InterruptGap) or 0.8) then return false end
+    local target = nil
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 300)) do
+        local h = e.model:FindFirstChildOfClass("Humanoid")
+        if h then
+            local casting = false
+            for _, attr in ipairs({ "Casting", "IsCasting", "Channeling", "Stunned" }) do
+                local ok, v = pcall(function() return h:GetAttribute(attr) or e.model:GetAttribute(attr) end)
+                if ok and v == true then casting = true break end
+            end
+            if casting then
+                target = e
+                break
+            end
+        end
+    end
+    if not target then return false end
+    local names = AUTO.InterruptSkills or {}
+    local fired = false
+    if #names > 0 then
+        for id, info in pairs(skillInfo) do
+            if info and info.name and os.clock() >= (skillNext[id] or 0) then
+                for _, n in ipairs(names) do
+                    if string.lower(tostring(info.name)) == string.lower(tostring(n)) then
+                        skillNext[id] = os.clock() + (info.cd or 2.5)
+                        fired = xCastSkillById(id, target.pos, info.name) or fired
+                    end
+                end
+            end
+        end
+    end
+    if not fired then
+        fired = xFire("Interrupt", target.model.Name) or xFire("Stun", target.model.Name)
+    end
+    if fired then
+        AUTO.LastReason = "打断：" .. target.model.Name
+        log("打断施法：" .. target.model.Name)
+        xStatAdd("打断", 1)
+    end
+    return fired
+end
+
+----------------------------------------------------------------
+-- 96. 拉 Boss 仇恨
+----------------------------------------------------------------
+function autoTauntBoss()
+    if not AUTO.AutoTauntBoss then return false end
+    if AUTO.Paused then return false end
+    if not every("x_taunt", tonumber(AUTO.TauntGap) or 5) then return false end
+    local range = tonumber(AUTO.TauntRange) or 120
+    local boss = nil
+    for _, e in ipairs(xEnemyList(range)) do
+        if xIsBoss(e.model) then
+            boss = e
+            break
+        end
+    end
+    if not boss then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local dir = (boss.pos - base.Position)
+    if dir.Magnitude > 0.01 and boss.dist > 12 then
+        xTp(boss.pos - dir.Unit * 8 + Vector3.new(0, 4, 0), boss.pos)
+    end
+    if AUTO.AutoFight then ensureFire() end
+    local ok = xFire("Taunt", boss.model.Name) or xFire("Provoke", boss.model.Name)
+    AUTO.LastReason = "拉仇恨：" .. boss.model.Name
+    AUTO.TauntTarget = boss.model.Name
+    log("拉 Boss 仇恨：" .. boss.model.Name .. (ok and "（已发送嘲讽）" or ""))
+    xStatAdd("拉仇恨", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 97. 团队增益
+----------------------------------------------------------------
+function autoTeamBuff()
+    if not AUTO.AutoTeamBuff then return false end
+    if AUTO.Paused then return false end
+    if not every("x_teambuff", tonumber(AUTO.TeamBuffGap) or 20) then return false end
+    local range = tonumber(AUTO.TeamBuffRange) or 80
+    local allies = xAllyList(range)
+    if #allies == 0 then return false end
+    local names = AUTO.TeamBuffNames or {}
+    if #names == 0 then
+        names = AUTO.BuffNames or {}
+    end
+    if #names == 0 then return false end
+    local r = xFindRemote("Boosts")
+    if not r then return false end
+    local n = 0
+    for _, name in ipairs(names) do
+        local ok = pcall(function() r:FireServer(name) end)
+        if ok then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "团队增益：" .. n .. " 个"
+        log(string.format("团队增益：为 %d 名队友续 %d 个增益", #allies, n))
+        xStatAdd("团队增益", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 98. 给队友套盾
+----------------------------------------------------------------
+function autoShieldAlly()
+    if not AUTO.AutoShieldAlly then return false end
+    if AUTO.Paused then return false end
+    if not every("x_shieldally", tonumber(AUTO.ShieldAllyGap) or 12) then return false end
+    local need = tonumber(AUTO.ShieldAllyHp) or 35
+    local target = nil
+    for _, a in ipairs(xAllyList(tonumber(AUTO.TeamBuffRange) or 80)) do
+        if a.hp > 0 and a.hp < a.maxhp * (need / 100) then
+            target = a
+            break
+        end
+    end
+    if not target then return false end
+    local ok = false
+    local r = xFindRemote("ShieldAlly") or xFindRemote("GiveShield")
+    if r then
+        pcall(function()
+            if r:IsA("RemoteEvent") then r:FireServer(target.player)
+            else r:InvokeServer(target.player) end
+        end)
+        ok = true
+    end
+    if not ok then
+        ok = xFire("Boosts", "Shield", target.player.Name)
+    end
+    if ok then
+        AUTO.LastReason = "套盾：" .. target.player.Name
+        log("给队友套盾：" .. target.player.Name)
+        xStatAdd("队友套盾", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 99. 背水一战（极低血全保命）
+----------------------------------------------------------------
+function autoLastStand()
+    if not AUTO.AutoLastStand then return false end
+    if AUTO.Paused then return false end
+    if not every("x_laststand", tonumber(AUTO.LastStandGap) or 4) then return false end
+    local hp = xHpPct()
+    local trigger = tonumber(AUTO.LastStandHp) or 12
+    if hp <= 0 or hp > trigger then
+        xSt("laststand").active = false
+        return false
+    end
+    local state = xSt("laststand")
+    state.active = true
+    local pos = xSafePoint(nil, tonumber(AUTO.EmergencyDistance) or 80)
+    if pos then xTp(pos) end
+    local names = {}
+    for _, list in ipairs({ AUTO.BandageNames, AUTO.ShieldNames, AUTO.CleanseNames, AUTO.FoodNames }) do
+        for _, n in ipairs(list or {}) do names[#names + 1] = n end
+    end
+    local n = xUseNamedRemote("Potions", names)
+    if AUTO.AutoBuyHP then buyHP() end
+    if AUTO.AutoPotion then usePotion() end
+    if AUTO.AutoBoost then
+        pcall(function() fireRemote("Boosts", "Speed") end)
+    end
+    AUTO.LastReason = string.format("背水一战：血量 %.0f%%，全部保命手段", hp)
+    notify("背水一战", string.format("血量 %.0f%%，已使用全部保命手段", hp))
+    log(string.format("背水一战：血量 %.0f%%，已撤退并治疗", hp))
+    xStatAdd("背水一战", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 100. 威胁表（记录最近敌人的威胁值）
+----------------------------------------------------------------
+function autoThreatTable()
+    if not AUTO.AutoThreatTable then return false end
+    if not every("x_threat", tonumber(AUTO.ThreatGap) or 1) then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 400)
+    local rows = {}
+    for _, e in ipairs(list) do
+        local h = e.model:FindFirstChildOfClass("Humanoid")
+        local hp = h and h.Health or 0
+        local maxhp = h and h.MaxHealth or 1
+        local threat = (maxhp * 0.5) + (100 - math.min(100, e.dist)) * 10 + (hp / math.max(1, maxhp)) * 200
+        if xIsBoss(e.model) then threat = threat + 5000 end
+        rows[#rows + 1] = { name = e.model.Name, threat = threat, dist = e.dist, hp = hp }
+    end
+    table.sort(rows, function(a, b) return a.threat > b.threat end)
+    AUTO.ThreatTop = rows[1] and rows[1].name or nil
+    if #rows > 0 and every("x_threat_log", 20) then
+        local parts = {}
+        for i = 1, math.min(3, #rows) do
+            parts[#parts + 1] = string.format("%s(%d)", rows[i].name, xRound(rows[i].threat))
+        end
+        log("威胁表：" .. table.concat(parts, " > "))
+        xStatAdd("威胁分析", 1)
+    end
+    return #rows > 0
+end
+
+----------------------------------------------------------------
+-- 101. 地形适应（水 / 岩浆 / 酸液）
+----------------------------------------------------------------
+function autoTerrainAdapt()
+    if not AUTO.AutoTerrainAdapt then return false end
+    if AUTO.Paused then return false end
+    if not every("x_terrain", tonumber(AUTO.TerrainCheckGap) or 1.5) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local mat = tostring(h.FloorMaterial)
+    local bad = AUTO.BadMaterials or {}
+    local hit = false
+    for _, m in ipairs(bad) do
+        if string.lower(mat) == string.lower(tostring(m)) then hit = true break end
+    end
+    if not hit and string.find(string.lower(mat), "water", 1, true) then hit = true end
+    if not hit then return false end
+    local pos = xSafePoint(nil, tonumber(AUTO.RetreatDistance) or 50)
+    if pos then xTp(pos) end
+    AUTO.LastReason = "地形适应：离开 " .. mat
+    log("地形适应：检测到 " .. mat .. "，已离开")
+    xStatAdd("地形适应", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 102. 防被甩飞
+----------------------------------------------------------------
+function autoAntiFling()
+    if not AUTO.AutoAntiFling then return false end
+    if AUTO.Paused then return false end
+    if not every("x_fling", tonumber(AUTO.FlingGap) or 0.5) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local v = base.AssemblyLinearVelocity
+    local limit = tonumber(AUTO.FlingSpeed) or 350
+    if v.Magnitude < limit then return false end
+    pcall(function()
+        base.AssemblyLinearVelocity = Vector3.zero
+        base.AssemblyAngularVelocity = Vector3.zero
+    end)
+    local spawn = xSpawnPos()
+    xTp(spawn + Vector3.new(0, 6, 0))
+    AUTO.LastReason = string.format("防甩飞：速度 %.0f", v.Magnitude)
+    if xToast("fling", "防甩飞", "检测到异常速度，已复位角色", 8) then
+        log(string.format("防甩飞：速度 %.0f，已复位", v.Magnitude))
+    end
+    xStatAdd("防甩飞", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 103. 巡逻（自动生成路径点）
+----------------------------------------------------------------
+function autoPatrol()
+    if not AUTO.AutoPatrol then return false end
+    if AUTO.Paused then return false end
+    if #xEnemyList(tonumber(AUTO.Range) or 300) > 0 then return false end
+    if not every("x_patrol", tonumber(AUTO.PatrolGap) or 3) then return false end
+    local state = xSt("patrol")
+    if not state.center then
+        state.center = xSpawnPos()
+        state.index = 0
+        state.points = {}
+        local n = math.max(2, tonumber(AUTO.PatrolPoints) or 4)
+        local radius = tonumber(AUTO.PatrolRadius) or 60
+        for i = 1, n do
+            local ang = (i - 1) / n * math.pi * 2
+            state.points[i] = state.center + Vector3.new(math.cos(ang) * radius, 6, math.sin(ang) * radius)
+        end
+    end
+    state.index = (state.index or 0) + 1
+    if state.index > #state.points then state.index = 1 end
+    local dest = state.points[state.index]
+    xTp(dest)
+    AUTO.LastReason = string.format("巡逻：前往第 %d 个路径点", state.index)
+    xStatAdd("巡逻", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 104. 返回出生点
+----------------------------------------------------------------
+function autoReturnHome()
+    if not AUTO.AutoReturnHome then return false end
+    if AUTO.Paused then return false end
+    if not every("x_home", tonumber(AUTO.HomeGap) or 2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local spawn = xSpawnPos()
+    local d = (base.Position - spawn).Magnitude
+    if d <= 12 then
+        xSt("home").idle = nil
+        return false
+    end
+    local enemies = #xEnemyList(tonumber(AUTO.Range) or 200)
+    local idleLimit = tonumber(AUTO.HomeIdleTime) or 25
+    local state = xSt("home")
+    if enemies > 0 then
+        state.idle = nil
+        return false
+    end
+    state.idle = state.idle or os.clock()
+    if os.clock() - state.idle < idleLimit then return false end
+    xTp(spawn + Vector3.new(0, 6, 0))
+    state.idle = nil
+    AUTO.LastReason = "返回出生点：附近无敌人"
+    log("返回出生点：附近长时间无敌人，已回去")
+    xStatAdd("返回出生点", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 105. 集合队伍
+----------------------------------------------------------------
+function autoGroupUp()
+    if not AUTO.AutoGroupUp then return false end
+    if AUTO.Paused then return false end
+    if not every("x_group", tonumber(AUTO.GroupGap) or 4) then return false end
+    local allies = xAllyList(tonumber(AUTO.FollowAllyRange) or 200)
+    if #allies < 1 then return false end
+    local sum = Vector3.new(0, 0, 0)
+    local n = 0
+    for _, a in ipairs(allies) do
+        sum = sum + a.pos
+        n = n + 1
+    end
+    if n == 0 then return false end
+    local center = sum / n
+    local base = xRoot2()
+    if not base then return false end
+    local keep = tonumber(AUTO.GroupDistance) or 10
+    if (base.Position - center).Magnitude <= keep then return false end
+    xTp(center + Vector3.new(0, 5, 0))
+    AUTO.LastReason = string.format("集合队伍：%d 人中心", n)
+    xStatAdd("集合队伍", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 106. 击杀确认（清理目标并结算）
+----------------------------------------------------------------
+function autoKillConfirm()
+    if not AUTO.AutoKillConfirm then return false end
+    if not every("x_killconfirm", tonumber(AUTO.KillConfirmGap) or 0.6) then return false end
+    local state = xSt("killconfirm")
+    local targetName = AUTO.Target
+    if not targetName then return false end
+    local folder = living()
+    local exists = false
+    if folder then
+        local m = folder:FindFirstChild(targetName)
+        if m then
+            local h = m:FindFirstChildOfClass("Humanoid")
+            if h and h.Health > 0 then exists = true end
+        end
+    end
+    if exists then
+        state.lastGone = nil
+        return false
+    end
+    state.lastGone = state.lastGone or os.clock()
+    if os.clock() - state.lastGone < 0.5 then return false end
+    AUTO.Target = nil
+    AUTO.PriorityTarget = nil
+    AUTO.LastReason = "击杀确认：" .. tostring(targetName)
+    log("击杀确认：" .. tostring(targetName) .. " 已清除")
+    xStatAdd("击杀确认", 1)
+    state.lastGone = nil
+    return true
+end
+
+----------------------------------------------------------------
+-- 107. 战斗日志（受伤 / 敌人数量 / 距离）
+----------------------------------------------------------------
+function autoCombatLog()
+    if not AUTO.AutoCombatLog then return false end
+    if not every("x_combatlog", tonumber(AUTO.CombatLogGap) or 10) then return false end
+    local h = xHum2()
+    local hp = h and h.Health or 0
+    local maxhp = h and h.MaxHealth or 1
+    local state = xSt("combatlog")
+    local now = os.clock()
+    local dt = math.max(1, now - (state.lastAt or now))
+    local dps = ((state.lastHp or hp) - hp) / dt
+    state.lastHp = hp
+    state.lastAt = now
+    local enemies = #xEnemyList(tonumber(AUTO.Range) or 400)
+    local line = string.format("血量 %.0f/%.0f（%.0f%%） 受伤 %.1f/s 敌人 %d 波次 %s",
+        hp, maxhp, hp / math.max(1, maxhp) * 100, math.max(0, dps), enemies, tostring(AUTO.WaveNow or "-"))
+    log("战斗日志：" .. line)
+    AUTO.CombatLine = line
+    xStatAdd("战斗日志", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 108. 复活等待（处理死亡界面）
+----------------------------------------------------------------
+function autoRespawnWait()
+    if not AUTO.AutoRespawnWait then return false end
+    if not every("x_respawnwait", tonumber(AUTO.RespawnWaitGap) or 1.5) then return false end
+    local h = xHum2()
+    if h and h.Health > 0 then
+        xSt("respawnwait").deadAt = nil
+        return false
+    end
+    local state = xSt("respawnwait")
+    state.deadAt = state.deadAt or os.clock()
+    local waited = os.clock() - state.deadAt
+    local clicked = false
+    for _, root in ipairs({ pg, workspace }) do
+        if xClickButtonByName(root, { "Respawn", "Revive", "Continue", "重生", "复活" }, "x_respawnbtn", 1.5) then
+            clicked = true
+            break
+        end
+    end
+    if not clicked then
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("revive")
+        if prompt then
+            xUsePrompt(prompt)
+            clicked = true
+        end
+    end
+    if not clicked and waited > 5 then
+        if AUTO.AutoRespawn then
+            pcall(function() forceRespawn() end)
+            clicked = true
+        end
+    end
+    if clicked then
+        AUTO.LastReason = "复活等待：已请求复活"
+        log("复活等待：已请求复活（等待 " .. xRound(waited) .. " 秒）")
+        xStatAdd("复活等待", 1)
+    end
+    return clicked
+end
+
+----------------------------------------------------------------
+-- 109. 倒地自救
+----------------------------------------------------------------
+function autoSelfRevive()
+    if not AUTO.AutoSelfRevive then return false end
+    if not every("x_selfrevive", tonumber(AUTO.SelfReviveGap) or 1) then return false end
+    local h = xHum2()
+    if h and h.Health > 0 then return false end
+    local ok = xFire("SelfRevive") or xFire("Revive", player.Name)
+    if not ok then
+        local r = xFindRemote("ReviveRemote")
+        if r then
+            pcall(function() r:FireServer(player) end)
+            ok = true
+        end
+    end
+    if not ok then
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("revive")
+        if prompt then
+            xUsePrompt(prompt)
+            ok = true
+        end
+    end
+    if ok then
+        AUTO.LastReason = "倒地自救：已请求"
+        log("倒地自救：已发送复活请求")
+        xStatAdd("倒地自救", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 VIII：装备 / 养成 / 活动 / 社交 / 辅助
+-- ============================================================
+----------------------------------------------------------------
+local X7_DEFAULTS = {
+    AutoAmmoBuy = false, AmmoBuyGap = 20, AmmoReserve = 30, AmmoItemName = "Ammo",
+    AutoWeaponDurability = false, DurabilityMin = 20, DurabilitySwaps = 2,
+    AutoPetSummon = false, PetGap = 60, PetName = "",
+    AutoVehicleUse = false, VehicleGap = 15,
+    AutoStatAllocation = false, StatGap = 3, StatPriority = {}, StatPointsMin = 1,
+    AutoLevelSpend = false, LevelSpendGap = 5,
+    AutoBossPhase = false, BossPhaseList = { 75, 50, 25 },
+    AutoEnemyAlert = false, EnemyAlertCount = 8, EnemyAlertGap = 10,
+    AutoQuestAutoEquip = false, QuestEquipGap = 6,
+    AutoSkillPointScan = false, SkillScanGap = 60,
+    AutoTitleAutoEquip = false, TitleEquipGap = 30, TitleNames = {},
+    AutoCharacterRotate = false, CharacterRotateMatches = 5, CharacterRotateGap = 10,
+    AutoSkinEquip = false, SkinNames = {}, SkinGap = 30,
+    AutoAccessoryEquip = false, AccessoryNames = {}, AccessoryGap = 30,
+    AutoEmoteUse = false, EmoteNames = {}, EmoteGap = 45,
+    AutoSprint = false, SprintSpeed = 32, SprintGap = 2,
+    AutoCrouchDodge = false, CrouchGap = 3,
+    AutoSwimGuard = false, SwimCheckGap = 1.2,
+    AutoSpeedSync = false, SpeedSyncGap = 1.5,
+    AutoJumpBoost = false, JumpPowerSync = 60, JumpBoostGap = 2,
+    AutoToolRepair = false, ToolRepairGap = 30,
+    AutoInventoryWeight = false, WeightNames = { "Weight", "Load", "Capacity" }, WeightMaxPct = 85,
+    AutoCraftItem = false, CraftGap = 15, CraftItems = {},
+    AutoUpgradeItem = false, UpgradeGap = 15, UpgradeItems = {},
+    AutoTradeRequest = false, TradeGap = 45, TradeNames = {},
+    AutoMailClaim = false, MailGap = 60,
+    AutoAchievementClaim = false, AchievementGap = 60,
+    AutoSeasonPassClaim = false, SeasonPassGap = 60,
+    AutoCodeRedeemLoop = false, CodeRedeemGap = 300,
+    AutoDailyShopRefresh = false, ShopRefreshGap = 3600,
+}
+
+for k, v in pairs(X7_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+function xEquipFromFolder(folderName, names, gapKey, gap)
+    local folder = player:FindFirstChild(folderName)
+    if not folder then return false end
+    if gapKey and not every(gapKey, gap or 5) then return false end
+    local wanted = nil
+    if names and #names > 0 then
+        for _, n in ipairs(names) do
+            for _, item in ipairs(folder:GetChildren()) do
+                if string.lower(item.Name) == string.lower(tostring(n)) then
+                    wanted = item
+                    break
+                end
+            end
+            if wanted then break end
+        end
+    end
+    if not wanted then
+        for _, item in ipairs(folder:GetChildren()) do
+            wanted = item
+            break
+        end
+    end
+    if not wanted then return false end
+    local ok = pcall(function()
+        if wanted:IsA("GuiButton") then
+            clickGui(wanted)
+        else
+            local r = xFindRemote("ForChangeCharacter")
+            if r and folderName == "CharactersFolder" then
+                r:FireServer(wanted.Name)
+            else
+                local equip = xFindRemote("Equip") or xFindRemote("EquipItem")
+                if equip then
+                    equip:FireServer(wanted.Name)
+                else
+                    wanted:SetAttribute("Equipped", true)
+                end
+            end
+        end
+    end)
+    if ok then
+        log(string.format("装备：%s / %s", folderName, wanted.Name))
+        xStatAdd("装备", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 110. 自动购买弹药
+----------------------------------------------------------------
+function autoAmmoBuy()
+    if not AUTO.AutoAmmoBuy then return false end
+    if AUTO.Paused then return false end
+    if not every("x_ammobuy", tonumber(AUTO.AmmoBuyGap) or 20) then return false end
+    local h = xHum2()
+    local c = player.Character
+    if not h or not c then return false end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ammo = nil
+    for _, key in ipairs({ "Ammo", "AmmoCount", "AmmoValue", "Bullets", "Magazine" }) do
+        local ok, v = pcall(function() return tool:GetAttribute(key) end)
+        if ok and tonumber(v) then ammo = tonumber(v) break end
+    end
+    if ammo == nil then return false end
+    local reserve = tonumber(AUTO.AmmoReserve) or 30
+    if ammo > reserve then return false end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    if money ~= nil and money < (tonumber(AUTO.BudgetReserve) or 1000) then return false end
+    local item = AUTO.AmmoItemName or "Ammo"
+    local ok = fireRemote("ShopSystem", "Buy", item) or xFire("BuyAmmo", item)
+    if ok then
+        AUTO.LastReason = "补充弹药：" .. tostring(item)
+        log("自动购买弹药：当前 " .. ammo .. "，已请求购买 " .. tostring(item))
+        xStatAdd("购买弹药", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 111. 武器耐久 / 切换
+----------------------------------------------------------------
+function autoWeaponDurability()
+    if not AUTO.AutoWeaponDurability then return false end
+    if AUTO.Paused then return false end
+    if not every("x_durability", 3) then return false end
+    local c = player.Character
+    if not c then return false end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local cur = nil
+    for _, key in ipairs({ "Durability", "DurabilityValue", "Dura", "Condition" }) do
+        local ok, v = pcall(function() return tool:GetAttribute(key) end)
+        if ok and tonumber(v) then cur = tonumber(v) break end
+    end
+    if cur == nil then return false end
+    local max = nil
+    for _, key in ipairs({ "MaxDurability", "DurabilityMax", "MaxCondition" }) do
+        local ok, v = pcall(function() return tool:GetAttribute(key) end)
+        if ok and tonumber(v) then max = tonumber(v) break end
+    end
+    local pct = max and max > 0 and cur / max * 100 or cur
+    local limit = tonumber(AUTO.DurabilityMin) or 20
+    if pct > limit then return false end
+    local bp = player:FindFirstChild("Backpack")
+    local other = nil
+    if bp then
+        for _, t in ipairs(bp:GetChildren()) do
+            if t:IsA("Tool") and t ~= tool then other = t break end
+        end
+    end
+    if other and xEquipTool(other) then
+        AUTO.LastReason = string.format("武器耐久：%.0f%%，切换到 %s", pct, other.Name)
+        log(string.format("武器耐久：%s 只剩 %.0f%%，已切换到 %s", tool.Name, pct, other.Name))
+        xStatAdd("武器切换", 1)
+        return true
+    end
+    if xFire("Repair", tool.Name) then
+        AUTO.LastReason = "武器耐久：已请求修理 " .. tool.Name
+        log("武器耐久：已请求修理 " .. tool.Name)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 112. 自动召唤宠物
+----------------------------------------------------------------
+function autoPetSummon()
+    if not AUTO.AutoPetSummon then return false end
+    if AUTO.Paused then return false end
+    if not every("x_pet", tonumber(AUTO.PetGap) or 60) then return false end
+    local name = AUTO.PetName
+    local ok = false
+    if name and name ~= "" then
+        ok = xFire("SummonPet", name) or xFire("PetSummon", name)
+    else
+        ok = xFire("SummonPet") or xFire("PetSummon") or xFire("EquipPet")
+    end
+    if not ok then
+        local clicked = xClickButtonByName(pg, { "SummonPet", "PetEquip", "EquipPet" }, "x_petbtn", 60)
+        ok = clicked
+    end
+    if ok then
+        AUTO.LastReason = "召唤宠物"
+        log("召唤宠物：已请求" .. (name and (" " .. name) or ""))
+        xStatAdd("召唤宠物", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 113. 自动使用载具
+----------------------------------------------------------------
+function autoVehicleUse()
+    if not AUTO.AutoVehicleUse then return false end
+    if AUTO.Paused then return false end
+    if not every("x_vehicle", tonumber(AUTO.VehicleGap) or 15) then return false end
+    for _, p in ipairs(xNearPrompts(tonumber(AUTO.InteractRange) or 25)) do
+        local low = string.lower(tostring(p.name))
+        if string.find(low, "vehicle", 1, true) or string.find(low, "car", 1, true)
+            or string.find(low, "mount", 1, true) or string.find(low, "board", 1, true) then
+            xUsePrompt(p.prompt)
+            AUTO.LastReason = "载具：" .. p.name
+            log("自动载具：已使用 " .. p.name)
+            xStatAdd("使用载具", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 114. 自动分配属性点
+----------------------------------------------------------------
+function autoStatAllocation()
+    if not AUTO.AutoStatAllocation then return false end
+    if AUTO.Paused then return false end
+    if not every("x_statalloc", tonumber(AUTO.StatGap) or 3) then return false end
+    local points, key = xFindPlayerAttrNumber({ "StatPoints", "Points", "AttributePoints", "TalentPoints" })
+    if points == nil or points < (tonumber(AUTO.StatPointsMin) or 1) then return false end
+    local priority = AUTO.StatPriority or {}
+    local candidates = { "Strength", "Agility", "Intelligence", "Vitality", "Defense", "Speed" }
+    local order = {}
+    for _, p in ipairs(priority) do order[#order + 1] = p end
+    if #order == 0 then
+        for _, c in ipairs(candidates) do order[#order + 1] = c end
+    end
+    local r = xFindRemote("Stats") or xFindRemote("AllocateStat") or xFindRemote("Attributes")
+    if not r then r = xFindRemote("StatUpgrade") end
+    if not r then return false end
+    local n = 0
+    for _, statName in ipairs(order) do
+        if points <= 0 then break end
+        local ok = pcall(function()
+            if r:IsA("RemoteFunction") then r:InvokeServer(statName, 1)
+            else r:FireServer(statName, 1) end
+        end)
+        if ok then
+            n = n + 1
+            points = points - 1
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = string.format("属性点：分配 %d 点（%s）", n, tostring(key))
+        log(string.format("属性点：已分配 %d 点（剩余 %d）", n, points))
+        xStatAdd("分配属性点", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 115. 自动升级 / 强化
+----------------------------------------------------------------
+function autoLevelSpend()
+    if not AUTO.AutoLevelSpend then return false end
+    if AUTO.Paused then return false end
+    if not every("x_levelspend", tonumber(AUTO.LevelSpendGap) or 5) then return false end
+    local ok = xFire("LevelUp") or xFire("UpgradeLevel") or xFire("Upgrade")
+    if not ok then
+        ok = xClickButtonByName(pg, { "LevelUp", "Upgrade", "升级" }, "x_levelbtn", 5)
+    end
+    if ok then
+        AUTO.LastReason = "升级：已请求"
+        log("自动升级：已请求升级")
+        xStatAdd("升级", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 116. Boss 阶段监测
+----------------------------------------------------------------
+function autoBossPhase()
+    if not AUTO.AutoBossPhase then return false end
+    if not every("x_bossphase", 0.7) then return false end
+    local boss = nil
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.BossRange) or 150)) do
+        if xIsBoss(e.model) then
+            boss = e
+            break
+        end
+    end
+    if not boss then
+        xSt("bossphase").phase = nil
+        return false
+    end
+    local h = boss.model:FindFirstChildOfClass("Humanoid")
+    if not h or h.MaxHealth <= 0 then return false end
+    local pct = h.Health / h.MaxHealth * 100
+    local phase = nil
+    for _, threshold in ipairs(AUTO.BossPhaseList or { 75, 50, 25 }) do
+        if pct <= threshold then phase = threshold end
+    end
+    local state = xSt("bossphase")
+    if phase and phase ~= state.phase then
+        state.phase = phase
+        notify("Boss 阶段", string.format("%s 血量 %.0f%%，进入 %d%% 阶段", boss.model.Name, pct, phase))
+        log(string.format("Boss 阶段：%s 血量 %.0f%%，进入 %d%% 阶段", boss.model.Name, pct, phase))
+        xStatAdd("Boss阶段", 1)
+        if AUTO.AutoSkillBurst then
+            xSt("burst").until_ = os.clock() + (tonumber(AUTO.BurstWindow) or 2.2)
+        end
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 117. 敌人数量警报
+----------------------------------------------------------------
+function autoEnemyAlert()
+    if not AUTO.AutoEnemyAlert then return false end
+    if not every("x_enemyalert", tonumber(AUTO.EnemyAlertGap) or 10) then return false end
+    local n = #xEnemyList(tonumber(AUTO.Range) or 400)
+    local limit = tonumber(AUTO.EnemyAlertCount) or 8
+    AUTO.EnemyCount = n
+    if n >= limit then
+        notify("敌人警报", string.format("附近敌人 %d 个，注意站位", n))
+        log(string.format("敌人警报：附近 %d 个敌人", n))
+        xStatAdd("敌人警报", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 118. 任务装备自动切换
+----------------------------------------------------------------
+function autoQuestAutoEquip()
+    if not AUTO.AutoQuestAutoEquip then return false end
+    if AUTO.Paused then return false end
+    if not every("x_questequip", tonumber(AUTO.QuestEquipGap) or 6) then return false end
+    local r = xQuestFolder()
+    if not r then return false end
+    local wanted = nil
+    pcall(function()
+        local missions = r:FindFirstChild("Missions") or r:FindFirstChild("QuestList")
+        if missions then
+            for _, m in ipairs(missions:GetChildren()) do
+                local item = m:GetAttribute("Item") or m:GetAttribute("RequiredItem")
+                if item and tostring(item) ~= "" then
+                    wanted = tostring(item)
+                    break
+                end
+            end
+        end
+    end)
+    if not wanted then return false end
+    local tool = xToolByName({ wanted })
+    if tool and tool.Parent ~= player.Character then
+        if xEquipTool(tool) then
+            AUTO.LastReason = "任务装备：" .. wanted
+            log("任务装备：已装备 " .. wanted)
+            xStatAdd("任务装备", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 119. 技能点扫描（只读统计）
+----------------------------------------------------------------
+function autoSkillPointScan()
+    if not AUTO.AutoSkillPointScan then return false end
+    if not every("x_skillscan", tonumber(AUTO.SkillScanGap) or 60) then return false end
+    local n = 0
+    for _ in pairs(skillInfo) do n = n + 1 end
+    local folder = player:FindFirstChild("SkillTreesFolder")
+    local nodes = folder and #folder:GetChildren() or 0
+    local points = xFindPlayerAttrNumber({ "TechPoints", "SkillPoints", "Technology" })
+    log(string.format("技能扫描：技能 %d 个，节点 %d 个，科技点 %s",
+        n, nodes, points ~= nil and tostring(points) or "未知"))
+    AUTO.SkillScanLine = string.format("技能 %d / 节点 %d / 科技点 %s", n, nodes,
+        points ~= nil and tostring(points) or "?")
+    return true
+end
+
+----------------------------------------------------------------
+-- 120. 自动称号（多称号轮换）
+----------------------------------------------------------------
+function autoTitleAutoEquip()
+    if not AUTO.AutoTitleAutoEquip then return false end
+    if AUTO.Paused then return false end
+    if not every("x_titleequip", tonumber(AUTO.TitleEquipGap) or 30) then return false end
+    local ok = xEquipFromFolder("TitlesFolder", AUTO.TitleNames, nil, 30)
+    if not ok and AUTO.TitleName and AUTO.TitleName ~= "" then
+        ok = xFire("Title", AUTO.TitleName)
+    end
+    if ok then
+        AUTO.LastReason = "称号：已装备"
+        xStatAdd("称号装备", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 121. 自动轮换角色
+----------------------------------------------------------------
+function autoCharacterRotate()
+    if not AUTO.AutoCharacterRotate then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then return false end
+    if not every("x_charrotate", tonumber(AUTO.CharacterRotateGap) or 10) then return false end
+    local state = xSt("charrotate")
+    state.matches = (state.matches or 0) + 1
+    if state.matches < (tonumber(AUTO.CharacterRotateMatches) or 5) then return false end
+    state.matches = 0
+    local folder = player:FindFirstChild("CharactersFolder")
+    if not folder then return false end
+    local list = folder:GetChildren()
+    if #list == 0 then return false end
+    state.index = ((state.index or 0) % #list) + 1
+    local target = list[state.index]
+    local r = xFindRemote("ForChangeCharacter")
+    local ok = false
+    if r then
+        pcall(function() r:FireServer(target.Name) end)
+        ok = true
+    else
+        ok = xEquipFromFolder("CharactersFolder", { target.Name }, nil, 10)
+    end
+    if ok then
+        AUTO.LastReason = "轮换角色：" .. target.Name
+        log("自动轮换角色：" .. target.Name)
+        xStatAdd("轮换角色", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 122. 自动皮肤
+----------------------------------------------------------------
+function autoSkinEquip()
+    if not AUTO.AutoSkinEquip then return false end
+    if AUTO.Paused then return false end
+    if not every("x_skinequip", tonumber(AUTO.SkinGap) or 30) then return false end
+    local ok = xEquipFromFolder("SkinsFolder", AUTO.SkinNames, nil, 30)
+    if ok then
+        AUTO.LastReason = "皮肤：已装备"
+        xStatAdd("皮肤装备", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 123. 自动饰品
+----------------------------------------------------------------
+function autoAccessoryEquip()
+    if not AUTO.AutoAccessoryEquip then return false end
+    if AUTO.Paused then return false end
+    if not every("x_accequip", tonumber(AUTO.AccessoryGap) or 30) then return false end
+    local ok = xEquipFromFolder("AccessoriesFolder", AUTO.AccessoryNames, nil, 30)
+    if ok then
+        AUTO.LastReason = "饰品：已装备"
+        xStatAdd("饰品装备", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 124. 自动表情
+----------------------------------------------------------------
+function autoEmoteUse()
+    if not AUTO.AutoEmoteUse then return false end
+    if AUTO.Paused then return false end
+    if not every("x_emote", tonumber(AUTO.EmoteGap) or 45) then return false end
+    local names = AUTO.EmoteNames or {}
+    if #names == 0 then return false end
+    local name = names[math.random(1, #names)]
+    local ok = xFire("Emote", name) or xFire("PlayEmote", name)
+    if ok then
+        AUTO.LastReason = "表情：" .. tostring(name)
+        log("自动表情：已播放 " .. tostring(name))
+        xStatAdd("表情", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 125. 自动疾跑
+----------------------------------------------------------------
+function autoSprint()
+    if not AUTO.AutoSprint then return false end
+    if AUTO.Paused then return false end
+    if not every("x_sprint", tonumber(AUTO.SprintGap) or 2) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local speed = tonumber(AUTO.SprintSpeed) or 32
+    local moving = false
+    local base = xRoot2()
+    if base then
+        local v = base.AssemblyLinearVelocity
+        moving = Vector3.new(v.X, 0, v.Z).Magnitude > 1
+    end
+    if moving and h.WalkSpeed < speed then
+        h.WalkSpeed = speed
+        AUTO.LastReason = "疾跑：速度 " .. xRound(speed)
+        return true
+    elseif not moving and h.WalkSpeed > speed then
+        h.WalkSpeed = tonumber(AUTO.WalkSpeed) or 16
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 126. 蹲伏闪避
+----------------------------------------------------------------
+function autoCrouchDodge()
+    if not AUTO.AutoCrouchDodge then return false end
+    if AUTO.Paused then return false end
+    if not every("x_crouch", tonumber(AUTO.CrouchGap) or 3) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 200)
+    if #list == 0 then return false end
+    pcall(function() h:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) end)
+    task.delay(0.4, function()
+        pcall(function()
+            if h and h.Parent then h:ChangeState(Enum.HumanoidStateType.Running) end
+        end)
+    end)
+    AUTO.LastReason = "蹲伏闪避：短暂降低受击"
+    xStatAdd("蹲伏闪避", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 127. 游泳保护
+----------------------------------------------------------------
+function autoSwimGuard()
+    if not AUTO.AutoSwimGuard then return false end
+    if AUTO.Paused then return false end
+    if not every("x_swim", tonumber(AUTO.SwimCheckGap) or 1.2) then return false end
+    local h = xHum2()
+    local base = xRoot2()
+    if not h or not base then return false end
+    local mat = tostring(h.FloorMaterial)
+    if not string.find(string.lower(mat), "water", 1, true) then return false end
+    xTp(base.Position + Vector3.new(0, 14, 0))
+    AUTO.LastReason = "游泳保护：已上浮"
+    xStatAdd("游泳保护", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 128. 移速同步（防止被服务器重置）
+----------------------------------------------------------------
+function autoSpeedSync()
+    if not AUTO.AutoSpeedSync then return false end
+    if AUTO.Paused then return false end
+    if not every("x_speedsync", tonumber(AUTO.SpeedSyncGap) or 1.5) then return false end
+    local h = xHum2()
+    if not h then return false end
+    if AUTO.LockMoveStats then
+        local want = tonumber(AUTO.WalkSpeed) or 16
+        if math.abs(h.WalkSpeed - want) > 0.5 then
+            h.WalkSpeed = want
+            AUTO.LastReason = "移速同步：" .. xRound(want)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 129. 跳跃力同步
+----------------------------------------------------------------
+function autoJumpBoost()
+    if not AUTO.AutoJumpBoost then return false end
+    if AUTO.Paused then return false end
+    if not every("x_jumpsync", tonumber(AUTO.JumpBoostGap) or 2) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local want = tonumber(AUTO.JumpPowerSync) or 60
+    if math.abs(h.JumpPower - want) > 0.5 then
+        h.JumpPower = want
+        AUTO.LastReason = "跳跃力同步：" .. xRound(want)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 130. 工具修理
+----------------------------------------------------------------
+function autoToolRepair()
+    if not AUTO.AutoToolRepair then return false end
+    if AUTO.Paused then return false end
+    if not every("x_toolrepair", tonumber(AUTO.ToolRepairGap) or 30) then return false end
+    local c = player.Character
+    if not c then return false end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ok = fireRemote("ShopSystem", "Repair", tool.Name) or xFire("Repair", tool.Name)
+    if ok then
+        AUTO.LastReason = "修理工具：" .. tool.Name
+        log("工具修理：已请求修理 " .. tool.Name)
+        xStatAdd("修理工具", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 131. 背包负重检查
+----------------------------------------------------------------
+function autoInventoryWeight()
+    if not AUTO.AutoInventoryWeight then return false end
+    if AUTO.Paused then return false end
+    if not every("x_weight", 10) then return false end
+    local cur, key = xNumAttr(player, AUTO.WeightNames or {})
+    if cur == nil then cur, key = xFindPlayerAttrNumber(AUTO.WeightNames or {}) end
+    if cur == nil then return false end
+    local max = nil
+    if key then
+        max = xFindPlayerAttrNumber({ tostring(key) .. "Max", "Max" .. tostring(key), "MaxWeight" })
+    end
+    local pct = max and max > 0 and cur / max * 100 or cur
+    AUTO.WeightPct = xRound(pct)
+    local limit = tonumber(AUTO.WeightMaxPct) or 85
+    if pct < limit then return false end
+    if AUTO.AutoSellJunk then
+        AUTO.SellGap = 1
+        autoSellJunk()
+    end
+    AUTO.LastReason = string.format("负重：%.0f%%（%s）", pct, tostring(key))
+    log(string.format("负重检查：%.0f%%，已触发清理", pct))
+    xStatAdd("负重清理", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 132. 自动合成
+----------------------------------------------------------------
+function autoCraftItem()
+    if not AUTO.AutoCraftItem then return false end
+    if AUTO.Paused then return false end
+    if not every("x_craft", tonumber(AUTO.CraftGap) or 15) then return false end
+    local list = AUTO.CraftItems or {}
+    if #list == 0 then return false end
+    local r = xFindRemote("Craft") or xFindRemote("Crafting") or xFindRemote("CraftItem")
+    if not r then return false end
+    local n = 0
+    for _, item in ipairs(list) do
+        local name = item
+        local amount = 1
+        if type(item) == "table" then
+            name = item.name or item[1]
+            amount = tonumber(item.amount or item[2]) or 1
+        end
+        local ok = pcall(function()
+            if r:IsA("RemoteFunction") then r:InvokeServer(name, amount)
+            else r:FireServer(name, amount) end
+        end)
+        if ok then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "合成：" .. n .. " 项"
+        log("自动合成：已请求 " .. n .. " 项")
+        xStatAdd("合成", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 133. 自动强化装备
+----------------------------------------------------------------
+function autoUpgradeItem()
+    if not AUTO.AutoUpgradeItem then return false end
+    if AUTO.Paused then return false end
+    if not every("x_itemupgrade", tonumber(AUTO.UpgradeGap) or 15) then return false end
+    local list = AUTO.UpgradeItems or {}
+    if #list == 0 then
+        local c = player.Character
+        local tool = c and c:FindFirstChildOfClass("Tool")
+        if tool then list = { tool.Name } end
+    end
+    if #list == 0 then return false end
+    local r = xFindRemote("UpgradeItem") or xFindRemote("Enhance") or xFindRemote("Upgrade")
+    if not r then return false end
+    local n = 0
+    for _, name in ipairs(list) do
+        local ok = pcall(function()
+            if r:IsA("RemoteFunction") then r:InvokeServer(name)
+            else r:FireServer(name) end
+        end)
+        if ok then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "强化装备：" .. n .. " 件"
+        log("自动强化：已请求 " .. n .. " 件")
+        xStatAdd("强化装备", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 134. 自动发起交易
+----------------------------------------------------------------
+function autoTradeRequest()
+    if not AUTO.AutoTradeRequest then return false end
+    if AUTO.Paused then return false end
+    if not every("x_trade", tonumber(AUTO.TradeGap) or 45) then return false end
+    local names = AUTO.TradeNames or {}
+    if #names == 0 then return false end
+    local r = xFindRemote("Trade") or xFindRemote("TradeRequest")
+    if not r then return false end
+    local n = 0
+    for _, name in ipairs(names) do
+        local target = nil
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= player and string.find(string.lower(plr.Name), string.lower(tostring(name)), 1, true) then
+                target = plr
+                break
+            end
+        end
+        if target then
+            pcall(function() r:FireServer(target) end)
+            n = n + 1
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "交易请求：" .. n .. " 人"
+        log("自动交易：已向 " .. n .. " 人发送请求")
+        xStatAdd("交易请求", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 135. 自动领取邮件
+----------------------------------------------------------------
+function autoMailClaim()
+    if not AUTO.AutoMailClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_mail", tonumber(AUTO.MailGap) or 60) then return false end
+    local names = { "Mail", "MailRemote", "ClaimMail", "MailBox" }
+    local n = 0
+    for _, name in ipairs(names) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then r:InvokeServer("Claim")
+                else r:FireServer("Claim") end
+            end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n == 0 then
+        local clicked = xClickButtonByName(pg, { "ClaimAll", "MailClaim", "CollectAll" }, "x_mailbtn", 60)
+        if clicked then n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "邮件：已领取"
+        log("自动邮件：已请求领取 " .. n .. " 项")
+        xStatAdd("领取邮件", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 136. 自动领取成就
+----------------------------------------------------------------
+function autoAchievementClaim()
+    if not AUTO.AutoAchievementClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_achievement", tonumber(AUTO.AchievementGap) or 60) then return false end
+    local names = { "Achievement", "Achievements", "AchievementRemote", "ClaimAchievement" }
+    local n = 0
+    for _, name in ipairs(names) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then r:InvokeServer("Claim")
+                else r:FireServer("Claim") end
+            end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n == 0 then
+        if xClickButtonByName(pg, { "Achievement", "成就" }, "x_achbtn", 60) then n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "成就：已领取"
+        log("自动成就：已请求领取 " .. n .. " 项")
+        xStatAdd("领取成就", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 137. 自动领取通行证
+----------------------------------------------------------------
+function autoSeasonPassClaim()
+    if not AUTO.AutoSeasonPassClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_seasonpass", tonumber(AUTO.SeasonPassGap) or 60) then return false end
+    if unlockPasses then
+        local ok = pcall(unlockPasses)
+        if ok then
+            AUTO.LastReason = "通行证：已请求领取"
+            log("自动通行证：已执行领取流程")
+            xStatAdd("领取通行证", 1)
+            return true
+        end
+    end
+    local names = { "SeasonPass", "BattlePass", "PassReward" }
+    for _, name in ipairs(names) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then r:InvokeServer("Claim")
+                else r:FireServer("Claim") end
+            end)
+            if ok then
+                AUTO.LastReason = "通行证：" .. name
+                log("自动通行证：已请求领取（" .. name .. "）")
+                xStatAdd("领取通行证", 1)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 138. 兑换码循环
+----------------------------------------------------------------
+function autoCodeRedeemLoop()
+    if not AUTO.AutoCodeRedeemLoop then return false end
+    if not every("x_codes", tonumber(AUTO.CodeRedeemGap) or 300) then return false end
+    if type(redeemCodes) ~= "function" then return false end
+    local ok = pcall(redeemCodes, true)
+    if ok then
+        AUTO.LastReason = "兑换码：已执行轮换"
+        log("兑换码循环：已提交当前选中的兑换码")
+        xStatAdd("兑换码", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 139. 每日商店刷新
+----------------------------------------------------------------
+function autoDailyShopRefresh()
+    if not AUTO.AutoDailyShopRefresh then return false end
+    if not every("x_shoprefresh", tonumber(AUTO.ShopRefreshGap) or 3600) then return false end
+    local ok = xFire("RefreshShop") or xFire("ShopRefresh") or fireRemote("ShopSystem", "Refresh")
+    if not ok then
+        ok = xClickButtonByName(pg, { "Refresh", "刷新" }, "x_refreshbtn", 3600)
+    end
+    if ok then
+        AUTO.LastReason = "商店刷新：已请求"
+        log("商店刷新：已请求刷新每日商店")
+        xStatAdd("商店刷新", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 IX：续航 / 掉落 / 场景机关 / 活动补充
+-- ============================================================
+----------------------------------------------------------------
+local X8_DEFAULTS = {
+    AutoShieldRegenWait = false, ShieldRegenHp = 60, ShieldRegenWait = 6,
+    AutoOutOfCombatRegen = false, OutOfCombatTime = 8,
+    AutoLootPriority = false, LootPriorityNames = {}, LootRange = 80,
+    AutoOpenAllPrompts = false, AllPromptRange = 18, AllPromptGap = 2.5,
+    AutoDoorOpen = false, DoorRange = 20, DoorGap = 2,
+    AutoGeneratorRepair = false, GeneratorRange = 25, GeneratorGap = 4,
+    AutoRescueNearby = false, RescueRange = 40, RescueGap = 2,
+    AutoUseBuffConsumable = false, BuffConsumableNames = { "Boost", "Potion", "Elixir" }, BuffConsumableGap = 45,
+    AutoDropJunk = false, DropJunkGap = 20, DropJunkNames = {},
+    AutoEquipBestArmor = false, ArmorEquipGap = 15,
+    AutoSellDuplicates = false, SellDuplicateGap = 30,
+    AutoBuyLimited = false, LimitedBuyGap = 30, LimitedItems = {},
+    AutoSkinGachaPlan = false, SkinGachaGap = 20, SkinGachaReserve = 3000,
+    AutoSpinWheel = false, SpinWheelGap = 60,
+    AutoDailyMissionClaim = false, DailyMissionGap = 45,
+    AutoRankedQueue = false, RankedGap = 8,
+    AutoWishlistScan = false, WishlistGap = 90, WishlistNames = {},
+    AutoAmmoPickup = false, AmmoPickupRange = 30, AmmoPickupGap = 3,
+    AutoCraftQueue = false, CraftQueueGap = 10, CraftQueueItems = {},
+    AutoPetFeed = false, PetFeedGap = 120,
+}
+
+for k, v in pairs(X8_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+----------------------------------------------------------------
+-- 140. 等盾恢复
+----------------------------------------------------------------
+function autoShieldRegenWait()
+    if not AUTO.AutoShieldRegenWait then return false end
+    if AUTO.Paused then return false end
+    if not every("x_shieldregen", 1) then return false end
+    local hp = xHpPct()
+    local threshold = tonumber(AUTO.ShieldRegenHp) or 60
+    if hp <= 0 or hp > threshold then
+        xSt("shieldregen").since = nil
+        return false
+    end
+    if #xEnemyList(tonumber(AUTO.Range) or 200) > 0 then
+        xSt("shieldregen").since = nil
+        return false
+    end
+    local state = xSt("shieldregen")
+    state.since = state.since or os.clock()
+    local wait = tonumber(AUTO.ShieldRegenWait) or 6
+    if os.clock() - state.since < wait then return false end
+    state.since = nil
+    local n = xUseNamedRemote("Potions", AUTO.ShieldNames or {})
+    if n == 0 then
+        n = xUseNamedRemote("Boosts", AUTO.ShieldNames or {})
+    end
+    AUTO.LastReason = "等盾：已补充护盾"
+    log("等盾恢复：血量 " .. xRound(hp) .. "%，已补充护盾")
+    xStatAdd("等盾恢复", 1)
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 141. 脱战回血
+----------------------------------------------------------------
+function autoOutOfCombatRegen()
+    if not AUTO.AutoOutOfCombatRegen then return false end
+    if AUTO.Paused then return false end
+    if not every("x_ooc", 1) then return false end
+    local state = xSt("ooc")
+    local enemies = #xEnemyList(tonumber(AUTO.Range) or 300)
+    if enemies > 0 then
+        state.since = nil
+        return false
+    end
+    state.since = state.since or os.clock()
+    local wait = tonumber(AUTO.OutOfCombatTime) or 8
+    if os.clock() - state.since < wait then return false end
+    local hp = xHpPct()
+    if hp <= 0 or hp >= 98 then return false end
+    buyHP()
+    usePotion()
+    local n = xUseNamedRemote("Potions", AUTO.BandageNames or {})
+    AUTO.LastReason = string.format("脱战回血：%.0f%%", hp)
+    if every("x_ooc_log", 15) then
+        log(string.format("脱战回血：血量 %.0f%%，已使用恢复手段", hp))
+        xStatAdd("脱战回血", 1)
+    end
+    return n > 0 or true
+end
+
+----------------------------------------------------------------
+-- 142. 掉落优先级（只捡指定物品）
+----------------------------------------------------------------
+function autoLootPriority()
+    if not AUTO.AutoLootPriority then return false end
+    if AUTO.Paused then return false end
+    if not every("x_lootprio", tonumber(AUTO.PickupGap) or 2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.LootRange) or 80
+    local names = AUTO.LootPriorityNames or {}
+    local best, bestDist = nil, range
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("BasePart") or d:IsA("Model") then
+                local low = string.lower(d.Name)
+                local hit = (#names == 0)
+                if not hit then
+                    for _, n in ipairs(names) do
+                        if string.find(low, string.lower(tostring(n)), 1, true) then hit = true break end
+                    end
+                end
+                if hit then
+                    local p = xPosOf(d)
+                    if p then
+                        local dist = (p - base.Position).Magnitude
+                        if dist < bestDist then
+                            best, bestDist = { obj = d, pos = p }, dist
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    if not best then return false end
+    xTp(best.pos + Vector3.new(0, 2, 0))
+    AUTO.LastReason = string.format("优先拾取：%s（%d 格）", best.obj.Name, xRound(bestDist))
+    xStatAdd("优先拾取", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 143. 触发附近所有提示
+----------------------------------------------------------------
+function autoOpenAllPrompts()
+    if not AUTO.AutoOpenAllPrompts then return false end
+    if AUTO.Paused then return false end
+    if not every("x_allprompt", tonumber(AUTO.AllPromptGap) or 2.5) then return false end
+    local list = xNearPrompts(tonumber(AUTO.AllPromptRange) or 18)
+    if #list == 0 then return false end
+    local n = 0
+    for _, p in ipairs(list) do
+        if n >= 2 then break end
+        xUsePrompt(p.prompt)
+        n = n + 1
+    end
+    if n > 0 then
+        AUTO.LastReason = "全提示：触发 " .. n .. " 个"
+        log("全提示：已触发 " .. n .. " 个附近提示")
+        xStatAdd("全提示", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 144. 自动开门
+----------------------------------------------------------------
+function autoDoorOpen()
+    if not AUTO.AutoDoorOpen then return false end
+    if AUTO.Paused then return false end
+    if not every("x_door", tonumber(AUTO.DoorGap) or 2) then return false end
+    for _, p in ipairs(xNearPrompts(tonumber(AUTO.DoorRange) or 20)) do
+        local low = string.lower(tostring(p.name))
+        if string.find(low, "door", 1, true) or string.find(low, "gate", 1, true)
+            or string.find(low, "open", 1, true) then
+            xUsePrompt(p.prompt)
+            AUTO.LastReason = "开门：" .. p.name
+            xStatAdd("开门", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 145. 自动修发电机 / 机关
+----------------------------------------------------------------
+function autoGeneratorRepair()
+    if not AUTO.AutoGeneratorRepair then return false end
+    if AUTO.Paused then return false end
+    if not every("x_generator", tonumber(AUTO.GeneratorGap) or 4) then return false end
+    for _, p in ipairs(xNearPrompts(tonumber(AUTO.GeneratorRange) or 25)) do
+        local low = string.lower(tostring(p.name))
+        if string.find(low, "generator", 1, true) or string.find(low, "repair", 1, true)
+            or string.find(low, "fix", 1, true) or string.find(low, "machine", 1, true) then
+            xUsePrompt(p.prompt, true)
+            AUTO.LastReason = "机关：" .. p.name
+            log("自动机关：已触发 " .. p.name)
+            xStatAdd("机关操作", 1)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 146. 就近救援
+----------------------------------------------------------------
+function autoRescueNearby()
+    if not AUTO.AutoRescueNearby then return false end
+    if AUTO.Paused then return false end
+    if not every("x_rescue", tonumber(AUTO.RescueGap) or 2) then return false end
+    local range = tonumber(AUTO.RescueRange) or 40
+    local target = nil
+    for _, a in ipairs(xAllyList(range)) do
+        if a.hp <= 0 then
+            target = a
+            break
+        end
+    end
+    if not target then return false end
+    local base = xRoot2()
+    if base and target.dist > 6 then
+        local dir = target.pos - base.Position
+        if dir.Magnitude > 0.01 then
+            xTp(target.pos - dir.Unit * 2 + Vector3.new(0, 3, 0), target.pos)
+        end
+    end
+    local n = 0
+    pcall(function() n = tryRevive() end)
+    AUTO.LastReason = "就近救援：" .. target.player.Name
+    if n and n > 0 then
+        log("就近救援：正在救 " .. target.player.Name)
+        xStatAdd("就近救援", n)
+    end
+    return true
+end
+
+----------------------------------------------------------------
+-- 147. 自动使用增益消耗品
+----------------------------------------------------------------
+function autoUseBuffConsumable()
+    if not AUTO.AutoUseBuffConsumable then return false end
+    if AUTO.Paused then return false end
+    if not every("x_buffconsume", tonumber(AUTO.BuffConsumableGap) or 45) then return false end
+    local names = AUTO.BuffConsumableNames or {}
+    local n = xUseNamedRemote("Potions", names)
+    if n == 0 then n = xUseNamedRemote("UseItems", names) end
+    if n == 0 then n = xUseNamedRemote("Boosts", names) end
+    if n > 0 then
+        AUTO.LastReason = "增益消耗品：已使用 " .. n .. " 个"
+        log("增益消耗品：已使用 " .. n .. " 个")
+        xStatAdd("增益消耗品", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 148. 丢弃杂物
+----------------------------------------------------------------
+function autoDropJunk()
+    if not AUTO.AutoDropJunk then return false end
+    if AUTO.Paused then return false end
+    if not every("x_dropjunk", tonumber(AUTO.DropJunkGap) or 20) then return false end
+    local names = AUTO.DropJunkNames or {}
+    if #names == 0 then return false end
+    local bp = player:FindFirstChild("Backpack")
+    if not bp then return false end
+    local n = 0
+    for _, t in ipairs(bp:GetChildren()) do
+        if t:IsA("Tool") then
+            for _, name in ipairs(names) do
+                if string.find(string.lower(t.Name), string.lower(tostring(name)), 1, true) then
+                    local ok = pcall(function() t.Parent = workspace end)
+                    if not ok then
+                        ok = xFire("Drop", t.Name)
+                    end
+                    if ok then n = n + 1 end
+                    break
+                end
+            end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "丢弃杂物：" .. n .. " 件"
+        log("丢弃杂物：已丢弃 " .. n .. " 件")
+        xStatAdd("丢弃杂物", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 149. 自动换最佳护甲
+----------------------------------------------------------------
+function autoEquipBestArmor()
+    if not AUTO.AutoEquipBestArmor then return false end
+    if AUTO.Paused then return false end
+    if not every("x_armorequip", tonumber(AUTO.ArmorEquipGap) or 15) then return false end
+    local bp = player:FindFirstChild("Backpack")
+    if not bp then return false end
+    local best, bestScore = nil, -math.huge
+    for _, t in ipairs(bp:GetChildren()) do
+        if t:IsA("Tool") then
+            local low = string.lower(t.Name)
+            if string.find(low, "armor", 1, true) or string.find(low, "vest", 1, true)
+                or string.find(low, "helmet", 1, true) or string.find(low, "shield", 1, true) then
+                local score = 0
+                for _, key in ipairs({ "Armor", "Defense", "Protection", "ArmorValue" }) do
+                    local ok, v = pcall(function() return t:GetAttribute(key) end)
+                    if ok and tonumber(v) then score = score + tonumber(v) break end
+                end
+                if score > bestScore then best, bestScore = t, score end
+            end
+        end
+    end
+    if not best then return false end
+    if xEquipTool(best) then
+        AUTO.LastReason = "最佳护甲：" .. best.Name
+        log(string.format("自动护甲：已装备 %s（评分 %d）", best.Name, xRound(bestScore)))
+        xStatAdd("装备护甲", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 150. 出售重复物品
+----------------------------------------------------------------
+function autoSellDuplicates()
+    if not AUTO.AutoSellDuplicates then return false end
+    if AUTO.Paused then return false end
+    if not every("x_dupes", tonumber(AUTO.SellDuplicateGap) or 30) then return false end
+    local bp = player:FindFirstChild("Backpack")
+    if not bp then return false end
+    local count = {}
+    for _, t in ipairs(bp:GetChildren()) do
+        if t:IsA("Tool") then
+            count[t.Name] = (count[t.Name] or 0) + 1
+        end
+    end
+    local sold = 0
+    for name, n in pairs(count) do
+        if n > 1 then
+            local ok = fireRemote("ShopSystem", "Sell", name)
+            if not ok then ok = xFire("Sell", name) end
+            if ok then sold = sold + (n - 1) end
+        end
+    end
+    if sold > 0 then
+        AUTO.LastReason = "出售重复：" .. sold .. " 件"
+        log("出售重复：已出售 " .. sold .. " 件重复物品")
+        xStatAdd("出售重复", sold)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 151. 限时商品购买
+----------------------------------------------------------------
+function autoBuyLimited()
+    if not AUTO.AutoBuyLimited then return false end
+    if AUTO.Paused then return false end
+    if not every("x_limited", tonumber(AUTO.LimitedBuyGap) or 30) then return false end
+    local items = AUTO.LimitedItems or {}
+    if #items == 0 then return false end
+    local n = 0
+    for _, item in ipairs(items) do
+        local ok = fireRemote("ShopSystem", "Buy", item)
+        if not ok then ok = xFire("BuyLimited", item) end
+        if ok then n = n + 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "限时购买：" .. n .. " 件"
+        log("限时购买：已购买 " .. n .. " 件限时商品")
+        xStatAdd("限时购买", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 152. 皮肤扭蛋计划
+----------------------------------------------------------------
+function autoSkinGachaPlan()
+    if not AUTO.AutoSkinGachaPlan then return false end
+    if AUTO.Paused then return false end
+    if not every("x_skingacha", tonumber(AUTO.SkinGachaGap) or 20) then return false end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    local reserve = tonumber(AUTO.SkinGachaReserve) or 3000
+    if money ~= nil and money <= reserve then return false end
+    local ok = xFire("GachaSkins", 1) or xFire("GachaSkins", "spin")
+    if ok then
+        AUTO.LastReason = "皮肤扭蛋：已抽取"
+        log("皮肤扭蛋：已抽一次")
+        xStatAdd("皮肤扭蛋", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 153. 转盘
+----------------------------------------------------------------
+function autoSpinWheel()
+    if not AUTO.AutoSpinWheel then return false end
+    if AUTO.Paused then return false end
+    if not every("x_wheel", tonumber(AUTO.SpinWheelGap) or 60) then return false end
+    local names = { "SpinWheel", "Wheel", "LuckyWheel", "Spin" }
+    for _, name in ipairs(names) do
+        if xFire(name) then
+            AUTO.LastReason = "转盘：" .. name
+            log("自动转盘：已转动（" .. name .. "）")
+            xStatAdd("转盘", 1)
+            return true
+        end
+    end
+    if xClickButtonByName(pg, { "Spin", "Wheel" }, "x_wheelbtn", 60) then
+        AUTO.LastReason = "转盘：已点击"
+        log("自动转盘：已点击转盘按钮")
+        xStatAdd("转盘", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 154. 每日任务领取
+----------------------------------------------------------------
+function autoDailyMissionClaim()
+    if not AUTO.AutoDailyMissionClaim then return false end
+    if AUTO.Paused then return false end
+    if not every("x_dailymission", tonumber(AUTO.DailyMissionGap) or 45) then return false end
+    local names = { "DailyMission", "DailyQuest", "DailyTasks", "MissionRemote" }
+    local n = 0
+    for _, name in ipairs(names) do
+        local r = xFindRemote(name)
+        if r then
+            local ok = pcall(function()
+                if r:IsA("RemoteFunction") then r:InvokeServer("Claim")
+                else r:FireServer("Claim") end
+            end)
+            if ok then n = n + 1 end
+        end
+    end
+    if n == 0 then
+        if xClickButtonByName(pg, { "DailyMission", "Daily", "日常" }, "x_dailymissionbtn", 45) then n = 1 end
+    end
+    if n > 0 then
+        AUTO.LastReason = "每日任务：已领取"
+        log("每日任务：已请求领取 " .. n .. " 项")
+        xStatAdd("每日任务", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 155. 排位匹配
+----------------------------------------------------------------
+function autoRankedQueue()
+    if not AUTO.AutoRankedQueue then return false end
+    if AUTO.Paused then return false end
+    if inMatch() then return false end
+    if not every("x_ranked", tonumber(AUTO.RankedGap) or 8) then return false end
+    local ok = xFire("Ranked", "Queue") or xFire("StartRanked") or xFire("Matchmaking", "Ranked")
+    if not ok then
+        ok = xClickButtonByName(pg, { "Ranked", "排位" }, "x_rankedbtn", 8)
+    end
+    if ok then
+        AUTO.LastReason = "排位：已请求匹配"
+        log("排位匹配：已请求进入排位")
+        xStatAdd("排位匹配", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 156. 心愿单扫描
+----------------------------------------------------------------
+function autoWishlistScan()
+    if not AUTO.AutoWishlistScan then return false end
+    if not every("x_wishlist", tonumber(AUTO.WishlistGap) or 90) then return false end
+    local names = AUTO.WishlistNames or {}
+    if #names == 0 then
+        log("心愿单扫描：未配置心愿物品")
+        return false
+    end
+    local money = xFindPlayerAttrNumber(AUTO.CurrencyNames or { "Money", "Cash", "Coins", "Gold" })
+    local found = {}
+    pcall(function()
+        for _, d in ipairs(pg:GetDescendants()) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton")) and d.Visible and d.Text then
+                for _, w in ipairs(names) do
+                    if string.find(string.lower(d.Text), string.lower(tostring(w)), 1, true) then
+                        found[#found + 1] = w
+                    end
+                end
+            end
+        end
+    end)
+    AUTO.WishlistHits = #found
+    if #found > 0 then
+        log(string.format("心愿单扫描：发现 %d 个心愿物品（余额 %s）", #found,
+            money ~= nil and xFmt(money) or "未知"))
+        xStatAdd("心愿扫描", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 157. 自动捡弹药
+----------------------------------------------------------------
+function autoAmmoPickup()
+    if not AUTO.AutoAmmoPickup then return false end
+    if AUTO.Paused then return false end
+    if not every("x_ammopick", tonumber(AUTO.AmmoPickupGap) or 3) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.AmmoPickupRange) or 30
+    local best, bestDist = nil, range
+    pcall(function()
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("BasePart") then
+                local low = string.lower(d.Name)
+                if string.find(low, "ammo", 1, true) or string.find(low, "bullet", 1, true)
+                    or string.find(low, "magazine", 1, true) then
+                    local dist = (d.Position - base.Position).Magnitude
+                    if dist < bestDist then
+                        best, bestDist = d, dist
+                    end
+                end
+            end
+        end
+    end)
+    if not best then return false end
+    xTp(best.Position + Vector3.new(0, 2, 0))
+    AUTO.LastReason = "捡弹药：" .. best.Name
+    xStatAdd("捡弹药", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 158. 合成队列
+----------------------------------------------------------------
+function autoCraftQueue()
+    if not AUTO.AutoCraftQueue then return false end
+    if AUTO.Paused then return false end
+    if not every("x_craftqueue", tonumber(AUTO.CraftQueueGap) or 10) then return false end
+    local list = AUTO.CraftQueueItems or {}
+    if #list == 0 then return false end
+    local state = xSt("craftqueue")
+    state.index = (state.index or 0) + 1
+    if state.index > #list then state.index = 1 end
+    local item = list[state.index]
+    local name, amount = item, 1
+    if type(item) == "table" then
+        name = item.name or item[1]
+        amount = tonumber(item.amount or item[2]) or 1
+    end
+    local ok = xFire("Craft", name, amount) or xFire("CraftItem", name, amount)
+    if ok then
+        AUTO.LastReason = "合成队列：" .. tostring(name)
+        log("合成队列：已合成 " .. tostring(name) .. " × " .. amount)
+        xStatAdd("合成队列", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 159. 自动喂养宠物
+----------------------------------------------------------------
+function autoPetFeed()
+    if not AUTO.AutoPetFeed then return false end
+    if AUTO.Paused then return false end
+    if not every("x_petfeed", tonumber(AUTO.PetFeedGap) or 120) then return false end
+    local ok = xFire("FeedPet") or xFire("PetFeed") or xFire("Feed")
+    if not ok then
+        ok = xClickButtonByName(pg, { "Feed", "PetFeed" }, "x_petfeedbtn", 120)
+    end
+    if ok then
+        AUTO.LastReason = "宠物喂养：已请求"
+        log("宠物喂养：已请求喂养")
+        xStatAdd("宠物喂养", 1)
+    end
+    return ok
+end
+
+-- [[EXT2-BATCH8-END]]
+
+-- [[EXT2-BATCH7-END]]
+
+-- [[EXT2-BATCH6-END]]
+
+-- [[EXT2-BATCH5-END]]
+
+-- [[EXT2-BATCH4-END]]
+
+-- [[EXT2-BATCH3-END]]
+
+-- [[EXT2-BATCH2-END]]
+
+-- [[EXT2-BATCH1-END]]
+
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 X：战斗补强 / 生存续航 / 活动日常（160 - 195）
+-- ============================================================
+----------------------------------------------------------------
+local X10_DEFAULTS = {
+    AutoUseReviveItem = false, ReviveItemGap = 2,
+    AutoRevivePromptScan = false, RevivePromptRange = 25, RevivePromptGap = 2,
+    AutoHealPriority = false, HealPriorityHp = 55, HealPriorityGap = 1.5,
+    AutoSecondWind = false, SecondWindHp = 20, SecondWindGap = 12,
+    AutoPositionAnchor = false, AnchorDrift = 60, AnchorGap = 3,
+    AutoFocusTargetLock = false, FocusLockTime = 6,
+    AutoAttackGapFill = false, AttackGapFill = 0.2,
+    AutoReloadCycle = false, ReloadCycleGap = 1.2,
+    AutoWeaponSwapLow = false, WeaponSwapGap = 2,
+    AutoDodgeRoll = false, DodgeRollRange = 14, DodgeRollGap = 0.8,
+    AutoBlockGuard = false, BlockGuardHp = 45, BlockGuardGap = 1.5,
+    AutoCoverUse = false, CoverRange = 30, CoverGap = 2.5,
+    AutoSuppressiveFire = false, SuppressEnemyCount = 2, SuppressGap = 0.3,
+    AutoSnipeFar = false, SnipeMinDist = 60, SnipeGap = 1.5,
+    AutoMeleeClose = false, MeleeCloseDist = 12, MeleeGap = 1,
+    AutoEliteFocus = false, EliteGap = 2,
+    AutoAddClear = false, AddClearGap = 1.2,
+    AutoRangedKite = false, RangedKiteMin = 30, RangedKiteMax = 50, RangedKiteGap = 1.2,
+    AutoSummonAssist = false, SummonGap = 20,
+    AutoTurretPlace = false, TurretGap = 25,
+    AutoTrapPlace = false, TrapGap = 18,
+    AutoConsumeCooldown = false, ConsumeCooldownGap = 8,
+    AutoBuffStack = false, BuffStackGap = 30, BuffStackNames = {},
+    AutoDebuffApply = false, DebuffGap = 6,
+    AutoStatusClear = false, StatusClearGap = 4,
+    AutoShieldBreak = false, ShieldBreakGap = 2,
+    AutoBossMechanic = false, BossMechanicGap = 3,
+    AutoWavePrep = false, WavePrepGap = 5,
+    AutoIntermissionLoot = false, IntermissionGap = 2.5,
+    AutoSafeSpotRotate = false, SafeSpotCount = 3, SafeSpotGap = 6,
+    AutoStamina = false, StaminaMin = 20, StaminaGap = 1,
+    AutoFoodBuff = false, FoodBuffGap = 60, FoodBuffNames = {},
+    AutoDailyLogin = false, DailyLoginGap = 3600,
+    AutoFriendGift = false, FriendGiftGap = 600, FriendGiftNames = {},
+    AutoGuildCheckIn = false, GuildCheckInGap = 600,
+    AutoLeaderboardCheck = false, LeaderboardGap = 120,
+}
+for k, v in pairs(X10_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
+
+----------------------------------------------------------------
+-- 160. 自动使用复活道具
+----------------------------------------------------------------
+function autoUseReviveItem()
+    if not AUTO.AutoUseReviveItem then return false end
+    if AUTO.Paused then return false end
+    if not every("x_reviveitem", tonumber(AUTO.ReviveItemGap) or 2) then return false end
+    local h = xHum2()
+    if not h or h.Health > 0 then return false end
+    local ok = xFire("UseRevive") or xFire("ReviveItem") or xFire("RequestRevive")
+    if not ok then
+        ok = xUseNamedRemote("UseItems", { "Revive", "Revival", "Phoenix" }) > 0
+    end
+    if not ok then
+        local prompt = xFindPromptByKeyword and xFindPromptByKeyword("revive")
+        if prompt then ok = xUsePrompt(prompt) end
+    end
+    if ok then
+        AUTO.LastReason = "复活道具：已使用"
+        log("复活道具：角色倒下，已尝试使用复活道具")
+        xStatAdd("复活道具", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 161. 扫描复活提示
+----------------------------------------------------------------
+function autoRevivePromptScan()
+    if not AUTO.AutoRevivePromptScan then return false end
+    if AUTO.Paused then return false end
+    if not every("x_reviveprompt", tonumber(AUTO.RevivePromptGap) or 2) then return false end
+    local range = tonumber(AUTO.RevivePromptRange) or 25
+    local n = 0
+    for _, p in ipairs(xNearPrompts(range)) do
+        local low = string.lower(p.Name)
+        local act = tostring(p.ActionText or ""):lower()
+        if string.find(low, "revive", 1, true) or string.find(act, "revive", 1, true) then
+            if xUsePrompt(p) then n = n + 1 end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "复活提示：已触发 " .. n .. " 个"
+        log("复活提示：已触发 " .. n .. " 个")
+        xStatAdd("复活提示", n)
+    end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 162. 治疗优先级
+----------------------------------------------------------------
+function autoHealPriority()
+    if not AUTO.AutoHealPriority then return false end
+    if AUTO.Paused then return false end
+    if not every("x_healprio", tonumber(AUTO.HealPriorityGap) or 1.5) then return false end
+    local threshold = tonumber(AUTO.HealPriorityHp) or 55
+    local best, bestPct = nil, 101
+    for _, a in ipairs(xAllyList(tonumber(AUTO.Range) or 200)) do
+        if a.maxhp > 0 and a.hp > 0 then
+            local pct = a.hp / a.maxhp * 100
+            if pct < bestPct then best, bestPct = a, pct end
+        end
+    end
+    local myPct = xHpPct()
+    if myPct > 0 and myPct < bestPct then
+        best, bestPct = nil, myPct
+    end
+    if bestPct > threshold then return false end
+    if best then
+        local ok = fireRemote("Heal", best.player) or fireRemote("HealPlayer", best.player)
+        if not ok then ok = xUseNamedRemote("Heals", { "Heal", "Medkit" }) > 0 end
+        if ok then
+            AUTO.LastReason = string.format("治疗优先级：%s（%.0f%%）", best.player.Name, bestPct)
+            log(string.format("治疗优先级：%s 血量 %.0f%%，已治疗", best.player.Name, bestPct))
+            xStatAdd("治疗队友", 1)
+            return true
+        end
+    else
+        local n = xUseNamedRemote("Potions", AUTO.HealNames or { "Heal", "Medkit", "Bandage" })
+        if n > 0 then
+            AUTO.LastReason = string.format("治疗优先级：自身 %.0f%%，已治疗", myPct)
+            log(string.format("治疗优先级：自身血量 %.0f%%，已用药", myPct))
+            xStatAdd("自我治疗", n)
+            return true
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 163. 濒死护盾
+----------------------------------------------------------------
+function autoSecondWind()
+    if not AUTO.AutoSecondWind then return false end
+    if AUTO.Paused then return false end
+    if not every("x_secondwind", tonumber(AUTO.SecondWindGap) or 12) then return false end
+    local pct = xHpPct()
+    if pct <= 0 or pct > (tonumber(AUTO.SecondWindHp) or 20) then return false end
+    local n = xUseNamedRemote("Boosts", { "Shield", "Barrier", "SecondWind" })
+    if n == 0 then n = xUseNamedRemote("Potions", { "Shield", "Barrier" }) end
+    if n > 0 then
+        AUTO.LastReason = "濒死护盾：已开启"
+        log(string.format("濒死护盾：血量 %.0f%%，已开启护盾", pct))
+        xStatAdd("濒死护盾", 1)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 164. 站位锚点
+----------------------------------------------------------------
+function autoPositionAnchor()
+    if not AUTO.AutoPositionAnchor then return false end
+    if AUTO.Paused then return false end
+    if not every("x_anchor", tonumber(AUTO.AnchorGap) or 3) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local st = xSt("anchor")
+    if not st.pos then
+        st.pos = base.Position
+        return false
+    end
+    local drift = (base.Position - st.pos).Magnitude
+    if drift <= (tonumber(AUTO.AnchorDrift) or 60) then return false end
+    if #xEnemyList(tonumber(AUTO.Range) or 200) > 0 then
+        st.pos = base.Position
+        return false
+    end
+    xTp(st.pos + Vector3.new(0, 4, 0))
+    AUTO.LastReason = string.format("站位锚点：偏离 %.0f 格，已归位", drift)
+    log(string.format("站位锚点：偏离 %.0f 格，已返回锚点", drift))
+    xStatAdd("归位", 1)
+    st.pos = base.Position
+    return true
+end
+
+----------------------------------------------------------------
+-- 165. 目标锁定保持
+----------------------------------------------------------------
+function autoFocusTargetLock()
+    if not AUTO.AutoFocusTargetLock then return false end
+    if AUTO.Paused then return false end
+    local st = xSt("focuslock")
+    local now = os.clock()
+    if AUTO.Target and st.name == AUTO.Target and st.until_ and now < st.until_ then
+        return false
+    end
+    local enemy = xPickTarget(tonumber(AUTO.Range) or 200)
+    if enemy then
+        st.name = enemy.model.Name
+        st.until_ = now + (tonumber(AUTO.FocusLockTime) or 6)
+        AUTO.Target = enemy.model.Name
+        return true
+    end
+    st.name = nil
+    st.until_ = nil
+    return false
+end
+
+----------------------------------------------------------------
+-- 166. 攻击间隔填充
+----------------------------------------------------------------
+function autoAttackGapFill()
+    if not AUTO.AutoAttackGapFill then return false end
+    if AUTO.Paused then return false end
+    if not AUTO.AutoFight and not AUTO.AutoAim then return false end
+    if not every("x_attackfill", tonumber(AUTO.AttackGapFill) or 0.2) then return false end
+    local c = myChar()
+    if not c then return false end
+    local tool = c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ok = pcall(function() tool:Activate() end)
+    if ok then
+        xStatAdd("补攻击", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 167. 换弹循环
+----------------------------------------------------------------
+function autoReloadCycle()
+    if not AUTO.AutoReloadCycle then return false end
+    if AUTO.Paused then return false end
+    if not every("x_reloadcycle", tonumber(AUTO.ReloadCycleGap) or 1.2) then return false end
+    local c = myChar()
+    local tool = c and c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ammo = tool:GetAttribute("Ammo") or tool:GetAttribute("Clip") or tool:GetAttribute("Mag")
+    local maxAmmo = tool:GetAttribute("MaxAmmo") or tool:GetAttribute("ClipSize")
+    if ammo == nil or maxAmmo == nil then return false end
+    if tonumber(ammo) > 0 and tonumber(ammo) >= tonumber(maxAmmo) * 0.3 then return false end
+    local prompt = xFindPromptByKeyword and xFindPromptByKeyword("reload")
+    local ok = false
+    if prompt then ok = xUsePrompt(prompt) end
+    if not ok then ok = xFire("Reload") or xFire("RequestReload") end
+    if ok then
+        xStatAdd("换弹", 1)
+        AUTO.LastReason = "换弹循环：已换弹"
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 168. 低耐久换武器
+----------------------------------------------------------------
+function autoWeaponSwapLow()
+    if not AUTO.AutoWeaponSwapLow then return false end
+    if AUTO.Paused then return false end
+    if not every("x_weaponswap", tonumber(AUTO.WeaponSwapGap) or 2) then return false end
+    local c = myChar()
+    if not c then return false end
+    local cur = c:FindFirstChildOfClass("Tool")
+    if not cur then return false end
+    local dur = cur:GetAttribute("Durability") or cur:GetAttribute("Durab") or cur:GetAttribute("DurabilityLeft")
+    if dur == nil then return false end
+    local maxDur = cur:GetAttribute("MaxDurability") or cur:GetAttribute("MaxDurab")
+    local pct = maxDur and tonumber(maxDur) > 0 and (tonumber(dur) / tonumber(maxDur) * 100) or tonumber(dur)
+    if pct == nil or pct > 20 then return false end
+    for _, t in ipairs(c:GetChildren()) do
+        if t:IsA("Tool") and t ~= cur then
+            local d2 = t:GetAttribute("Durability") or t:GetAttribute("Durab")
+            if d2 == nil or tonumber(d2) > pct then
+                local ok = xEquipTool(t)
+                if ok then
+                    AUTO.LastReason = "武器耐久：" .. cur.Name .. " 过低，已换 " .. t.Name
+                    log("武器耐久：" .. cur.Name .. " 过低，已切换到 " .. t.Name)
+                    xStatAdd("换武器", 1)
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 169. 翻滚闪避
+----------------------------------------------------------------
+function autoDodgeRoll()
+    if not AUTO.AutoDodgeRoll then return false end
+    if AUTO.Paused then return false end
+    if not every("x_dodgeroll", tonumber(AUTO.DodgeRollGap) or 0.8) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.DodgeRollRange) or 14
+    local threat = nil
+    for _, e in ipairs(xEnemyList(range)) do
+        threat = e
+        break
+    end
+    if not threat then return false end
+    local dir = base.Position - threat.pos
+    if dir.Magnitude <= 0 then dir = Vector3.new(1, 0, 0) end
+    local target = base.Position + dir.Unit * 10 + Vector3.new(0, 2, 0)
+    local ok = xTp(target)
+    if ok then
+        AUTO.LastReason = "翻滚闪避：已拉开距离"
+        xStatAdd("翻滚", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 170. 格挡保护
+----------------------------------------------------------------
+function autoBlockGuard()
+    if not AUTO.AutoBlockGuard then return false end
+    if AUTO.Paused then return false end
+    if not every("x_blockguard", tonumber(AUTO.BlockGuardGap) or 1.5) then return false end
+    local pct = xHpPct()
+    if pct <= 0 or pct > (tonumber(AUTO.BlockGuardHp) or 45) then return false end
+    local c = myChar()
+    local tool = c and xFindTool("block")
+    if tool then
+        local ok = xActivateTool(tool)
+        if ok then
+            AUTO.LastReason = "格挡保护：已举盾"
+            xStatAdd("格挡", 1)
+            return true
+        end
+    end
+    local prompt = xFindPromptByKeyword and xFindPromptByKeyword("block")
+    if prompt then return xUsePrompt(prompt) end
+    return false
+end
+
+----------------------------------------------------------------
+-- 171. 掩体利用
+----------------------------------------------------------------
+function autoCoverUse()
+    if not AUTO.AutoCoverUse then return false end
+    if AUTO.Paused then return false end
+    if not every("x_coveruse", tonumber(AUTO.CoverGap) or 2.5) then return false end
+    local base = xRoot2()
+    if not base or xHpPct() > 60 then return false end
+    local range = tonumber(AUTO.CoverRange) or 30
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = { myChar() }
+    local bestPos, bestDist = nil, range
+    for i = 1, 8 do
+        local ang = math.rad(i * 45)
+        local dir = Vector3.new(math.cos(ang), 0, math.sin(ang))
+        local hit = workspace:Raycast(base.Position, dir * range, rayParams)
+        if hit and hit.Position then
+            local d = (hit.Position - base.Position).Magnitude
+            if d < bestDist then
+                bestPos = hit.Position - dir.Unit * 3 + Vector3.new(0, 3, 0)
+                bestDist = d
+            end
+        end
+    end
+    if bestPos then
+        local ok = xTp(bestPos)
+        if ok then
+            AUTO.LastReason = "掩体利用：已贴身掩体"
+            xStatAdd("掩体", 1)
+        end
+        return ok
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 172. 压制射击
+----------------------------------------------------------------
+function autoSuppressiveFire()
+    if not AUTO.AutoSuppressiveFire then return false end
+    if AUTO.Paused then return false end
+    if not every("x_suppress", tonumber(AUTO.SuppressGap) or 0.3) then return false end
+    local need = tonumber(AUTO.SuppressEnemyCount) or 2
+    local list = xEnemyList(tonumber(AUTO.Range) or 200)
+    if #list < need then return false end
+    local c = myChar()
+    local tool = c and c:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+    local ok = pcall(function() tool:Activate() end)
+    if ok then
+        AUTO.LastReason = "压制射击：" .. #list .. " 个目标"
+        xStatAdd("压制射击", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 173. 远程点杀
+----------------------------------------------------------------
+function autoSnipeFar()
+    if not AUTO.AutoSnipeFar then return false end
+    if AUTO.Paused then return false end
+    if not every("x_snipfar", tonumber(AUTO.SnipeGap) or 1.5) then return false end
+    local minDist = tonumber(AUTO.SnipeMinDist) or 60
+    local best, bestD = nil, -1
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 300)) do
+        if e.dist >= minDist and e.dist > bestD then
+            best, bestD = e, e.dist
+        end
+    end
+    if not best then return false end
+    if AUTO.AutoAim then
+        local okAim = pcall(function()
+            local bb = bot()
+            if bb then
+                bb.Enabled = true
+                bb.AimPosition = best.pos + Vector3.new(0, 1.2, 0)
+            end
+        end)
+        if not okAim then return false end
+    end
+    local c = myChar()
+    local tool = c and c:FindFirstChildOfClass("Tool")
+    if tool then pcall(function() tool:Activate() end) end
+    AUTO.LastReason = string.format("远程点杀：%s（%.0f 格）", best.model.Name, bestD)
+    xStatAdd("点杀", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 174. 近战贴脸
+----------------------------------------------------------------
+function autoMeleeClose()
+    if not AUTO.AutoMeleeClose then return false end
+    if AUTO.Paused then return false end
+    if not every("x_meleeclose", tonumber(AUTO.MeleeGap) or 1) then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 200)
+    if #list == 0 then return false end
+    local target = list[1]
+    if target.dist <= (tonumber(AUTO.MeleeCloseDist) or 12) then return false end
+    local ok = xTp(target.pos + Vector3.new(0, 3, 0))
+    if ok then
+        AUTO.LastReason = string.format("近战贴脸：%s（%.0f 格）", target.model.Name, target.dist)
+        xStatAdd("贴脸", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 175. 精英优先
+----------------------------------------------------------------
+function autoEliteFocus()
+    if not AUTO.AutoEliteFocus then return false end
+    if AUTO.Paused then return false end
+    if not every("x_elitefocus", tonumber(AUTO.EliteGap) or 2) then return false end
+    local best, bestHp = nil, -1
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 250)) do
+        local h = humOf(e.model)
+        if h and h.MaxHealth > bestHp then
+            best, bestHp = e, h.MaxHealth
+        end
+    end
+    if not best then return false end
+    AUTO.Target = best.model.Name
+    AUTO.LastReason = string.format("精英优先：%s（%d 血）", best.model.Name, math.floor(bestHp))
+    xStatAdd("精英目标", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 176. 小怪清理
+----------------------------------------------------------------
+function autoAddClear()
+    if not AUTO.AutoAddClear then return false end
+    if AUTO.Paused then return false end
+    if not every("x_addclear", tonumber(AUTO.AddClearGap) or 1.2) then return false end
+    local best, bestHp = nil, math.huge
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 200)) do
+        local h = humOf(e.model)
+        if h and h.Health > 0 and h.Health < bestHp then
+            best, bestHp = e, h.Health
+        end
+    end
+    if not best then return false end
+    AUTO.Target = best.model.Name
+    AUTO.LastReason = string.format("小怪清理：%s（%d 血）", best.model.Name, math.floor(bestHp))
+    xStatAdd("清小怪", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 177. 远程风筝
+----------------------------------------------------------------
+function autoRangedKite()
+    if not AUTO.AutoRangedKite then return false end
+    if AUTO.Paused then return false end
+    if not every("x_rangedkite", tonumber(AUTO.RangedKiteGap) or 1.2) then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 250)
+    if #list == 0 then return false end
+    local near = list[1]
+    local minD = tonumber(AUTO.RangedKiteMin) or 30
+    if near.dist >= minD then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local dir = base.Position - near.pos
+    if dir.Magnitude <= 0 then dir = Vector3.new(0, 0, 1) end
+    local dest = base.Position + dir.Unit * (minD - near.dist + 8) + Vector3.new(0, 2, 0)
+    local ok = xTp(dest)
+    if ok then
+        AUTO.LastReason = string.format("远程风筝：%s 过近，已拉开", near.model.Name)
+        xStatAdd("风筝", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 178. 召唤协同
+----------------------------------------------------------------
+function autoSummonAssist()
+    if not AUTO.AutoSummonAssist then return false end
+    if AUTO.Paused then return false end
+    if not every("x_summon", tonumber(AUTO.SummonGap) or 20) then return false end
+    local ok = xFire("Summon") or xFire("SummonPet") or xFire("RequestSummon")
+    if not ok then
+        local tool = xFindTool("summon")
+        if tool then ok = xActivateTool(tool) end
+    end
+    if ok then
+        AUTO.LastReason = "召唤协同：已请求召唤"
+        log("召唤协同：已请求召唤物协助")
+        xStatAdd("召唤", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 179. 放置炮台
+----------------------------------------------------------------
+function autoTurretPlace()
+    if not AUTO.AutoTurretPlace then return false end
+    if AUTO.Paused then return false end
+    if not every("x_turret", tonumber(AUTO.TurretGap) or 25) then return false end
+    local tool = xFindTool("turret") or xFindTool("炮台") or xFindTool("sentr")
+    if not tool then return false end
+    local ok = xActivateTool(tool)
+    if ok then
+        AUTO.LastReason = "放置炮台：已部署"
+        log("放置炮台：已部署 " .. tool.Name)
+        xStatAdd("炮台", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 180. 放置陷阱
+----------------------------------------------------------------
+function autoTrapPlace()
+    if not AUTO.AutoTrapPlace then return false end
+    if AUTO.Paused then return false end
+    if not every("x_trap", tonumber(AUTO.TrapGap) or 18) then return false end
+    local tool = xFindTool("trap") or xFindTool("mine") or xFindTool("陷阱")
+    if not tool then return false end
+    local ok = xActivateTool(tool)
+    if ok then
+        AUTO.LastReason = "放置陷阱：已布置"
+        log("放置陷阱：已布置 " .. tool.Name)
+        xStatAdd("陷阱", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 181. 消耗品冷却
+----------------------------------------------------------------
+function autoConsumeCooldown()
+    if not AUTO.AutoConsumeCooldown then return false end
+    if AUTO.Paused then return false end
+    if not every("x_consume_cd", tonumber(AUTO.ConsumeCooldownGap) or 8) then return false end
+    local c = myChar()
+    if not c then return false end
+    local n = 0
+    for _, t in ipairs(c:GetChildren()) do
+        if t:IsA("Tool") then
+            local cd = t:GetAttribute("Cooldown") or t:GetAttribute("CD")
+            local ready = t:GetAttribute("Ready")
+            if ready == true or (cd ~= nil and tonumber(cd) <= 0) then
+                if xActivateTool(t) then n = n + 1 end
+            end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "消耗品冷却：已使用 " .. n .. " 个"
+        xStatAdd("消耗品", n)
+    end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 182. 增益叠加
+----------------------------------------------------------------
+function autoBuffStack()
+    if not AUTO.AutoBuffStack then return false end
+    if AUTO.Paused then return false end
+    if not every("x_buffstack", tonumber(AUTO.BuffStackGap) or 30) then return false end
+    local names = AUTO.BuffStackNames
+    if type(names) ~= "table" or #names == 0 then
+        names = { "Damage", "Speed", "Defense", "Buff" }
+    end
+    local n = xUseNamedRemote("Boosts", names)
+    if n == 0 then n = xUseNamedRemote("UseItems", names) end
+    if n > 0 then
+        AUTO.LastReason = "增益叠加：已叠加 " .. n .. " 层"
+        log("增益叠加：已使用 " .. n .. " 个增益")
+        xStatAdd("增益叠加", n)
+    end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 183. 施加减益
+----------------------------------------------------------------
+function autoDebuffApply()
+    if not AUTO.AutoDebuffApply then return false end
+    if AUTO.Paused then return false end
+    if not every("x_debuff", tonumber(AUTO.DebuffGap) or 6) then return false end
+    local list = xEnemyList(tonumber(AUTO.Range) or 200)
+    if #list == 0 then return false end
+    local target = list[1]
+    local ok = xFire("Debuff", target.model) or xFire("ApplyDebuff", target.model)
+    if not ok then
+        local id = (AUTO.DebuffSkills or {})[1]
+        if id then ok = xCastSkillById(id, target.pos) end
+    end
+    if ok then
+        AUTO.LastReason = "施加减益：" .. target.model.Name
+        xStatAdd("减益", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 184. 清除负面状态
+----------------------------------------------------------------
+function autoStatusClear()
+    if not AUTO.AutoStatusClear then return false end
+    if AUTO.Paused then return false end
+    if not every("x_statusclear", tonumber(AUTO.StatusClearGap) or 4) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local bad = 0
+    for _, name in ipairs({ "Burning", "Poison", "Stunned", "Frozen", "Bleeding", "Slowed" }) do
+        if h:GetAttribute(name) == true then bad = bad + 1 end
+    end
+    if bad == 0 then return false end
+    local n = xUseNamedRemote("Potions", { "Cleanse", "Antidote", "Purify" })
+    if n == 0 then n = xUseNamedRemote("UseItems", { "Cleanse", "Antidote" }) end
+    if n > 0 then
+        AUTO.LastReason = "清除负面：" .. bad .. " 个状态"
+        log("清除负面：已清除 " .. bad .. " 个负面状态")
+        xStatAdd("净化", n)
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 185. 破盾
+----------------------------------------------------------------
+function autoShieldBreak()
+    if not AUTO.AutoShieldBreak then return false end
+    if AUTO.Paused then return false end
+    if not every("x_shieldbreak", tonumber(AUTO.ShieldBreakGap) or 2) then return false end
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 200)) do
+        local shield = e.model:GetAttribute("Shield") or e.model:GetAttribute("Armor")
+        local h = humOf(e.model)
+        if h and h.Health > 0 then
+            local hasShield = (shield ~= nil and tonumber(shield) > 0)
+                or e.model:FindFirstChild("Shield") ~= nil
+            if hasShield then
+                local ok = xFire("BreakShield", e.model) or xFire("ShieldBreak", e.model)
+                if ok then
+                    AUTO.LastReason = "破盾：" .. e.model.Name
+                    xStatAdd("破盾", 1)
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 186. Boss 机制应对
+----------------------------------------------------------------
+function autoBossMechanic()
+    if not AUTO.AutoBossMechanic then return false end
+    if AUTO.Paused then return false end
+    if not every("x_bossmech", tonumber(AUTO.BossMechanicGap) or 3) then return false end
+    local boss = nil
+    for _, e in ipairs(xEnemyList(tonumber(AUTO.Range) or 300)) do
+        if xIsBoss(e.model) then
+            boss = e
+            break
+        end
+    end
+    if not boss then
+        xSt("bossmech").phase = nil
+        return false
+    end
+    local h = humOf(boss.model)
+    if not h or h.MaxHealth <= 0 then return false end
+    local pct = h.Health / h.MaxHealth * 100
+    local phase = pct > 66 and 1 or (pct > 33 and 2 or 3)
+    local st = xSt("bossmech")
+    if st.phase == phase then return false end
+    st.phase = phase
+    local safe = xSafePoint(boss.pos, 45)
+    if safe then xTp(safe) end
+    AUTO.LastReason = string.format("Boss机制：进入第 %d 阶段，已撤离", phase)
+    log(string.format("Boss机制：%s 进入第 %d 阶段（%.0f%%），已撤到安全点", boss.model.Name, phase, pct))
+    xStatAdd("Boss阶段", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 187. 波次准备
+----------------------------------------------------------------
+function autoWavePrep()
+    if not AUTO.AutoWavePrep then return false end
+    if AUTO.Paused then return false end
+    if not every("x_waveprep", tonumber(AUTO.WavePrepGap) or 5) then return false end
+    if inMatch() then return false end
+    local pct = xHpPct()
+    local did = false
+    if pct > 0 and pct < 90 then
+        local n = xUseNamedRemote("Potions", { "Heal", "Medkit" })
+        if n > 0 then did = true end
+    end
+    local ammo = xUseNamedRemote("Ammo", { "Ammo", "Refill" })
+    if ammo > 0 then did = true end
+    if did then
+        AUTO.LastReason = "波次准备：已补给"
+        log("波次准备：已补充状态与弹药")
+        xStatAdd("波次准备", 1)
+    end
+    return did
+end
+
+----------------------------------------------------------------
+-- 188. 间歇拾取
+----------------------------------------------------------------
+function autoIntermissionLoot()
+    if not AUTO.AutoIntermissionLoot then return false end
+    if AUTO.Paused then return false end
+    if not every("x_interloot", tonumber(AUTO.IntermissionGap) or 2.5) then return false end
+    if inMatch() and #xEnemyList(tonumber(AUTO.Range) or 200) > 0 then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local best, bestD = nil, 60
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if (d:IsA("Model") or d:IsA("BasePart")) and d.Name ~= player.Name then
+            local low = string.lower(d.Name)
+            if string.find(low, "drop", 1, true) or string.find(low, "loot", 1, true)
+                or string.find(low, "reward", 1, true) then
+                local p = xPosOf(d)
+                if p then
+                    local dist = (p - base.Position).Magnitude
+                    if dist < bestD then best, bestD = p, dist end
+                end
+            end
+        end
+    end
+    if best then
+        local ok = xTp(best + Vector3.new(0, 3, 0))
+        if ok then
+            AUTO.LastReason = string.format("间歇拾取：%.0f 格", bestD)
+            xStatAdd("拾取", 1)
+        end
+        return ok
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 189. 安全点轮换
+----------------------------------------------------------------
+function autoSafeSpotRotate()
+    if not AUTO.AutoSafeSpotRotate then return false end
+    if AUTO.Paused then return false end
+    if not every("x_safespot", tonumber(AUTO.SafeSpotGap) or 6) then return false end
+    local base = xRoot2()
+    if not base or xHpPct() > 40 then return false end
+    local count = math.max(1, tonumber(AUTO.SafeSpotCount) or 3)
+    local st = xSt("safespot")
+    st.idx = (st.idx or 0) % count + 1
+    local ang = math.rad((st.idx - 1) * (360 / count))
+    local dest = base.Position + Vector3.new(math.cos(ang) * 35, 4, math.sin(ang) * 35)
+    local ok = xTp(dest)
+    if ok then
+        AUTO.LastReason = "安全点轮换：" .. st.idx
+        xStatAdd("轮换", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 190. 体力管理
+----------------------------------------------------------------
+function autoStamina()
+    if not AUTO.AutoStamina then return false end
+    if AUTO.Paused then return false end
+    if not every("x_stamina", tonumber(AUTO.StaminaGap) or 1) then return false end
+    local h = xHum2()
+    if not h then return false end
+    local stam = h:GetAttribute("Stamina") or h:GetAttribute("Energy")
+    if stam == nil then return false end
+    local minS = tonumber(AUTO.StaminaMin) or 20
+    if tonumber(stam) <= minS then
+        pcall(function() h.WalkSpeed = 16 end)
+        AUTO.LastReason = string.format("体力管理：%d，已降速", math.floor(tonumber(stam)))
+        return true
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 191. 食物增益
+----------------------------------------------------------------
+function autoFoodBuff()
+    if not AUTO.AutoFoodBuff then return false end
+    if AUTO.Paused then return false end
+    if not every("x_foodbuff", tonumber(AUTO.FoodBuffGap) or 60) then return false end
+    local names = AUTO.FoodBuffNames
+    if type(names) ~= "table" or #names == 0 then
+        names = { "Food", "Snack", "Meal" }
+    end
+    local n = xUseNamedRemote("Food", names)
+    if n == 0 then n = xUseNamedRemote("UseItems", names) end
+    if n > 0 then
+        AUTO.LastReason = "食物增益：已使用 " .. n .. " 个"
+        log("食物增益：已使用 " .. n .. " 个食物")
+        xStatAdd("食物", n)
+    end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 192. 每日登录
+----------------------------------------------------------------
+function autoDailyLogin()
+    if not AUTO.AutoDailyLogin then return false end
+    if AUTO.Paused then return false end
+    if not every("x_dailylogin", tonumber(AUTO.DailyLoginGap) or 3600) then return false end
+    local today = os.date("%Y%m%d")
+    local st = xSt("dailylogin")
+    if st.day == today then return false end
+    local ok = xFire("DailyLogin") or xFire("ClaimLogin") or xFire("LoginReward")
+    if ok then
+        st.day = today
+        AUTO.LastReason = "每日登录：已领取"
+        log("每日登录：已领取今日登录奖励")
+        xStatAdd("每日登录", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 193. 好友赠礼
+----------------------------------------------------------------
+function autoFriendGift()
+    if not AUTO.AutoFriendGift then return false end
+    if AUTO.Paused then return false end
+    if not every("x_friendgift", tonumber(AUTO.FriendGiftGap) or 600) then return false end
+    local names = AUTO.FriendGiftNames
+    local n = 0
+    if type(names) == "table" and #names > 0 then
+        for _, name in ipairs(names) do
+            local plr = Players:FindFirstChild(name)
+            if plr then
+                local ok = fireRemote("SendGift", plr) or fireRemote("Gift", plr)
+                if ok then n = n + 1 end
+            end
+        end
+    else
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= player then
+                local ok = fireRemote("SendGift", plr) or fireRemote("Gift", plr)
+                if ok then n = n + 1 end
+            end
+        end
+    end
+    if n > 0 then
+        AUTO.LastReason = "好友赠礼：已赠送 " .. n .. " 人"
+        log("好友赠礼：已赠送 " .. n .. " 位好友")
+        xStatAdd("赠礼", n)
+    end
+    return n > 0
+end
+
+----------------------------------------------------------------
+-- 194. 公会签到
+----------------------------------------------------------------
+function autoGuildCheckIn()
+    if not AUTO.AutoGuildCheckIn then return false end
+    if AUTO.Paused then return false end
+    if not every("x_guildcheck", tonumber(AUTO.GuildCheckInGap) or 600) then return false end
+    local ok = xFire("GuildCheckIn") or xFire("CheckIn") or xFire("GuildSign")
+    if not ok then
+        ok = xClickButtonByName(pg, { "CheckIn", "签到", "Guild" }, "x_guildbtn", 600)
+    end
+    if ok then
+        AUTO.LastReason = "公会签到：已完成"
+        log("公会签到：已签到")
+        xStatAdd("公会签到", 1)
+    end
+    return ok
+end
+
+----------------------------------------------------------------
+-- 195. 排行榜检查
+----------------------------------------------------------------
+function autoLeaderboardCheck()
+    if not AUTO.AutoLeaderboardCheck then return false end
+    if AUTO.Paused then return false end
+    if not every("x_leaderboard", tonumber(AUTO.LeaderboardGap) or 120) then return false end
+    local best = 0
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("IntValue") or d:IsA("NumberValue") then
+            local low = string.lower(d.Name)
+            if string.find(low, "score", 1, true) or string.find(low, "leaderboard", 1, true) then
+                local v = tonumber(d.Value) or 0
+                if v > best then best = v end
+            end
+        end
+    end
+    local st = xSt("leaderboard")
+    if best ~= st.best then
+        st.best = best
+        AUTO.LastReason = "排行榜检查：最高分 " .. best
+        log("排行榜检查：当前最高分 " .. best)
+        xStatAdd("排行榜", 1)
+    end
+    return best > 0
+end
+
+-- 注册
+reg("AutoUseReviveItem", "自动复活道具", "生存", "bool", "倒下时自动使用复活道具")
+reg("AutoRevivePromptScan", "复活提示扫描", "生存", "bool", "扫描并触发附近复活提示")
+reg("AutoHealPriority", "治疗优先级", "补给", "bool", "优先治疗血量最低的目标")
+reg("AutoSecondWind", "濒死护盾", "生存", "bool", "濒死时开启护盾")
+reg("AutoPositionAnchor", "站位锚点", "战斗", "bool", "脱战偏离过远时回到锚点")
+reg("AutoFocusTargetLock", "目标锁定", "战斗", "bool", "锁定目标一段时间不切换")
+reg("AutoAttackGapFill", "攻击间隙填充", "战斗", "bool", "攻击间隙补一发")
+reg("AutoReloadCycle", "换弹循环", "战斗", "bool", "弹药不足时循环换弹")
+reg("AutoWeaponSwapLow", "低耐久换武器", "装备", "bool", "耐久过低时换备用武器")
+reg("AutoDodgeRoll", "翻滚闪避", "战斗", "bool", "近距离威胁时翻滚拉开")
+reg("AutoBlockGuard", "格挡保护", "战斗", "bool", "低血时举盾格挡")
+reg("AutoCoverUse", "掩体利用", "战斗", "bool", "低血时贴近掩体")
+reg("AutoSuppressiveFire", "压制射击", "战斗", "bool", "多目标时持续开火")
+reg("AutoSnipeFar", "远程点杀", "战斗", "bool", "优先点杀远处目标")
+reg("AutoMeleeClose", "近战贴脸", "战斗", "bool", "近战武器贴脸输出")
+reg("AutoEliteFocus", "精英优先", "战斗", "bool", "优先处理血量最高的精英")
+reg("AutoAddClear", "小怪清理", "战斗", "bool", "优先清理残血小怪")
+reg("AutoRangedKite", "远程风筝", "战斗", "bool", "保持远程安全距离")
+reg("AutoSummonAssist", "召唤协同", "战斗", "bool", "自动召唤协助作战")
+reg("AutoTurretPlace", "放置炮台", "战斗", "bool", "自动部署炮台")
+reg("AutoTrapPlace", "放置陷阱", "战斗", "bool", "自动布置陷阱")
+reg("AutoConsumeCooldown", "消耗品冷却", "补给", "bool", "冷却就绪的消耗品自动使用")
+reg("AutoBuffStack", "增益叠加", "补给", "bool", "按列表叠加增益")
+reg("AutoDebuffApply", "施加减益", "战斗", "bool", "给目标施加减益")
+reg("AutoStatusClear", "清除负面", "生存", "bool", "检测并清除负面状态")
+reg("AutoShieldBreak", "破盾", "战斗", "bool", "优先破除目标护盾")
+reg("AutoBossMechanic", "Boss机制应对", "战斗", "bool", "按 Boss 阶段自动撤离")
+reg("AutoWavePrep", "波次准备", "任务", "bool", "开局前补给状态与弹药")
+reg("AutoIntermissionLoot", "间歇拾取", "拾取", "bool", "波次间隙拾取掉落")
+reg("AutoSafeSpotRotate", "安全点轮换", "生存", "bool", "低血时轮换安全点")
+reg("AutoStamina", "体力管理", "移动", "bool", "体力过低时降速")
+reg("AutoFoodBuff", "食物增益", "补给", "bool", "定时使用食物增益")
+reg("AutoDailyLogin", "每日登录", "任务", "bool", "每天自动领取登录奖励")
+reg("AutoFriendGift", "好友赠礼", "社交", "bool", "定时给好友赠送礼物")
+reg("AutoGuildCheckIn", "公会签到", "社交", "bool", "自动完成公会签到")
+reg("AutoLeaderboardCheck", "排行榜检查", "统计", "bool", "记录排行榜分数变化")
+
+MODULE_RUNNERS.AutoUseReviveItem = autoUseReviveItem
+MODULE_RUNNERS.AutoRevivePromptScan = autoRevivePromptScan
+MODULE_RUNNERS.AutoHealPriority = autoHealPriority
+MODULE_RUNNERS.AutoSecondWind = autoSecondWind
+MODULE_RUNNERS.AutoPositionAnchor = autoPositionAnchor
+MODULE_RUNNERS.AutoFocusTargetLock = autoFocusTargetLock
+MODULE_RUNNERS.AutoAttackGapFill = autoAttackGapFill
+MODULE_RUNNERS.AutoReloadCycle = autoReloadCycle
+MODULE_RUNNERS.AutoWeaponSwapLow = autoWeaponSwapLow
+MODULE_RUNNERS.AutoDodgeRoll = autoDodgeRoll
+MODULE_RUNNERS.AutoBlockGuard = autoBlockGuard
+MODULE_RUNNERS.AutoCoverUse = autoCoverUse
+MODULE_RUNNERS.AutoSuppressiveFire = autoSuppressiveFire
+MODULE_RUNNERS.AutoSnipeFar = autoSnipeFar
+MODULE_RUNNERS.AutoMeleeClose = autoMeleeClose
+MODULE_RUNNERS.AutoEliteFocus = autoEliteFocus
+MODULE_RUNNERS.AutoAddClear = autoAddClear
+MODULE_RUNNERS.AutoRangedKite = autoRangedKite
+MODULE_RUNNERS.AutoSummonAssist = autoSummonAssist
+MODULE_RUNNERS.AutoTurretPlace = autoTurretPlace
+MODULE_RUNNERS.AutoTrapPlace = autoTrapPlace
+MODULE_RUNNERS.AutoConsumeCooldown = autoConsumeCooldown
+MODULE_RUNNERS.AutoBuffStack = autoBuffStack
+MODULE_RUNNERS.AutoDebuffApply = autoDebuffApply
+MODULE_RUNNERS.AutoStatusClear = autoStatusClear
+MODULE_RUNNERS.AutoShieldBreak = autoShieldBreak
+MODULE_RUNNERS.AutoBossMechanic = autoBossMechanic
+MODULE_RUNNERS.AutoWavePrep = autoWavePrep
+MODULE_RUNNERS.AutoIntermissionLoot = autoIntermissionLoot
+MODULE_RUNNERS.AutoSafeSpotRotate = autoSafeSpotRotate
+MODULE_RUNNERS.AutoStamina = autoStamina
+MODULE_RUNNERS.AutoFoodBuff = autoFoodBuff
+MODULE_RUNNERS.AutoDailyLogin = autoDailyLogin
+MODULE_RUNNERS.AutoFriendGift = autoFriendGift
+MODULE_RUNNERS.AutoGuildCheckIn = autoGuildCheckIn
+MODULE_RUNNERS.AutoLeaderboardCheck = autoLeaderboardCheck
+
+for _, k in ipairs({
+    "AutoUseReviveItem", "AutoRevivePromptScan", "AutoHealPriority", "AutoSecondWind",
+    "AutoFocusTargetLock", "AutoAttackGapFill", "AutoReloadCycle", "AutoWeaponSwapLow",
+    "AutoDodgeRoll", "AutoBlockGuard", "AutoCoverUse", "AutoSuppressiveFire", "AutoSnipeFar",
+    "AutoMeleeClose", "AutoEliteFocus", "AutoAddClear", "AutoRangedKite", "AutoSummonAssist",
+    "AutoTurretPlace", "AutoTrapPlace", "AutoConsumeCooldown", "AutoBuffStack", "AutoDebuffApply",
+    "AutoStatusClear", "AutoShieldBreak", "AutoBossMechanic", "AutoIntermissionLoot",
+    "AutoSafeSpotRotate", "AutoStamina", "AutoFoodBuff",
+}) do
+    table.insert(COMBAT_QUEUE, k)
+end
+
+for _, k in ipairs({
+    "AutoPositionAnchor", "AutoWavePrep", "AutoDailyLogin", "AutoFriendGift",
+    "AutoGuildCheckIn", "AutoLeaderboardCheck",
+}) do
+    table.insert(LOBBY_QUEUE, k)
+end
+
+
+----------------------------------------------------------------
+-- 扩展自动化 IX：注册与调度接入（把第六/七/八批模块挂到主循环）
+----------------------------------------------------------------
+-- 第六批：高级战斗 / 预判 / 区域规避 / 巡逻
+reg("AutoAimLead", "预判瞄准", "战斗", "bool", "按目标速度提前量瞄准")
+reg("AutoDodgeZone", "区域规避", "战斗", "bool", "站在危险区域外输出")
+reg("AutoInterrupt", "打断施法", "战斗", "bool", "目标读条时优先打断")
+reg("AutoTauntBoss", "Boss嘲讽", "战斗", "bool", "Boss 目标转移时拉回仇恨")
+reg("AutoTeamBuff", "团队增益", "战斗", "bool", "定时给队友上增益")
+reg("AutoShieldAlly", "队友护盾", "战斗", "bool", "队友低血时套盾")
+reg("AutoLastStand", "背水一战", "战斗", "bool", "残血时提升输出并停止后撤")
+reg("AutoThreatTable", "仇恨表", "战斗", "bool", "记录并排序当前仇恨目标")
+reg("AutoTerrainAdapt", "地形适应", "战斗", "bool", "按地形调整站位高度")
+reg("AutoAntiFling", "防甩飞", "战斗", "bool", "被高速甩动时锁回原位")
+reg("AutoPatrol", "自动巡逻", "战斗", "bool", "无敌人时按路线巡逻")
+reg("AutoReturnHome", "自动归位", "战斗", "bool", "偏离出生点过远时返回")
+reg("AutoGroupUp", "自动集合", "战斗", "bool", "向队伍中心靠拢")
+reg("AutoKillConfirm", "击杀确认", "战斗", "bool", "记录击杀确认与掉落")
+reg("AutoCombatLog", "战斗日志", "战斗", "bool", "记录战斗关键事件")
+reg("AutoRespawnWait", "重生等待", "战斗", "bool", "重生期间暂停其它动作")
+reg("AutoSelfRevive", "自我复活", "战斗", "bool", "有复活道具时自动使用")
+-- 第七批：装备 / 养成 / 活动 / 社交
+reg("AutoAmmoBuy", "自动买弹", "装备", "bool", "弹药不足时补购")
+reg("AutoWeaponDurability", "武器耐久", "装备", "bool", "耐久低时修理或更换")
+reg("AutoPetSummon", "自动召唤宠物", "养成", "bool", "定时召唤并切换宠物")
+reg("AutoVehicleUse", "自动载具", "养成", "bool", "需要时召唤并使用载具")
+reg("AutoStatAllocation", "属性加点", "养成", "bool", "有属性点时自动分配")
+reg("AutoLevelSpend", "等级加点", "养成", "bool", "升级后自动加点")
+reg("AutoBossPhase", "Boss阶段", "战斗", "bool", "按 Boss 阶段切换策略")
+reg("AutoEnemyAlert", "敌人预警", "战斗", "bool", "高危敌人靠近时提醒")
+reg("AutoQuestAutoEquip", "任务自动装备", "任务", "bool", "按任务要求自动换装")
+reg("AutoSkillPointScan", "技能点扫描", "科技", "bool", "扫描可用技能点并记录")
+reg("AutoTitleAutoEquip", "自动称号", "装备", "bool", "自动佩戴收益最高的称号")
+reg("AutoCharacterRotate", "自动换角色", "装备", "bool", "按配置轮换角色")
+reg("AutoSkinEquip", "自动皮肤", "装备", "bool", "自动佩戴皮肤")
+reg("AutoAccessoryEquip", "自动饰品", "装备", "bool", "自动佩戴饰品")
+reg("AutoEmoteUse", "自动动作", "社交", "bool", "定时播放表情动作")
+reg("AutoSprint", "自动冲刺", "移动", "bool", "赶路时保持冲刺")
+reg("AutoCrouchDodge", "下蹲闪避", "战斗", "bool", "高危弹幕时下蹲减伤")
+reg("AutoSwimGuard", "游泳保护", "生存", "bool", "水中低氧时上浮")
+reg("AutoSpeedSync", "速度同步", "移动", "bool", "按场景同步移动速度")
+reg("AutoJumpBoost", "跳跃强化", "移动", "bool", "按需提升跳跃高度")
+reg("AutoToolRepair", "工具修理", "装备", "bool", "工具耐久低时修理")
+reg("AutoInventoryWeight", "负重管理", "经济", "bool", "超重时清理背包")
+reg("AutoCraftItem", "自动合成", "养成", "bool", "材料足够时合成")
+reg("AutoUpgradeItem", "自动升级", "养成", "bool", "自动升级装备")
+reg("AutoTradeRequest", "自动交易", "社交", "bool", "按名单发起交易")
+reg("AutoMailClaim", "领取邮件", "社交", "bool", "自动领取邮件附件")
+reg("AutoAchievementClaim", "领取成就", "任务", "bool", "自动领取成就奖励")
+reg("AutoSeasonPassClaim", "领取通行证", "任务", "bool", "自动领取赛季奖励")
+reg("AutoCodeRedeemLoop", "兑换码循环", "社交", "bool", "定时尝试兑换码")
+reg("AutoDailyShopRefresh", "每日商店刷新", "经济", "bool", "每日刷新并购买")
+-- 第八批：续航 / 掉落 / 场景机关 / 活动补充
+reg("AutoShieldRegenWait", "护盾回充", "生存", "bool", "等待护盾自然回充")
+reg("AutoOutOfCombatRegen", "脱战回复", "生存", "bool", "脱战一段时间后回血")
+reg("AutoLootPriority", "掉落优先级", "拾取", "bool", "按价值优先拾取掉落")
+reg("AutoOpenAllPrompts", "全开交互", "拾取", "bool", "自动触发附近所有可交互提示")
+reg("AutoDoorOpen", "自动开门", "场景", "bool", "靠近门时自动开启")
+reg("AutoGeneratorRepair", "自动修机", "场景", "bool", "自动修理发电机类机关")
+reg("AutoRescueNearby", "就近救援", "生存", "bool", "优先救援最近倒地队友")
+reg("AutoUseBuffConsumable", "自动用增益", "补给", "bool", "定时使用增益消耗品")
+reg("AutoDropJunk", "清理杂物", "经济", "bool", "定时丢弃低价值物品")
+reg("AutoEquipBestArmor", "最优护甲", "装备", "bool", "自动穿防御最高的护甲")
+reg("AutoSellDuplicates", "出售重复", "经济", "bool", "自动出售重复道具")
+reg("AutoBuyLimited", "限购购买", "经济", "bool", "自动购买限时商品")
+reg("AutoSkinGachaPlan", "皮肤扭蛋", "经济", "bool", "按预算抽取皮肤")
+reg("AutoSpinWheel", "自动转盘", "活动", "bool", "免费次数转盘")
+reg("AutoDailyMissionClaim", "领取日常任务", "任务", "bool", "自动领取日常任务奖励")
+reg("AutoRankedQueue", "排位排队", "活动", "bool", "自动进入排位队列")
+reg("AutoWishlistScan", "心愿单扫描", "经济", "bool", "扫描心愿单商品价格")
+reg("AutoAmmoPickup", "拾取弹药", "拾取", "bool", "自动拾取弹药箱")
+reg("AutoCraftQueue", "合成队列", "养成", "bool", "按队列依次合成")
+reg("AutoPetFeed", "自动喂宠", "养成", "bool", "定时喂养宠物")
+
+-- 运行表
+MODULE_RUNNERS.AutoAimLead = autoAimLead
+MODULE_RUNNERS.AutoDodgeZone = autoDodgeZone
+MODULE_RUNNERS.AutoInterrupt = autoInterrupt
+MODULE_RUNNERS.AutoTauntBoss = autoTauntBoss
+MODULE_RUNNERS.AutoTeamBuff = autoTeamBuff
+MODULE_RUNNERS.AutoShieldAlly = autoShieldAlly
+MODULE_RUNNERS.AutoLastStand = autoLastStand
+MODULE_RUNNERS.AutoThreatTable = autoThreatTable
+MODULE_RUNNERS.AutoTerrainAdapt = autoTerrainAdapt
+MODULE_RUNNERS.AutoAntiFling = autoAntiFling
+MODULE_RUNNERS.AutoPatrol = autoPatrol
+MODULE_RUNNERS.AutoReturnHome = autoReturnHome
+MODULE_RUNNERS.AutoGroupUp = autoGroupUp
+MODULE_RUNNERS.AutoKillConfirm = autoKillConfirm
+MODULE_RUNNERS.AutoCombatLog = autoCombatLog
+MODULE_RUNNERS.AutoRespawnWait = autoRespawnWait
+MODULE_RUNNERS.AutoSelfRevive = autoSelfRevive
+MODULE_RUNNERS.AutoAmmoBuy = autoAmmoBuy
+MODULE_RUNNERS.AutoWeaponDurability = autoWeaponDurability
+MODULE_RUNNERS.AutoPetSummon = autoPetSummon
+MODULE_RUNNERS.AutoVehicleUse = autoVehicleUse
+MODULE_RUNNERS.AutoStatAllocation = autoStatAllocation
+MODULE_RUNNERS.AutoLevelSpend = autoLevelSpend
+MODULE_RUNNERS.AutoBossPhase = autoBossPhase
+MODULE_RUNNERS.AutoEnemyAlert = autoEnemyAlert
+MODULE_RUNNERS.AutoQuestAutoEquip = autoQuestAutoEquip
+MODULE_RUNNERS.AutoSkillPointScan = autoSkillPointScan
+MODULE_RUNNERS.AutoTitleAutoEquip = autoTitleAutoEquip
+MODULE_RUNNERS.AutoCharacterRotate = autoCharacterRotate
+MODULE_RUNNERS.AutoSkinEquip = autoSkinEquip
+MODULE_RUNNERS.AutoAccessoryEquip = autoAccessoryEquip
+MODULE_RUNNERS.AutoEmoteUse = autoEmoteUse
+MODULE_RUNNERS.AutoSprint = autoSprint
+MODULE_RUNNERS.AutoCrouchDodge = autoCrouchDodge
+MODULE_RUNNERS.AutoSwimGuard = autoSwimGuard
+MODULE_RUNNERS.AutoSpeedSync = autoSpeedSync
+MODULE_RUNNERS.AutoJumpBoost = autoJumpBoost
+MODULE_RUNNERS.AutoToolRepair = autoToolRepair
+MODULE_RUNNERS.AutoInventoryWeight = autoInventoryWeight
+MODULE_RUNNERS.AutoCraftItem = autoCraftItem
+MODULE_RUNNERS.AutoUpgradeItem = autoUpgradeItem
+MODULE_RUNNERS.AutoTradeRequest = autoTradeRequest
+MODULE_RUNNERS.AutoMailClaim = autoMailClaim
+MODULE_RUNNERS.AutoAchievementClaim = autoAchievementClaim
+MODULE_RUNNERS.AutoSeasonPassClaim = autoSeasonPassClaim
+MODULE_RUNNERS.AutoCodeRedeemLoop = autoCodeRedeemLoop
+MODULE_RUNNERS.AutoDailyShopRefresh = autoDailyShopRefresh
+MODULE_RUNNERS.AutoShieldRegenWait = autoShieldRegenWait
+MODULE_RUNNERS.AutoOutOfCombatRegen = autoOutOfCombatRegen
+MODULE_RUNNERS.AutoLootPriority = autoLootPriority
+MODULE_RUNNERS.AutoOpenAllPrompts = autoOpenAllPrompts
+MODULE_RUNNERS.AutoDoorOpen = autoDoorOpen
+MODULE_RUNNERS.AutoGeneratorRepair = autoGeneratorRepair
+MODULE_RUNNERS.AutoRescueNearby = autoRescueNearby
+MODULE_RUNNERS.AutoUseBuffConsumable = autoUseBuffConsumable
+MODULE_RUNNERS.AutoDropJunk = autoDropJunk
+MODULE_RUNNERS.AutoEquipBestArmor = autoEquipBestArmor
+MODULE_RUNNERS.AutoSellDuplicates = autoSellDuplicates
+MODULE_RUNNERS.AutoBuyLimited = autoBuyLimited
+MODULE_RUNNERS.AutoSkinGachaPlan = autoSkinGachaPlan
+MODULE_RUNNERS.AutoSpinWheel = autoSpinWheel
+MODULE_RUNNERS.AutoDailyMissionClaim = autoDailyMissionClaim
+MODULE_RUNNERS.AutoRankedQueue = autoRankedQueue
+MODULE_RUNNERS.AutoWishlistScan = autoWishlistScan
+MODULE_RUNNERS.AutoAmmoPickup = autoAmmoPickup
+MODULE_RUNNERS.AutoCraftQueue = autoCraftQueue
+MODULE_RUNNERS.AutoPetFeed = autoPetFeed
+
+-- 队列
+local EX2_COMBAT = {
+    "AutoAimLead", "AutoDodgeZone", "AutoInterrupt", "AutoTauntBoss", "AutoTeamBuff",
+    "AutoShieldAlly", "AutoLastStand", "AutoThreatTable", "AutoTerrainAdapt", "AutoAntiFling",
+    "AutoPatrol", "AutoReturnHome", "AutoGroupUp", "AutoKillConfirm", "AutoCombatLog",
+    "AutoRespawnWait", "AutoSelfRevive", "AutoBossPhase", "AutoEnemyAlert", "AutoCrouchDodge",
+    "AutoSwimGuard", "AutoSpeedSync", "AutoSprint", "AutoJumpBoost", "AutoWeaponDurability",
+    "AutoLootPriority", "AutoDoorOpen", "AutoGeneratorRepair", "AutoRescueNearby",
+    "AutoShieldRegenWait", "AutoOutOfCombatRegen", "AutoUseBuffConsumable", "AutoOpenAllPrompts",
+    "AutoAmmoPickup",
+}
+local EX2_LOBBY = {
+    "AutoAmmoBuy", "AutoPetSummon", "AutoVehicleUse", "AutoStatAllocation", "AutoLevelSpend",
+    "AutoQuestAutoEquip", "AutoSkillPointScan", "AutoTitleAutoEquip", "AutoCharacterRotate",
+    "AutoSkinEquip", "AutoAccessoryEquip", "AutoEmoteUse", "AutoToolRepair", "AutoInventoryWeight",
+    "AutoCraftItem", "AutoUpgradeItem", "AutoTradeRequest", "AutoMailClaim",
+    "AutoAchievementClaim", "AutoSeasonPassClaim", "AutoCodeRedeemLoop", "AutoDailyShopRefresh",
+    "AutoDropJunk", "AutoEquipBestArmor", "AutoSellDuplicates", "AutoBuyLimited",
+    "AutoSkinGachaPlan", "AutoSpinWheel", "AutoDailyMissionClaim", "AutoRankedQueue",
+    "AutoWishlistScan", "AutoCraftQueue", "AutoPetFeed",
+}
+for _, k in ipairs(EX2_COMBAT) do table.insert(COMBAT_QUEUE, k) end
+for _, k in ipairs(EX2_LOBBY) do table.insert(LOBBY_QUEUE, k) end
+
 
 ----------------------------------------------------------------
 -- 状态刷新
 ----------------------------------------------------------------
-local function refreshStatus()
+function refreshStatus()
     local me = myChar()
     local h = humOf(me)
     local hp = (h and math.max(0, math.floor(h.Health))) or 0
@@ -20222,9 +9541,268 @@ end
 
 AUTO.Actions.Respawn = function()
     task.spawn(function()
-        local ok = forceRespawn("手动")
+        local ok = forceRespawn("手动", true)
         notify("无限复活", ok and "已重置角色，正在重生" or "当前无法重置（已死或冷却中）")
         refreshStatus()
+    end)
+end
+
+AUTO.Actions.Claim = function()
+    task.spawn(function()
+        local n = 0
+        for _, name in ipairs({ "LoginRemote", "GroupRewardRemote" }) do
+            if claimRemote(name) then n = n + 1 end
+        end
+        local clicked = 0
+        local saved = AUTO.AutoClickClaim
+        AUTO.AutoClickClaim = true
+        for _ = 1, 3 do
+            if autoClickClaim() then clicked = clicked + 1 end
+            task.wait(1.2)
+        end
+        AUTO.AutoClickClaim = saved
+        notify("领取奖励",
+            (n > 0 or clicked > 0)
+                and string.format("已领取 %d 个奖励入口，点了 %d 次领取按钮", n, clicked)
+                or "没有可领取的奖励")
+        log("领取奖励：请求 " .. n .. " 个入口，点击 " .. clicked .. " 次领取按钮")
+        refreshStatus()
+    end)
+end
+
+AUTO.Actions.BuyHP = function()
+    task.spawn(function()
+        buyHpNext = 0
+        notify("商店", buyHP() and "已请求购买补血" or "买不了（缺少商店遥控）")
+    end)
+end
+
+AUTO.Actions.Potion = function()
+    task.spawn(function()
+        potionNext = 0
+        notify("药水", usePotion() and ("已请求使用 " .. AUTO.PotionName) or "用不了（缺少药水遥控）")
+    end)
+end
+
+AUTO.Actions.Boost = function()
+    task.spawn(function()
+        boostNext = 0
+        notify("加速", useBoost() and ("已请求使用 " .. AUTO.BoostName) or "用不了（缺少加速遥控）")
+    end)
+end
+
+AUTO.Actions.UseMoney = function()
+    task.spawn(function()
+        moneyNext = 0
+        notify("道具", useMoneyBag() and "已请求使用金钱袋" or "用不了（缺少 UseItems 遥控）")
+    end)
+end
+
+AUTO.Actions.SkillTree = function()
+    task.spawn(function()
+        resetClock("skilltree")
+        notify("技能树", autoSkillTree() and "已尝试升级技能树" or "没有可升级技能")
+        refreshStatus()
+    end)
+end
+
+AUTO.Actions.Title = function()
+    task.spawn(function()
+        local ok, name = equipTitle(AUTO.TitleName)
+        notify("称号", ok and ("已装备：" .. tostring(name)) or ("没换：" .. tostring(name)))
+    end)
+end
+
+AUTO.Actions.Gacha = function()
+    task.spawn(function()
+        resetClock("gachachar")
+        resetClock("gachaskin")
+        resetClock("capsule")
+        local a, b, c = AUTO.AutoGachaChar, AUTO.AutoGachaSkin, AUTO.AutoCapsule
+        AUTO.AutoGachaChar, AUTO.AutoGachaSkin, AUTO.AutoCapsule = true, true, c
+        local ok = autoGacha()
+        AUTO.AutoGachaChar, AUTO.AutoGachaSkin, AUTO.AutoCapsule = a, b, c
+        if ok then
+            notify("抽奖", "已请求抽奖：" .. AUTO.GachaSpin)
+        else
+            notify("抽奖", "现在不能抽（战斗中或缺少抽奖遥控）")
+        end
+    end)
+end
+
+AUTO.Actions.SquadQuest = function()
+    task.spawn(function()
+        resetClock("squad")
+        notify("小队任务", autoSquadQuest() and "已请求接取 / 完成任务" or "现在不能做（战斗中或无任务）")
+    end)
+end
+
+AUTO.Actions.RestartVote = function()
+    task.spawn(function()
+        resetClock("restart")
+        notify("重新开局", autoRestartVote() and "已投 Yes" or "当前没有重新开始投票")
+    end)
+end
+
+AUTO.Actions.SaveConfig = function()
+    task.spawn(function()
+        local ok = saveConfig()
+        notify("保存配置", ok and "已写入 难度模式_配置.json" or "当前执行器不支持写文件")
+    end)
+end
+
+AUTO.Actions.Redeem = function()
+    task.spawn(function()
+        local codes = AUTO.SelectedCodes or {}
+        if #codes == 0 then
+            notify("兑换码", "请先在下拉框里选择兑换码")
+            return
+        end
+        local n = redeemCodes(codes)
+        notify("兑换码", "已提交 " .. n .. " 个兑换码")
+    end)
+end
+
+AUTO.Actions.RedeemAll = function()
+    task.spawn(function()
+        local n = redeemCodes(REDEEM_ALL)
+        notify("兑换码", "已提交全部 " .. n .. " 个兑换码")
+    end)
+end
+
+AUTO.Actions.UnlockPass = function()
+    task.spawn(function()
+        local n = unlockPasses(AUTO.SelectedPasses or {})
+        notify("通行证", n > 0 and ("已解锁 " .. n .. " 项（客户端）") or "请先选择通行证")
+    end)
+end
+
+AUTO.Actions.BuyWeapon = function()
+    task.spawn(function()
+        if AUTO.WeaponName == nil or AUTO.WeaponName == "" then
+            notify("商店武器", "请先选择武器")
+            return
+        end
+        local ok = shopFire(AUTO.WeaponName)
+        notify("商店武器", ok and ("已请求购买 " .. tostring(AUTO.WeaponName)) or "购买指令发送失败")
+    end)
+end
+
+AUTO.Actions.BuyMisc = function()
+    task.spawn(function()
+        if AUTO.MiscName == nil or AUTO.MiscName == "" then
+            notify("商店杂项", "请先选择杂项")
+            return
+        end
+        local ok = shopFire(AUTO.MiscName)
+        notify("商店杂项", ok and ("已请求购买 " .. tostring(AUTO.MiscName)) or "购买指令发送失败")
+    end)
+end
+
+AUTO.Actions.BuyRequest = function()
+    task.spawn(function()
+        local w = waveNumber() or 0
+        if w < 10 then
+            notify("请求", "需要第 10 波或更高才能请求")
+            return
+        end
+        local ok = shopFire(AUTO.RequestName)
+        notify("请求", ok and ("已请求 " .. tostring(AUTO.RequestName)) or "请求指令发送失败")
+    end)
+end
+
+AUTO.Actions.BuyHourly = function()
+    task.spawn(function()
+        local amount = math.max(1, math.floor(tonumber(AUTO.HourlyAmount) or 1))
+        local n = 0
+        for _, item in ipairs(AUTO.HourlyItems or {}) do
+            if fireRemote("BuyItemFromShopHourly", item, amount) then n = n + 1 end
+        end
+        notify("小时购", n > 0 and ("已购买 " .. n .. " 项 x" .. amount) or "请先选择物品")
+    end)
+end
+
+AUTO.Actions.UseItem = function()
+    task.spawn(function()
+        local old = AUTO.AutoUseItem
+        AUTO.AutoUseItem = true
+        resetClock("useitem")
+        local ok = useAutoItem()
+        AUTO.AutoUseItem = old
+        notify("使用物品", ok and "已使用所选物品" or "没有可用物品或正在冷却")
+    end)
+end
+
+AUTO.Actions.CollectOnce = function()
+    task.spawn(function()
+        local old = AUTO.AutoCollect
+        AUTO.AutoCollect = true
+        collectStamp = 0
+        lastCollect = 0
+        local ok = collectStep()
+        AUTO.AutoCollect = old
+        notify("自动收集", ok and "已收集最近目标" or "附近没有可收集目标")
+    end)
+end
+
+AUTO.Actions.JumpServer = function()
+    task.spawn(function()
+        notify("跳转服务器", "正在寻找可用服务器…")
+        if not jumpServer() then
+            notify("跳转服务器", "没有找到可用服务器，稍后再试")
+        end
+    end)
+end
+
+AUTO.Actions.Rejoin = function()
+    task.spawn(function()
+        notify("重新加入", "正在重新连接当前服务器…")
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, player)
+        end)
+    end)
+end
+
+AUTO.Actions.ApplyGameMode = function()
+    task.spawn(function()
+        if AUTO.GameMode == nil or AUTO.GameMode == "" then
+            notify("游戏模式", "请先选择游戏模式")
+            return
+        end
+        AUTO.VoteMode = AUTO.GameMode
+        notify("游戏模式", "已设为 " .. tostring(AUTO.GameMode) .. "，自动投票会优先投它")
+    end)
+end
+
+AUTO.Actions.RestoreVote = function()
+    task.spawn(function()
+        local ready = RS:FindFirstChild("GetReadyRemote")
+        if ready and (ready:IsA("RemoteEvent") or ready:IsA("RemoteFunction")) then
+            pcall(function()
+                ready:FireServer("1", true)
+                task.wait(0.5)
+                ready:FireServer("1", false)
+                task.wait(0.5)
+                ready:FireServer("2", false)
+                task.wait(0.5)
+                ready:FireServer("3", false)
+                task.wait(0.5)
+                ready:FireServer("1", true)
+            end)
+        end
+        notify("恢复投票系统", "准备中，恢复投票系统…")
+        task.wait(6)
+        local c = myChar()
+        if c then
+            pcall(function() c:PivotTo(CFrame.new(-220, -10, -600)) end)
+        end
+        task.wait(10)
+        pcall(openVoteGui)
+        pcall(function()
+            local play = findPath(pg, { "Play" })
+            if play and play:IsA("GuiObject") then play.Visible = true end
+        end)
+        notify("恢复投票系统", "投票系统已恢复，现在可以使用自动投票")
     end)
 end
 
@@ -20243,7 +9821,7 @@ AUTO.Actions.Diag = function()
         log("技能数：" .. skillCount())
         log("Living：" .. tostring(living() ~= nil) .. "   敌人数：" .. enemyCount())
         log("BotBridge：" .. tostring(bot() ~= nil) .. "   MouseStream：" .. tostring(RS:FindFirstChild("MouseStream") ~= nil))
-        log("AutoReady 垫：" .. tostring(workspace:FindFirstChild("AutoReady") ~= nil))
+        log("准备区域检测：" .. tostring(workspace:FindFirstChild("AutoReady") ~= nil))
         log("投票阶段：" .. tostring(votePhase()) .. "   Vote 遥控：" .. tostring(RS:FindFirstChild("Vote") ~= nil))
         log("Play 界面：" .. tostring(pg:FindFirstChild("Play") ~= nil) .. "   SelectCharacter：" .. tostring(pg:FindFirstChild("SelectCharacter") ~= nil))
         log("投票建议：" .. tostring(AUTO.VoteState or "—") .. "   Normal票：" .. tostring(voteCount("Normal")))
@@ -20257,6 +9835,121 @@ AUTO.Actions.Diag = function()
         refreshStatus()
     end)
 end
+
+----------------------------------------------------------------
+-- ESP：给 workspace.Living 里的敌人模型加 Highlight
+-- 0.5 秒扫一次；开关关闭时全部销毁
+----------------------------------------------------------------
+local espMap = {}
+local espAllyMap = {}
+local espItemMap = {}
+local espItemStamp = 0
+
+function nameInList(name, list)
+    if type(list) ~= "table" or #list == 0 then return false end
+    local low = string.lower(tostring(name or ""))
+    for _, w in ipairs(list) do
+        local pat = string.lower(tostring(w))
+        if pat ~= "" then
+            if low == pat then return true end
+            if #low > #pat and low:sub(1, #pat) == pat then
+                local ch = low:sub(#pat + 1, #pat + 1)
+                if ch == " " or ch == "#" or ch == "_" or ch == "-" then return true end
+            end
+        end
+    end
+    return false
+end
+
+function addHighlight(model, map, fill, outlineTc)
+    if map[model] then return end
+    pcall(function()
+        local hl = Instance.new("Highlight")
+        hl.Name = "YYa_ESP"
+        hl.FillColor = fill
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = outlineTc
+        hl.Adornee = model
+        hl.Parent = model
+        map[model] = hl
+    end)
+end
+
+function clearHighlights(map)
+    for model, hl in pairs(map) do
+        pcall(function() hl:Destroy() end)
+        map[model] = nil
+    end
+end
+
+task.spawn(function()
+    while AUTO.Running do
+        task.wait(0.5)
+
+        -- 敌人透视（红色）
+        if AUTO.ESPEnable ~= false and AUTO.ESP then
+            local lv = living()
+            local seen = {}
+            if lv then
+                for _, m in ipairs(lv:GetChildren()) do
+                    if isEnemy(m) then
+                        seen[m] = true
+                        addHighlight(m, espMap, Color3.fromRGB(255, 60, 60), 0.6)
+                    end
+                end
+            end
+            for model in pairs(espMap) do
+                if not seen[model] then
+                    pcall(function() espMap[model]:Destroy() end)
+                    espMap[model] = nil
+                end
+            end
+        elseif next(espMap) then
+            clearHighlights(espMap)
+        end
+
+        -- 队友 / 玩家透视（绿色）
+        if AUTO.ESPEnable ~= false and (AUTO.ESPAlly or AUTO.ESPPlayer) then
+            local seen = {}
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= player and plr.Character then
+                    seen[plr.Character] = true
+                    addHighlight(plr.Character, espAllyMap, Color3.fromRGB(60, 255, 120), 0.6)
+                end
+            end
+            for model in pairs(espAllyMap) do
+                if not seen[model] then
+                    pcall(function() espAllyMap[model]:Destroy() end)
+                    espAllyMap[model] = nil
+                end
+            end
+        elseif next(espAllyMap) then
+            clearHighlights(espAllyMap)
+        end
+
+        -- 物品透视（金色，每 2 秒刷新一次目标列表）
+        if AUTO.ESPEnable ~= false and AUTO.ESPItem and #(AUTO.ESPItems or {}) > 0 then
+            if os.clock() - espItemStamp > 2 then
+                espItemStamp = os.clock()
+                local seen = {}
+                for _, d in ipairs(workspace:GetDescendants()) do
+                    if (d:IsA("Model") or d:IsA("BasePart")) and nameInList(d.Name, AUTO.ESPItems) then
+                        seen[d] = true
+                        addHighlight(d, espItemMap, Color3.fromRGB(255, 210, 40), 0.55)
+                    end
+                end
+                for m in pairs(espItemMap) do
+                    if not seen[m] or not m.Parent then
+                        pcall(function() espItemMap[m]:Destroy() end)
+                        espItemMap[m] = nil
+                    end
+                end
+            end
+        elseif next(espItemMap) then
+            clearHighlights(espItemMap)
+        end
+    end
+end)
 
 ----------------------------------------------------------------
 -- 防踢
@@ -20321,9 +10014,6 @@ task.spawn(function()
                 if every("settings", 3) then
                     applySettings()
                 end
-                if every("claim", 20) then
-                    autoClaim()
-                end
                 if AUTO.AutoEquipChar and AUTO.Character ~= "" and not equipDone and every("equip", 3) then
                     local pad2 = workspace:FindFirstChild("AutoReady")
                     local far = pad2 and (base.Position - pad2.Position).Magnitude > 40
@@ -20334,15 +10024,33 @@ task.spawn(function()
                 if AUTO.AutoOpenVote and every("openvote", 2) then
                     openVoteGui()
                 end
-                if AUTO.AutoVote and every("vote", AUTO.VoteGap) then
-                    autoVote()
+                if AUTO.AutoVote or AUTO.AutoVoteInGame then
+                    if every("vote", AUTO.VoteGap) then
+                        autoVote()
+                    end
                 end
+                if AUTO.AutoGameModeLobby then autoGameModeLobby() end
                 if AUTO.AutoReady and every("ready", 0.8) then
                     autoReady()
                 end
                 if AUTO.AutoStart and every("start", 1.5) then
                     autoStartSolo()
                 end
+                -- 奖励 / 收集 / 商店类自动化（各自内部有开关与冷却）
+                autoClaimRewards()
+                autoClickClaim()
+                autoGacha()
+                if AUTO.AutoSquadQuest then autoSquadQuest() end
+                if AUTO.AutoTitle and every("title", 6) then equipTitle(AUTO.TitleName) end
+                if AUTO.AutoUseMoney then useMoneyBag() end
+                if AUTO.AutoBoost then useBoost() end
+                if AUTO.AutoSkillTree then autoSkillTree() end
+                if AUTO.AutoRestartVote then autoRestartVote() end
+                useAutoItem()
+                shopStep()
+                flushStep()
+                -- 扩展自动化队列：大厅阶段
+                xRunLobbyModules()
                 return
             end
 
@@ -20355,6 +10063,32 @@ task.spawn(function()
             end
             if every("settings2", 5) then
                 applySettings()
+            end
+
+            -- 扩展：Jeffrey / 冲刷 / 重置波次 / 收集 / 商店
+            jeffreyStep()
+            flushStep()
+            resetWaveStep()
+            collectStep()
+            shopStep()
+            useAutoItem()
+
+            -- 上帝模式 / 安全模式
+            if every("safety", 0.5) then
+                local sh = humOf(myChar())
+                if sh and sh.MaxHealth > 0 and sh.Health > 0 then
+                    local pct = sh.Health / sh.MaxHealth * 100
+                    if AUTO.GodMode and pct < (AUTO.GodHp or 30) then
+                        pcall(function() sh.Health = sh.MaxHealth end)
+                        if AUTO.AutoBuyHP then buyHP() end
+                        if every("godlog", 5) then log("上帝模式：生命已补满") end
+                    end
+                    if AUTO.AutoFarm and pct <= (AUTO.SafeHp or 30) then
+                        if every("saferetreat", 1.5) then
+                            retreatSafe(string.format("血量 %.0f%%", pct))
+                        end
+                    end
+                end
             end
 
             -- 跳波投票（界面出现时自动跟票）
@@ -20373,6 +10107,24 @@ task.spawn(function()
                 end
             end
 
+            -- 低血自动补血 / 喝药（不影响无限复活，二者可同时开）
+            if (AUTO.AutoBuyHP or AUTO.AutoPotion) and every("healcheck", 0.5) then
+                local hh = humOf(myChar())
+                if hh and hh.MaxHealth > 0 and hh.Health > 0 then
+                    local pct = hh.Health / hh.MaxHealth * 100
+                    if pct <= AUTO.ReviveHp then
+                        if AUTO.AutoBuyHP then buyHP() end
+                        if AUTO.AutoPotion then usePotion() end
+                    end
+                end
+            end
+            if AUTO.AutoUseMoney then useMoneyBag() end
+            if AUTO.AutoBoost then useBoost() end
+            if AUTO.AutoRestartVote then autoRestartVote() end
+
+            -- 扩展自动化队列：战斗阶段
+            xRunCombatModules()
+
             -- 先看有没有导弹/投掷物朝脸上飞，有就侧向瞬移躲开
             dodgeProjectile(base)
 
@@ -20385,13 +10137,20 @@ task.spawn(function()
                     end
                     ensureFire()
 
-                    if AUTO.AutoSkill and every("skill", AUTO.SkillTick) then
+                    if AUTO.AutoFarm then
+                        farmStep(enemy, dist)
+                    end
+
+                    if AUTO.AutoSkill and every("skill", math.max(0.2, tonumber(AUTO.SkillDelay) or AUTO.SkillTick)) then
                         useSkills(p.Position)
                     end
 
-                    -- 太远：直接瞬移到敌人身边（和参考脚本一样，不走路）
-                    local teleported = combatTeleport(base, p.Position)
-                    if not teleported and AUTO.AutoApproach and dist and dist > AUTO.TurnDist then
+                    -- 太远：直接瞬移到敌人身边（开了自动刷怪则由刷怪位置控制，不再强制贴脸）
+                    local teleported = false
+                    if not AUTO.AutoFarm then
+                        teleported = combatTeleport(base, p.Position)
+                    end
+                    if not AUTO.AutoFarm and not teleported and AUTO.AutoApproach and dist and dist > AUTO.TurnDist then
                         local delta = p.Position - base.Position
                         if delta.Magnitude > 0 then
                             local stand = p.Position - delta.Unit * 12 + Vector3.new(0, 4, 0)
@@ -20418,6 +10177,7 @@ task.spawn(function()
                 stopFire()
                 AUTO.Target = nil
                 AUTO.LastReason = "本波已清空，等待下一波"
+                if AUTO.AutoFarm then farmStep(nil) end
             end
         end)
 
@@ -20442,6 +10202,16 @@ task.spawn(function()
     end
 end)
 
+-- 常驻模块循环（跳服 / 统计 / 日志 / 配置备份等，与战斗循环互不影响）
+task.spawn(function()
+    while AUTO.Running do
+        task.wait(1)
+        if AUTO.Running and not AUTO.Paused then
+            pcall(xRunAlwaysModules)
+        end
+    end
+end)
+
 -- 启动时把游戏的自动跳波打开
 task.spawn(function()
     task.wait(3)
@@ -20452,7 +10222,7 @@ task.spawn(function()
     end
 end)
 
-log("引擎已启动：自动选角色 / 瞬移准备 / 自动投票 / 自动开单人局 / 自动跳过场 / 自动战斗 / 无限复活 / 自动技能 / 自动救人 / 结算自动继续")
-notify("难度模式 自动挂机", "已启动，全自动运行中")
+log("引擎已启动：所有功能默认关闭，请在界面里手动打开需要的开关（投票 / 准备 / 开局 / 战斗 / 复活等）")
+notify("难度模式 至尊版", "已加载：功能默认全关，打开菜单手动启用")
 
 end
