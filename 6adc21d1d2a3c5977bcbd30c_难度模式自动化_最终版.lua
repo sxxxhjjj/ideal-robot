@@ -287,6 +287,191 @@ end
 
 Config = CustomConfig.new()
 
+AUTO = {
+    -- 流程开关（默认全关，必须在界面里手动打开）
+    AutoOpenVote  = false,   -- 大厅自动打开投票界面（相当于点击 GUI）
+    AutoVote      = false,   -- 自动投票选难度模式
+    AutoStart     = false,   -- 自动开单人局（StartSolo）
+    AutoEquipChar = false,   -- 自动装备你在「玩家」页选的角色（不判断强弱）
+    Character     = "",      -- 玩家自选角色名，空 = 不自动装备
+    AutoSkipVote  = false,   -- 自动跟着投跳波票
+    AutoReady     = false,   -- 大厅自动点新版 UI 准备按钮（点不动才发 GetReadyRemote）
+    AutoSkip      = false,   -- 自动开启跳波设置
+    AutoSkipHeli  = false,   -- 自动跳过直升机过场
+    AutoSettings  = false,   -- 自动打开游戏内快速过场等设置
+    AutoFight     = false,   -- 自动锁敌 + 开火
+    AutoAim       = false,   -- 自动瞄准
+    AutoTeleport  = false,   -- 敌人太远时直接瞬移到脸上
+    AutoSkill     = false,   -- 自动放技能
+    AutoRevive    = false,   -- 自动救倒地队友
+    AutoRespawn   = false,   -- 无限复活：残血自动重置角色，立刻重生
+    ReviveHp      = 35,      -- 血量百分比低于这个值就触发复活重置
+    AutoDodge     = false,   -- 瞬移躲投射物（导弹/投掷物朝你飞来时侧向瞬移）
+    AutoContinue  = false,   -- 结算自动准备下一局
+    AutoApproach  = false,   -- 敌人太远自动靠近
+    AntiAfk       = false,   -- 防踢
+    ESP           = false,   -- 敌人透视（Highlight）
+    ESPAlly       = false,   -- 队友透视（绿色高亮）
+    -- 奖励 / 收集自动化（默认全关）
+    AutoClaimLogin = false,  -- 自动领每日登录奖励（LoginRemote）
+    AutoClaimGroup = false,  -- 自动领团队奖励（GroupRewardRemote）
+    AutoClickClaim = false,  -- 自动点界面上所有可领取按钮（Claim / Collect / 领取）
+    AutoGachaChar  = false,  -- 自动抽角色
+    AutoGachaSkin  = false,  -- 自动抽皮肤
+    AutoCapsule    = false,  -- 自动开扭蛋胶囊
+    AutoSquadQuest = false,  -- 自动接取 / 完成 G-Squad 小队任务
+    AutoRestartVote = false, -- 结算后自动投"重新开始"票
+    AutoTitle      = false,  -- 自动装备指定称号
+    -- 商店 / 消耗品自动化（默认全关）
+    AutoBuyHP      = false,  -- 低血量自动在商店买补血
+    AutoPotion     = false,  -- 低血量自动喝药水
+    AutoBoost      = false,  -- 自动续开加速卡
+    AutoUseMoney   = false,  -- 自动使用金钱袋（UseItems Money）
+    AutoSkillTree  = false,  -- 自动升级技能树
+    -- 角色 / 移动（默认全关）
+    NoClip         = false,  -- 无碰撞
+    Fly            = false,  -- 飞行
+    InfiniteJump   = false,  -- 无限跳跃
+    LockMoveStats  = false,  -- 锁定移动速度 / 跳跃力
+    FullBright     = false,  -- 全亮
+    NoFog          = false,  -- 无雾
+    GodMode        = false,  -- 上帝模式（低血自动补满）
+    NoBarrier      = false,  -- 绕过隐形屏障
+    -- 刷怪设置（默认全关）
+    AutoFarm       = false,  -- 自动刷怪总开关（持续贴怪）
+    -- 天文币 / 农场辅助（默认全关）
+    AutoAstroFarm    = false,  -- 自动刷天文币：切天文模式并刷天文怪
+    AutoAstroCollect = false,  -- 自动拾取天文零件
+    AutoAstroInsert  = false,  -- 自动上交天文零件换取天文币
+    AutoAstroTech    = false,  -- 自动升级天文科技
+    AutoAstroReport  = false,  -- 定时汇报天文币数量
+    AutoAstroToken   = false,  -- 天文币模式一：贴图零件往返刷币
+    RemoveMap        = false,  -- 删除地图（提帧）
+    AutoFarmAssist   = false,  -- 自动刷怪辅助：保持锁定与输出
+    AutoOneClickReady = false, -- 一键准备：投票 + 准备 + 开局
+    ResetWave      = false,  -- 到达指定波次回安全点
+    BypassJeffrey  = false,  -- 绕过 Jeffrey
+    AntiJeffrey    = false,  -- Anti Jeffrey
+    FlushAura      = false,  -- 自动冲刷光环
+    -- 透视扩展（默认全关）
+    ESPEnable      = false,  -- 透视总开关
+    ESPPlayer      = false,  -- 玩家透视
+    ESPItem        = false,  -- 物品透视
+    -- 商店扩展（默认全关）
+    AutoBuyWeapon  = false,  -- 自动买武器
+    AutoBuyMisc    = false,  -- 自动买杂项
+    AutoRequest    = false,  -- 自动请求（第 10 波后）
+    UpgradeTitanSpeaker = false, -- 自动升级泰坦扬声器
+    UpgradeUTCM    = false,  -- 自动升级 UTCM
+    UpgradeTV      = false,  -- 自动升级 TV
+    AutoHourly     = false,  -- 自动小时购
+    AutoUseItem    = false,  -- 自动使用物品
+    UseItemName    = "Presents", -- 要使用的物品
+    -- 收集扩展（默认全关）
+    AutoCollect    = false,  -- 自动收集
+    -- 杂项（默认全关）
+    AutoSave       = false,  -- 自动保存配置
+    AutoVoteInGame = false,  -- 局内自动投票
+    AutoGameModeLobby = false, -- 大厅自动应用游戏模式
+    CombatDebug    = false,  -- 战斗调试日志
+    -- 自动化参数
+    GachaSpin      = "10Spins",                  -- 抽奖档位
+    BoostName      = "Booster X2 Mastery : 30Min", -- 加速卡名称
+    PotionName     = "Potion",                     -- 自动喝哪种药水
+    TitleName      = "",                          -- 要装备的称号名
+    FarmMode       = "Normal",                    -- 刷怪模式
+    FarmPos        = "Above",                     -- 刷怪位置：Above / Under / Orbit
+    FarmMove       = "Teleport",                  -- 移动方式：Teleport / Tween
+    CircleRadius   = 6,                            -- 环绕半径
+    FarmHeight     = 0,                            -- 刷怪高度
+    SkillDelay     = 1,                            -- 技能按键间隔（秒）
+    SafeHp         = 30,                           -- 安全模式血量
+    GodHp          = 30,                           -- 上帝模式触发血量
+    ResetWaveValue = 10,                           -- 第几波重置
+    AntiJeffreyRange = 50,                         -- Jeffrey 检测范围
+    FlushAuraRange = 5,                            -- 冲刷光环范围
+    WalkSpeed      = 16,                           -- 锁定移速
+    JumpPower      = 50,                           -- 锁定跳跃力
+    FlySpeed       = 1,                            -- 飞行速度倍率（x50）
+    FlyHeight      = 10,                           -- 飞行升降速度
+    CameraMode     = "Classic",                    -- 相机模式：Classic / Manual
+    WeaponName     = "Stungun",                    -- 要买的武器
+    MiscName       = "HeadPhone",                  -- 要买的杂项
+    RequestName    = "Titan-Request",              -- 要请求的物品
+    HourlyAmount   = 1,                            -- 小时购数量
+    HourlyCustom   = "",                           -- 小时购自定义物品名
+    CollectMode    = "Clean",                      -- 收集模式
+    CollectMove    = "Teleport",                   -- 收集移动方式
+    AutoSaveDelay  = 15,                           -- 自动保存间隔
+    GameMode       = "Normal",                     -- 大厅游戏模式
+    ESPSettings    = { "高亮" },                    -- 透视显示项
+    ESPItems       = {},                           -- 透视物品列表
+    TitanUpgrades  = {},                           -- 泰坦扬声器升级
+    UTCMUpgrades   = {},                           -- UTCM 升级
+    TVUpgrades     = {},                           -- TV 升级
+    HourlyItems    = {},                           -- 小时购物品
+    CollectItems   = {},                           -- 收集物品列表
+    SelectedCodes  = {},                           -- 已选兑换码
+    SelectedPasses = {},                           -- 已选通行证
+    -- 内部数值
+    Range         = 400,     -- 锁敌半径
+    SkillTick     = 0.2,     -- 技能检查频率（每个技能按自己的冷却独立触发）
+    VoteGap       = 5,       -- 重复投票间隔
+    TeleportDist  = 90,      -- 超过这个距离直接瞬移
+    TurnDist      = 110,     -- 超过这个距离开始瞬移
+    VoteMode      = "",      -- 空 = 自动投当前票数最高的模式
+    -- 运行数据
+    Phase         = "启动中",
+    LastReason    = "就绪",
+    Target        = nil,
+    VoteState     = "—",
+    Running       = true,
+    Paused        = false,
+    Actions       = {},
+    Logs          = {},
+}
+
+-- 启动时读取上次保存的配置（有就覆盖默认值，界面会显示保存时的状态）
+pcall(function()
+    if type(isfile) == "function" and type(readfile) == "function" and isfile("难度模式_配置.json") then
+        local ok, data = pcall(function()
+            return game:GetService("HttpService"):JSONDecode(readfile("难度模式_配置.json"))
+        end)
+        if ok and type(data) == "table" then
+            for k, v in pairs(data) do
+                if AUTO[k] ~= nil and type(v) == type(AUTO[k]) then
+                    AUTO[k] = v
+                end
+            end
+        end
+    end
+end)
+-- ============================================================
+-- 升级开关辅助（在原版页面里直接追加，不另开标签页）
+-- ============================================================
+function UpToggle(tab, key, title, desc)
+    return tab:Toggle({
+        Title = title,
+        Desc  = desc,
+        Value = AUTO[key] == true,
+        Callback = function(v) AUTO[key] = v end,
+    })
+end
+
+function UpSlider(tab, key, title, desc, minv, maxv, defaultv)
+    local cur = tonumber(AUTO[key]) or defaultv
+    if cur < minv then cur = minv end
+    if cur > maxv then cur = maxv end
+    return tab:Slider({
+        Title = title,
+        Desc  = desc,
+        Value = { Min = minv, Max = maxv, Default = cur },
+        Step  = 1,
+        Callback = function(v) AUTO[key] = v end,
+    })
+end
+
+
 -- ====================== UI DISPLAY NAME MAPPING ======================
 GachaDisplayNames = { "1次抽奖", "10次抽奖", "100次抽奖", "1次幸运抽奖", "10次幸运抽奖" }
 GachaMap = {
@@ -4834,6 +5019,20 @@ FarmTargetModeDropdown = Main:Dropdown({
     end
 })
 
+
+-- ===== 自动刷怪 · 升级（新功能，默认关闭）=====
+Main:Section({ Title = "自动刷怪 · 升级", Icon = "arrow-up" })
+UpToggle(Main, "AutoFight", "自动锁敌开火", "自动锁定最近的敌人并持续攻击")
+UpToggle(Main, "AutoAim", "自动瞄准", "准心自动跟随目标")
+UpToggle(Main, "AutoSkill", "自动技能", "按冷却自动释放技能")
+UpToggle(Main, "AutoTeleport", "瞬移贴脸", "敌人太远时直接瞬移到脸上")
+UpToggle(Main, "AutoFarmAssist", "刷怪辅助", "保持锁定与持续输出")
+UpToggle(Main, "AutoRespawn", "无限复活", "血量过低自动重置角色，立刻重生")
+UpSlider(Main, "ReviveHp", "复活血量", "血量百分比低于此值触发复活", 1, 99, 35)
+UpToggle(Main, "AutoBuyHP", "自动补血 / 补货", "低血量自动在商店买补血")
+UpToggle(Main, "AutoDodge", "自动躲投射物", "投射物飞来时侧向瞬移")
+UpToggle(Main, "AutoRetreatHeal", "残血自动撤退", "血量过低自动拉开距离")
+
 Main:Section({ Title = "刷怪设置", Icon = "settings" })
 
 PositionDropdown = Main:Dropdown({
@@ -5643,6 +5842,13 @@ EspItemDropdown = Main4:Dropdown({
 })
 
 -- ====================== UI: 玩家 ======================
+
+-- ===== 透视 · 升级 =====
+Main4:Section({ Title = "透视 · 升级", Icon = "arrow-up" })
+UpToggle(Main4, "ESPAlly", "队友透视", "绿色高亮队友")
+UpToggle(Main4, "ESPPlayer", "玩家透视", "高亮所有玩家")
+UpToggle(Main4, "ESPItem", "物品透视", "高亮地面物品")
+
 Main2:Section({ Title = "玩家", Icon = "user" })
 
 WSValue = Config:Get("WSValue", 16)
@@ -5819,6 +6025,16 @@ nocliptoggle = Main2:Toggle({
         Config:Save()
     end
 })
+
+
+-- ===== 玩家 · 升级 =====
+Main2:Section({ Title = "玩家 · 升级", Icon = "arrow-up" })
+UpToggle(Main2, "AutoRevive", "自动救队友", "队友倒地自动去救")
+UpToggle(Main2, "AutoReviveChain", "自动复活链", "连续复活倒地队友")
+UpToggle(Main2, "AutoEmergencyTeleport", "紧急传送", "危险时传送到安全点")
+UpToggle(Main2, "GodMode", "上帝模式", "低血量自动补满")
+UpToggle(Main2, "NoClip", "无碰撞", "穿过墙壁和零件")
+UpToggle(Main2, "InfiniteJump", "无限跳跃", "空中可以连续跳")
 
 Main2:Section({ Title = "飞行控制", Icon = "plane" })
 
@@ -7005,6 +7221,16 @@ workspace.DescendantAdded:Connect(function(obj)
     end
 end)
 
+
+-- ===== 商店 · 升级 =====
+Main5:Section({ Title = "商店 · 升级", Icon = "arrow-up" })
+UpToggle(Main5, "AutoBuyWeapon", "自动买武器", "按设置自动购买武器")
+UpToggle(Main5, "AutoBuyMisc", "自动买杂项", "自动购买杂项道具")
+UpToggle(Main5, "AutoHourly", "自动小时购", "每小时自动购买")
+UpToggle(Main5, "AutoUseMoney", "自动用金钱袋", "自动使用金钱袋")
+UpToggle(Main5, "AutoBoost", "自动续加速卡", "加速卡到期自动续")
+UpToggle(Main5, "AutoPotion", "自动喝药水", "低血量自动喝药")
+
 Main6:Section({ Title = "自动收集", Icon = "package" })
 
 AutoCollectToggle = Main6:Toggle({
@@ -7087,6 +7313,13 @@ CollectMovementDropdown = Main6:Dropdown({
 })
 
 -- ====================== 游戏模式 ======================
+
+-- ===== 收集 · 升级 =====
+Main6:Section({ Title = "收集 · 升级", Icon = "arrow-up" })
+UpToggle(Main6, "AutoAstroCollect", "自动拾取天文零件", "天文零件自动拾取")
+UpToggle(Main6, "AutoAstroInsert", "自动上交天文零件", "自动上交换取天文币")
+UpToggle(Main6, "AutoCollect", "自动收集（升级）", "自动收集指定物品")
+
 Main7:Section({ Title = "投票信息", TextXAlignment = "Center", TextSize = 17 })
 Main7:Divider()
 Main7:Paragraph({
@@ -7559,6 +7792,18 @@ function FireAutoSkillTrees()
 end
 
 -- ====================== 设置 ======================
+
+-- ===== 游戏模式 · 升级 =====
+Main7:Section({ Title = "游戏模式 · 升级", Icon = "arrow-up" })
+UpToggle(Main7, "AutoOneClickReady", "一键准备", "投票 + 准备 + 开局一条龙")
+UpToggle(Main7, "AutoOpenVote", "自动打开投票界面", "大厅自动打开投票 GUI")
+UpToggle(Main7, "AutoVote", "自动投票", "投给票数最高的模式")
+UpToggle(Main7, "AutoReady", "自动准备", "按老版顺序发准备信号")
+UpToggle(Main7, "AutoStart", "自动开始单人局", "投完票直接 StartSolo")
+UpToggle(Main7, "AutoAstroToken", "天文币模式一", "贴图零件往返刷币")
+UpToggle(Main7, "AutoAstroFarm", "自动刷天文怪", "自动打天文模式怪物")
+UpToggle(Main7, "RemoveMap", "删除地图（提帧）", "隐藏地图零件提升帧率")
+
 Main3:Section({ Title = "保存配置", Icon = "save" })
 
 Main3:Button({
@@ -7899,238 +8144,36 @@ print("[YYa] 至尊版 - 已移除付费限制，所有功能免费")
 print("[YYa] 至尊版 - 已移除AutoFarm与Astro互斥锁，可同时启用")
 print("[YYa] 至尊版 - 本次修改：新增计时器上帝模式独立函数，天文币模式一和模式二使用独立上帝模式")
 
-local AUTO = {
-    -- 流程开关（默认全关，必须在界面里手动打开）
-    AutoOpenVote  = false,   -- 大厅自动打开投票界面（相当于点击 GUI）
-    AutoVote      = false,   -- 自动投票选难度模式
-    AutoStart     = false,   -- 自动开单人局（StartSolo）
-    AutoEquipChar = false,   -- 自动装备你在「玩家」页选的角色（不判断强弱）
-    Character     = "",      -- 玩家自选角色名，空 = 不自动装备
-    AutoSkipVote  = false,   -- 自动跟着投跳波票
-    AutoReady     = false,   -- 大厅自动点新版 UI 准备按钮（点不动才发 GetReadyRemote）
-    AutoSkip      = false,   -- 自动开启跳波设置
-    AutoSkipHeli  = false,   -- 自动跳过直升机过场
-    AutoSettings  = false,   -- 自动打开游戏内快速过场等设置
-    AutoFight     = false,   -- 自动锁敌 + 开火
-    AutoAim       = false,   -- 自动瞄准
-    AutoTeleport  = false,   -- 敌人太远时直接瞬移到脸上
-    AutoSkill     = false,   -- 自动放技能
-    AutoRevive    = false,   -- 自动救倒地队友
-    AutoRespawn   = false,   -- 无限复活：残血自动重置角色，立刻重生
-    ReviveHp      = 35,      -- 血量百分比低于这个值就触发复活重置
-    AutoDodge     = false,   -- 瞬移躲投射物（导弹/投掷物朝你飞来时侧向瞬移）
-    AutoContinue  = false,   -- 结算自动准备下一局
-    AutoApproach  = false,   -- 敌人太远自动靠近
-    AntiAfk       = false,   -- 防踢
-    ESP           = false,   -- 敌人透视（Highlight）
-    ESPAlly       = false,   -- 队友透视（绿色高亮）
-    -- 奖励 / 收集自动化（默认全关）
-    AutoClaimLogin = false,  -- 自动领每日登录奖励（LoginRemote）
-    AutoClaimGroup = false,  -- 自动领团队奖励（GroupRewardRemote）
-    AutoClickClaim = false,  -- 自动点界面上所有可领取按钮（Claim / Collect / 领取）
-    AutoGachaChar  = false,  -- 自动抽角色
-    AutoGachaSkin  = false,  -- 自动抽皮肤
-    AutoCapsule    = false,  -- 自动开扭蛋胶囊
-    AutoSquadQuest = false,  -- 自动接取 / 完成 G-Squad 小队任务
-    AutoRestartVote = false, -- 结算后自动投"重新开始"票
-    AutoTitle      = false,  -- 自动装备指定称号
-    -- 商店 / 消耗品自动化（默认全关）
-    AutoBuyHP      = false,  -- 低血量自动在商店买补血
-    AutoPotion     = false,  -- 低血量自动喝药水
-    AutoBoost      = false,  -- 自动续开加速卡
-    AutoUseMoney   = false,  -- 自动使用金钱袋（UseItems Money）
-    AutoSkillTree  = false,  -- 自动升级技能树
-    -- 角色 / 移动（默认全关）
-    NoClip         = false,  -- 无碰撞
-    Fly            = false,  -- 飞行
-    InfiniteJump   = false,  -- 无限跳跃
-    LockMoveStats  = false,  -- 锁定移动速度 / 跳跃力
-    FullBright     = false,  -- 全亮
-    NoFog          = false,  -- 无雾
-    GodMode        = false,  -- 上帝模式（低血自动补满）
-    NoBarrier      = false,  -- 绕过隐形屏障
-    -- 刷怪设置（默认全关）
-    AutoFarm       = false,  -- 自动刷怪总开关（持续贴怪）
-    -- 天文币 / 农场辅助（默认全关）
-    AutoAstroFarm    = false,  -- 自动刷天文币：切天文模式并刷天文怪
-    AutoAstroCollect = false,  -- 自动拾取天文零件
-    AutoAstroInsert  = false,  -- 自动上交天文零件换取天文币
-    AutoAstroTech    = false,  -- 自动升级天文科技
-    AutoAstroReport  = false,  -- 定时汇报天文币数量
-    AutoAstroToken   = false,  -- 天文币模式一：贴图零件往返刷币
-    RemoveMap        = false,  -- 删除地图（提帧）
-    AutoFarmAssist   = false,  -- 自动刷怪辅助：保持锁定与输出
-    AutoOneClickReady = false, -- 一键准备：投票 + 准备 + 开局
-    ResetWave      = false,  -- 到达指定波次回安全点
-    BypassJeffrey  = false,  -- 绕过 Jeffrey
-    AntiJeffrey    = false,  -- Anti Jeffrey
-    FlushAura      = false,  -- 自动冲刷光环
-    -- 透视扩展（默认全关）
-    ESPEnable      = false,  -- 透视总开关
-    ESPPlayer      = false,  -- 玩家透视
-    ESPItem        = false,  -- 物品透视
-    -- 商店扩展（默认全关）
-    AutoBuyWeapon  = false,  -- 自动买武器
-    AutoBuyMisc    = false,  -- 自动买杂项
-    AutoRequest    = false,  -- 自动请求（第 10 波后）
-    UpgradeTitanSpeaker = false, -- 自动升级泰坦扬声器
-    UpgradeUTCM    = false,  -- 自动升级 UTCM
-    UpgradeTV      = false,  -- 自动升级 TV
-    AutoHourly     = false,  -- 自动小时购
-    AutoUseItem    = false,  -- 自动使用物品
-    UseItemName    = "Presents", -- 要使用的物品
-    -- 收集扩展（默认全关）
-    AutoCollect    = false,  -- 自动收集
-    -- 杂项（默认全关）
-    AutoSave       = false,  -- 自动保存配置
-    AutoVoteInGame = false,  -- 局内自动投票
-    AutoGameModeLobby = false, -- 大厅自动应用游戏模式
-    CombatDebug    = false,  -- 战斗调试日志
-    -- 自动化参数
-    GachaSpin      = "10Spins",                  -- 抽奖档位
-    BoostName      = "Booster X2 Mastery : 30Min", -- 加速卡名称
-    PotionName     = "Potion",                     -- 自动喝哪种药水
-    TitleName      = "",                          -- 要装备的称号名
-    FarmMode       = "Normal",                    -- 刷怪模式
-    FarmPos        = "Above",                     -- 刷怪位置：Above / Under / Orbit
-    FarmMove       = "Teleport",                  -- 移动方式：Teleport / Tween
-    CircleRadius   = 6,                            -- 环绕半径
-    FarmHeight     = 0,                            -- 刷怪高度
-    SkillDelay     = 1,                            -- 技能按键间隔（秒）
-    SafeHp         = 30,                           -- 安全模式血量
-    GodHp          = 30,                           -- 上帝模式触发血量
-    ResetWaveValue = 10,                           -- 第几波重置
-    AntiJeffreyRange = 50,                         -- Jeffrey 检测范围
-    FlushAuraRange = 5,                            -- 冲刷光环范围
-    WalkSpeed      = 16,                           -- 锁定移速
-    JumpPower      = 50,                           -- 锁定跳跃力
-    FlySpeed       = 1,                            -- 飞行速度倍率（x50）
-    FlyHeight      = 10,                           -- 飞行升降速度
-    CameraMode     = "Classic",                    -- 相机模式：Classic / Manual
-    WeaponName     = "Stungun",                    -- 要买的武器
-    MiscName       = "HeadPhone",                  -- 要买的杂项
-    RequestName    = "Titan-Request",              -- 要请求的物品
-    HourlyAmount   = 1,                            -- 小时购数量
-    HourlyCustom   = "",                           -- 小时购自定义物品名
-    CollectMode    = "Clean",                      -- 收集模式
-    CollectMove    = "Teleport",                   -- 收集移动方式
-    AutoSaveDelay  = 15,                           -- 自动保存间隔
-    GameMode       = "Normal",                     -- 大厅游戏模式
-    ESPSettings    = { "高亮" },                    -- 透视显示项
-    ESPItems       = {},                           -- 透视物品列表
-    TitanUpgrades  = {},                           -- 泰坦扬声器升级
-    UTCMUpgrades   = {},                           -- UTCM 升级
-    TVUpgrades     = {},                           -- TV 升级
-    HourlyItems    = {},                           -- 小时购物品
-    CollectItems   = {},                           -- 收集物品列表
-    SelectedCodes  = {},                           -- 已选兑换码
-    SelectedPasses = {},                           -- 已选通行证
-    -- 内部数值
-    Range         = 400,     -- 锁敌半径
-    SkillTick     = 0.2,     -- 技能检查频率（每个技能按自己的冷却独立触发）
-    VoteGap       = 5,       -- 重复投票间隔
-    TeleportDist  = 90,      -- 超过这个距离直接瞬移
-    TurnDist      = 110,     -- 超过这个距离开始瞬移
-    VoteMode      = "",      -- 空 = 自动投当前票数最高的模式
-    -- 运行数据
-    Phase         = "启动中",
-    LastReason    = "就绪",
-    Target        = nil,
-    VoteState     = "—",
-    Running       = true,
-    Paused        = false,
-    Actions       = {},
-    Logs          = {},
-}
+-- ===== 设置 · 升级 =====
+Main3:Section({ Title = "升级引擎", Icon = "activity" })
+UpToggle(Main3, "CombatDebug", "战斗调试日志", "输出战斗调试信息")
+UpToggle(Main3, "AutoSave", "自动保存配置（升级）", "定时保存升级开关")
 
--- 启动时读取上次保存的配置（有就覆盖默认值，界面会显示保存时的状态）
-pcall(function()
-    if type(isfile) == "function" and type(readfile) == "function" and isfile("难度模式_配置.json") then
-        local ok, data = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(readfile("难度模式_配置.json"))
-        end)
-        if ok and type(data) == "table" then
-            for k, v in pairs(data) do
-                if AUTO[k] ~= nil and type(v) == type(AUTO[k]) then
-                    AUTO[k] = v
-                end
-            end
-        end
-    end
-end)
-
--- ============================================================
--- 升级层（以原版模板为基底，只做追加，不改原版任何逻辑）
--- 原版 UI / 原版功能全部保留；新增功能放在「升级功能」「全部模块」页
--- ============================================================
-local player = (Players and Players.LocalPlayer) or game:GetService("Players").LocalPlayer
-local camera = workspace.CurrentCamera
-
--- 升级功能页：常用新功能直接开
-local UpTab = Window:Tab({ Title = "升级功能", Icon = "sparkles" })
-local UpFlow = UpTab:Section({ Title = "流程", Icon = "list" })
-local UpFight = UpTab:Section({ Title = "战斗", Icon = "swords" })
-local UpAstro = UpTab:Section({ Title = "天文币 / 农场", Icon = "rocket" })
-local UpStatusSec = UpTab:Section({ Title = "运行状态", Icon = "activity" })
-local StatusPara = UpStatusSec:Paragraph({ Title = "实时数据", Desc = "启动中..." })
-local LogPara = UpTab:Section({ Title = "运行日志", Icon = "file-text" }):Paragraph({ Title = "日志", Desc = "等待引擎启动..." })
-
-local function upToggle(sec, key, title, desc)
-    sec:Toggle({
-        Title = title,
-        Desc  = desc,
-        Value = AUTO[key] == true,
-        Callback = function(v) AUTO[key] = v end,
-    })
-end
-
-upToggle(UpFlow, "AutoOpenVote", "自动打开投票界面", "大厅自动打开投票 GUI")
-upToggle(UpFlow, "AutoVote", "自动投票", "自动投给票数最高的模式")
-upToggle(UpFlow, "AutoReady", "自动准备", "按老版顺序发 GetReadyRemote")
-upToggle(UpFlow, "AutoStart", "自动开单人局", "投完票直接 StartSolo")
-upToggle(UpFlow, "AutoOneClickReady", "一键准备", "投票 + 准备 + 开局一条龙")
-upToggle(UpFlow, "AutoContinue", "结算自动继续", "结算界面自动准备下一局")
-upToggle(UpFlow, "AutoSkipVote", "自动跳波投票", "跳波投票自动跟票")
-
-upToggle(UpFight, "AutoFight", "自动锁敌开火", "自动锁定并攻击敌人")
-upToggle(UpFight, "AutoAim", "自动瞄准", "自动把准心对准目标")
-upToggle(UpFight, "AutoSkill", "自动放技能", "按冷却自动释放技能")
-upToggle(UpFight, "AutoFarm", "自动刷怪", "持续贴怪输出")
-upToggle(UpFight, "AutoTeleport", "瞬移贴脸", "敌人太远直接瞬移过去")
-upToggle(UpFight, "AutoRespawn", "无限复活", "残血自动重置角色立刻重生")
-upToggle(UpFight, "ESP", "敌人透视", "给敌人加高亮")
-upToggle(UpFight, "AntiAfk", "防踢", "挂机防踢")
-
-UpFight:Slider({
-    Title = "无限复活血量",
-    Desc  = "血量低于这个百分比就重置角色",
-    Value = { Min = 1, Max = 99, Default = AUTO.ReviveHp },
-    Step  = 1,
-    Callback = function(v) AUTO.ReviveHp = v end,
-})
-
-upToggle(UpAstro, "AutoAstroToken", "天文币模式一", "贴图零件往返刷币")
-upToggle(UpAstro, "AutoAstroFarm", "自动刷天文怪", "自动打天文模式怪物")
-upToggle(UpAstro, "AutoFarmAssist", "刷怪辅助", "保持锁定与输出")
-upToggle(UpAstro, "RemoveMap", "删除地图（提帧）", "隐藏地图零件提升帧率")
-
-UpAstro:Button({
-    Title = "立即保存配置", Desc = "保存当前所有开关", Icon = "save",
+Main3:Button({
+    Title = "立即保存升级配置", Desc = "保存升级引擎的所有开关", Icon = "save",
     Callback = function() if AUTO.Actions.SaveConfig then AUTO.Actions.SaveConfig() end end,
 })
-UpAstro:Button({
+Main3:Button({
     Title = "暂停 / 继续", Desc = "暂停后不再瞄准、开火、放技能", Icon = "pause",
     Callback = function() if AUTO.Actions.TogglePause then AUTO.Actions.TogglePause() end end,
 })
-UpAstro:Button({
-    Title = "环境自检", Desc = "检查角色 / 遥控是否正常", Icon = "stethoscope",
+Main3:Button({
+    Title = "环境自检", Desc = "检查角色与遥控是否正常", Icon = "stethoscope",
     Callback = function() if AUTO.Actions.Diag then AUTO.Actions.Diag() end end,
 })
 
-----------------------------------------------------------------
--- ▼▼ 升级引擎 ▼▼
-----------------------------------------------------------------
+UpStatSec = Main3:Section({ Title = "运行状态 · 升级", Icon = "server" })
+StatusPara = UpStatSec:Paragraph({ Title = "实时数据", Desc = "启动中..." })
+UpLogSec = Main3:Section({ Title = "运行日志 · 升级", Icon = "file-text" })
+LogPara = UpLogSec:Paragraph({ Title = "日志", Desc = "等待引擎启动..." })
 
+
+----------------------------------------------------------------
+-- ▼▼ 升级引擎（在原版之上追加，不改原版逻辑）▼▼
+----------------------------------------------------------------
+local player = (Players and Players.LocalPlayer) or game:GetService("Players").LocalPlayer
+local camera = workspace.CurrentCamera
+local AUTO = AUTO
 
 local ENGINE_DEFAULTS = {
     AutoFarm = false, FarmMode = "Normal Mode", FarmPos = "Above", FarmMove = "Teleport",
@@ -18241,7 +18284,7 @@ end
 ----------------------------------------------------------------
 pcall(function()
     if not Window or not Window.Tab then return end
-    local AllTab = Window:Tab({ Title = "全部模块", Icon = "list" })
+    local AllTab = Window:Tab({ Title = "扩展模块", Icon = "list" })
     local groups, order = {}, {}
     for _, m in ipairs(MODULE_REGISTRY) do
         if m.kind == "bool" and m.key and AUTO[m.key] ~= nil then
@@ -19409,4 +19452,5 @@ log("引擎已启动：所有功能默认关闭，请在界面里手动打开需
 xNotify("难度模式 自动化", "已加载：功能默认全关，打开菜单手动启用")
 
 end
+
 
