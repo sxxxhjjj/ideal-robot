@@ -1,8 +1,8 @@
 --[[
   难度模式 自动化 · 引擎（UI 外置 / 链接加载版）
   =================================================
-  · UI（WindUI 库 + 菜单 + 悬浮窗）已单独放在「难度模式_UI.lua」
-  · 本文件通过链接加载 UI，然后启动自动化引擎
+  · UI 单独放在「难度模式_UI.lua」，UI 内部用链接加载 WindUI 库
+  · 本文件只负责加载 UI 并启动自动化引擎
   · 所有功能默认关闭，必须玩家在菜单里手动打开开关才会运行
   · 准备流程：自动投票 → 点击新版 UI 准备按钮 → 开单人局
 ]]
@@ -10,22 +10,34 @@
 -- ============================================================
 -- UI 加载
 -- ============================================================
--- ↓↓↓ 把这里换成你 UI 文件的直链（GitHub raw / 图床 / 任意可 HttpGet 的链接）
+-- 你的 UI 链接（引擎直接加载这个链接，UI 里自带 WindUI，不需要额外库链接）
 local UILINK = "https://raw.githubusercontent.com/sxxxhjjj/ideal-robot/refs/heads/main/6adc21d1d2a3c5977bcbd30c_%E9%9A%BE%E5%BA%A6%E6%A8%A1%E5%BC%8F_UI.lua"
 
-local function loadUISource()
-    if UILINK and UILINK ~= "" and not string.find(UILINK, "example.com", 1, true) then
-        return game:HttpGet(UILINK)
+local function loadUIExport()
+    if UILINK and UILINK ~= "" then
+        return loadstring(game:HttpGet(UILINK))()
     end
-    -- 没填链接时尝试本地文件（注入器支持 readfile 时可用）
-    local ok, data = pcall(readfile, "难度模式_UI.lua")
-    if ok and type(data) == "string" and data ~= "" then
-        return data
+    if getgenv then
+        local cached = getgenv().DifficultyModeUI
+        if type(cached) == "table" and cached.AUTO then
+            return cached
+        end
     end
-    error("[难度模式] 请先在 UILINK 填入 UI 文件的直链")
+    local source
+    for _, name in ipairs({ "难度模式_UI.lua", "难度模式_UI_new.lua" }) do
+        local ok, data = pcall(readfile, name)
+        if ok and type(data) == "string" and data ~= "" then
+            source = data
+            break
+        end
+    end
+    if not source or source == "" then
+        error("[难度模式] 未找到新版 UI：先单独执行 UI 文件，或在 UILINK 填新版 UI 直链")
+    end
+    return loadstring(source)()
 end
 
-local UI = loadstring(loadUISource())()
+local UI = loadUIExport()
 
 local AUTO             = UI.AUTO
 local WindUI           = UI.WindUI
@@ -9269,10 +9281,322 @@ for _, k in ipairs({
     table.insert(LOBBY_QUEUE, k)
 end
 
+----------------------------------------------------------------
+-- ============================================================
+-- 扩展自动化 XI：天文币 / 自动农场 / 自动刷怪 / 一键准备
+-- ============================================================
+----------------------------------------------------------------
+local X11_DEFAULTS = {
+    AutoAstroFarm = false, AstroFarmRadius = 260, AstroFarmGap = 1.5,
+    AutoAstroCollect = false, AstroCollectRange = 140, AstroCollectGap = 2,
+    AutoAstroInsert = false, AstroInsertGap = 3,
+    AutoAstroTech = false, AstroTechGap = 20,
+    AutoAstroScan = false, AstroScanGap = 15,
+    AutoAstroReport = false, AstroReportGap = 120,
+    AutoOneClickReady = false, OneClickGap = 1.2,
+    AutoFarmAssist = false, FarmAssistGap = 1,
+}
+for k, v in pairs(X11_DEFAULTS) do
+    if AUTO[k] == nil then AUTO[k] = v end
+end
 
 ----------------------------------------------------------------
--- 扩展自动化 IX：注册与调度接入（把第六/七/八批模块挂到主循环）
+-- 天文零件名单（直接从游戏 AstroResearch 模块读取）
 ----------------------------------------------------------------
+function xAstroPartNames()
+    local st = xSt("astroparts")
+    local now = os.clock()
+    if st.names and now - (st.t or 0) < 60 then return st.names end
+    local names = {}
+    local mod = RS:FindFirstChild("AstroResearch")
+    if mod then
+        local ok, res = pcall(require, mod)
+        if ok and type(res) == "table" and type(res.Parts) == "table" then
+            for _, p in ipairs(res.Parts) do
+                if type(p) == "table" and p.Item then
+                    table.insert(names, p.Item)
+                end
+            end
+        end
+    end
+    st.names = names
+    st.t = now
+    return names
+end
+
+function xIsAstroPartName(name)
+    if not name or name == "" then return false end
+    local low = string.lower(name)
+    if string.find(low, "astro", 1, true) then return true end
+    for _, part in ipairs(xAstroPartNames()) do
+        if name == part then return true end
+    end
+    return false
+end
+
+function xAstroTokenCount()
+    local v = player:GetAttribute("Astro Token")
+    if v == nil then v = player:GetAttribute("AstroToken") end
+    if v == nil then
+        local ls = player:FindFirstChild("leaderstats")
+        local node = ls and (ls:FindFirstChild("Astro Token") or ls:FindFirstChild("AstroToken")
+            or ls:FindFirstChild("Token"))
+        if node then v = node.Value end
+    end
+    return tonumber(v)
+end
+
+----------------------------------------------------------------
+-- 196. 自动天文农场（切模式 + 开战斗 + 锁天文怪）
+----------------------------------------------------------------
+function autoAstroFarm()
+    if not AUTO.AutoAstroFarm then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astrofarm", tonumber(AUTO.AstroFarmGap) or 1.5) then return false end
+    if not inMatch() then
+        AUTO.FarmMode = "Astro Holdout Mode"
+        if AUTO.GameMode ~= "Astro" and AUTO.GameMode ~= "AstroV2" then
+            AUTO.GameMode = "Astro"
+        end
+        return false
+    end
+    AUTO.FarmMode = "Astro Holdout Mode"
+    AUTO.AutoFarm = true
+    AUTO.AutoFight = true
+    AUTO.AutoAim = true
+    AUTO.AutoSkill = true
+    local radius = tonumber(AUTO.AstroFarmRadius) or 260
+    local enemy, dist = nearestEnemy(radius)
+    if enemy then
+        AUTO.Target = enemy.Name
+        AUTO.LastReason = string.format("天文农场：锁定 %s（%.0f 格）", enemy.Name, dist or 0)
+        return true
+    end
+    AUTO.LastReason = "天文农场：等待天文怪刷新"
+    return false
+end
+
+----------------------------------------------------------------
+-- 197. 自动拾取天文零件
+----------------------------------------------------------------
+function autoAstroCollect()
+    if not AUTO.AutoAstroCollect then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astrocollect", tonumber(AUTO.AstroCollectGap) or 2) then return false end
+    local base = xRoot2()
+    if not base then return false end
+    local range = tonumber(AUTO.AstroCollectRange) or 140
+    local best, bestD = nil, range
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("Model") or d:IsA("BasePart") then
+            if xIsAstroPartName(d.Name) then
+                local p = xPosOf(d)
+                if p then
+                    local dist = (p - base.Position).Magnitude
+                    if dist < bestD then
+                        best, bestD = p, dist
+                    end
+                end
+            end
+        end
+    end
+    if best then
+        local ok = xTp(best + Vector3.new(0, 3, 0))
+        if ok then
+            AUTO.LastReason = string.format("天文零件：拾取 %.0f 格", bestD)
+            xStatAdd("天文零件", 1)
+        end
+        return ok
+    end
+    for _, p in ipairs(xNearPrompts(20)) do
+        if xIsAstroPartName(p.Name) then
+            if xUsePrompt(p) then
+                xStatAdd("天文零件", 1)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+----------------------------------------------------------------
+-- 198. 自动上交天文零件换币
+----------------------------------------------------------------
+function autoAstroInsert()
+    if not AUTO.AutoAstroInsert then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astroinsert", tonumber(AUTO.AstroInsertGap) or 3) then return false end
+    local items = {}
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, t in ipairs(backpack:GetChildren()) do
+            if t:IsA("Tool") and xIsAstroPartName(t.Name) then
+                table.insert(items, t.Name)
+            end
+        end
+    end
+    local c = myChar()
+    if c then
+        for _, t in ipairs(c:GetChildren()) do
+            if t:IsA("Tool") and xIsAstroPartName(t.Name) then
+                table.insert(items, t.Name)
+            end
+        end
+    end
+    if #items == 0 then return false end
+    local okCount = 0
+    for _, name in ipairs(items) do
+        if xFire("CraftToken", name, "Insert") then
+            okCount = okCount + 1
+        end
+    end
+    if okCount > 0 then
+        AUTO.LastReason = "天文研究：已上交 " .. okCount .. " 个零件"
+        log("天文研究：已上交 " .. okCount .. " 个零件，累计换取天文币")
+        xStatAdd("天文上交", okCount)
+    end
+    return okCount > 0
+end
+
+----------------------------------------------------------------
+-- 199. 自动升级天文科技
+----------------------------------------------------------------
+function autoAstroTech()
+    if not AUTO.AutoAstroTech then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astrotech", tonumber(AUTO.AstroTechGap) or 20) then return false end
+    local upgraded = 0
+    for _, level in ipairs({ "Level1", "Level2", "Level3" }) do
+        if xFire("AstroTechUpgrade", level) then
+            upgraded = upgraded + 1
+        end
+    end
+    if upgraded > 0 then
+        AUTO.LastReason = "天文科技：已请求升级"
+        log("天文科技：已请求升级 " .. upgraded .. " 项")
+        xStatAdd("天文科技", upgraded)
+    end
+    return upgraded > 0
+end
+
+----------------------------------------------------------------
+-- 200. 扫描天文研究进度
+----------------------------------------------------------------
+function autoAstroScan()
+    if not AUTO.AutoAstroScan then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astroscan", tonumber(AUTO.AstroScanGap) or 15) then return false end
+    local mod = RS:FindFirstChild("AstroResearch")
+    local progressName = "AstroTradeSystem"
+    if mod then
+        local ok, res = pcall(require, mod)
+        if ok and type(res) == "table" and type(res.ProgressValue) == "string" then
+            progressName = res.ProgressValue
+        end
+    end
+    local value = player:GetAttribute(progressName)
+    if value == nil then
+        local ok, v = pcall(function() return player:GetAttribute(progressName) end)
+        if ok then value = v end
+    end
+    local st = xSt("astroscan")
+    if value ~= nil and value ~= st.value then
+        st.value = value
+        AUTO.LastReason = "天文研究：进度 " .. tostring(value)
+        log("天文研究：当前进度 " .. tostring(value))
+        xStatAdd("天文扫描", 1)
+    end
+    return value ~= nil
+end
+
+----------------------------------------------------------------
+-- 201. 天文币汇报
+----------------------------------------------------------------
+function autoAstroReport()
+    if not AUTO.AutoAstroReport then return false end
+    if AUTO.Paused then return false end
+    if not every("x_astroreport", tonumber(AUTO.AstroReportGap) or 120) then return false end
+    local tokens = xAstroTokenCount()
+    if tokens == nil then return false end
+    local st = xSt("astroreport")
+    if st.last == tokens then return false end
+    st.last = tokens
+    AUTO.LastReason = "天文币：" .. xFmt(tokens)
+    log("天文币：当前持有 " .. xFmt(tokens))
+    xStatAdd("天文汇报", 1)
+    return true
+end
+
+----------------------------------------------------------------
+-- 202. 一键准备（投票 → 准备 → 开局）
+----------------------------------------------------------------
+function autoOneClickReady()
+    if not AUTO.AutoOneClickReady then return false end
+    if AUTO.Paused then return false end
+    if not every("x_oneclick", tonumber(AUTO.OneClickGap) or 1.2) then return false end
+    if inMatch() then return false end
+    local did = false
+    if autoVote() then did = true end
+    if autoReady() then did = true end
+    if autoStartSolo() then did = true end
+    if did then
+        AUTO.LastReason = "一键准备：投票 / 准备 / 开局已执行"
+        xStatAdd("一键准备", 1)
+    end
+    return did
+end
+
+----------------------------------------------------------------
+-- 203. 自动刷怪辅助（让农场保持锁定与输出）
+----------------------------------------------------------------
+function autoFarmAssist()
+    if not AUTO.AutoFarmAssist then return false end
+    if AUTO.Paused then return false end
+    if not every("x_farmassist", tonumber(AUTO.FarmAssistGap) or 1) then return false end
+    if not AUTO.AutoFarm then return false end
+    AUTO.AutoFight = true
+    AUTO.AutoAim = true
+    local enemy, dist = nearestEnemy(tonumber(AUTO.Range) or 200)
+    if enemy then
+        AUTO.Target = enemy.Name
+        AUTO.LastReason = string.format("刷怪辅助：锁定 %s（%.0f 格）", enemy.Name, dist or 0)
+        return true
+    end
+    return false
+end
+
+reg("AutoAstroFarm", "自动刷天文币", "天文", "bool", "切到天文模式并自动刷天文怪")
+reg("AutoAstroCollect", "拾取天文零件", "天文", "bool", "自动传送拾取天文零件")
+reg("AutoAstroInsert", "自动上交零件", "天文", "bool", "把背包里的天文零件上交研究换币")
+reg("AutoAstroTech", "自动天文科技", "天文", "bool", "自动升级天文科技树")
+reg("AutoAstroScan", "天文进度扫描", "天文", "bool", "定时读取天文研究进度")
+reg("AutoAstroReport", "天文币汇报", "天文", "bool", "定时汇报天文币数量")
+reg("AutoOneClickReady", "一键准备", "流程", "bool", "投票 + 准备 + 开局一次完成")
+reg("AutoFarmAssist", "自动刷怪辅助", "战斗", "bool", "让自动农场保持锁定与输出")
+
+MODULE_RUNNERS.AutoAstroFarm = autoAstroFarm
+MODULE_RUNNERS.AutoAstroCollect = autoAstroCollect
+MODULE_RUNNERS.AutoAstroInsert = autoAstroInsert
+MODULE_RUNNERS.AutoAstroTech = autoAstroTech
+MODULE_RUNNERS.AutoAstroScan = autoAstroScan
+MODULE_RUNNERS.AutoAstroReport = autoAstroReport
+MODULE_RUNNERS.AutoOneClickReady = autoOneClickReady
+MODULE_RUNNERS.AutoFarmAssist = autoFarmAssist
+
+for _, k in ipairs({
+    "AutoAstroFarm", "AutoAstroCollect", "AutoAstroInsert", "AutoAstroTech",
+    "AutoFarmAssist",
+}) do
+    table.insert(COMBAT_QUEUE, k)
+end
+
+for _, k in ipairs({
+    "AutoAstroScan", "AutoAstroReport", "AutoOneClickReady", "AutoAstroFarm",
+}) do
+    table.insert(LOBBY_QUEUE, k)
+end
+
+
 -- 第六批：高级战斗 / 预判 / 区域规避 / 巡逻
 reg("AutoAimLead", "预判瞄准", "战斗", "bool", "按目标速度提前量瞄准")
 reg("AutoDodgeZone", "区域规避", "战斗", "bool", "站在危险区域外输出")
