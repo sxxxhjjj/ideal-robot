@@ -51,37 +51,13 @@ if not WindUI then
 end
 
 -- ============================================================
--- 窗口：和老版本完全一致（550x380 / 默认侧栏 / 无搜索栏）
+-- 窗口：WindUI 原版默认样式，不做任何自定义装饰
 -- ============================================================
 local Window = WindUI:CreateWindow({
-    Title    = "至尊版",
-    IconThemed = true,
-    Icon     = "rbxassetid://103789103251622",
-    Author   = "STBB | 至尊版",
-    Folder   = "YYa",
-
-    Size     = UDim2.fromOffset(550, 380),
-
-    Background = "rbxassetid://90331823252393",
-    BackgroundImageTransparency = 0.8,
-
-    Transparent = true,
-    Theme = "Dark",
-    HasOutline = false,
-    HideSearchBar = true,
-    ScrollBarEnabled = true,
-    User = { Enabled = true, Anonymous = false },
-})
-
-Window:SetToggleKey(Enum.KeyCode.K)
-Window:Tag({ Title = "至尊版", Color = Color3.fromHex("#db7093") })
-Window:EditOpenButton({
-    Title = "至尊版 - 打开",
-    Icon = "monitor",
-    CornerRadius = UDim.new(0, 6),
-    StrokeThickness = 2,
-    Color = ColorSequence.new(Color3.fromRGB(30, 30, 30), Color3.fromRGB(255, 255, 255)),
-    Draggable = true,
+    Title  = "难度模式 自动化",
+    Author = "STBB",
+    Size   = UDim2.fromOffset(550, 380),
+    Theme  = "Dark",
 })
 
 -- ============================================================
@@ -249,8 +225,8 @@ pcall(function()
 end)
 
 -- ============================================================
--- 界面：布局与老版本至尊版一模一样
--- 信息 / 主要 / 透视 / 玩家 / 商店 / 收集 / 游戏模式 / 设置
+-- 界面：WindUI 原版样式
+-- 信息 / 主要 / 透视 / 玩家 / 商店 / 收集 / 游戏模式 / 设置 / 全部模块
 -- 所有功能开关默认关闭，必须玩家手动打开才会运行
 -- ============================================================
 -- 中文显示名 → 游戏实际参数（下拉框显示中文，发给引擎英文）
@@ -412,14 +388,14 @@ Window:SelectTab(1)
 
 -- ====================== 信息 ======================
 local SecInfo = InfoTab:Section({
-    Title = "难度模式 至尊版",
+    Title = "难度模式 自动化",
     TextXAlignment = "Center",
     TextSize = 17,
 })
 
 SecInfo:Paragraph({
-    Title = "最新更新",
-    Desc  = "布局与老版本至尊版一模一样。所有功能默认关闭，必须你手动打开开关才会运行，不打开就什么都不做。\n开局流程：自动投票 → 点击新版 UI 准备按钮 → 开单人局。\n战斗功能：自动锁敌开火 / 自动瞄准 / 自动技能 / 瞬移贴脸 / 瞬移躲投射物 / 无限复活 / 自动救人 / 结算自动继续，全部独立开关，按需打开。\n本次新增：自动领登录奖 / 团队奖 / 一键点领取按钮 / 自动抽角色 / 抽皮肤 / 开胶囊 / 小队任务 / 重开投票 / 自动称号 / 自动补血 / 喝药 / 续加速 / 用金钱袋 / 升级技能树 / 队友透视，同样默认全关。",
+    Title = "说明",
+    Desc  = "所有功能默认关闭，必须你手动打开开关才会运行，不打开就什么都不做。\n开局流程：自动投票 → 点击新版 UI 准备按钮 → 开单人局。\n战斗功能：自动锁敌开火 / 自动瞄准 / 自动技能 / 瞬移贴脸 / 瞬移躲投射物 / 无限复活 / 自动救人 / 结算自动继续，全部独立开关，按需打开。\n其余模块统一放在「全部模块」页，按分组列好，直接开关即可。",
 })
 
 -- ====================== 主要 ======================
@@ -1915,27 +1891,6 @@ do
 local RS = game:GetService("ReplicatedStorage")
 local VirtualUser = game:GetService("VirtualUser")
 local pg = player:WaitForChild("PlayerGui")
-
--- 顶部拖动修复：搜索框会盖住标题栏的拖动区域，这里直接隐藏掉，标题栏就能正常拖
-pcall(function()
-    local hosts = { (gethui and gethui()) or game:GetService("CoreGui"), player:WaitForChild("PlayerGui") }
-    for _, host in ipairs(hosts) do
-        for _, gui in ipairs(host:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                local bar = gui:FindFirstChild("SearchBar", true)
-                if bar then
-                    bar.Visible = false
-                    bar.Active = false
-                    local box = bar:FindFirstChildWhichIsA("TextBox", true)
-                    if box then
-                        box.Visible = false
-                        box.Active = false
-                    end
-                end
-            end
-        end
-    end
-end)
 
 ----------------------------------------------------------------
 -- 基础工具
@@ -13169,6 +13124,6 @@ task.spawn(function()
 end)
 
 log("引擎已启动：所有功能默认关闭，请在界面里手动打开需要的开关（投票 / 准备 / 开局 / 战斗 / 复活等）")
-notify("难度模式 至尊版", "已加载：功能默认全关，打开菜单手动启用")
+notify("难度模式 自动化", "已加载：功能默认全关，打开菜单手动启用")
 
 end
