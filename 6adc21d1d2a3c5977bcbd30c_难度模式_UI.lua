@@ -1,13 +1,21 @@
 --[[
   难度模式 · 界面文件（UI 外置版）
   =================================================
-  · 内嵌 WindUI v1.6.66 + 菜单 + 自定义悬浮窗，本文件可单独托管用链接加载
-  · 由引擎文件通过 loadstring(game:HttpGet(...))() 加载
-  · 加载后返回一张表：AUTO / WindUI / Status / Log / Players / player 等
+  · 内嵌 WindUI + 你的自定义布局与悬浮窗，无外部库链接
+  · 窗口 620x480 / 图标侧栏 72 / 搜索栏开启 / 悬浮窗常驻
+  · 由引擎加载后取走 AUTO 表启动自动化
   · 适配游戏：难度模式（PlaceId 18816546575）
-  · 界面布局与老版本至尊版一模一样（信息/主要/透视/玩家/商店/收集/游戏模式/设置）
-  · 所有功能默认关闭，必须玩家自己在界面里打开开关才会运行，不打开就什么都不做
-  · 出口：文件末尾返回 __UI_EXPORT
+  · 所有功能默认关闭，必须玩家自己在界面里打开开关才会运行
+]]
+
+--[[
+  WindUI 独立融合脚本 · 最终版
+  =================================================
+  · 内嵌 WindUI v1.6.66，整份文件直接运行，无 loadstring / 无外部链接
+  · 窗口大小 / 位置 / 搜索栏 / 悬浮窗 均已配置好
+  · 搜索【可改】可替换标题 / 作者 / 图标 / 开关等个性化内容
+  · 密钥系统(KeySystem) / 第三方服务(Services) / 亚克力(Acrylic) / 多语言：全部关闭
+  · 配置系统：仅保存 Toggle（开关）状态
 ]]
 
 --[[
@@ -17449,39 +17457,40 @@ return h
 end
 
 local WindUI = aa
-
 -- ============================================================
--- 窗口：与老版本至尊版布局一模一样
+-- 窗口：用你自己的布局（620x480 / 图标侧栏 / 自定义悬浮窗）
 -- ============================================================
 local Window = WindUI:CreateWindow({
-    Title = "至尊版",
-    IconThemed = true,
-    Icon = "rbxassetid://103789103251622",
-    Author = "STBB | 至尊版",
-    Folder = "YYa",
-    Size = UDim2.fromOffset(550, 380),
+    Title    = "至尊版",
+    Icon     = "rbxassetid://103789103251622",
+    Author   = "STBB | 至尊版",
+    Folder   = "YYa",
+
+    Size     = UDim2.new(0, 620, 0, 480),
+    MinSize  = Vector2.new(520, 340),
+    MaxSize  = Vector2.new(1000, 700),
+    Resizable = true,
+    AutoScale = true,
+    Acrylic   = false,
+
+    SideBarWidth  = 72,
+    HideSearchBar = false,
+    Radius        = 16,
+    ElementsRadius = 16,
+
+    Background = "rbxassetid://90331823252393",
+    OpenButton = { Enabled = false },
+
     Transparent = true,
     Theme = "Dark",
-    Background = "rbxassetid://90331823252393",
     BackgroundImageTransparency = 0.8,
     HasOutline = false,
-    HideSearchBar = true,
     ScrollBarEnabled = true,
     User = { Enabled = true, Anonymous = false },
 })
 
 Window:SetToggleKey(Enum.KeyCode.K)
-
 Window:Tag({ Title = "至尊版", Color = Color3.fromHex("#db7093") })
-
-Window:EditOpenButton({
-    Title = "至尊版 - 打开",
-    Icon = "monitor",
-    CornerRadius = UDim.new(0, 6),
-    StrokeThickness = 2,
-    Color = ColorSequence.new(Color3.fromRGB(30, 30, 30), Color3.fromRGB(255, 255, 255)),
-    Draggable = true,
-})
 
 -- ============================================================
 -- 共享状态（界面与自动化引擎共用）
@@ -17528,11 +17537,89 @@ local AUTO = {
     AutoBoost      = false,  -- 自动续开加速卡
     AutoUseMoney   = false,  -- 自动使用金钱袋（UseItems Money）
     AutoSkillTree  = false,  -- 自动升级技能树
+    -- 角色 / 移动（默认全关）
+    NoClip         = false,  -- 无碰撞
+    Fly            = false,  -- 飞行
+    InfiniteJump   = false,  -- 无限跳跃
+    LockMoveStats  = false,  -- 锁定移动速度 / 跳跃力
+    FullBright     = false,  -- 全亮
+    NoFog          = false,  -- 无雾
+    GodMode        = false,  -- 上帝模式（低血自动补满）
+    NoBarrier      = false,  -- 绕过隐形屏障
+    -- 刷怪设置（默认全关）
+    AutoFarm       = false,  -- 自动刷怪总开关（持续贴怪）
+    -- 天文币 / 农场辅助（默认全关）
+    AutoAstroFarm    = false,  -- 自动刷天文币：切天文模式并刷天文怪
+    AutoAstroCollect = false,  -- 自动拾取天文零件
+    AutoAstroInsert  = false,  -- 自动上交天文零件换取天文币
+    AutoAstroTech    = false,  -- 自动升级天文科技
+    AutoAstroReport  = false,  -- 定时汇报天文币数量
+    AutoFarmAssist   = false,  -- 自动刷怪辅助：保持锁定与输出
+    AutoOneClickReady = false, -- 一键准备：投票 + 准备 + 开局
+    ResetWave      = false,  -- 到达指定波次回安全点
+    BypassJeffrey  = false,  -- 绕过 Jeffrey
+    AntiJeffrey    = false,  -- Anti Jeffrey
+    FlushAura      = false,  -- 自动冲刷光环
+    -- 透视扩展（默认全关）
+    ESPEnable      = false,  -- 透视总开关
+    ESPPlayer      = false,  -- 玩家透视
+    ESPItem        = false,  -- 物品透视
+    -- 商店扩展（默认全关）
+    AutoBuyWeapon  = false,  -- 自动买武器
+    AutoBuyMisc    = false,  -- 自动买杂项
+    AutoRequest    = false,  -- 自动请求（第 10 波后）
+    UpgradeTitanSpeaker = false, -- 自动升级泰坦扬声器
+    UpgradeUTCM    = false,  -- 自动升级 UTCM
+    UpgradeTV      = false,  -- 自动升级 TV
+    AutoHourly     = false,  -- 自动小时购
+    AutoUseItem    = false,  -- 自动使用物品
+    UseItemName    = "Presents", -- 要使用的物品
+    -- 收集扩展（默认全关）
+    AutoCollect    = false,  -- 自动收集
+    -- 杂项（默认全关）
+    AutoSave       = false,  -- 自动保存配置
+    AutoVoteInGame = false,  -- 局内自动投票
+    AutoGameModeLobby = false, -- 大厅自动应用游戏模式
+    CombatDebug    = false,  -- 战斗调试日志
     -- 自动化参数
     GachaSpin      = "10Spins",                  -- 抽奖档位
     BoostName      = "Booster X2 Mastery : 30Min", -- 加速卡名称
     PotionName     = "Potion",                     -- 自动喝哪种药水
     TitleName      = "",                          -- 要装备的称号名
+    FarmMode       = "Normal",                    -- 刷怪模式
+    FarmPos        = "Above",                     -- 刷怪位置：Above / Under / Orbit
+    FarmMove       = "Teleport",                  -- 移动方式：Teleport / Tween
+    CircleRadius   = 6,                            -- 环绕半径
+    FarmHeight     = 0,                            -- 刷怪高度
+    SkillDelay     = 1,                            -- 技能按键间隔（秒）
+    SafeHp         = 30,                           -- 安全模式血量
+    GodHp          = 30,                           -- 上帝模式触发血量
+    ResetWaveValue = 10,                           -- 第几波重置
+    AntiJeffreyRange = 50,                         -- Jeffrey 检测范围
+    FlushAuraRange = 5,                            -- 冲刷光环范围
+    WalkSpeed      = 16,                           -- 锁定移速
+    JumpPower      = 50,                           -- 锁定跳跃力
+    FlySpeed       = 1,                            -- 飞行速度倍率（x50）
+    FlyHeight      = 10,                           -- 飞行升降速度
+    CameraMode     = "Classic",                    -- 相机模式：Classic / Manual
+    WeaponName     = "Stungun",                    -- 要买的武器
+    MiscName       = "HeadPhone",                  -- 要买的杂项
+    RequestName    = "Titan-Request",              -- 要请求的物品
+    HourlyAmount   = 1,                            -- 小时购数量
+    HourlyCustom   = "",                           -- 小时购自定义物品名
+    CollectMode    = "Clean",                      -- 收集模式
+    CollectMove    = "Teleport",                   -- 收集移动方式
+    AutoSaveDelay  = 15,                           -- 自动保存间隔
+    GameMode       = "Normal",                     -- 大厅游戏模式
+    ESPSettings    = { "高亮" },                    -- 透视显示项
+    ESPItems       = {},                           -- 透视物品列表
+    TitanUpgrades  = {},                           -- 泰坦扬声器升级
+    UTCMUpgrades   = {},                           -- UTCM 升级
+    TVUpgrades     = {},                           -- TV 升级
+    HourlyItems    = {},                           -- 小时购物品
+    CollectItems   = {},                           -- 收集物品列表
+    SelectedCodes  = {},                           -- 已选兑换码
+    SelectedPasses = {},                           -- 已选通行证
     -- 内部数值
     Range         = 400,     -- 锁敌半径
     SkillTick     = 0.2,     -- 技能检查频率（每个技能按自己的冷却独立触发）
@@ -17551,11 +17638,171 @@ local AUTO = {
     Logs          = {},
 }
 
+-- 启动时读取上次保存的配置（有就覆盖默认值，界面会显示保存时的状态）
+pcall(function()
+    if type(isfile) == "function" and type(readfile) == "function" and isfile("难度模式_配置.json") then
+        local ok, data = pcall(function()
+            return game:GetService("HttpService"):JSONDecode(readfile("难度模式_配置.json"))
+        end)
+        if ok and type(data) == "table" then
+            for k, v in pairs(data) do
+                if AUTO[k] ~= nil and type(v) == type(AUTO[k]) then
+                    AUTO[k] = v
+                end
+            end
+        end
+    end
+end)
+
 -- ============================================================
 -- 界面：布局与老版本至尊版一模一样
 -- 信息 / 主要 / 透视 / 玩家 / 商店 / 收集 / 游戏模式 / 设置
 -- 所有功能开关默认关闭，必须玩家手动打开才会运行
 -- ============================================================
+-- 中文显示名 → 游戏实际参数（下拉框显示中文，发给引擎英文）
+-- ============================================================
+local UI_LISTS = {
+    FarmMode = {
+        { "普通模式", "Normal Mode" },
+        { "Astro 坚守模式", "Astro Holdout Mode" },
+        { "黑暗维度模式", "Dark Dimension Mode" },
+    },
+    FarmPos = {
+        { "上方", "Above" },
+        { "下方", "Under" },
+        { "环绕", "Orbit" },
+    },
+    Move = {
+        { "传送", "Teleport" },
+        { "补间", "Tween" },
+    },
+    CollectMode = {
+        { "清洁", "Clean" },
+        { "IDGF", "IDGF" },
+    },
+    Camera = {
+        { "经典", "Classic" },
+        { "手动", "Manual" },
+    },
+    Collect = {
+        { "时钟蜘蛛", "Clock Spider" }, { "X-18 核心", "X-18 Core" },
+        { "绿色能量核心", "Green Energy Core" }, { "奇怪发射器", "Weird Transmitter" },
+        { "Astro 样本", "Astro Samples" }, { "奇怪棱镜", "Weird Prism" },
+        { "钥匙卡", "Key Card" }, { "僵尸核心", "Zombie Core" },
+        { "闪存驱动器", "Flash Drives" }, { "礼物", "Presents" },
+        { "创世纪核心", "Genesis Core" },
+    },
+    Weapon = {
+        { "电击枪", "Stungun" }, { "火焰喷射器", "Flamethrower" },
+        { "鱼叉枪", "Harpoon Gun" }, { "霰弹枪", "Shot Gun" },
+        { "脉冲步枪", "Pulse Rifle" }, { "鱼叉霰弹枪", "Shot Harpoon Gun" },
+        { "EPD", "EPD" }, { "小型激光枪", "Small Laser Gun" },
+    },
+    Misc = {
+        { "头戴式耳机", "HeadPhone" }, { "手雷", "Grenade" },
+        { "喷气背包", "Jetpack" }, { "透镜", "Lens" },
+    },
+    Request = {
+        { "泰坦请求", "Titan-Request" }, { "特殊泰坦请求", "SpecialTitan-Request" },
+        { "扬声器请求", "Speaker-Request" },
+    },
+    Pass = {
+        { "全部", "All" }, { "幸运加成", "LuckyBoost" },
+        { "稀有幸运加成", "RareLuckyBoost" }, { "传奇幸运加成", "LegendaryLuckyBoost" },
+    },
+    Titan = {
+        { "喷气背包", "Jetpack" }, { "过载", "OverCharge" },
+        { "音波增幅器", "SoundBooster" }, { "核心", "Core" }, { "升级", "Upgrade" },
+    },
+    UTCM = {
+        { "护盾", "Shield" }, { "冲击波", "Blaster" }, { "透镜", "Lens" },
+        { "热度", "Heat" }, { "护甲", "Armor" },
+    },
+    TV = {
+        { "吸收", "Absorb" }, { "共享过载", "ShareOverCharge" },
+        { "护盾", "Shield" }, { "Astro 臂", "AstroArm" },
+    },
+    Hourly = {
+        { "幸运药水 I", "LuckPotionI" }, { "幸运药水 II", "LuckPotionII" },
+        { "幸运药水 III", "LuckPotionIII" }, { "S-余烬", "S-Ember" },
+        { "BSX2:30", "BSX2:30" }, { "BSX2:60", "BSX2:60" }, { "BSX2:360", "BSX2:360" },
+        { "闪存驱动器#1", "FlashDrive#1" }, { "闪存驱动器#2", "FlashDrive#2" },
+        { "闪存驱动器#3", "FlashDrive#3" }, { "闪存驱动器#4", "FlashDrive#4" },
+        { "闪存驱动器#5", "FlashDrive#5" }, { "闪存驱动器#6", "FlashDrive#6" },
+        { "大师卡：普通", "MasterCard:Normal" },
+        { "大师卡：普通泰坦", "MasterCard:NormalTitan" },
+        { "大师卡：特殊泰坦", "MasterCard:SpecialTitan" },
+    },
+    UseItem = { { "礼物", "Presents" } },
+    Vote = {
+        { "普通", "Normal" }, { "非常困难", "VeryHard" }, { "困难", "Hard" },
+        { "疯狂", "Insane" }, { "噩梦", "Nightmare" }, { "Boss Rush", "BossRush" },
+        { "黑暗维度", "DarkDimension" }, { "地狱", "Hell" }, { "雷暴", "ThunderStorm" },
+        { "圣诞节", "Christmas" }, { "僵尸", "Zombie" }, { "僵尸 V2", "ZombieV2" },
+        { "Astro V2", "AstroV2" }, { "Astro", "Astro" }, { "战斗装甲 第一章", "BattleArmorAct1" },
+        { "声波", "Soundwave" }, { "万圣节", "Halloween" }, { "无光之夜", "NoLightInTheSky" },
+        { "1亿访问", "100MVisit" },
+    },
+    GameMode = {
+        { "普通", "Normal" }, { "困难", "Hard" }, { "非常困难", "VeryHard" },
+        { "疯狂", "Insane" }, { "噩梦", "Nightmare" }, { "Boss Rush", "BossRush" },
+        { "黑暗维度", "DarkDimension" }, { "地狱", "Hell" }, { "雷暴", "ThunderStorm" },
+        { "圣诞节", "Christmas" }, { "僵尸", "Zombie" }, { "僵尸 V2", "ZombieV2" },
+        { "Astro V2", "AstroV2" }, { "Astro", "Astro" }, { "战斗装甲 第一章", "BattleArmorAct1" },
+        { "声波", "Soundwave" }, { "万圣节", "Halloween" }, { "无光之夜", "NoLightInTheSky" },
+        { "1亿访问", "100MVisit" },
+    },
+    Gacha = {
+        { "1次抽奖", "1Spin" }, { "10次抽奖", "10Spins" }, { "100次抽奖", "100Spins" },
+        { "1次幸运抽奖", "1SpinLucky" }, { "10次幸运抽奖", "10SpinLucky" },
+    },
+    ESP = {
+        { "高亮", "Highlight" }, { "距离", "Distance" },
+        { "血量", "Health" }, { "名称", "Name" },
+    },
+}
+
+local UI_VALUES, UI_ENG = {}, {}
+for key, list in pairs(UI_LISTS) do
+    UI_VALUES[key] = {}
+    UI_ENG[key] = {}
+    for _, pair in ipairs(list) do
+        table.insert(UI_VALUES[key], pair[1])
+        UI_ENG[key][pair[1]] = pair[2]
+    end
+end
+
+local function uiEng(key, display)
+    if display == nil then return nil end
+    return UI_ENG[key][display] or display
+end
+
+local function uiEngList(key, list)
+    if type(list) ~= "table" then return {} end
+    local out = {}
+    for _, v in ipairs(list) do
+        table.insert(out, uiEng(key, v))
+    end
+    return out
+end
+
+local function uiDisp(key, english)
+    if english == nil then return nil end
+    for d, e in pairs(UI_ENG[key]) do
+        if e == english then return d end
+    end
+    return english
+end
+
+local function uiDispList(key, englishList)
+    if type(englishList) ~= "table" then return {} end
+    local out = {}
+    for _, v in ipairs(englishList) do
+        table.insert(out, uiDisp(key, v))
+    end
+    return out
+end
+
 local InfoTab = Window:Tab({ Title = "信息", Icon = "info" })
 Window:Divider()
 local MainTab = Window:Tab({ Title = "主要", Icon = "rocket" })
@@ -17585,6 +17832,13 @@ SecInfo:Paragraph({
 local SecFight = MainTab:Section({ Title = "自动刷怪", Icon = "swords" })
 
 SecFight:Toggle({
+    Title = "自动刷怪",
+    Desc  = "按「刷怪设置」里的位置 / 移动方式持续贴着敌人",
+    Value = AUTO.AutoFarm,
+    Callback = function(v) AUTO.AutoFarm = v end,
+})
+
+SecFight:Toggle({
     Title = "自动战斗",
     Desc  = "锁定最近敌人并持续开火",
     Value = AUTO.AutoFight,
@@ -17603,6 +17857,55 @@ SecFight:Toggle({
     Desc  = "每个技能按自己的冷却独立触发，冷却好就点；普攻连续点击",
     Value = AUTO.AutoSkill,
     Callback = function(v) AUTO.AutoSkill = v end,
+})
+
+SecFight:Toggle({
+    Title = "自动刷天文币",
+    Desc  = "切到天文模式，自动刷天文怪、捡零件、上交换天文币",
+    Value = AUTO.AutoAstroFarm,
+    Callback = function(v) AUTO.AutoAstroFarm = v end,
+})
+
+SecFight:Toggle({
+    Title = "拾取天文零件",
+    Desc  = "自动瞬移拾取附近的天文零件",
+    Value = AUTO.AutoAstroCollect,
+    Callback = function(v) AUTO.AutoAstroCollect = v end,
+})
+
+SecFight:Toggle({
+    Title = "上交天文零件",
+    Desc  = "把背包里的天文零件自动上交研究，换取天文币",
+    Value = AUTO.AutoAstroInsert,
+    Callback = function(v) AUTO.AutoAstroInsert = v end,
+})
+
+SecFight:Toggle({
+    Title = "自动天文科技",
+    Desc  = "自动升级天文科技树",
+    Value = AUTO.AutoAstroTech,
+    Callback = function(v) AUTO.AutoAstroTech = v end,
+})
+
+SecFight:Toggle({
+    Title = "天文币汇报",
+    Desc  = "定时把当前天文币数量写进日志",
+    Value = AUTO.AutoAstroReport,
+    Callback = function(v) AUTO.AutoAstroReport = v end,
+})
+
+SecFight:Toggle({
+    Title = "刷怪辅助",
+    Desc  = "自动刷怪时保持锁定目标与自动输出",
+    Value = AUTO.AutoFarmAssist,
+    Callback = function(v) AUTO.AutoFarmAssist = v end,
+})
+
+SecFight:Toggle({
+    Title = "一键准备",
+    Desc  = "自动投票 + 点准备 + 开单人局，一次完成",
+    Value = AUTO.AutoOneClickReady,
+    Callback = function(v) AUTO.AutoOneClickReady = v end,
 })
 
 SecFight:Toggle({
@@ -17640,7 +17943,139 @@ SecFight:Toggle({
     Callback = function(v) AUTO.AutoRespawn = v end,
 })
 
-local SecFlow = MainTab:Section({ Title = "刷怪设置", Icon = "list-checks" })
+local SecFarmSet = MainTab:Section({ Title = "刷怪设置", Icon = "crosshair" })
+
+SecFarmSet:Dropdown({
+    Title = "刷怪模式",
+    Desc  = "普通 / Astro 坚守 / 黑暗维度",
+    Values = UI_VALUES.FarmMode,
+    Multi = false,
+    Value = uiDisp("FarmMode", AUTO.FarmMode),
+    Callback = function(v) if v then AUTO.FarmMode = uiEng("FarmMode", v) end end,
+})
+
+SecFarmSet:Dropdown({
+    Title = "刷怪位置",
+    Desc  = "贴怪时站在敌人的哪个方向",
+    Values = UI_VALUES.FarmPos,
+    Multi = false,
+    Value = uiDisp("FarmPos", AUTO.FarmPos),
+    Callback = function(v) if v then AUTO.FarmPos = uiEng("FarmPos", v) end end,
+})
+
+SecFarmSet:Dropdown({
+    Title = "移动方式",
+    Desc  = "传送 = 瞬移贴怪，补间 = 平滑移动",
+    Values = UI_VALUES.Move,
+    Multi = false,
+    Value = uiDisp("Move", AUTO.FarmMove),
+    Callback = function(v) if v then AUTO.FarmMove = uiEng("Move", v) end end,
+})
+
+SecFarmSet:Slider({
+    Title = "环绕半径",
+    Desc  = "刷怪位置选 Orbit 时的绕圈半径",
+    Value = { Min = 2, Max = 20, Default = AUTO.CircleRadius },
+    Step = 1,
+    Callback = function(v) AUTO.CircleRadius = v end,
+})
+
+SecFarmSet:Slider({
+    Title = "刷怪高度",
+    Desc  = "贴怪位置的上下偏移",
+    Value = { Min = -150, Max = 150, Default = AUTO.FarmHeight },
+    Step = 5,
+    Callback = function(v) AUTO.FarmHeight = v end,
+})
+
+SecFarmSet:Slider({
+    Title = "技能延迟",
+    Desc  = "自动技能两次按键之间的间隔（秒）",
+    Value = { Min = 1, Max = 60, Default = AUTO.SkillDelay },
+    Step = 1,
+    Callback = function(v) AUTO.SkillDelay = v end,
+})
+
+SecFarmSet:Slider({
+    Title = "安全模式血量",
+    Desc  = "血量低于该百分比时自动退回安全点",
+    Value = { Min = 1, Max = 99, Default = AUTO.SafeHp },
+    Step = 1,
+    Callback = function(v) AUTO.SafeHp = v end,
+})
+
+SecFarmSet:Toggle({
+    Title = "上帝模式",
+    Desc  = "血量低于指定值时自动补满（客户端）",
+    Value = AUTO.GodMode,
+    Callback = function(v) AUTO.GodMode = v end,
+})
+
+SecFarmSet:Slider({
+    Title = "上帝模式血量",
+    Desc  = "上帝模式的触发血量百分比",
+    Value = { Min = 1, Max = 99, Default = AUTO.GodHp },
+    Step = 1,
+    Callback = function(v) AUTO.GodHp = v end,
+})
+
+SecFarmSet:Toggle({
+    Title = "重置波次",
+    Desc  = "到达指定波次后回到安全点，避免高层翻车",
+    Value = AUTO.ResetWave,
+    Callback = function(v) AUTO.ResetWave = v end,
+})
+
+SecFarmSet:Slider({
+    Title = "重置波次数值",
+    Desc  = "第几波触发重置",
+    Value = { Min = 1, Max = 100, Default = AUTO.ResetWaveValue },
+    Step = 1,
+    Callback = function(v) AUTO.ResetWaveValue = v end,
+})
+
+local SecJeffrey = MainTab:Section({ Title = "Jeffrey 设置", Icon = "ghost" })
+
+SecJeffrey:Toggle({
+    Title = "绕过 Jeffrey",
+    Desc  = "Jeffrey 靠近时直接拉开 60 格，避免被追",
+    Value = AUTO.BypassJeffrey,
+    Callback = function(v) AUTO.BypassJeffrey = v end,
+})
+
+SecJeffrey:Toggle({
+    Title = "Anti Jeffrey",
+    Desc  = "Jeffrey 靠近时自动弹开一段距离",
+    Value = AUTO.AntiJeffrey,
+    Callback = function(v) AUTO.AntiJeffrey = v end,
+})
+
+SecJeffrey:Slider({
+    Title = "Jeffrey 检测范围",
+    Desc  = "进入这个距离就处理",
+    Value = { Min = 10, Max = 200, Default = AUTO.AntiJeffreyRange },
+    Step = 5,
+    Callback = function(v) AUTO.AntiJeffreyRange = v end,
+})
+
+local SecFlush = MainTab:Section({ Title = "冲刷设置", Icon = "droplets" })
+
+SecFlush:Toggle({
+    Title = "自动冲刷光环",
+    Desc  = "自动激活附近的冲刷 / 马桶交互",
+    Value = AUTO.FlushAura,
+    Callback = function(v) AUTO.FlushAura = v end,
+})
+
+SecFlush:Slider({
+    Title = "冲刷范围",
+    Desc  = "光环覆盖半径",
+    Value = { Min = 1, Max = 15, Default = AUTO.FlushAuraRange },
+    Step = 1,
+    Callback = function(v) AUTO.FlushAuraRange = v end,
+})
+
+local SecFlow = MainTab:Section({ Title = "流程设置", Icon = "list-checks" })
 
 SecFlow:Toggle({
     Title = "自动打开投票界面",
@@ -17831,7 +18266,14 @@ local StatusPara = SecStatus:Paragraph({
 })
 
 -- ====================== 透视 ======================
-local SecEsp = EspTab:Section({ Title = "启用透视", Icon = "eye" })
+local SecEsp = EspTab:Section({ Title = "透视设置", Icon = "eye" })
+
+SecEsp:Toggle({
+    Title = "启用透视",
+    Desc  = "透视总开关，关掉后下面所有高亮全部清理",
+    Value = AUTO.ESPEnable,
+    Callback = function(v) AUTO.ESPEnable = v end,
+})
 
 SecEsp:Toggle({
     Title = "敌人透视",
@@ -17841,10 +18283,33 @@ SecEsp:Toggle({
 })
 
 SecEsp:Toggle({
+    Title = "玩家透视",
+    Desc  = "给其他玩家模型加绿色高亮",
+    Value = AUTO.ESPPlayer,
+    Callback = function(v) AUTO.ESPPlayer = v end,
+})
+
+SecEsp:Toggle({
     Title = "队友透视",
-    Desc  = "给队友模型加绿色高亮，关闭后自动清理",
+    Desc  = "给同阵营队友加绿色高亮，关闭后自动清理",
     Value = AUTO.ESPAlly,
     Callback = function(v) AUTO.ESPAlly = v end,
+})
+
+SecEsp:Toggle({
+    Title = "物品透视",
+    Desc  = "给下面选中的物品加金色高亮",
+    Value = AUTO.ESPItem,
+    Callback = function(v) AUTO.ESPItem = v end,
+})
+
+SecEsp:Dropdown({
+    Title = "透视物品",
+    Desc  = "选择要透视的物品（可多选）",
+    Values = UI_VALUES.Collect,
+    Multi = true,
+    Value = uiDispList("Collect", AUTO.ESPItems),
+    Callback = function(v) AUTO.ESPItems = uiEngList("Collect", v) end,
 })
 
 -- ====================== 玩家 ======================
@@ -17938,6 +18403,152 @@ SecTitle:Button({
     end,
 })
 
+local SecMove = PlayerTab:Section({ Title = "移动与角色", Icon = "move" })
+
+SecMove:Slider({
+    Title = "移动速度",
+    Desc  = "锁定移动时使用的 WalkSpeed",
+    Value = { Min = 1, Max = 300, Default = AUTO.WalkSpeed },
+    Step = 1,
+    Callback = function(v) AUTO.WalkSpeed = v end,
+})
+
+SecMove:Slider({
+    Title = "跳跃力",
+    Desc  = "锁定移动时使用的 JumpPower",
+    Value = { Min = 1, Max = 500, Default = AUTO.JumpPower },
+    Step = 1,
+    Callback = function(v) AUTO.JumpPower = v end,
+})
+
+SecMove:Toggle({
+    Title = "锁定移动属性",
+    Desc  = "持续把移动速度 / 跳跃力锁在上面设置的值",
+    Value = AUTO.LockMoveStats,
+    Callback = function(v) AUTO.LockMoveStats = v end,
+})
+
+SecMove:Toggle({
+    Title = "无碰撞",
+    Desc  = "穿墙（关闭角色所有部件碰撞）",
+    Value = AUTO.NoClip,
+    Callback = function(v) AUTO.NoClip = v end,
+})
+
+SecMove:Toggle({
+    Title = "飞行",
+    Desc  = "空格上升 / Ctrl 下降，飞行时角色不受重力",
+    Value = AUTO.Fly,
+    Callback = function(v) AUTO.Fly = v end,
+})
+
+SecMove:Slider({
+    Title = "飞行速度",
+    Desc  = "实际速度 = 该值 x 50",
+    Value = { Min = 1, Max = 20, Default = AUTO.FlySpeed },
+    Step = 1,
+    Callback = function(v) AUTO.FlySpeed = v end,
+})
+
+SecMove:Slider({
+    Title = "飞行升降速度",
+    Desc  = "空格 / Ctrl 时的垂直速度",
+    Value = { Min = 1, Max = 50, Default = AUTO.FlyHeight },
+    Step = 1,
+    Callback = function(v) AUTO.FlyHeight = v end,
+})
+
+SecMove:Toggle({
+    Title = "无限跳跃",
+    Desc  = "空中也能继续跳",
+    Value = AUTO.InfiniteJump,
+    Callback = function(v) AUTO.InfiniteJump = v end,
+})
+
+SecMove:Toggle({
+    Title = "全亮",
+    Desc  = "提高亮度、关闭阴影与部分后期特效",
+    Value = AUTO.FullBright,
+    Callback = function(v) AUTO.FullBright = v end,
+})
+
+SecMove:Toggle({
+    Title = "无雾",
+    Desc  = "去掉地图雾气，远距离也看得清",
+    Value = AUTO.NoFog,
+    Callback = function(v) AUTO.NoFog = v end,
+})
+
+SecMove:Toggle({
+    Title = "绕过屏障",
+    Desc  = "关闭隐形墙 / Barrier 的碰撞",
+    Value = AUTO.NoBarrier,
+    Callback = function(v) AUTO.NoBarrier = v end,
+})
+
+SecMove:Dropdown({
+    Title = "相机模式",
+    Desc  = "经典 = 游戏原版，手动 = 固定跟随视角",
+    Values = UI_VALUES.Camera,
+    Multi = false,
+    Value = uiDisp("Camera", AUTO.CameraMode),
+    Callback = function(v) if v then AUTO.CameraMode = uiEng("Camera", v) end end,
+})
+
+local REDEEM_CODES = {
+    "100MVisit2", "100MVisit1", "CamArmada", "CCTVBase",
+    "ADelayedGameIsEventuallyGoodButRushedGameIsForeverBad",
+}
+
+local SecCode = PlayerTab:Section({ Title = "兑换码", Icon = "ticket" })
+
+SecCode:Dropdown({
+    Title = "选择兑换码",
+    Desc  = "可多选，然后点兑换",
+    Values = REDEEM_CODES,
+    Multi = true,
+    Value = AUTO.SelectedCodes,
+    Callback = function(v) AUTO.SelectedCodes = v or {} end,
+})
+
+SecCode:Button({
+    Title = "兑换选中的码",
+    Desc  = "提交下拉框里选中的兑换码",
+    Icon  = "ticket",
+    Callback = function()
+        if AUTO.Actions.Redeem then AUTO.Actions.Redeem() end
+    end,
+})
+
+SecCode:Button({
+    Title = "兑换全部兑换码",
+    Desc  = "一次性提交脚本内置的全部兑换码",
+    Icon  = "gift",
+    Callback = function()
+        if AUTO.Actions.RedeemAll then AUTO.Actions.RedeemAll() end
+    end,
+})
+
+local SecPass = PlayerTab:Section({ Title = "通行证", Icon = "crown" })
+
+SecPass:Dropdown({
+    Title = "选择通行证",
+    Desc  = "客户端解锁（本地标记）",
+    Values = UI_VALUES.Pass,
+    Multi = true,
+    Value = uiDispList("Pass", AUTO.SelectedPasses),
+    Callback = function(v) AUTO.SelectedPasses = uiEngList("Pass", v) end,
+})
+
+SecPass:Button({
+    Title = "解锁所选通行证",
+    Desc  = "在本地 GachaData 里写入对应开关",
+    Icon  = "crown",
+    Callback = function()
+        if AUTO.Actions.UnlockPass then AUTO.Actions.UnlockPass() end
+    end,
+})
+
 -- ====================== 商店 ======================
 local SecShop = ShopTab:Section({ Title = "商店", Icon = "shopping-cart" })
 
@@ -17978,6 +18589,254 @@ SecShop:Button({
     end,
 })
 
+-- ---------------- 角色 / 皮肤扭蛋 ----------------
+local SecGacha = ShopTab:Section({ Title = "角色扭蛋", Icon = "dice-5" })
+
+SecGacha:Toggle({
+    Title = "自动抽角色",
+    Desc  = "大厅自动用抽奖遥控抽角色，档位在下面选",
+    Value = AUTO.AutoGachaChar,
+    Callback = function(v) AUTO.AutoGachaChar = v end,
+})
+
+SecGacha:Toggle({
+    Title = "自动抽皮肤",
+    Desc  = "大厅自动用抽奖遥控抽皮肤，档位在下面选",
+    Value = AUTO.AutoGachaSkin,
+    Callback = function(v) AUTO.AutoGachaSkin = v end,
+})
+
+SecGacha:Dropdown({
+    Title = "抽奖档位",
+    Desc  = "选择自动抽奖使用的档位",
+    Values = UI_VALUES.Gacha,
+    Multi = false,
+    Value = uiDisp("Gacha", AUTO.GachaSpin),
+    Callback = function(v) if v then AUTO.GachaSpin = uiEng("Gacha", v) end end,
+})
+
+SecGacha:Button({
+    Title = "立即抽一次",
+    Desc  = "按上面选的档位手动抽一次（角色+皮肤）",
+    Icon  = "dice-5",
+    Callback = function()
+        if AUTO.Actions.Gacha then AUTO.Actions.Gacha() end
+    end,
+})
+
+-- ---------------- 使用物品 ----------------
+local SecUseItem = ShopTab:Section({ Title = "使用物品", Icon = "package" })
+
+SecUseItem:Toggle({
+    Title = "自动使用物品",
+    Desc  = "自动使用背包里的礼物（开扭蛋胶囊）",
+    Value = AUTO.AutoUseItem,
+    Callback = function(v) AUTO.AutoUseItem = v end,
+})
+
+SecUseItem:Toggle({
+    Title = "自动开胶囊",
+    Desc  = "自动使用背包里的扭蛋胶囊（GachaCapsule）",
+    Value = AUTO.AutoCapsule,
+    Callback = function(v) AUTO.AutoCapsule = v end,
+})
+
+SecUseItem:Dropdown({
+    Title = "要使用的物品",
+    Desc  = "目前支持：礼物",
+    Values = UI_VALUES.UseItem,
+    Multi = false,
+    Value = uiDisp("UseItem", AUTO.UseItemName),
+    Callback = function(v) if v then AUTO.UseItemName = uiEng("UseItem", v) end end,
+})
+
+SecUseItem:Button({
+    Title = "立即使用物品",
+    Desc  = "马上用一次上面选中的物品",
+    Icon  = "package-open",
+    Callback = function()
+        if AUTO.Actions.UseItem then AUTO.Actions.UseItem() end
+    end,
+})
+
+-- ---------------- 商店升级 ----------------
+local SecUpgrade = ShopTab:Section({ Title = "商店升级", Icon = "arrow-up-circle" })
+
+SecUpgrade:Toggle({
+    Title = "自动升级泰坦扬声器",
+    Desc  = "按下面选中的项目自动升级",
+    Value = AUTO.UpgradeTitanSpeaker,
+    Callback = function(v) AUTO.UpgradeTitanSpeaker = v end,
+})
+
+SecUpgrade:Dropdown({
+    Title = "泰坦扬声器升级项",
+    Desc  = "可多选",
+    Values = UI_VALUES.Titan,
+    Multi = true,
+    Value = uiDispList("Titan", AUTO.TitanUpgrades),
+    Callback = function(v) AUTO.TitanUpgrades = uiEngList("Titan", v) end,
+})
+
+SecUpgrade:Toggle({
+    Title = "自动升级 UTCM",
+    Desc  = "按下面选中的项目自动升级",
+    Value = AUTO.UpgradeUTCM,
+    Callback = function(v) AUTO.UpgradeUTCM = v end,
+})
+
+SecUpgrade:Dropdown({
+    Title = "UTCM 升级项",
+    Desc  = "可多选",
+    Values = UI_VALUES.UTCM,
+    Multi = true,
+    Value = uiDispList("UTCM", AUTO.UTCMUpgrades),
+    Callback = function(v) AUTO.UTCMUpgrades = uiEngList("UTCM", v) end,
+})
+
+SecUpgrade:Toggle({
+    Title = "自动升级 TV",
+    Desc  = "按下面选中的项目自动升级",
+    Value = AUTO.UpgradeTV,
+    Callback = function(v) AUTO.UpgradeTV = v end,
+})
+
+SecUpgrade:Dropdown({
+    Title = "TV 升级项",
+    Desc  = "可多选",
+    Values = UI_VALUES.TV,
+    Multi = true,
+    Value = uiDispList("TV", AUTO.TVUpgrades),
+    Callback = function(v) AUTO.TVUpgrades = uiEngList("TV", v) end,
+})
+
+-- ---------------- 商店武器 ----------------
+local SecWeapon = ShopTab:Section({ Title = "商店武器", Icon = "swords" })
+
+SecWeapon:Toggle({
+    Title = "自动购买武器",
+    Desc  = "商店出现时自动买下面选中的武器",
+    Value = AUTO.AutoBuyWeapon,
+    Callback = function(v) AUTO.AutoBuyWeapon = v end,
+})
+
+SecWeapon:Dropdown({
+    Title = "武器类型",
+    Desc  = "选择要自动购买的武器",
+    Values = UI_VALUES.Weapon,
+    Multi = false,
+    Value = uiDisp("Weapon", AUTO.WeaponName),
+    Callback = function(v) if v then AUTO.WeaponName = uiEng("Weapon", v) end end,
+})
+
+SecWeapon:Button({
+    Title = "立即购买武器",
+    Desc  = "马上买一次上面选中的武器",
+    Icon  = "swords",
+    Callback = function()
+        if AUTO.Actions.BuyWeapon then AUTO.Actions.BuyWeapon() end
+    end,
+})
+
+-- ---------------- 商店杂项 ----------------
+local SecMisc = ShopTab:Section({ Title = "商店杂项", Icon = "box" })
+
+SecMisc:Toggle({
+    Title = "自动购买杂项",
+    Desc  = "商店出现时自动买下面选中的杂项",
+    Value = AUTO.AutoBuyMisc,
+    Callback = function(v) AUTO.AutoBuyMisc = v end,
+})
+
+SecMisc:Dropdown({
+    Title = "杂项类型",
+    Desc  = "选择要自动购买的杂项",
+    Values = UI_VALUES.Misc,
+    Multi = false,
+    Value = uiDisp("Misc", AUTO.MiscName),
+    Callback = function(v) if v then AUTO.MiscName = uiEng("Misc", v) end end,
+})
+
+SecMisc:Button({
+    Title = "立即购买杂项",
+    Desc  = "马上买一次上面选中的杂项",
+    Icon  = "box",
+    Callback = function()
+        if AUTO.Actions.BuyMisc then AUTO.Actions.BuyMisc() end
+    end,
+})
+
+-- ---------------- 请求 ----------------
+local SecRequest = ShopTab:Section({ Title = "请求", Icon = "megaphone" })
+
+SecRequest:Toggle({
+    Title = "自动请求",
+    Desc  = "第 10 波以后自动发起请求",
+    Value = AUTO.AutoRequest,
+    Callback = function(v) AUTO.AutoRequest = v end,
+})
+
+SecRequest:Dropdown({
+    Title = "请求类型",
+    Desc  = "选择要自动请求的内容",
+    Values = UI_VALUES.Request,
+    Multi = false,
+    Value = uiDisp("Request", AUTO.RequestName),
+    Callback = function(v) if v then AUTO.RequestName = uiEng("Request", v) end end,
+})
+
+SecRequest:Button({
+    Title = "立即请求",
+    Desc  = "马上发起一次请求（需第 10 波后）",
+    Icon  = "megaphone",
+    Callback = function()
+        if AUTO.Actions.BuyRequest then AUTO.Actions.BuyRequest() end
+    end,
+})
+
+-- ---------------- 小时购 ----------------
+local SecHourly = ShopTab:Section({ Title = "小时购", Icon = "clock" })
+
+SecHourly:Toggle({
+    Title = "自动购买小时购",
+    Desc  = "自动购买下面选中的小时购物品",
+    Value = AUTO.AutoHourly,
+    Callback = function(v) AUTO.AutoHourly = v end,
+})
+
+SecHourly:Dropdown({
+    Title = "小时购物品",
+    Desc  = "可多选",
+    Values = UI_VALUES.Hourly,
+    Multi = true,
+    Value = uiDispList("Hourly", AUTO.HourlyItems),
+    Callback = function(v) AUTO.HourlyItems = uiEngList("Hourly", v) end,
+})
+
+SecHourly:Slider({
+    Title = "购买数量",
+    Desc  = "每个物品一次买几个",
+    Value = { Min = 1, Max = 10, Default = AUTO.HourlyAmount },
+    Step = 1,
+    Callback = function(v) AUTO.HourlyAmount = v end,
+})
+
+SecHourly:Input({
+    Title = "自定义物品名",
+    Desc  = "填了就会额外尝试购买这个物品名",
+    Value = AUTO.HourlyCustom,
+    Callback = function(v) AUTO.HourlyCustom = v or "" end,
+})
+
+SecHourly:Button({
+    Title = "立即购买小时购",
+    Desc  = "马上买一次上面选中的物品",
+    Icon  = "clock",
+    Callback = function()
+        if AUTO.Actions.BuyHourly then AUTO.Actions.BuyHourly() end
+    end,
+})
+
 -- ====================== 收集 ======================
 local SecCollect = CollectTab:Section({ Title = "自动收集", Icon = "hand" })
 
@@ -18012,41 +18871,45 @@ SecCollect:Toggle({
 })
 
 SecCollect:Toggle({
-    Title = "自动抽角色",
-    Desc  = "大厅自动用抽奖遥控抽角色，档位在下面选",
-    Value = AUTO.AutoGachaChar,
-    Callback = function(v) AUTO.AutoGachaChar = v end,
-})
-
-SecCollect:Toggle({
-    Title = "自动抽皮肤",
-    Desc  = "大厅自动用抽奖遥控抽皮肤，档位在下面选",
-    Value = AUTO.AutoGachaSkin,
-    Callback = function(v) AUTO.AutoGachaSkin = v end,
+    Title = "自动收集",
+    Desc  = "战斗中用「收集模式 / 移动方式」自动捡下面的物品",
+    Value = AUTO.AutoCollect,
+    Callback = function(v) AUTO.AutoCollect = v end,
 })
 
 SecCollect:Dropdown({
-    Title = "抽奖档位",
-    Desc  = "选择自动抽奖使用的档位",
-    Values = { "1Spin", "10Spins", "100Spins", "1SpinLucky", "10SpinLucky" },
-    Multi = false,
-    Value = AUTO.GachaSpin,
-    Callback = function(v) if v then AUTO.GachaSpin = v end end,
+    Title = "收集物品",
+    Desc  = "可多选要自动收集的物品",
+    Values = UI_VALUES.Collect,
+    Multi = true,
+    Value = uiDispList("Collect", AUTO.CollectItems),
+    Callback = function(v) AUTO.CollectItems = uiEngList("Collect", v) end,
 })
 
-SecCollect:Toggle({
-    Title = "自动开胶囊",
-    Desc  = "自动使用背包里的扭蛋胶囊（GachaCapsule）",
-    Value = AUTO.AutoCapsule,
-    Callback = function(v) AUTO.AutoCapsule = v end,
+SecCollect:Dropdown({
+    Title = "收集模式",
+    Desc  = "清洁 / IDGF",
+    Values = UI_VALUES.CollectMode,
+    Multi = false,
+    Value = uiDisp("CollectMode", AUTO.CollectMode),
+    Callback = function(v) if v then AUTO.CollectMode = uiEng("CollectMode", v) end end,
+})
+
+SecCollect:Dropdown({
+    Title = "移动方式",
+    Desc  = "传送 = 瞬移过去，补间 = 平滑移动",
+    Values = UI_VALUES.Move,
+    Multi = false,
+    Value = uiDisp("Move", AUTO.CollectMove),
+    Callback = function(v) if v then AUTO.CollectMove = uiEng("Move", v) end end,
 })
 
 SecCollect:Button({
-    Title = "立即抽一次",
-    Desc  = "按上面选的档位手动抽一次（角色+皮肤）",
-    Icon  = "dice-5",
+    Title = "立即收集一次",
+    Desc  = "手动收集最近的一个目标",
+    Icon  = "hand",
     Callback = function()
-        if AUTO.Actions.Gacha then AUTO.Actions.Gacha() end
+        if AUTO.Actions.CollectOnce then AUTO.Actions.CollectOnce() end
     end,
 })
 
@@ -18096,8 +18959,86 @@ SecMode2:Button({
     end,
 })
 
+SecMode2:Dropdown({
+    Title = "设置投票模式",
+    Desc  = "指定要投的模式；不选则自动投票数最高的",
+    Values = UI_VALUES.Vote,
+    Multi = false,
+    Value = (AUTO.VoteMode ~= "" and uiDisp("Vote", AUTO.VoteMode)) or nil,
+    Callback = function(v)
+        if v then AUTO.VoteMode = uiEng("Vote", v) end
+    end,
+})
+
+SecMode2:Toggle({
+    Title = "局内自动投票",
+    Desc  = "战斗中出现投票界面时也自动跟票",
+    Value = AUTO.AutoVoteInGame,
+    Callback = function(v) AUTO.AutoVoteInGame = v end,
+})
+
+SecMode2:Dropdown({
+    Title = "设置游戏模式",
+    Desc  = "大厅要应用的游戏模式",
+    Values = UI_VALUES.GameMode,
+    Multi = false,
+    Value = (AUTO.GameMode ~= "" and uiDisp("GameMode", AUTO.GameMode)) or nil,
+    Callback = function(v)
+        if v then AUTO.GameMode = uiEng("GameMode", v) end
+    end,
+})
+
+SecMode2:Button({
+    Title = "应用游戏模式",
+    Desc  = "把上面的游戏模式设为自动投票目标",
+    Icon = "gamepad-2",
+    Callback = function()
+        if AUTO.Actions.ApplyGameMode then AUTO.Actions.ApplyGameMode() end
+    end,
+})
+
+SecMode2:Toggle({
+    Title = "自动游戏模式（大厅）",
+    Desc  = "大厅里持续把投票目标锁定到上面设置的模式",
+    Value = AUTO.AutoGameModeLobby,
+    Callback = function(v) AUTO.AutoGameModeLobby = v end,
+})
+
+SecMode2:Button({
+    Title = "恢复投票系统",
+    Desc  = "重新打开投票界面并恢复 Play 按钮显示",
+    Icon = "rotate-cw",
+    Callback = function()
+        if AUTO.Actions.RestoreVote then AUTO.Actions.RestoreVote() end
+    end,
+})
+
 -- ====================== 设置 ======================
 local SecSave = SettingsTab:Section({ Title = "保存配置", Icon = "save" })
+
+SecSave:Toggle({
+    Title = "自动保存配置",
+    Desc  = "按下面的间隔把当前开关保存到本地文件",
+    Value = AUTO.AutoSave,
+    Callback = function(v) AUTO.AutoSave = v end,
+})
+
+SecSave:Slider({
+    Title = "自动保存间隔",
+    Desc  = "秒",
+    Value = { Min = 5, Max = 120, Default = AUTO.AutoSaveDelay },
+    Step = 5,
+    Callback = function(v) AUTO.AutoSaveDelay = v end,
+})
+
+SecSave:Button({
+    Title = "立即保存配置",
+    Desc  = "保存所有开关与参数到 难度模式_配置.json",
+    Icon  = "save",
+    Callback = function()
+        if AUTO.Actions.SaveConfig then AUTO.Actions.SaveConfig() end
+    end,
+})
 
 SecSave:Button({
     Title = "暂停 / 继续",
@@ -18129,6 +19070,33 @@ SecServer:Button({
     end,
 })
 
+SecServer:Button({
+    Title = "跳转服务器",
+    Desc = "随机找一个没满人的公共服务器并传送过去",
+    Icon = "shuffle",
+    Callback = function()
+        if AUTO.Actions.JumpServer then AUTO.Actions.JumpServer() end
+    end,
+})
+
+SecServer:Button({
+    Title = "重新加入当前服务器",
+    Desc = "重新连接本局服务器",
+    Icon = "refresh-cw",
+    Callback = function()
+        if AUTO.Actions.Rejoin then AUTO.Actions.Rejoin() end
+    end,
+})
+
+local SecDebug = SettingsTab:Section({ Title = "杂项", Icon = "wrench" })
+
+SecDebug:Toggle({
+    Title = "战斗调试",
+    Desc = "把锁敌 / 刷怪 / 撤退等过程写进日志",
+    Value = AUTO.CombatDebug,
+    Callback = function(v) AUTO.CombatDebug = v end,
+})
+
 local SecLog = SettingsTab:Section({
     Title = "运行日志",
     Desc  = "最近 14 条",
@@ -18140,7 +19108,9 @@ local LogPara = SecLog:Paragraph({
     Desc  = "等待引擎启动...",
 })
 
-print("[难度模式 自动化] 界面已加载：布局与老版一致，所有功能默认关闭，请手动打开需要的开关")
+print("[难度模式 自动化] 界面已加载：使用你的布局与悬浮窗，所有功能默认关闭，请手动打开需要的开关")
+
+-- ============================================================
 
 -- ============================================================
 -- ▼▼ 内嵌自定义悬浮窗（替换内置 OpenButton）▼▼
@@ -18350,7 +19320,6 @@ local function CreatePopupPanel(parent)
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
             Image = "rbxassetid://137413437808718",
-            ImageColor3 = Color3.fromRGB(62, 64, 76),   -- 压暗背景图，避免过亮
             ScaleType = Enum.ScaleType.Crop,
             Name = "BackgroundImage",
         }, {
@@ -18358,8 +19327,8 @@ local function CreatePopupPanel(parent)
         }),
         Creator.New("Frame", {
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(6, 7, 12),
-            BackgroundTransparency = 0.68,               -- 再加一层深色遮罩
+            BackgroundColor3 = Color3.fromRGB(10, 10, 15),
+            BackgroundTransparency = 0.5,
             BorderSizePixel = 0,
         }, {
             Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
@@ -18462,35 +19431,35 @@ local function CreatePopupPanel(parent)
 
     local leftGlass = Creator.New("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(12, 14, 20),
-        BackgroundTransparency = 0.12,
+        BackgroundColor3 = Color3.fromRGB(245, 245, 250),
+        BackgroundTransparency = 0.78,
         BorderSizePixel = 0,
         Parent = leftPanel,
     }, {
         Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         Creator.New("UIStroke", {
             Thickness = 1,
-            Color = Color3.fromRGB(120, 130, 160),
-            Transparency = 0.6,
+            Color = Color3.fromRGB(255, 255, 255),
+            Transparency = 0.7,
         }),
         Creator.New("Frame", {
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency = 0.35,
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 0.92,
             BorderSizePixel = 0,
         }, {
             Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         }),
         Creator.New("UIGradient", {
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(14, 16, 24)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(34, 38, 52)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 16, 24)),
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 240, 248)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
             }),
             Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.15),
-                NumberSequenceKeypoint.new(0.5, 0.35),
-                NumberSequenceKeypoint.new(1, 0.15),
+                NumberSequenceKeypoint.new(0, 0.6),
+                NumberSequenceKeypoint.new(0.5, 0.8),
+                NumberSequenceKeypoint.new(1, 0.6),
             }),
         }),
     })
@@ -18510,9 +19479,7 @@ local function CreatePopupPanel(parent)
             Text = "功能开关",
             TextSize = 14,
             FontFace = Font.new(Creator.Font, Enum.FontWeight.SemiBold),
-            TextColor3 = Color3.new(1, 1, 1),
-            TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-            TextStrokeTransparency = 0.55,
+            TextColor3 = Color3.fromRGB(40, 45, 55),
             BackgroundTransparency = 1,
             AutomaticSize = "XY",
         }),
@@ -18542,36 +19509,35 @@ local function CreatePopupPanel(parent)
 
     local rightGlass = Creator.New("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(12, 14, 20),
-        BackgroundTransparency = 0.08,
+        BackgroundColor3 = Color3.fromRGB(245, 245, 250),
+        BackgroundTransparency = 0.78,
         BorderSizePixel = 0,
         Parent = rightPanel,
     }, {
         Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         Creator.New("UIStroke", {
             Thickness = 1,
-            Color = Color3.fromRGB(130, 140, 170),
-            Transparency = 0.55,
+            Color = Color3.fromRGB(255, 255, 255),
+            Transparency = 0.7,
         }),
-        -- 深色遮罩层：压住背景图亮度，保证白色文字清晰
         Creator.New("Frame", {
             Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-            BackgroundTransparency = 0.28,
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 0.92,
             BorderSizePixel = 0,
         }, {
             Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
         }),
         Creator.New("UIGradient", {
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 12, 18)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 34, 46)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 12, 18)),
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 240, 248)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
             }),
             Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.1),
-                NumberSequenceKeypoint.new(0.5, 0.3),
-                NumberSequenceKeypoint.new(1, 0.1),
+                NumberSequenceKeypoint.new(0, 0.6),
+                NumberSequenceKeypoint.new(0.5, 0.8),
+                NumberSequenceKeypoint.new(1, 0.6),
             }),
         }),
     })
@@ -18590,14 +19556,12 @@ local function CreatePopupPanel(parent)
         }),
     })
 
-    -- 时间（白色 + 描边，深色底上更清晰）
+    -- 时间（白色）
     local timeLabel = Creator.New("TextLabel", {
         Text = "00:00:00",
-        TextSize = 32,
+        TextSize = 34,
         FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
         TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.55,
         BackgroundTransparency = 1,
         AutomaticSize = "XY",
         Parent = rightContent,
@@ -18609,8 +19573,6 @@ local function CreatePopupPanel(parent)
         TextSize = 16,
         FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
         TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.6,
         BackgroundTransparency = 1,
         AutomaticSize = "XY",
         Parent = rightContent,
@@ -18622,8 +19584,6 @@ local function CreatePopupPanel(parent)
         TextSize = 13,
         FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
         TextColor3 = Color3.new(1, 1, 1),
-        TextStrokeColor3 = Color3.fromRGB(0, 0, 0),
-        TextStrokeTransparency = 0.65,
         BackgroundTransparency = 1,
         AutomaticSize = "XY",
         Parent = rightContent,
@@ -19517,10 +20477,8 @@ print("   - 自动吸附：拖到边缘附近自动吸附到最近边缘")
 print("   - 悬浮窗始终显示，不随主面板开合而隐藏")
 print("   - 自动清理、自动保存状态")
 
-
-
 -- ============================================================
--- 导出给引擎使用（链接加载后直接取这张表）
+-- 导出给引擎使用
 -- ============================================================
 local __UI_EXPORT = {
     AUTO               = AUTO,
