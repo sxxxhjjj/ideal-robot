@@ -15,7 +15,7 @@ local UI = (function()
   难度模式 · 界面部分（内嵌）
   =================================================
   · WindUI 库按原版链接加载（和旧脚本同一个链接）
-  · 窗口 550x380 / 默认侧栏 / 隐藏搜索栏 / 悬浮窗常驻
+  · 窗口 550x380 / 默认侧栏 / 隐藏搜索栏
   · 适配游戏：难度模式（PlaceId 18816546575）
   · 所有功能默认关闭，必须玩家自己在界面里打开开关才会运行
 ]]
@@ -405,7 +405,7 @@ local PlayerTab = Window:Tab({ Title = "玩家", Icon = "user" })
 Window:Divider()
 local ShopTab = Window:Tab({ Title = "商店", Icon = "shopping-cart" })
 local CollectTab = Window:Tab({ Title = "收集", Icon = "hand" })
-local ModeTab = Window:Tab({ Title = "游戏模式", Icon = "gamepad-2" })
+local ModeTab = Window:Tab({ Title = "游戏模式", Icon = "gamepad" })
 Window:Divider()
 local SettingsTab = Window:Tab({ Title = "设置", Icon = "settings" })
 Window:SelectTab(1)
@@ -705,7 +705,7 @@ SecFlush:Slider({
     Callback = function(v) AUTO.FlushAuraRange = v end,
 })
 
-local SecFlow = MainTab:Section({ Title = "流程设置", Icon = "list-checks" })
+local SecFlow = MainTab:Section({ Title = "流程设置", Icon = "list" })
 
 SecFlow:Toggle({
     Title = "自动打开投票界面",
@@ -1086,7 +1086,7 @@ SecChar:Button({
 SecChar:Button({
     Title = "立即复活一次",
     Desc  = "手动触发一次重置重生",
-    Icon  = "heart-pulse",
+    Icon  = "heart",
     Callback = function()
         if AUTO.Actions.Respawn then AUTO.Actions.Respawn() end
     end,
@@ -1300,14 +1300,14 @@ SecShop:Dropdown({
 SecShop:Button({
     Title = "立即买补血",
     Desc  = "马上买一次补血",
-    Icon  = "heart-pulse",
+    Icon  = "heart",
     Callback = function()
         if AUTO.Actions.BuyHP then AUTO.Actions.BuyHP() end
     end,
 })
 
 -- ---------------- 角色 / 皮肤扭蛋 ----------------
-local SecGacha = ShopTab:Section({ Title = "角色扭蛋", Icon = "dice-5" })
+local SecGacha = ShopTab:Section({ Title = "角色扭蛋", Icon = "dice" })
 
 SecGacha:Toggle({
     Title = "自动抽角色",
@@ -1335,7 +1335,7 @@ SecGacha:Dropdown({
 SecGacha:Button({
     Title = "立即抽一次",
     Desc  = "按上面选的档位手动抽一次（角色+皮肤）",
-    Icon  = "dice-5",
+    Icon  = "dice",
     Callback = function()
         if AUTO.Actions.Gacha then AUTO.Actions.Gacha() end
     end,
@@ -1370,14 +1370,14 @@ SecUseItem:Dropdown({
 SecUseItem:Button({
     Title = "立即使用物品",
     Desc  = "马上用一次上面选中的物品",
-    Icon  = "package-open",
+    Icon  = "package",
     Callback = function()
         if AUTO.Actions.UseItem then AUTO.Actions.UseItem() end
     end,
 })
 
 -- ---------------- 商店升级 ----------------
-local SecUpgrade = ShopTab:Section({ Title = "商店升级", Icon = "arrow-up-circle" })
+local SecUpgrade = ShopTab:Section({ Title = "商店升级", Icon = "arrow-up" })
 
 SecUpgrade:Toggle({
     Title = "自动升级泰坦扬声器",
@@ -1647,7 +1647,7 @@ SecMode:Paragraph({
     Desc  = "投完票直接发起单人开局（StartSolo），不用等别人、不用等倒计时。",
 })
 
-local SecMode2 = ModeTab:Section({ Title = "设置游戏模式", Icon = "gamepad-2" })
+local SecMode2 = ModeTab:Section({ Title = "设置游戏模式", Icon = "gamepad" })
 
 SecMode2:Button({
     Title = "立即投票",
@@ -1708,7 +1708,7 @@ SecMode2:Dropdown({
 SecMode2:Button({
     Title = "应用游戏模式",
     Desc  = "把上面的游戏模式设为自动投票目标",
-    Icon = "gamepad-2",
+    Icon = "gamepad",
     Callback = function()
         if AUTO.Actions.ApplyGameMode then AUTO.Actions.ApplyGameMode() end
     end,
@@ -1817,7 +1817,7 @@ SecDebug:Toggle({
 local SecLog = SettingsTab:Section({
     Title = "运行日志",
     Desc  = "最近 14 条",
-    Icon  = "scroll-text",
+    Icon  = "file-text",
 })
 
 local LogPara = SecLog:Paragraph({
@@ -1825,31 +1825,11 @@ local LogPara = SecLog:Paragraph({
     Desc  = "等待引擎启动...",
 })
 
-print("[难度模式 自动化] 界面已加载：使用你的布局与悬浮窗，所有功能默认关闭，请手动打开需要的开关")
+print("[难度模式 自动化] 界面已加载，所有功能默认关闭，请手动打开需要的开关")
 
 -- ============================================================
-
+-- 常用服务（导出给引擎使用）
 -- ============================================================
--- ▼▼ 内嵌自定义悬浮窗（替换内置 OpenButton）▼▼
--- ============================================================
-
---[[
-    ================================================================
-    独立悬浮窗（最终版 - 自动清理 + 自动保存）
-    - 主悬浮窗：纯黑色背景 + 彩虹文字 + 左侧按钮（保持不变）
-    - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）
-      - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）
-      - 自动换图关闭：背景根据当前时间自动切换（6张时段图）
-      - 单点互动开启：鼠标悬停扩张（仅鼠标）
-    - 左侧按钮：亮度调高（透明度 0.3→0.05），尺寸略大（50→56）
-    - 弹出面板：左右毛玻璃子面板（开关 / 时间 + 问候语）
-    - 右边子面板所有文字：白色（时间/星期/问候语）
-    - 所有功能：拖拽、边缘检测、双击展开、Toggle控制、按钮动画
-    - 启动时自动删除旧的同名悬浮窗，保证只有一个
-    - 每10秒自动保存状态，下次启动自动恢复
-    ================================================================
-]]
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -1859,1347 +1839,12 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 -- ============================================================
--- Creator（工具类）
--- ============================================================
-local Creator = {}
-Creator.Font = "rbxassetid://12187365364"
-Creator.Signals = {}
-
-Creator.DefaultProperties = {
-    Frame = { BorderSizePixel = 0, BackgroundColor3 = Color3.new(1,1,1) },
-    TextLabel = { BorderSizePixel = 0, Text = "", RichText = true, TextColor3 = Color3.new(1,1,1), TextSize = 14, BackgroundColor3 = Color3.new(1,1,1) },
-    TextButton = { BorderSizePixel = 0, Text = "", AutoButtonColor = false, TextColor3 = Color3.new(1,1,1), TextSize = 14, BackgroundColor3 = Color3.new(1,1,1) },
-    ImageLabel = { BackgroundTransparency = 1, BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0 },
-    ImageButton = { BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0, AutoButtonColor = false },
-    UIListLayout = { SortOrder = "LayoutOrder" },
-    UICorner = {}, UIGradient = {}, UIScale = {}, UIPadding = {}, UIStroke = {},
-    CanvasGroup = { BorderSizePixel = 0, BackgroundColor3 = Color3.new(1,1,1) },
-    ViewportFrame = { BackgroundTransparency = 1 },
-    TextBox = { BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0, ClearTextOnFocus = false, Text = "", TextColor3 = Color3.new(0,0,0), TextSize = 14 },
-}
-
-function Creator.New(className, props, children)
-    local obj = Instance.new(className)
-    local defaults = Creator.DefaultProperties[className]
-    if defaults then
-        for k, v in pairs(defaults) do
-            obj[k] = v
-        end
-    end
-    if props then
-        for k, v in pairs(props) do
-            if k ~= "FontFace" then
-                obj[k] = v
-            end
-        end
-    end
-    if children then
-        for _, c in ipairs(children) do
-            if c then
-                c.Parent = obj
-            end
-        end
-    end
-    if props and props.FontFace then
-        obj.FontFace = Font.new(Creator.Font, props.FontFace.Weight, props.FontFace.Style)
-    end
-    return obj
-end
-
-function Creator.Tween(obj, duration, properties, style, direction)
-    return TweenService:Create(obj, TweenInfo.new(duration or 0.2, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out), properties)
-end
-
-function Creator.AddSignal(connection, callback)
-    local conn = connection:Connect(callback)
-    table.insert(Creator.Signals, conn)
-    return conn
-end
-
-function Creator.Image(icon)
-    return Creator.New("ImageLabel", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Image = icon,
-        ScaleType = "Crop",
-    })
-end
-
--- ============================================================
--- ★★★ 缩小版 Toggle 组件（高度26，整体缩小） ★★★
--- ============================================================
-function CreateToggle(parent, title, defaultValue)
-    local state = (defaultValue ~= nil) and defaultValue or true
-    local callback = nil
-
-    local container = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 0, 26),
-        BackgroundTransparency = 1,
-        Parent = parent,
-    })
-
-    local label = Creator.New("TextLabel", {
-        Text = title,
-        TextSize = 13,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        TextColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, -50, 1, 0),
-        TextXAlignment = "Left",
-        Parent = container,
-    })
-
-    local bg = Creator.New("Frame", {
-        Size = UDim2.new(0, 36, 0, 20),
-        Position = UDim2.new(1, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(1, 0.5),
-        BackgroundColor3 = state and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(120, 120, 120),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        Parent = container,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-    })
-
-    local thumb = Creator.New("Frame", {
-        Size = UDim2.new(0, 14, 0, 14),
-        Position = state and UDim2.new(1, -18, 0.5, 0) or UDim2.new(0, 3, 0.5, 0),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        Parent = bg,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        Creator.New("UIScale", { Scale = 1 }),
-    })
-
-    local btn = Creator.New("TextButton", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "",
-        Parent = bg,
-    })
-
-    local function SetState(newState)
-        if state == newState then return end
-        state = newState
-        local targetColor = state and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(120, 120, 120)
-        local targetPos = state and UDim2.new(1, -18, 0.5, 0) or UDim2.new(0, 3, 0.5, 0)
-        Creator.Tween(bg, 0.2, { BackgroundColor3 = targetColor }):Play()
-        Creator.Tween(thumb, 0.25, { Position = targetPos }, Enum.EasingStyle.Back):Play()
-        if callback then callback(state) end
-    end
-
-    Creator.AddSignal(btn.MouseButton1Click, function()
-        SetState(not state)
-    end)
-
-    local obj = {}
-    function obj:SetState(newState)
-        SetState(newState)
-    end
-    function obj:GetState()
-        return state
-    end
-    function obj:OnChanged(cb)
-        callback = cb
-    end
-    return obj
-end
-
--- ============================================================
--- 面板（常用功能）—— 4个开关，逻辑完全照抄你的脚本
--- ============================================================
-function CreatePopupPanel(parent)
-    local panelObj = {}
-    panelObj.isOpen = false
-
-    local panel = Creator.New("Frame", {
-        Size = UDim2.new(0, 420, 0, 180),
-        Position = UDim2.new(0, 0, 1, 8),
-        BackgroundTransparency = 1,
-        Visible = false,
-        ZIndex = 100,
-        Parent = parent,
-    })
-
-    local panelScale = Creator.New("UIScale", { Scale = 0.85, Parent = panel })
-
-    -- ★★★ 底板：透明，内部包含图片背景和覆盖层 ★★★
-    local panelBg = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Parent = panel,
-    }, {
-        Creator.New("ImageLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Image = "rbxassetid://137413437808718",
-            ScaleType = Enum.ScaleType.Crop,
-            Name = "BackgroundImage",
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-        }),
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(10, 10, 15),
-            BackgroundTransparency = 0.5,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-        }),
-        Creator.New("UIStroke", {
-            Thickness = 1.5,
-            ApplyStrokeMode = "Border",
-            Color = Color3.fromRGB(60, 60, 80),
-            Transparency = 0.5,
-        }),
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 16) }),
-    })
-
-    local bgImage = panelBg:FindFirstChild("BackgroundImage")
-
-    -- ★★★ 图片列表（6张时段图） ★★★
-    local imageList = {
-        "137413437808718",   -- 凌晨
-        "104923767129650",   -- 日出
-        "93074867292976",    -- 中午
-        "134557272690355",   -- 下午
-        "112101675518147",   -- 傍晚
-        "124884282551441",   -- 晚上
-    }
-    local currentIndex = 1
-
-    -- ★★★ 根据当前时间获取对应的图片ID ★★★
-    local function getImageIdForHour(hour)
-        if hour >= 0 and hour < 5 then
-            return "137413437808718"
-        elseif hour >= 5 and hour < 9 then
-            return "104923767129650"
-        elseif hour >= 9 and hour < 12 then
-            return "93074867292976"
-        elseif hour >= 12 and hour < 14 then
-            return "93074867292976"
-        elseif hour >= 14 and hour < 18 then
-            return "134557272690355"
-        elseif hour >= 18 and hour < 20 then
-            return "112101675518147"
-        else
-            return "124884282551441"
-        end
-    end
-
-    -- ★★★ 根据当前时间更新背景（时间模式） ★★★
-    local function updateBackgroundByTime()
-        if not bgImage then return end
-        local hour = tonumber(os.date("%H"))
-        local imageId = getImageIdForHour(hour)
-        bgImage.Image = "rbxassetid://" .. imageId
-        for i, id in ipairs(imageList) do
-            if id == imageId then
-                currentIndex = i
-                break
-            end
-        end
-    end
-
-    -- ★★★ 切换到下一张图片（循环模式） ★★★
-    local function cycleToNextImage()
-        if not bgImage then return end
-        currentIndex = currentIndex % #imageList + 1
-        bgImage.Image = "rbxassetid://" .. imageList[currentIndex]
-        print("🔄 切换背景 ->", imageList[currentIndex])
-    end
-
-    -- ★★★ 核心：根据当前模式更新背景 ★★★
-    local function updateBackground()
-        if panelObj.autoSwitchEnabled then
-            -- 开启“自动换图”：切换到下一张
-            cycleToNextImage()
-        else
-            -- 关闭“自动换图”：根据当前时间恢复
-            updateBackgroundByTime()
-        end
-    end
-
-    -- 内容容器
-    local container = Creator.New("Frame", {
-        Size = UDim2.new(1, -20, 1, -20),
-        Position = UDim2.new(0, 10, 0, 10),
-        BackgroundTransparency = 1,
-        Parent = panel,
-    }, {
-        Creator.New("UIListLayout", {
-            FillDirection = "Horizontal",
-            VerticalAlignment = "Center",
-            Padding = UDim.new(0, 12),
-        }),
-    })
-
-    -- 左边毛玻璃子面板（4个开关）
-    local leftPanel = Creator.New("Frame", {
-        Size = UDim2.new(0, 185, 1, 0),
-        BackgroundTransparency = 1,
-        LayoutOrder = 1,
-        Parent = container,
-    })
-
-    local leftGlass = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(245, 245, 250),
-        BackgroundTransparency = 0.78,
-        BorderSizePixel = 0,
-        Parent = leftPanel,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        Creator.New("UIStroke", {
-            Thickness = 1,
-            Color = Color3.fromRGB(255, 255, 255),
-            Transparency = 0.7,
-        }),
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BackgroundTransparency = 0.92,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        }),
-        Creator.New("UIGradient", {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 240, 248)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
-            }),
-            Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.6),
-                NumberSequenceKeypoint.new(0.5, 0.8),
-                NumberSequenceKeypoint.new(1, 0.6),
-            }),
-        }),
-    })
-
-    local leftContent = Creator.New("Frame", {
-        Size = UDim2.new(1, -16, 1, -16),
-        Position = UDim2.new(0, 8, 0, 8),
-        BackgroundTransparency = 1,
-        Parent = leftPanel,
-    }, {
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 6),
-            FillDirection = "Vertical",
-            VerticalAlignment = "Center",
-        }),
-        Creator.New("TextLabel", {
-            Text = "功能开关",
-            TextSize = 14,
-            FontFace = Font.new(Creator.Font, Enum.FontWeight.SemiBold),
-            TextColor3 = Color3.fromRGB(40, 45, 55),
-            BackgroundTransparency = 1,
-            AutomaticSize = "XY",
-        }),
-    })
-
-    -- ★★★ 3个开关（已移除手动吸附） ★★★
-    local toggle1 = CreateToggle(leftContent, "自动吸附", true)
-    local toggle3 = CreateToggle(leftContent, "自动换图", false)   -- 默认关闭 = 时间控制
-    local toggle4 = CreateToggle(leftContent, "单点互动", false)
-    panelObj.toggles = { toggle1, toggle3, toggle4 }
-
-    -- ★★★ 自动换图开关控制（逻辑完全照抄你的脚本） ★★★
-    panelObj.autoSwitchEnabled = false
-
-    toggle3:OnChanged(function(v)
-        panelObj.autoSwitchEnabled = v
-        updateBackground()
-    end)
-
-    -- 右边毛玻璃子面板（时间 + 星期 + 问候语）
-    local rightPanel = Creator.New("Frame", {
-        Size = UDim2.new(1, -197, 1, 0),
-        BackgroundTransparency = 1,
-        LayoutOrder = 2,
-        Parent = container,
-    })
-
-    local rightGlass = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(245, 245, 250),
-        BackgroundTransparency = 0.78,
-        BorderSizePixel = 0,
-        Parent = rightPanel,
-    }, {
-        Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        Creator.New("UIStroke", {
-            Thickness = 1,
-            Color = Color3.fromRGB(255, 255, 255),
-            Transparency = 0.7,
-        }),
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BackgroundTransparency = 0.92,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(0, 14) }),
-        }),
-        Creator.New("UIGradient", {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 240, 248)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
-            }),
-            Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.6),
-                NumberSequenceKeypoint.new(0.5, 0.8),
-                NumberSequenceKeypoint.new(1, 0.6),
-            }),
-        }),
-    })
-
-    local rightContent = Creator.New("Frame", {
-        Size = UDim2.new(1, -16, 1, -16),
-        Position = UDim2.new(0, 8, 0, 8),
-        BackgroundTransparency = 1,
-        Parent = rightPanel,
-    }, {
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 4),
-            FillDirection = "Vertical",
-            VerticalAlignment = "Center",
-            HorizontalAlignment = "Center",
-        }),
-    })
-
-    -- 时间（白色）
-    local timeLabel = Creator.New("TextLabel", {
-        Text = "00:00:00",
-        TextSize = 34,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        TextColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-    })
-
-    -- 星期（白色）
-    local weekdayLabel = Creator.New("TextLabel", {
-        Text = "Monday",
-        TextSize = 16,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
-        TextColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-    })
-
-    -- 问候语（白色半透明）
-    local greetingLabel = Creator.New("TextLabel", {
-        Text = "",
-        TextSize = 13,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Regular),
-        TextColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        Parent = rightContent,
-        TextTransparency = 0.15,
-    })
-
-    -- ============================================================
-    -- 问候语、时间、星期更新（完全照抄你的脚本）
-    -- ============================================================
-    local function getGreeting(hour)
-        if hour >= 0 and hour < 5 then
-            return { "🌙 凌晨好", "夜深人静，正是思考的好时候" }
-        elseif hour >= 5 and hour < 9 then
-            return { "🌅 早上好", "一日之计在于晨，今天也要加油哦" }
-        elseif hour >= 9 and hour < 12 then
-            return { "☀️ 上午好", "把握黄金时光，做最重要的事" }
-        elseif hour >= 12 and hour < 14 then
-            return { "🌤️ 中午好", "午间小憩片刻，下午精神百倍" }
-        elseif hour >= 14 and hour < 18 then
-            return { "🌇 下午好", "继续前行，莫负好时光" }
-        elseif hour >= 18 and hour < 20 then
-            return { "🌆 傍晚好", "暮色温柔，适合放慢脚步" }
-        else
-            return { "🌙 晚上好", "放下疲惫，好好休息吧" }
-        end
-    end
-
-    local function updateGreeting()
-        local hour = tonumber(os.date("%H"))
-        local greeting, advice = unpack(getGreeting(hour))
-        greetingLabel.Text = greeting .. "  " .. advice
-    end
-    updateGreeting()
-
-    local function updateTimeAndGreeting()
-        local now = os.time()
-        timeLabel.Text = os.date("%H:%M:%S", now)
-        weekdayLabel.Text = os.date("%A", now)
-        updateGreeting()
-        -- 只有在“关闭”状态（时间模式）时才自动更新背景
-        if not panelObj.autoSwitchEnabled then
-            updateBackgroundByTime()
-        end
-    end
-    updateTimeAndGreeting()
-
-    local timeUpdater
-    timeUpdater = RunService.Heartbeat:Connect(function()
-        if math.floor(tick()) ~= math.floor(tick() - 0.05) then
-            updateTimeAndGreeting()
-        end
-    end)
-    table.insert(Creator.Signals, timeUpdater)
-
-    function panelObj:Open()
-        if self.isOpen then return end
-        self.isOpen = true
-        panel.Visible = true
-        panelScale.Scale = 0.85
-        Creator.Tween(panelScale, 0.18, { Scale = 1 }, Enum.EasingStyle.Back):Play()
-        Creator.Tween(panelBg, 0.12, { BackgroundTransparency = 0 }):Play()
-        updateBackground()
-    end
-
-    function panelObj:Close()
-        if not self.isOpen then return end
-        self.isOpen = false
-        Creator.Tween(panelScale, 0.12, { Scale = 0.85 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In):Play()
-        Creator.Tween(panelBg, 0.1, { BackgroundTransparency = 1 }):Play()
-        task.wait(0.12)
-        panel.Visible = false
-    end
-
-    function panelObj:Toggle()
-        if self.isOpen then self:Close() else self:Open() end
-    end
-
-    local globalConn = nil
-    local function isInside(frame, x, y)
-        local pos = frame.AbsolutePosition
-        local size = frame.AbsoluteSize
-        return x >= pos.X and x <= pos.X + size.X and y >= pos.Y and y <= pos.Y + size.Y
-    end
-
-    local function setupGlobalClose()
-        if globalConn then globalConn:Disconnect() end
-        globalConn = UserInputService.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if not panelObj.isOpen then return end
-                local px, py = input.Position.X, input.Position.Y
-                if isInside(panel, px, py) then return end    -- 点在面板内部：不关闭
-                if isInside(parent, px, py) then return end   -- 点在悬浮窗本体（含左侧按钮）：不关闭，交给 Toggle 处理
-                panelObj:Close()
-            end
-        end)
-    end
-
-    local oldOpen = panelObj.Open
-    panelObj.Open = function(self, ...)
-        oldOpen(self, ...)
-        setupGlobalClose()
-    end
-
-    local oldClose = panelObj.Close
-    panelObj.Close = function(self, ...)
-        oldClose(self, ...)
-        if globalConn then
-            globalConn:Disconnect()
-            globalConn = nil
-        end
-    end
-
-    return panelObj
-end
-
--- ============================================================
--- ★★★ 悬停效果管理（单点互动） ★★★
--- ============================================================
-function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
-    local self = {}
-    scaleMultiplier = scaleMultiplier or 1.08
-    local scaleObj = nil
-    local enterConn = nil
-    local leaveConn = nil
-    local touchBeganConn = nil
-    local touchEndedConn = nil
-    local isEnabled = false
-
-    local function ensureScaleObj()
-        if not scaleObj then
-            scaleObj = targetContainer:FindFirstChild("HoverScale")
-            if not scaleObj then
-                scaleObj = Creator.New("UIScale", {
-                    Name = "HoverScale",
-                    Scale = 1,
-                    Parent = targetContainer,
-                })
-            end
-        end
-    end
-
-    local function bindEvents()
-        if enterConn then enterConn:Disconnect() end
-        if leaveConn then leaveConn:Disconnect() end
-        if touchBeganConn then touchBeganConn:Disconnect() end
-        if touchEndedConn then touchEndedConn:Disconnect() end
-
-        enterConn = Creator.AddSignal(textButton.MouseEnter, function()
-            if isEnabled then
-                Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
-            end
-        end)
-        leaveConn = Creator.AddSignal(textButton.MouseLeave, function()
-            if isEnabled then
-                Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-            end
-        end)
-
-        -- 手机端没有鼠标悬停，用触摸按下/抬起模拟“单点互动”的扩张/回缩
-        touchBeganConn = Creator.AddSignal(textButton.InputBegan, function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
-                Creator.Tween(scaleObj, 0.25, { Scale = scaleMultiplier }, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
-            end
-        end)
-        touchEndedConn = Creator.AddSignal(textButton.InputEnded, function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and isEnabled then
-                Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-            end
-        end)
-    end
-
-    function self:Enable()
-        if isEnabled then return end
-        isEnabled = true
-        ensureScaleObj()
-        bindEvents()
-    end
-
-    function self:Disable()
-        if not isEnabled then return end
-        isEnabled = false
-        if scaleObj then
-            Creator.Tween(scaleObj, 0.2, { Scale = 1 }, Enum.EasingStyle.Quint, Enum.EasingDirection.Out):Play()
-        end
-        if enterConn then enterConn:Disconnect(); enterConn = nil end
-        if leaveConn then leaveConn:Disconnect(); leaveConn = nil end
-        if touchBeganConn then touchBeganConn:Disconnect(); touchBeganConn = nil end
-        if touchEndedConn then touchEndedConn:Disconnect(); touchEndedConn = nil end
-    end
-
-    function self:Destroy()
-        self:Disable()
-        if scaleObj then
-            scaleObj:Destroy()
-            scaleObj = nil
-        end
-    end
-
-    return self
-end
-
--- ============================================================
--- 主函数（悬浮窗）—— 纯黑色背景，不添加图片
--- ============================================================
-function CreateFloatingButton(config)
-    config = config or {}
-    local parent = config.Parent or player.PlayerGui
-    local title = config.Title or "至尊版"
-    local uipadding = config.UIPadding or 9
-    local onOpen = config.OnOpen  -- 右侧标题单击 → 打开主面板；双击不触发
-
-    local button = {}
-
-    -- ============================================================
-    -- 1. UI 构建（悬浮窗本体：三层结构，纯黑色）
-    -- ============================================================
-    local ICON_DEFAULT = "rbxassetid://134285175074723"
-    local ICON_ACTIVE = "rbxassetid://116112495652693"
-
-    local ai = Creator.New("TextLabel", {
-        Text = title,
-        TextSize = 17,
-        FontFace = Font.new(Creator.Font, Enum.FontWeight.Medium),
-        BackgroundTransparency = 1,
-        AutomaticSize = "XY",
-        TextColor3 = Color3.new(1, 1, 1),
-    })
-
-    local rainbowGrad = Creator.New("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.0, Color3.fromHSV(0, 1, 1)),
-            ColorSequenceKeypoint.new(0.17, Color3.fromHSV(1/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.33, Color3.fromHSV(2/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromHSV(3/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.67, Color3.fromHSV(4/6, 1, 1)),
-            ColorSequenceKeypoint.new(0.83, Color3.fromHSV(5/6, 1, 1)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromHSV(1, 1, 1)),
-        }),
-        Rotation = 0,
-        Offset = Vector2.new(0, 0),
-        Parent = ai,
-    })
-
-    local rainbowOffset = 0
-    Creator.AddSignal(RunService.Heartbeat, function(dt)
-        rainbowOffset = rainbowOffset + 0.3 * dt
-        if rainbowOffset > 1 then rainbowOffset = rainbowOffset - 1 end
-        rainbowGrad.Offset = Vector2.new(rainbowOffset, 0)
-    end)
-
-    local aj = Creator.New("ImageButton", {
-        Image = ICON_DEFAULT,
-        Size = UDim2.new(0, 56, 0, 56),
-        BackgroundTransparency = 1,
-        ScaleType = Enum.ScaleType.Fit,
-        ImageTransparency = 0.05,
-        ImageColor3 = Color3.new(1, 1, 1),
-        Name = "Drag",
-    })
-
-    local ajScale = Creator.New("UIScale", { Scale = 1, Parent = aj })
-    aj.Rotation = 0
-
-    local ak = Creator.New("Frame", {
-        Size = UDim2.new(0, 1, 1, 0),
-        Position = UDim2.new(0, 56, 0.5, 0),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0.9,
-    })
-
-    local al = Creator.New("Frame", {
-        Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0, 0, 0, 28),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundTransparency = 1,
-        Active = true,
-        Visible = false,
-        Parent = parent,
-    })
-    -- 统一坐标体系：Position 一律用 Offset（悬浮窗中心相对 parent 左上角的像素偏移）。
-    -- 不再用 X.Scale=0.5 居中——否则拖动把 Position 写回 Scale=0 时，X 会从“居中”猛地跳到
-    -- “手指移动几十像素”，再被钳到贴边，这就是“一拖就往那面闪”的根因。
-    -- X 的实际居中值在启动块里、等 parent.AbsoluteSize 已知后再设置（见文件末尾）。
-
-    local am = Creator.New("UIScale", { Scale = 1, Parent = al })
-
-    -- ★★★ 第1层：黑色底层（纯黑色背景） ★★★
-    local borderGrad = Creator.New("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(0.20, Color3.fromRGB(160, 0, 0)),
-            ColorSequenceKeypoint.new(0.35, Color3.fromRGB(220, 30, 30)),
-            ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 80, 80)),
-            ColorSequenceKeypoint.new(0.55, Color3.fromRGB(220, 30, 30)),
-            ColorSequenceKeypoint.new(0.70, Color3.fromRGB(160, 0, 0)),
-            ColorSequenceKeypoint.new(0.90, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(80, 0, 0)),
-        }),
-        Rotation = 0,
-        Offset = Vector2.new(0, 0),
-    })
-
-    local borderOffset = 0
-    Creator.AddSignal(RunService.Heartbeat, function(dt)
-        borderOffset = borderOffset + 0.5 * dt
-        if borderOffset > 1 then borderOffset = borderOffset - 1 end
-        borderGrad.Offset = Vector2.new(borderOffset, 0)
-    end)
-
-    -- 底层容器（纯黑色，无图片）
-    local bgFrame = Creator.New("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ZIndex = 0,
-        Parent = al,
-    }, {
-        -- 纯黑色背景
-        Creator.New("Frame", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.new(0, 0, 0),
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-        }, {
-            Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        }),
-        -- 边框（UIStroke + UIGradient）
-        Creator.New("UIStroke", {
-            Thickness = 2,
-            ApplyStrokeMode = "Border",
-            Color = Color3.new(1, 1, 1),
-            Transparency = 0,
-        }, { borderGrad }),
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-    })
-
-    -- ★★★ 第2层：主体框架（背景透明，容纳控件） ★★★
-    local an = Creator.New("Frame", {
-        Size = UDim2.new(0, 0, 0, 44),
-        AutomaticSize = "X",
-        BackgroundTransparency = 1,
-        BackgroundColor3 = Color3.new(0, 0, 0),
-        ZIndex = 99,
-        Active = false,
-        Parent = al,
-    }, {
-        am,
-        Creator.New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-        aj,
-        ak,
-        Creator.New("UIListLayout", {
-            Padding = UDim.new(0, 4),
-            FillDirection = "Horizontal",
-            VerticalAlignment = "Center",
-        }),
-    })
-
-    -- ★★★ 第3层：交互与文字层 ★★★
-    local textButton = Creator.New("TextButton", {
-        AutomaticSize = "XY",
-        Active = true,
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 0, 0, 36),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        Parent = an,
-    })
-
-    Creator.New("UICorner", {
-        CornerRadius = UDim.new(1, -4),
-        Parent = textButton,
-    })
-
-    Creator.New("UIListLayout", {
-        Padding = UDim.new(0, uipadding),
-        FillDirection = "Horizontal",
-        VerticalAlignment = "Center",
-        Parent = textButton,
-    })
-
-    local stretchPadding = Creator.New("UIPadding", {
-        Name = "StretchPadding",
-        PaddingLeft = UDim.new(0, 50),
-        PaddingRight = UDim.new(0, 50),
-        Parent = textButton,
-    })
-
-    ai.Parent = textButton
-
-    -- 弹出面板
-    local popupPanel = CreatePopupPanel(al)
-    local toggles = popupPanel.toggles
-    -- toggles[1]=自动吸附, [2]=自动换图, [3]=单点互动
-
-    -- ★★★ 创建悬停效果（单点互动） ★★★
-    local hoverEffect = CreateHoverEffect(textButton, al, 1.1)
-
-    -- ★★★ 单点互动开关控制 ★★★
-    toggles[3]:OnChanged(function(v)
-        if v then
-            hoverEffect:Enable()
-        else
-            hoverEffect:Disable()
-        end
-    end)
-
-    -- ★★★ 恢复「an.AbsoluteSize → al.Size」实时绑定 ★★★
-    -- 靠边吸附时内容 padding 会 50↔120 自动伸缩，这里实时把内容尺寸同步给拖动根 al，
-    -- 黑色背景/边框才会跟着一起平滑展开；al 是 AnchorPoint(0.5,0.5)，以中心对称伸缩（参考版行为）。
-    Creator.AddSignal(an:GetPropertyChangedSignal("AbsoluteSize"), function()
-        if an.AbsoluteSize.X > 0 then
-            al.Size = UDim2.new(0, an.AbsoluteSize.X, 0, an.AbsoluteSize.Y)
-        end
-    end)
-
-    Creator.AddSignal(textButton.MouseEnter, function()
-        Creator.Tween(textButton, 0.1, { BackgroundTransparency = 0.93 }):Play()
-    end)
-    Creator.AddSignal(textButton.MouseLeave, function()
-        Creator.Tween(textButton, 0.1, { BackgroundTransparency = 1 }):Play()
-    end)
-
-    -- ============================================================
-    -- 2. 共享状态
-    -- ============================================================
-    local state = {
-        autoSnapEnabled = true,
-        autoSwitchEnabled = false,   -- ★★★ 自动换图开关状态 ★★★
-        singleClickEnabled = false,  -- ★★★ 单点互动开关状态 ★★★
-        edgeActive = false,
-        currentPadding = 50,
-        positionX = 0,
-        positionY = 0,
-        scale = 1,
-    }
-
-    -- ============================================================
-    -- 根尺寸同步：只在布局安定后调用一次，绝不在拖动/自动布局过程中逐帧写回。
-    -- 拖动根 al 只负责 Position / 拖动 / 吸附，尺寸由这里在安定点校准。
-    -- ============================================================
-    local function syncRootSize()
-        if not an or not an.Parent then return end
-        local w = an.AbsoluteSize.X
-        local h = an.AbsoluteSize.Y
-        if w <= 0 or h <= 0 then return end
-        al.Size = UDim2.new(0, w, 0, h)
-    end
-    task.defer(syncRootSize)
-
-    -- ============================================================
-    -- ★★★ 3. 自动保存/加载 ★★★
-    -- ============================================================
-    -- 独立存档：与原始悬浮窗版区分，避免读到另一套坐标体系的旧位置
-    local SAVE_FILE = "IntegralFloating_" .. title .. ".json"
-    local SAVE_VERSION = 2   -- 坐标体系版本：与旧版（左上角体系）不兼容，据此跳过旧存档的位置
-
-    local function saveState()
-        state.positionX = al.Position.X.Offset
-        state.positionY = al.Position.Y.Offset
-        state.scale = am.Scale
-        state.autoSwitchEnabled = toggles[2]:GetState()
-        state.singleClickEnabled = toggles[3]:GetState()
-
-        local data = {
-            schemaVersion = SAVE_VERSION,
-            autoSnapEnabled = state.autoSnapEnabled,
-            autoSwitchEnabled = state.autoSwitchEnabled,
-            singleClickEnabled = state.singleClickEnabled,
-            positionX = state.positionX,
-            positionY = state.positionY,
-            scale = state.scale,
-        }
-
-        local json = game:GetService("HttpService"):JSONEncode(data)
-        if writefile then
-            pcall(function()
-                writefile(SAVE_FILE, json)
-            end)
-        end
-    end
-
-    local function loadState()
-        -- 返回 true 表示「位置可用，可恢复」；返回 false 表示「不恢复位置」
-        if isfile and isfile(SAVE_FILE) then
-            local success, data = pcall(function()
-                local content = readfile(SAVE_FILE)
-                return game:GetService("HttpService"):JSONDecode(content)
-            end)
-            if success and type(data) == "table" then
-                -- 开关与缩放始终恢复（与坐标无关）
-                state.autoSnapEnabled = data.autoSnapEnabled ~= false
-                state.autoSwitchEnabled = data.autoSwitchEnabled == true
-                state.singleClickEnabled = data.singleClickEnabled == true
-                state.scale = (type(data.scale) == "number") and data.scale or 1
-
-                -- 位置仅当「版本一致 + 坐标是数字」才恢复，否则保持默认居中并忽略旧值
-                if data.schemaVersion == SAVE_VERSION
-                   and type(data.positionX) == "number"
-                   and type(data.positionY) == "number" then
-                    state.positionX = data.positionX
-                    state.positionY = data.positionY
-                    return true
-                end
-                return false
-            end
-        end
-        return false
-    end
-
-    -- 加载保存的状态（有存档才覆盖位置，避免新用户悬浮窗被定到左上角）
-    local loaded = loadState()
-
-    -- 应用加载的状态到 UI
-    if loaded then
-        al.Position = UDim2.new(0, state.positionX, 0, state.positionY)
-    end
-    am.Scale = state.scale
-    toggles[1]:SetState(state.autoSnapEnabled)
-    toggles[2]:SetState(state.autoSwitchEnabled)
-    toggles[3]:SetState(state.singleClickEnabled)
-    popupPanel.autoSwitchEnabled = state.autoSwitchEnabled
-
-    -- 恢复悬停效果
-    if state.singleClickEnabled then
-        hoverEffect:Enable()
-    else
-        hoverEffect:Disable()
-    end
-
-    -- ============================================================
-    -- 拖动/靠边展开共享状态（提前声明，供 updateEdgeState / 拖拽模块共用）
-    -- ============================================================
-    local isDragging = false      -- 是否正在拖动
-
-    -- ============================================================
-    -- 4. applyLayout
-    -- ============================================================
-    local function applyLayout()
-        local targetPadding = 50
-        if state.autoSnapEnabled and state.edgeActive then
-            targetPadding = 120
-        end
-        if targetPadding ~= state.currentPadding then
-            state.currentPadding = targetPadding
-            Creator.Tween(stretchPadding, 0.2, {
-                PaddingLeft = UDim.new(0, targetPadding),
-                PaddingRight = UDim.new(0, targetPadding),
-            }, Enum.EasingStyle.Quad):Play()
-            -- Padding 动画结束后再同步一次根尺寸，且只同步这一次，
-            -- 避免动画期间根尺寸被连续改写、与吸附/拖动抢位置
-            task.delay(0.22, syncRootSize)
-        end
-    end
-
-    -- ============================================================
-    -- 5. 边缘检测
-    -- ============================================================
-    local function updateEdgeState()
-        if not state.autoSnapEnabled then
-            if state.edgeActive then
-                state.edgeActive = false
-                applyLayout()
-            end
-            return
-        end
-
-        if not al or not al.Parent or al.AbsoluteSize.X <= 0 then
-            state.edgeActive = false
-            return
-        end
-
-        local pos = al.AbsolutePosition
-        local size = al.AbsoluteSize
-        local vp = camera.ViewportSize
-
-        local newEdge = (pos.Y <= 2) or
-                        (pos.Y + size.Y >= vp.Y - 2) or
-                        (pos.X <= 2) or
-                        (pos.X + size.X >= vp.X - 2)
-
-        if newEdge ~= state.edgeActive then
-            state.edgeActive = newEdge
-            applyLayout()
-        end
-    end
-
-    local edgeHeartbeat
-    local function startEdgeDetection()
-        if edgeHeartbeat then return end
-        edgeHeartbeat = RunService.Heartbeat:Connect(updateEdgeState)
-    end
-    startEdgeDetection()
-
-    -- ============================================================
-    -- 6. 拖拽模块（先定义位置钳制函数，供自动吸附复用）
-    -- ============================================================
-    local function clampPosition(offsetX, offsetY)
-        local parentSize = parent.AbsoluteSize
-        local alSize = al.AbsoluteSize
-        if parentSize.X == 0 or parentSize.Y == 0 or alSize.X == 0 or alSize.Y == 0 then
-            return offsetX, offsetY
-        end
-        -- al 的 AnchorPoint 为 (0.5, 0.5)：Position 偏移代表“中心”，
-        -- 故合法范围为 [half, parent - half]，避免悬浮窗半个被拖出屏幕
-        local halfW = alSize.X / 2
-        local halfH = alSize.Y / 2
-        return math.clamp(offsetX, halfW, parentSize.X - halfW),
-               math.clamp(offsetY, halfH, parentSize.Y - halfH)
-    end
-
-    -- （自动吸附已还原为“靠边自动展开”，物理“吸附到边缘”的 snapToEdge 已移除）
-
-    Creator.AddSignal(camera:GetPropertyChangedSignal("ViewportSize"), function()
-        task.wait(0.05)
-        -- 屏幕旋转/尺寸变化：只把位置钳制回屏幕内，不强制吸附到边缘
-        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
-        al.Position = UDim2.new(0, cx, 0, cy)
-        updateEdgeState()
-    end)
-
-    -- 拖拽：以按下时 al.Position(Offset) 为基准，随手指/鼠标位移移动，实时钳制 + 靠边展开。
-    -- Position 一律用 Offset（中心点坐标），不再混用 Scale 居中，避免拖动时坐标跳动。
-    local dragInput = nil          -- 当前负责拖动的输入对象（鼠标左键 / 某根手指 Touch）
-    local pressStartPos = nil      -- 按下瞬间手指屏幕坐标（阈值判定用）
-    local dragStartMouse = nil     -- 按下瞬间手指屏幕坐标（拖动基准）
-    local dragStartPos = nil       -- 按下瞬间 al.Position（拖动基准）
-    local DRAG_THRESHOLD = 5
-    local suppressClickUntil = 0  -- 拖拽松手后的短暂窗口内，忽略标题点击
-
-    -- 改为监听 UserInputService.InputBegan + 命中检测：
-    -- 原先挂在 an.InputBegan 上，但 an 是「透明 + Active=false」的内容容器，
-    -- 命中不到它，而且子按钮(textButton/aj)会抢走输入，导致 an.InputBegan 根本不触发 → 拖不动。
-    -- 现在只要按在悬浮窗本体(al)范围内（无论按在图标还是文字上）都能启动拖动。
-    local function isPointerOnWindow(input)
-        if not al or not al.Visible then return false end
-        local p = input.Position
-        local pos = al.AbsolutePosition
-        local size = al.AbsoluteSize
-        if size.X <= 0 or size.Y <= 0 then return false end
-        return p.X >= pos.X and p.X <= pos.X + size.X
-           and p.Y >= pos.Y and p.Y <= pos.Y + size.Y
-    end
-
-    Creator.AddSignal(UserInputService.InputBegan, function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
-           input.UserInputType ~= Enum.UserInputType.Touch then
-            return
-        end
-        if dragInput then return end   -- 已有一根手指/一次按下在拖动，忽略新的输入
-        if not isPointerOnWindow(input) then return end  -- 没按在悬浮窗上：不启动拖动
-        dragInput = input
-        pressStartPos = input.Position
-        isDragging = false
-        dragStartPos = al.Position
-        dragStartMouse = input.Position
-    end)
-
-    Creator.AddSignal(UserInputService.InputChanged, function(input)
-        local isMove = input.UserInputType == Enum.UserInputType.MouseMovement or
-                       input.UserInputType == Enum.UserInputType.Touch
-        if not isMove then return end
-
-        -- 只响应「当前这一次按下」的输入：触屏靠同一 InputObject 引用识别；
-        -- 鼠标移动是持续的新对象，用“左键仍按下”判断，避免别的输入抢拖动
-        local belongs
-        if input.UserInputType == Enum.UserInputType.Touch then
-            belongs = (dragInput ~= nil and input == dragInput)
-        else
-            belongs = (dragInput ~= nil
-                and dragInput.UserInputType == Enum.UserInputType.MouseButton1
-                and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1))
-        end
-        if not belongs then return end
-
-        if pressStartPos then
-            local delta = (input.Position - pressStartPos).Magnitude
-            if delta > DRAG_THRESHOLD then
-                isDragging = true
-                pressStartPos = nil
-            end
-        end
-
-        if isDragging then
-            -- 以按下时 al.Position(Offset) 为基准，加上手指位移，再钳制回屏幕内
-            local newX = dragStartPos.X.Offset + (input.Position.X - dragStartMouse.X)
-            local newY = dragStartPos.Y.Offset + (input.Position.Y - dragStartMouse.Y)
-            local clampedX, clampedY = clampPosition(newX, newY)
-            al.Position = UDim2.new(0, clampedX, 0, clampedY)
-            updateEdgeState()  -- 拖动中实时靠边展开
-        end
-    end)
-
-    Creator.AddSignal(UserInputService.InputEnded, function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and
-           input.UserInputType ~= Enum.UserInputType.Touch then
-            return
-        end
-        -- 只有「负责拖动」的那个输入结束，才结束拖动
-        if not dragInput or input ~= dragInput then return end
-        dragInput = nil
-
-        if isDragging then
-            isDragging = false
-            suppressClickUntil = tick() + 0.35  -- 松手后约0.35秒内忽略点击，避免拖拽误触发
-            task.wait(0.05)
-            updateEdgeState()
-            syncRootSize()     -- 松手后内容若已变化，同步一次根尺寸
-            return
-        end
-        pressStartPos = nil
-        dragStartPos = nil
-        dragStartMouse = nil
-    end)
-
-    -- ============================================================
-    -- 7. 右侧标题文字 → 单击打开主面板；双击不触发任何操作
-    -- ============================================================
-    local DOUBLE_CLICK_GAP = 0.3   -- 两次点击间隔小于此值视为双击
-    local lastClickTime = 0
-    local pendingOpen = false
-
-    Creator.AddSignal(textButton.MouseButton1Click, function()
-        if isDragging then return end                -- 拖拽松手时不算点击
-        if tick() < suppressClickUntil then return end  -- 拖拽刚结束的短暂窗口内忽略
-
-        local now = tick()
-        if now - lastClickTime <= DOUBLE_CLICK_GAP and pendingOpen then
-            -- 第二次点击 = 双击：取消即将执行的“单击打开”，什么都不做
-            pendingOpen = false
-            lastClickTime = 0
-            return
-        end
-
-        lastClickTime = now
-        pendingOpen = true
-        task.delay(DOUBLE_CLICK_GAP, function()
-            if pendingOpen then
-                pendingOpen = false
-                lastClickTime = 0
-                if onOpen then onOpen() end
-            end
-        end)
-    end)
-
-    -- ============================================================
-    -- 8. Toggle 控制
-    -- ============================================================
-    toggles[1]:OnChanged(function(v)
-        state.autoSnapEnabled = v
-        if not v then
-            state.edgeActive = false
-        else
-            task.wait(0.05)
-            updateEdgeState()
-        end
-        applyLayout()
-    end)
-
-    -- ★★★ 自动换图、单点互动的逻辑已在上面处理 ★★★
-
-    -- ============================================================
-    -- 9. 左侧圆形按钮点击事件（单击 → 弹出/收起功能面板）
-    -- ============================================================
-    Creator.AddSignal(aj.MouseButton1Click, function()
-        local scaleDown = Creator.Tween(ajScale, 0.12, { Scale = 0.75 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local rotateLeft = Creator.Tween(aj, 0.12, { Rotation = -15 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local pulseColor = Creator.Tween(aj, 0.1, { ImageColor3 = Color3.fromRGB(255, 255, 255) })
-
-        local scaleUp = Creator.Tween(ajScale, 0.2, { Scale = 1 }, Enum.EasingStyle.Back)
-        local rotateBack = Creator.Tween(aj, 0.2, { Rotation = 0 }, Enum.EasingStyle.Back)
-        local resetColor = Creator.Tween(aj, 0.15, { ImageColor3 = Color3.new(1, 1, 1) })
-
-        scaleDown:Play()
-        rotateLeft:Play()
-        pulseColor:Play()
-
-        task.delay(0.13, function()
-            scaleUp:Play()
-            rotateBack:Play()
-            resetColor:Play()
-        end)
-
-        popupPanel:Toggle()
-        if popupPanel.isOpen then
-            aj.Image = ICON_ACTIVE
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0 }):Play()
-        else
-            aj.Image = ICON_DEFAULT
-            Creator.Tween(aj, 0.15, { ImageTransparency = 0.05 }):Play()
-        end
-    end)
-
-    -- ============================================================
-    -- ★★★ 10. 自动保存（每10秒） ★★★
-    -- ============================================================
-    local function startAutoSave()
-        task.spawn(function()
-            while true do
-                task.wait(10)
-                saveState()
-            end
-        end)
-    end
-    startAutoSave()
-
-    -- 角色离开时保存一次
-    Creator.AddSignal(player.CharacterRemoving, function()
-        saveState()
-    end)
-
-    -- ============================================================
-    -- 11. 对外 API
-    -- ============================================================
-    function button:Visible(visible)
-        al.Visible = visible
-    end
-
-    function button:SetScale(newScale)
-        am.Scale = newScale
-    end
-
-    function button:GetState()
-        return state
-    end
-
-    button.Button = an
-    button.Popup = al
-    button.Panel = popupPanel
-
-    -- 启动：等尺寸已知后，先同步根尺寸；无存档则 X 居中（Offset 体系）；最后钳制回合法范围再做边缘检测
-    task.spawn(function()
-        task.wait(0.1)
-        syncRootSize()
-        -- 无有效存档位置时，X 居中（相对 parent 左上角的像素偏移），Y 保持 28
-        if not loaded then
-            al.Position = UDim2.new(0, parent.AbsoluteSize.X / 2, 0, 28)
-        end
-        local cx, cy = clampPosition(al.Position.X.Offset, al.Position.Y.Offset)
-        al.Position = UDim2.new(0, cx, 0, cy)
-        updateEdgeState()
-    end)
-
-    return button
-end
-
--- ============================================================
--- ★★★ 启动（自动清理多余的悬浮窗） ★★★
--- ============================================================
-local existingGui = player.PlayerGui:FindFirstChild("FloatingButton")
-if existingGui then
-    existingGui:Destroy()
-end
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FloatingButton"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player.PlayerGui
-
-local btn = CreateFloatingButton({
-    Parent = screenGui,
-    Title = "至尊版",
-    UIPadding = 9,
-    OnOpen = function()
-        -- 右侧标题“单击”已由悬浮窗内部区分：单击打开主面板，双击不触发
-        -- 这里只负责真正打开主面板（重复点击时不再二次打开）
-        if not Window.Closed then return end
-        Window:Open()
-    end,
-})
-
--- ★★★ 一体化联动：悬浮窗始终显示（无论主面板打开/关闭） ★★★
--- 主面板销毁时，悬浮窗一起销毁
-Window:OnDestroy(function()
-    if screenGui and screenGui.Parent then
-        screenGui:Destroy()
-    end
-end)
-
--- 悬浮窗保持可见，不再随主面板开合而隐藏
-btn:Visible(true)
-
-print("✅ 加载完成")
-print("   - 悬浮窗本体：纯黑色背景")
-print("   - 弹出面板：3个开关（自动吸附 / 自动换图 / 单点互动）")
-print("   - 自动换图开启：每次打开主面板，背景切换到下一张图（6张循环）")
-print("   - 自动换图关闭：背景根据当前时间自动切换（6张时段图）")
-print("   - 单点互动开启：鼠标悬停 / 手机触摸按下时扩张")
-print("   - 右侧标题：单击打开主面板，双击不触发")
-print("   - 自动吸附：拖到边缘附近自动吸附到最近边缘")
-print("   - 悬浮窗始终显示，不随主面板开合而隐藏")
-print("   - 自动清理、自动保存状态")
-
--- ============================================================
 -- 导出给引擎使用
 -- ============================================================
 local __UI_EXPORT = {
     AUTO               = AUTO,
     WindUI             = WindUI,
+    Window             = Window,
     Status             = StatusPara,
     Log                = LogPara,
     Players            = Players,
@@ -3214,6 +1859,7 @@ end)()
 
 local AUTO             = UI.AUTO
 local WindUI           = UI.WindUI
+local Window           = UI.Window
 local StatusPara       = UI.Status
 local LogPara          = UI.Log
 local Players          = UI.Players
@@ -13289,38 +11935,6 @@ MODULE_RUNNERS.AutoAmmoPickup = autoAmmoPickup
 MODULE_RUNNERS.AutoCraftQueue = autoCraftQueue
 MODULE_RUNNERS.AutoPetFeed = autoPetFeed
 
--- 自动补注册：AutoXxx 开关 → autoXxx 函数，没注册过的补进常驻队列
--- （老扩展块里的函数以前只定义了没挂上，这里统一补齐，保证开关真的能跑）
-do
-    local seen = {}
-    for _, k in ipairs(COMBAT_QUEUE) do seen[k] = true end
-    for _, k in ipairs(LOBBY_QUEUE) do seen[k] = true end
-    for _, k in ipairs(ALWAYS_QUEUE) do seen[k] = true end
-    local sets = {
-        ENGINE_DEFAULTS, X_DEFAULTS, X2_DEFAULTS, X3_DEFAULTS, X4_DEFAULTS,
-        X5_DEFAULTS, X6_DEFAULTS, X7_DEFAULTS, X8_DEFAULTS, X10_DEFAULTS, X11_DEFAULTS,
-    }
-    local extra = 0
-    for _, set in ipairs(sets) do
-        for key, val in pairs(set) do
-            if type(val) == "boolean" and string.sub(key, 1, 4) == "Auto" and MODULE_RUNNERS[key] == nil then
-                local fn = _G["auto" .. string.sub(key, 5)]
-                if type(fn) == "function" then
-                    MODULE_RUNNERS[key] = fn
-                    if not seen[key] then
-                        seen[key] = true
-                        table.insert(ALWAYS_QUEUE, key)
-                    end
-                    extra = extra + 1
-                end
-            end
-        end
-    end
-    if extra > 0 then
-        log("扩展模块补注册：" .. extra .. " 个已接入常驻队列")
-    end
-end
-
 -- 队列
 local EX2_COMBAT = {
     "AutoAimLead", "AutoDodgeZone", "AutoInterrupt", "AutoTauntBoss", "AutoTeamBuff",
@@ -13344,6 +11958,89 @@ local EX2_LOBBY = {
 }
 for _, k in ipairs(EX2_COMBAT) do table.insert(COMBAT_QUEUE, k) end
 for _, k in ipairs(EX2_LOBBY) do table.insert(LOBBY_QUEUE, k) end
+
+----------------------------------------------------------------
+-- 自动补注册：AutoXxx 开关 → autoXxx 函数
+-- 1) 没注册过执行入口的补进 MODULE_RUNNERS
+-- 2) 不在任何队列里的补进 ALWAYS_QUEUE（否则开关打开也不会被执行）
+----------------------------------------------------------------
+do
+    local seen = {}
+    for _, q in ipairs({ COMBAT_QUEUE, LOBBY_QUEUE, ALWAYS_QUEUE }) do
+        for _, k in ipairs(q) do seen[k] = true end
+    end
+    local sets = {
+        ENGINE_DEFAULTS, X_DEFAULTS, X2_DEFAULTS, X3_DEFAULTS, X4_DEFAULTS,
+        X5_DEFAULTS, X6_DEFAULTS, X7_DEFAULTS, X8_DEFAULTS, X10_DEFAULTS, X11_DEFAULTS,
+    }
+    local genv = (getgenv and getgenv()) or _G or {}
+    local added, queued = 0, 0
+    for _, set in ipairs(sets) do
+        for key, val in pairs(set) do
+            if type(val) == "boolean" and string.sub(key, 1, 4) == "Auto" then
+                local fn = MODULE_RUNNERS[key] or genv["auto" .. string.sub(key, 5)]
+                if type(fn) == "function" then
+                    if MODULE_RUNNERS[key] == nil then
+                        MODULE_RUNNERS[key] = fn
+                        added = added + 1
+                    end
+                    if not seen[key] then
+                        seen[key] = true
+                        table.insert(ALWAYS_QUEUE, key)
+                        queued = queued + 1
+                    end
+                end
+            end
+        end
+    end
+    if added > 0 or queued > 0 then
+        log(string.format("模块补注册：新增入口 %d 个，补入常驻队列 %d 个", added, queued))
+    end
+end
+
+----------------------------------------------------------------
+-- 全部模块：把注册表里的模块全部生成菜单开关
+-- （主界面只放了常用项，这里保证每个模块都能直接开关）
+----------------------------------------------------------------
+pcall(function()
+    if not Window or not Window.Tab then return end
+    local AllTab = Window:Tab({ Title = "全部模块", Icon = "list" })
+    local groups, order = {}, {}
+    for _, m in ipairs(MODULE_REGISTRY) do
+        if m.kind == "bool" and m.key and AUTO[m.key] ~= nil then
+            local g = m.group or "其他"
+            if not groups[g] then
+                groups[g] = {}
+                table.insert(order, g)
+            end
+            table.insert(groups[g], m)
+        end
+    end
+    local iconOf = {
+        ["战斗"] = "swords", ["补给"] = "heart", ["生存"] = "box", ["技能"] = "zap",
+        ["科技"] = "trending-up", ["任务"] = "clipboard-check", ["经济"] = "coins",
+        ["大厅"] = "house", ["互动"] = "hand", ["收集"] = "gift", ["移动"] = "move",
+        ["系统"] = "settings", ["核心"] = "sparkles", ["装备"] = "package",
+        ["拾取"] = "hand", ["社交"] = "user", ["统计"] = "activity",
+        ["天文"] = "rocket", ["流程"] = "list", ["养成"] = "arrow-up",
+        ["场景"] = "house", ["活动"] = "ticket",
+    }
+    local total = 0
+    for _, g in ipairs(order) do
+        local list = groups[g]
+        local sec = AllTab:Section({ Title = g .. "（" .. #list .. "）", Icon = iconOf[g] or "list" })
+        for _, m in ipairs(list) do
+            total = total + 1
+            sec:Toggle({
+                Title = m.title,
+                Desc  = (m.desc ~= "" and m.desc or m.key) .. "（" .. m.key .. "）",
+                Value = AUTO[m.key] == true,
+                Callback = function(v) AUTO[m.key] = v end,
+            })
+        end
+    end
+    log(string.format("全部模块页已生成：%d 个开关 / %d 组", total, #order))
+end)
 
 ----------------------------------------------------------------
 -- 天文币模式一（老版 Farm Astro Token）：贴图零件上下往返 + 计时器锁位
