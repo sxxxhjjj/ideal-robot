@@ -2637,6 +2637,8 @@ end
 
 function TeleportToMob(mob)
     local cf = GetTargetCFrame(mob, FarmPosition)
+    -- 升级：新版怪物模型没有旧版锚点，原版算不出落点时改用升级引擎 farmCFrame（带屏障夹紧）
+    if not cf then cf = farmCFrame(mob, 0) end
     if not cf then return end
 
     if FarmMode == "Tween" then
@@ -3433,7 +3435,14 @@ function TimerResetAndTeleport_AstroHoldout()
 end
 
 function DoFillUp()
+    -- 升级：新版商店遥控在 ReplicatedStorage.ShopSystem，且要等商店件到位
+    if AUTO and AUTO.AutoBuyHP then
+        return buyHP()
+    end
     local remote = GetRemote("ShopSystem")
+    if not remote and ReplicatedStorage then
+        remote = ReplicatedStorage:FindFirstChild("ShopSystem")
+    end
     if not remote then return end
     for i = 1, 2 do
         pcall(function() remote:FireServer("Buy", "FillHP") end)
@@ -4287,6 +4296,8 @@ FarmLoopToken = FarmLoopToken or 0
 
 function StartFarmLoop()
     if FarmLoopRunning then return end
+    -- 升级：新版模型下原版找怪逻辑已失效，改由升级引擎 farmStep 接管
+    if AUTO and AUTO.AutoFarm then return end
     FarmLoopRunning = true
     FarmLoopToken = (FarmLoopToken or 0) + 1
     local thisFarmLoopToken = FarmLoopToken
@@ -4745,21 +4756,14 @@ function HandleMiscOptions(selectedOptions)
 
     local canRun = IsMiscFarmAllowed()
 
+    -- 升级：新版模型/遥控换了，原版攻击/技能循环失效，统一交给升级引擎
     local hasAutoAttack = table.find(selectedOptions, "自动攻击") ~= nil
-    if hasAutoAttack and canRun then
-        AutoAttackEnabled = true
-        StartAutoAttack()
-    else
-        AutoAttackEnabled = false
-    end
+    AutoAttackEnabled = false
+    if AUTO then AUTO.AutoFight = (hasAutoAttack and canRun) and true or false end
 
     local hasAutoSkill = table.find(selectedOptions, "自动技能") ~= nil
-    if hasAutoSkill and canRun then
-        AutoSkillEnabled = true
-        StartAutoSkill()
-    else
-        AutoSkillEnabled = false
-    end
+    AutoSkillEnabled = false
+    if AUTO then AUTO.AutoSkill = (hasAutoSkill and canRun) and true or false end
 
     local hasAutoSkipHeli = table.find(selectedOptions, "自动跳过直升机")
     if hasAutoSkipHeli and canRun then
@@ -4803,13 +4807,11 @@ function HandleMiscOptions(selectedOptions)
         if AutoStartEnabled then StopAutoStart() end
     end
 
+    -- 升级：新版补血改走升级引擎 buyHP（商店遥控 ReplicatedStorage.ShopSystem），原版循环停用
     local hasAutoFillUp = table.find(selectedOptions, "自动填充")
-    if hasAutoFillUp and canRun then
-        if not AutoFillUpEnabled then AutoFillUpEnabled = true; StartAutoFillUpLoop() end
-    else
-        AutoFillUpEnabled = false
-        FillUpRunning = false
-    end
+    AutoFillUpEnabled = false
+    FillUpRunning = false
+    if AUTO then AUTO.AutoBuyHP = (hasAutoFillUp and canRun) and true or false end
 
     Config:Set("MiscOptions", selectedOptions)
     Config:Set("AutoStartEnabled", hasAutoStart ~= nil)
@@ -4977,6 +4979,8 @@ AutoFarmToggle = Main:Toggle({
         end
 
         AutoFarmEnabled = state
+        -- 升级：同步到升级引擎（新版模型的找怪/贴怪由升级引擎负责）
+        if AUTO then AUTO.AutoFarm = state end
         UpdateYYAWaitingPartCollision()
         if state then
             StartFarmLoop()
@@ -5011,6 +5015,8 @@ FarmTargetModeDropdown = Main:Dropdown({
         FarmTargetMode = NormalizeFarmTargetMode(value)
         Config:Set("FarmTargetMode", FarmTargetMode)
         Config:Save()
+        -- 升级：同步刷怪模式到升级引擎（普通/Astro/黑暗维度均按新版模型接管）
+        if AUTO then AUTO.FarmMode = FarmTargetMode end
         InvalidateMobCache("刷怪模式已更改")
         FarmForceRetarget = true
         if AutoFarmEnabled then StartFarmLoop(); StartJeffreyGuardLoop() end
@@ -5062,6 +5068,8 @@ PositionDropdown = Main:Dropdown({
                 end
             end)
         end
+        -- 升级：同步刷怪位置到升级引擎
+        if AUTO then AUTO.FarmPos = FarmPosition end
     end
 })
 
@@ -5076,6 +5084,8 @@ ModeDropdown = Main:Dropdown({
         FarmMode = english
         Config:Set("FarmMode", english)
         Config:Save()
+        -- 升级：同步移动方式到升级引擎
+        if AUTO then AUTO.FarmMove = FarmMode end
         WindUI:Notify({ Title = "移动方式", Content = "已选择: " .. tostring(value), Duration = 2, Icon = "mouse-pointer-click" })
     end
 })
@@ -5089,6 +5099,8 @@ Main:Slider({
         circleRadius = value
         Config:Set("CircleRadius", value)
         Config:Save()
+        -- 升级：同步环绕半径到升级引擎
+        if AUTO then AUTO.CircleRadius = value end
     end
 })
 
@@ -6753,6 +6765,8 @@ _G.__YYA_ShopSystems = function()
         Value = autoSkillTreeEnabled,
         Callback = function(enabled)
             autoSkillTreeEnabled = enabled
+            -- 升级：新版技能树遥控由升级引擎处理
+            if AUTO then AUTO.AutoSkillTree = enabled end
             Config:Set("AutoSkillTreeEnabled", enabled)
             Config:Save()
             if enabled then StartAutoSyncedShopLoop() end
@@ -7752,6 +7766,10 @@ function NotifyAutoSkillTree(message)
 end
 
 function FireAutoSkillTrees()
+    -- 升级：新版技能树结构变了，交给升级引擎的 autoSkillTree 处理
+    if AUTO and AUTO.AutoSkillTree then
+        return autoSkillTree()
+    end
     local remote = GetSkillTreesRemote()
     if not remote then
         NotifyAutoSkillTree("技能树尚未就绪。")
@@ -8205,6 +8223,14 @@ local ENGINE_DEFAULTS = {
 for k, v in pairs(ENGINE_DEFAULTS) do
     if AUTO[k] == nil then AUTO[k] = v end
 end
+
+-- 升级：启动时把原版已保存的刷怪设置同步进升级引擎，保证界面显示与引擎一致
+pcall(function()
+    if FarmTargetMode then AUTO.FarmMode = FarmTargetMode end
+    if FarmPosition then AUTO.FarmPos = FarmPosition end
+    if FarmMode then AUTO.FarmMove = FarmMode end
+    if tonumber(circleRadius) then AUTO.CircleRadius = tonumber(circleRadius) end
+end)
 
 -- ============================================================
 -- ▼▼ 难度模式 自动化引擎 ▼▼
