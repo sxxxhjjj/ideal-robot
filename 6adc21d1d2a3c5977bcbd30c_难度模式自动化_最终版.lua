@@ -22,9 +22,33 @@ local UI = (function()
 
 
 -- ============================================================
--- WindUI 库：原版加载方式（链接加载，不内嵌）
+-- WindUI 库：原版链接加载（带备用镜像 + 明确报错，避免 nil 报错）
 -- ============================================================
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+function xLoadWindUI()
+    local urls = {
+        "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua",
+        "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua",
+        "https://raw.githubusercontent.com/Footagesus/WindUI/master/dist/main.lua",
+    }
+    for _, u in ipairs(urls) do
+        local ok, src = pcall(function() return game:HttpGet(u) end)
+        if ok and type(src) == "string" and #src > 2000 then
+            local fn = loadstring(src)
+            if fn then
+                local ok2, lib = pcall(fn)
+                if ok2 and type(lib) == "table" and lib.CreateWindow then
+                    return lib
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local WindUI = xLoadWindUI()
+if not WindUI then
+    error("[难度模式] WindUI 加载失败：链接被拦截或网络不通，请检查执行器是否允许 HttpGet", 0)
+end
 
 -- ============================================================
 -- 窗口：和老版本完全一致（550x380 / 默认侧栏 / 无搜索栏）
@@ -342,12 +366,12 @@ for key, list in pairs(UI_LISTS) do
     end
 end
 
-local function uiEng(key, display)
+function uiEng(key, display)
     if display == nil then return nil end
     return UI_ENG[key][display] or display
 end
 
-local function uiEngList(key, list)
+function uiEngList(key, list)
     if type(list) ~= "table" then return {} end
     local out = {}
     for _, v in ipairs(list) do
@@ -356,7 +380,7 @@ local function uiEngList(key, list)
     return out
 end
 
-local function uiDisp(key, english)
+function uiDisp(key, english)
     if english == nil then return nil end
     for d, e in pairs(UI_ENG[key]) do
         if e == english then return d end
@@ -364,7 +388,7 @@ local function uiDisp(key, english)
     return english
 end
 
-local function uiDispList(key, englishList)
+function uiDispList(key, englishList)
     if type(englishList) ~= "table" then return {} end
     local out = {}
     for _, v in ipairs(englishList) do
@@ -1904,7 +1928,7 @@ end
 -- ============================================================
 -- ★★★ 缩小版 Toggle 组件（高度26，整体缩小） ★★★
 -- ============================================================
-local function CreateToggle(parent, title, defaultValue)
+function CreateToggle(parent, title, defaultValue)
     local state = (defaultValue ~= nil) and defaultValue or true
     local callback = nil
 
@@ -1987,7 +2011,7 @@ end
 -- ============================================================
 -- 面板（常用功能）—— 4个开关，逻辑完全照抄你的脚本
 -- ============================================================
-local function CreatePopupPanel(parent)
+function CreatePopupPanel(parent)
     local panelObj = {}
     panelObj.isOpen = false
 
@@ -2395,7 +2419,7 @@ end
 -- ============================================================
 -- ★★★ 悬停效果管理（单点互动） ★★★
 -- ============================================================
-local function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
+function CreateHoverEffect(textButton, targetContainer, scaleMultiplier)
     local self = {}
     scaleMultiplier = scaleMultiplier or 1.08
     local scaleObj = nil
@@ -2481,7 +2505,7 @@ end
 -- ============================================================
 -- 主函数（悬浮窗）—— 纯黑色背景，不添加图片
 -- ============================================================
-local function CreateFloatingButton(config)
+function CreateFloatingButton(config)
     config = config or {}
     local parent = config.Parent or player.PlayerGui
     local title = config.Title or "至尊版"
@@ -3270,7 +3294,7 @@ end)
 ----------------------------------------------------------------
 -- 基础工具
 ----------------------------------------------------------------
-local function log(msg)
+function log(msg)
     local line = os.date("%H:%M:%S") .. "  " .. tostring(msg)
     table.insert(AUTO.Logs, 1, line)
     while #AUTO.Logs > 14 do
@@ -3279,13 +3303,13 @@ local function log(msg)
     print("[难度模式] " .. line)
 end
 
-local function notify(title, text)
+function notify(title, text)
     pcall(function()
         WindUI:Notify({ Title = title, Content = tostring(text), Duration = 4 })
     end)
 end
 
-local function findPath(root, names)
+function findPath(root, names)
     local node = root
     for _, n in ipairs(names) do
         if not node then return nil end
@@ -3294,7 +3318,7 @@ local function findPath(root, names)
     return node
 end
 
-local function deepVisible(obj)
+function deepVisible(obj)
     if not obj then return false end
     local cur = obj
     while cur and cur ~= game do
@@ -3306,7 +3330,7 @@ local function deepVisible(obj)
 end
 
 local clockTimes = {}
-local function every(key, gap)
+function every(key, gap)
     local now = os.clock()
     if (clockTimes[key] or 0) + gap <= now then
         clockTimes[key] = now
@@ -3316,30 +3340,30 @@ local function every(key, gap)
 end
 
 -- 手动按钮用：清掉某个节流计时，让对应动作立刻执行
-local function resetClock(key)
+function resetClock(key)
     clockTimes[key] = 0
 end
 
-local function nameOf(inst)
+function nameOf(inst)
     return inst and inst.Name or "无"
 end
 
-local function myChar()
+function myChar()
     local c = player.Character
     if c and c.Parent then return c end
     return nil
 end
 
-local function humOf(m)
+function humOf(m)
     return m and m:FindFirstChildOfClass("Humanoid")
 end
 
-local function hrpOf(m)
+function hrpOf(m)
     if not m then return nil end
     return m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart
 end
 
-local function living()
+function living()
     return workspace:FindFirstChild("Living")
 end
 
@@ -3355,7 +3379,7 @@ do
     end
 end
 
-local function isEnemy(m)
+function isEnemy(m)
     if not m or not m:IsA("Model") then return false end
     local me = myChar()
     if m == me then return false end
@@ -3374,7 +3398,7 @@ local function isEnemy(m)
 end
 
 local enemyCache = { t = 0, n = 0 }
-local function enemyCount()
+function enemyCount()
     if os.clock() - enemyCache.t < 0.25 then
         return enemyCache.n
     end
@@ -3390,7 +3414,7 @@ local function enemyCount()
     return n
 end
 
-local function nearestEnemy(maxDist)
+function nearestEnemy(maxDist)
     local me = myChar()
     local base = hrpOf(me)
     if not base then return nil, nil end
@@ -3416,7 +3440,7 @@ end
 -- 瞄准 / 开火
 ----------------------------------------------------------------
 local BotBridge = nil
-local function bot()
+function bot()
     if BotBridge and BotBridge.Enabled ~= nil then return BotBridge end
     local mod = RS:FindFirstChild("BotBridge")
     if not mod then return nil end
@@ -3428,7 +3452,7 @@ local function bot()
     return nil
 end
 
-local function aimAt(pos)
+function aimAt(pos)
     if not AUTO.AutoAim then return end
     local bb = bot()
     if bb then
@@ -3449,7 +3473,7 @@ local function aimAt(pos)
     end
 end
 
-local function stopAim()
+function stopAim()
     local bb = bot()
     if bb then
         bb.Enabled = false
@@ -3459,7 +3483,7 @@ end
 
 local holdingTool = nil
 local lastActivate = 0
-local function ensureFire()
+function ensureFire()
     if not AUTO.AutoFight then return end
     local c = myChar()
     if not c then return end
@@ -3485,7 +3509,7 @@ local function ensureFire()
     end
 end
 
-local function stopFire()
+function stopFire()
     if holdingTool then
         holdingTool = nil
         local sync = RS:FindFirstChild("HoldStateSync")
@@ -3503,7 +3527,7 @@ local skillInfo = {}   -- id -> { name = 按键名, cd = 该技能自己的间�
 local skillNext = {}   -- id -> 下次可以点的时间
 
 -- 鼠标键位绑定的就是普攻，可以一直点
-local function isBasicKey(name)
+function isBasicKey(name)
     if not name then return false end
     local u = string.upper(name)
     return u == "M1" or u == "MB1" or u == "LMB" or u == "MOUSEBUTTON1"
@@ -3511,7 +3535,7 @@ local function isBasicKey(name)
 end
 
 -- 每个技能单独一套间隔：普攻 1 秒一次，其余按槽位错开 2.5 / 3.0 / 3.5 …
-local function rebuildSkillInfo(fresh)
+function rebuildSkillInfo(fresh)
     local ids = {}
     for id in pairs(fresh) do table.insert(ids, id) end
     table.sort(ids, function(a, b) return tostring(a) < tostring(b) end)
@@ -3575,14 +3599,14 @@ do
     end)
 end
 
-local function skillCount()
+function skillCount()
     local n = 0
     for _ in pairs(skills) do n = n + 1 end
     return n
 end
 
 -- 每个技能按自己的冷却独立触发：普攻连着点，其它技能冷却好了就放
-local function useSkills(hitPos)
+function useSkills(hitPos)
     local act = RS:FindFirstChild("SkillActivate")
     if not act or not hitPos or not AUTO.AutoSkill then return 0 end
     local cam = workspace.CurrentCamera
@@ -3607,7 +3631,7 @@ end
 ----------------------------------------------------------------
 -- 自动救人（倒地队友身上的 ProximityPrompt）
 ----------------------------------------------------------------
-local function tryRevive()
+function tryRevive()
     local me = myChar()
     local base = hrpOf(me)
     if not base then return 0 end
@@ -3635,28 +3659,28 @@ end
 ----------------------------------------------------------------
 -- 场景判断
 ----------------------------------------------------------------
-local function waveText()
+function waveText()
     local wg = pg:FindFirstChild("WavesGui")
     local lbl = wg and findPath(wg, { "Frame", "TextLabel" })
     if lbl and lbl:IsA("TextLabel") then return lbl.Text end
     return ""
 end
 
-local function readyText()
+function readyText()
     local chr = pg:FindFirstChild("ChrGUI")
     local lbl = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button", "TextLabel" })
     if lbl and lbl:IsA("TextLabel") then return lbl.Text end
     return ""
 end
 
-local function modeText()
+function modeText()
     local mv = workspace:FindFirstChild("Mode")
     if mv and mv:IsA("StringValue") then return mv.Value end
     if mv and mv:IsA("ValueBase") then return tostring(mv.Value) end
     return ""
 end
 
-local function hasShownGui(root)
+function hasShownGui(root)
     if not root then return false end
     if root:IsA("GuiObject") then return deepVisible(root) end
     for _, d in ipairs(root:GetDescendants()) do
@@ -3665,7 +3689,7 @@ local function hasShownGui(root)
     return false
 end
 
-local function inMatch()
+function inMatch()
     local me = myChar()
     -- 角色被放进 workspace.Living 就是真正开局了
     local lv = living()
@@ -3694,7 +3718,7 @@ end
 ----------------------------------------------------------------
 -- 点按钮：和参考脚本同款（firesignal → getconnections → Activate）
 ----------------------------------------------------------------
-local function clickGui(btn)
+function clickGui(btn)
     if not btn or not btn:IsA("GuiButton") then return false end
     local clicked = false
     pcall(function()
@@ -3736,7 +3760,7 @@ end
 ----------------------------------------------------------------
 local lastReadyAt = 0
 local readying = false
-local function autoReady()
+function autoReady()
     if readying then return false end
     -- 只在有大厅准备板 / 投票阶段时做
     if not workspace:FindFirstChild("AutoReady") and not workspace:FindFirstChild("Voteing") then
@@ -3779,7 +3803,7 @@ end
 ----------------------------------------------------------------
 -- 结算：自动准备下一局
 ----------------------------------------------------------------
-local function autoContinue()
+function autoContinue()
     local gui = pg:FindFirstChild("ModeResult")
     if not hasShownGui(gui) then return false end
     local remote = RS:FindFirstChild("ModeResult")
@@ -3793,7 +3817,7 @@ end
 ----------------------------------------------------------------
 -- 自动跳波设置（游戏内已有开关）
 ----------------------------------------------------------------
-local function enableAutoSkip()
+function enableAutoSkip()
     if not AUTO.AutoSkip then return end
     local r = RS:FindFirstChild("SetSettingAutoSkipWave")
     if r then
@@ -3806,7 +3830,7 @@ end
 ----------------------------------------------------------------
 -- 装备指定角色（不自动判断强弱，由玩家在「玩家」页选择）
 local lastEquip = 0
-local function equipNamed(name)
+function equipNamed(name)
     if inMatch() then return false, "战斗中不换角色" end
     local ud = player:FindFirstChild("UnlockData")
     local remote = RS:FindFirstChild("ForChangeCharacter")
@@ -3832,7 +3856,7 @@ local MODE_ORDER = {
     "Soundwave", "Halloween", "NoLightInTheSky", "100MVisit",
 }
 
-local function voteCount(mode)
+function voteCount(mode)
     local folder = workspace:FindFirstChild("Vote")
     local m = folder and folder:FindFirstChild(mode)
     if m then return #m:GetChildren() end
@@ -3840,7 +3864,7 @@ local function voteCount(mode)
 end
 
 -- 等价于点击 OpenVoteUI 里的 "OPEN UI"：关角色选择，打开投票界面
-local function openVoteGui()
+function openVoteGui()
     local playGui = pg:FindFirstChild("Play")
     if not playGui then return false end
     if playGui.Enabled then
@@ -3864,7 +3888,7 @@ local function openVoteGui()
 end
 
 -- 选模式：优先票数最高的；都没票就投 Normal
-local function bestMode()
+function bestMode()
     if AUTO.VoteMode ~= "" then
         return AUTO.VoteMode, "指定模式"
     end
@@ -3893,7 +3917,7 @@ local function bestMode()
     return "Normal", "默认"
 end
 
-local function votePhase()
+function votePhase()
     if workspace:FindFirstChild("Voteing") then return true end
     local ov = pg:FindFirstChild("OpenVoteUI")
     local f = ov and ov:FindFirstChild("OPEN UI")
@@ -3905,7 +3929,7 @@ local lastVoteAt = 0
 
 -- 自动开单人局：新版客户端只有 QuestFuse({ "StartSolo" })，老版 MainHandler 留作兜底
 local lastStart = 0
-local function autoStartSolo()
+function autoStartSolo()
     if votePhase() then return false end
     local now = os.clock()
     if now - lastStart < 8 then return false end
@@ -3926,7 +3950,7 @@ local function autoStartSolo()
     return ok
 end
 
-local function autoVote()
+function autoVote()
     if not votePhase() then
         AUTO.VoteState = "等待投票"
         return false
@@ -3959,7 +3983,7 @@ end
 
 -- 跳波投票：跟随票数最高的那一档
 local skipVotedKey, skipVotedAt = nil, 0
-local function autoSkipVote()
+function autoSkipVote()
     local vs = pg:FindFirstChild("VoteSkip")
     if not vs or vs.Enabled ~= true then return false end
     local panel = vs:FindFirstChild("Main")
@@ -4031,7 +4055,7 @@ local SETTING_ON = {
     "MuteCharacterThemes", "DisableMusicTheme", "DisableAmbience",
 }
 local lastSettings = 0
-local function applySettings()
+function applySettings()
     local now = os.clock()
     if not AUTO.AutoSettings then return end
     if now - lastSettings < 15 then return end
@@ -4056,7 +4080,7 @@ local function applySettings()
 end
 
 local lastHeli = 0
-local function autoSkipHeli()
+function autoSkipHeli()
     local now = os.clock()
     if not AUTO.AutoSkipHeli then return false end
     if now - lastHeli < 2 then return false end
@@ -4078,7 +4102,7 @@ end
 -- manual = true 时忽略开关（玩家手动点按钮触发）
 ----------------------------------------------------------------
 local lastReset = 0
-local function forceRespawn(reason, manual)
+function forceRespawn(reason, manual)
     if not manual and not AUTO.AutoRespawn then return false end
     local now = os.clock()
     if now - lastReset < 2 then return false end
@@ -4109,7 +4133,7 @@ end
 ----------------------------------------------------------------
 -- 队友识别（给队友透视用）
 ----------------------------------------------------------------
-local function isAlly(m)
+function isAlly(m)
     if not m or not m:IsA("Model") then return false end
     local plr = Players:GetPlayerFromCharacter(m)
     return plr ~= nil and plr ~= player
@@ -4118,7 +4142,7 @@ end
 ----------------------------------------------------------------
 -- 奖励 / 收集自动化
 ----------------------------------------------------------------
-local function claimRemote(name)
+function claimRemote(name)
     local r = RS:FindFirstChild(name)
     if not r or not r:IsA("RemoteFunction") then return false end
     local ok, res = pcall(function() return r:InvokeServer("Claim") end)
@@ -4127,7 +4151,7 @@ local function claimRemote(name)
     return true
 end
 
-local function autoClaimRewards()
+function autoClaimRewards()
     local did = false
     if AUTO.AutoClaimLogin and every("claimlogin", 25) then
         if claimRemote("LoginRemote") then did = true end
@@ -4145,7 +4169,7 @@ end
 -- 自动点界面上所有 Claim / Collect / 领取 按钮（每个按钮 3 秒冷却）
 local CLAIM_WORDS = { "claim", "collect", "领取", "claim all", "领取全部" }
 local claimClickedAt = {}
-local function autoClickClaim()
+function autoClickClaim()
     if not AUTO.AutoClickClaim then return end
     if not every("clickclaim", 1.5) then return end
     local now = os.clock()
@@ -4179,7 +4203,7 @@ end
 ----------------------------------------------------------------
 -- 抽奖 / 胶囊（只在大厅做）
 ----------------------------------------------------------------
-local function autoGacha()
+function autoGacha()
     if inMatch() then return false end
     local did = false
     if AUTO.AutoGachaChar and every("gachachar", 4) then
@@ -4213,7 +4237,7 @@ end
 -- G-Squad 小队任务
 ----------------------------------------------------------------
 local squadCfg = nil
-local function getSquadCfg()
+function getSquadCfg()
     if squadCfg then return squadCfg end
     local m = RS:FindFirstChild("GSquadQuestConfig")
     if m then
@@ -4223,7 +4247,7 @@ local function getSquadCfg()
     return squadCfg
 end
 
-local function autoSquadQuest()
+function autoSquadQuest()
     if inMatch() then return false end
     if not every("squad", 6) then return false end
     local cfg = getSquadCfg()
@@ -4245,7 +4269,7 @@ end
 ----------------------------------------------------------------
 -- 重新开局投票
 ----------------------------------------------------------------
-local function autoRestartVote()
+function autoRestartVote()
     if not every("restart", 3) then return false end
     local voteFolder = workspace:FindFirstChild("Vote")
     local rg = voteFolder and voteFolder:FindFirstChild("RestartGame")
@@ -4263,7 +4287,7 @@ end
 ----------------------------------------------------------------
 -- 称号
 ----------------------------------------------------------------
-local function equipTitle(name)
+function equipTitle(name)
     if name == nil or name == "" then return false, "没填称号名" end
     local r = RS:FindFirstChild("Title")
     if not r then return false, "缺少 Title 遥控" end
@@ -4282,7 +4306,7 @@ end
 local buyHpNext, potionNext, moneyNext, boostNext = 0, 0, 0, 0
 
 -- 老版自动补货：商店件（直升机上的 PartForShop）到位后才能买到 FillHP
-local function fillUpReady()
+function fillUpReady()
     local obj = workspace
     for _, k in ipairs({ "HelicopterShop", "ShopXDD", "PartForShop" }) do
         obj = obj and obj:FindFirstChild(k)
@@ -4291,7 +4315,7 @@ local function fillUpReady()
     return (obj.Position - Vector3.new(44.2756729, 26.3595276, -32.7318268)).Magnitude < 0.5
 end
 
-local function buyHP()
+function buyHP()
     if os.clock() < buyHpNext then return false end
     local r = RS:FindFirstChild("ShopSystem")
     if not r then return false end
@@ -4309,7 +4333,7 @@ local function buyHP()
     return true
 end
 
-local function usePotion()
+function usePotion()
     if os.clock() < potionNext then return false end
     local r = RS:FindFirstChild("Potions")
     if not r then return false end
@@ -4319,7 +4343,7 @@ local function usePotion()
     return true
 end
 
-local function useMoneyBag()
+function useMoneyBag()
     if os.clock() < moneyNext then return false end
     local r = RS:FindFirstChild("UseItems")
     if not r then return false end
@@ -4329,7 +4353,7 @@ local function useMoneyBag()
     return true
 end
 
-local function useBoost()
+function useBoost()
     if os.clock() < boostNext then return false end
     if AUTO.BoostName == nil or AUTO.BoostName == "" then return false end
     local r = RS:FindFirstChild("Boosts")
@@ -4343,7 +4367,7 @@ end
 ----------------------------------------------------------------
 -- 技能树自动升级
 ----------------------------------------------------------------
-local function autoSkillTree()
+function autoSkillTree()
     if not every("skilltree", 12) then return false end
     local r = RS:FindFirstChild("SkillTrees")
     local folder = player:FindFirstChild("SkillTreesFolder")
@@ -4361,7 +4385,7 @@ end
 -- 自动传送
 ----------------------------------------------------------------
 local lastTeleport = 0
-local function combatTeleport(base, targetPos)
+function combatTeleport(base, targetPos)
     if not AUTO.AutoTeleport or not base or not targetPos then return false end
     local now = os.clock()
     if now - lastTeleport < 0.7 then return false end
@@ -4387,7 +4411,7 @@ local PROJ_KEYS = {
 }
 local lastDodge, lastDodgeScan = 0, 0
 
-local function isProjectileName(n)
+function isProjectileName(n)
     local l = string.lower(n)
     for _, k in ipairs(PROJ_KEYS) do
         if string.find(l, k, 1, true) then return true end
@@ -4395,7 +4419,7 @@ local function isProjectileName(n)
     return false
 end
 
-local function findIncoming(base)
+function findIncoming(base)
     local function scan(list)
         for _, obj in ipairs(list) do
             if obj:IsA("BasePart") or obj:IsA("Model") then
@@ -4436,7 +4460,7 @@ local function findIncoming(base)
     return hit
 end
 
-local function dodgeProjectile(base)
+function dodgeProjectile(base)
     if not AUTO.AutoDodge or not base then return false end
     local now = os.clock()
     if now - lastDodge < 0.6 then return false end
@@ -4477,23 +4501,23 @@ local Lighting = game:GetService("Lighting")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
-local function firstNumber(text)
+function firstNumber(text)
     local n = tostring(text or ""):match("(%d+)")
     return n and tonumber(n) or nil
 end
 
-local function waveNumber()
+function waveNumber()
     return firstNumber(waveText())
 end
 
-local function fireRemote(name, ...)
+function fireRemote(name, ...)
     local r = RS:FindFirstChild(name)
     if not r or not r:IsA("RemoteEvent") then return false end
     local args = { ... }
     return pcall(function() r:FireServer(table.unpack(args)) end)
 end
 
-local function moveChar(dest, lookAt, moveMode)
+function moveChar(dest, lookAt, moveMode)
     local c = myChar()
     local b = hrpOf(c)
     if not c or not b or not dest then return false end
@@ -4585,7 +4609,7 @@ end)
 ----------------------------------------------------------------
 local flyConn, flyVel, flyGyro, flyActive = nil, nil, nil, false
 
-local function stopFly()
+function stopFly()
     flyActive = false
     if flyConn then flyConn:Disconnect(); flyConn = nil end
     if flyVel then pcall(function() flyVel:Destroy() end); flyVel = nil end
@@ -4597,7 +4621,7 @@ local function stopFly()
     end
 end
 
-local function startFly()
+function startFly()
     local c = myChar()
     local h = humOf(c)
     if not c or not h then return false end
@@ -4670,7 +4694,7 @@ end)
 local fullBrightOn, noFogOn = false, false
 local lightSaved, fogSaved, effectSaved = nil, nil, nil
 
-local function applyLighting()
+function applyLighting()
     if AUTO.FullBright and not fullBrightOn then
         fullBrightOn = true
         pcall(function()
@@ -4749,7 +4773,7 @@ end)
 ----------------------------------------------------------------
 local camConn, camModeApplied = nil, nil
 
-local function applyCameraMode()
+function applyCameraMode()
     local mode = AUTO.CameraMode or "Classic"
     if camModeApplied == mode then return end
     camModeApplied = mode
@@ -4812,12 +4836,12 @@ local orbitAngle = 0
 local boundsCache, boundsAt = {}, {}
 local farmLockUntil = 0
 
-local function mobMaxHp(mob)
+function mobMaxHp(mob)
     local h = mob:FindFirstChildOfClass("Humanoid")
     return h and h.MaxHealth or 0
 end
 
-local function promptOf(mob)
+function promptOf(mob)
     for _, d in ipairs(mob:GetDescendants()) do
         if d:IsA("ProximityPrompt") then return d end
     end
@@ -4825,7 +4849,7 @@ local function promptOf(mob)
 end
 
 -- 原版 ComputeMobVisualBounds：按所有可见部件算中心、最低点、最高点
-local function mobBounds(mob)
+function mobBounds(mob)
     local now = os.clock()
     local cached = boundsCache[mob]
     if cached and now - (boundsAt[mob] or 0) < 0.25 then
@@ -4859,7 +4883,7 @@ local function mobBounds(mob)
     return res[1], res[2], res[3]
 end
 
-local function farmCandidates()
+function farmCandidates()
     local out = {}
     local folder = living()
     if not folder then return out end
@@ -4873,7 +4897,7 @@ local function farmCandidates()
 end
 
 -- 原版 GetPriorityMob：Giant ST(4) → 直升机(3) → 高血量(2) → 最近(1)
-local function pickFarmTarget()
+function pickFarmTarget()
     local base = hrpOf(myChar())
     if not base then return nil end
     local cands = farmCandidates()
@@ -4917,7 +4941,7 @@ local function pickFarmTarget()
 end
 
 -- 原版 GetTargetCFrame：上方贴最高点、下方贴最低点、环绕贴着怪转
-local function farmCFrame(mob, extra)
+function farmCFrame(mob, extra)
     local padding = (tonumber(AUTO.FarmHeight) or 3) + (extra or 0)
     local center, minY, maxY = mobBounds(mob)
     local pos = AUTO.FarmPos or "Above"
@@ -4948,7 +4972,7 @@ end
 ----------------------------------------------------------------
 local barrierBoundsCache, barrierBoundsAt = nil, 0
 
-local function barrierBounds()
+function barrierBounds()
     local now = os.clock()
     if barrierBoundsCache and now - barrierBoundsAt < 1.25 then return barrierBoundsCache end
     barrierBoundsAt = now
@@ -4980,7 +5004,7 @@ local function barrierBounds()
     return barrierBoundsCache
 end
 
-local function clampInsideBarrier(pos)
+function clampInsideBarrier(pos)
     local b = barrierBounds()
     if not b then return pos, false end
     local pad = 8
@@ -4994,13 +5018,13 @@ end
 ----------------------------------------------------------------
 local sanityCollecting = false
 
-local function sanityValue()
+function sanityValue()
     local gui = pg:FindFirstChild("SanityUI")
     local label = gui and gui:FindFirstChild("ImageLabel")
     return label and label.ImageTransparency or nil
 end
 
-local function nearestSanityOrb()
+function nearestSanityOrb()
     local b = hrpOf(myChar())
     if not b then return nil end
     local best, bestD = nil, math.huge
@@ -5026,7 +5050,7 @@ local function nearestSanityOrb()
     return best
 end
 
-local function sanityStep()
+function sanityStep()
     if AUTO.FarmMode ~= "Dark Dimension Mode" or not AUTO.AutoFarm then return false end
     local v = sanityValue()
     if not v or v >= 0.9 then return false end
@@ -5057,7 +5081,7 @@ local function sanityStep()
     return true
 end
 
-local function showFarmCFrame(cf)
+function showFarmCFrame(cf)
     local c = myChar()
     local b = hrpOf(c)
     if not c or not b or not cf then return end
@@ -5083,7 +5107,7 @@ local lastFarmAt = 0
 local paddingAdj = 0
 local lastTarget, lastTargetHp, lastTargetAt = nil, nil, 0
 
-local function farmStep()
+function farmStep()
     if not AUTO.AutoFarm or AUTO.Paused then return end
     if os.clock() < farmLockUntil then return end
     if os.clock() - lastFarmAt < 0.15 then return end
@@ -5153,7 +5177,7 @@ task.spawn(function()
     end
 end)
 
-local function retreatSafe(reason)
+function retreatSafe(reason)
     -- 原版安全模式：血量低于阈值就抬到目标怪头顶 111 格，而不是跑回准备板
     local enemy = nearestEnemy(300)
     local p = enemy and hrpOf(enemy)
@@ -5174,7 +5198,7 @@ local function retreatSafe(reason)
 end
 
 local jeffreyCache, jeffreyStamp = {}, 0
-local function scanJeffrey()
+function scanJeffrey()
     jeffreyCache = {}
     for _, d in ipairs(workspace:GetDescendants()) do
         if d:IsA("Model") and string.find(string.lower(d.Name), "jeffrey", 1, true) then
@@ -5186,7 +5210,7 @@ local function scanJeffrey()
 end
 
 local lastJeffrey = 0
-local function jeffreyStep()
+function jeffreyStep()
     if not (AUTO.BypassJeffrey or AUTO.AntiJeffrey) then return end
     local now = os.clock()
     if now - lastJeffrey < 0.2 then return end
@@ -5232,7 +5256,7 @@ local function jeffreyStep()
 end
 
 local flushCache, flushStamp, lastFlush = {}, 0, 0
-local function rebuildFlush()
+function rebuildFlush()
     flushCache = {}
     for _, d in ipairs(workspace:GetDescendants()) do
         if d:IsA("ProximityPrompt") then
@@ -5245,7 +5269,7 @@ local function rebuildFlush()
     flushStamp = os.clock()
 end
 
-local function flushStep()
+function flushStep()
     if not AUTO.FlushAura then return end
     local now = os.clock()
     if now - lastFlush < 0.4 then return end
@@ -5272,7 +5296,7 @@ local function flushStep()
 end
 
 local resetWaveLast = nil
-local function resetWaveStep()
+function resetWaveStep()
     if not AUTO.ResetWave then return end
     local w = waveNumber()
     if not w then return end
@@ -5305,7 +5329,7 @@ end
 ----------------------------------------------------------------
 local collectCache, collectStamp, lastCollect = {}, 0, 0
 
-local function collectNameMatches(name)
+function collectNameMatches(name)
     local list = AUTO.CollectItems or {}
     if #list == 0 then return false end
     local low = string.lower(tostring(name or ""))
@@ -5322,7 +5346,7 @@ local function collectNameMatches(name)
     return false
 end
 
-local function collectModelOf(prompt)
+function collectModelOf(prompt)
     local cur = prompt
     while cur and cur ~= workspace do
         if cur:IsA("Model") or cur:IsA("BasePart") then return cur end
@@ -5331,7 +5355,7 @@ local function collectModelOf(prompt)
     return nil
 end
 
-local function rebuildCollect()
+function rebuildCollect()
     collectCache = {}
     collectStamp = os.clock()
     -- IDGF：不管列表，所有带交互提示的东西都收
@@ -5366,7 +5390,7 @@ local function rebuildCollect()
     collectStamp = os.clock()
 end
 
-local function collectStep()
+function collectStep()
     if not AUTO.AutoCollect or AUTO.Paused then return false end
     if not inMatch() then return false end
     -- 原版：先清完怪再收，不然一边刷怪一边收会互相拉扯
@@ -5412,12 +5436,12 @@ end
 ----------------------------------------------------------------
 local lastShop = 0
 
-local function shopFire(item)
+function shopFire(item)
     if item == nil or item == "" then return false end
     return fireRemote("ShopSystem", "Buy", item)
 end
 
-local function shopStep()
+function shopStep()
     local heavy = AUTO.AutoBuyWeapon or AUTO.AutoBuyMisc or AUTO.AutoRequest
         or AUTO.UpgradeTitanSpeaker or AUTO.UpgradeUTCM or AUTO.UpgradeTV or AUTO.AutoHourly
     if not heavy then return false end
@@ -5475,7 +5499,7 @@ local function shopStep()
     return true
 end
 
-local function useAutoItem()
+function useAutoItem()
     if not AUTO.AutoUseItem then return false end
     if not every("useitem", 3) then return false end
     if AUTO.UseItemName == "Presents" then
@@ -5490,7 +5514,7 @@ end
 ----------------------------------------------------------------
 -- 自动游戏模式（大厅）
 ----------------------------------------------------------------
-local function autoGameModeLobby()
+function autoGameModeLobby()
     if not AUTO.AutoGameModeLobby or AUTO.Paused then return end
     if inMatch() then return end
     if not every("agmloop", 2) then return end
@@ -5513,7 +5537,7 @@ local REDEEM_ALL = {
     "ADelayedGameIsEventuallyGoodButRushedGameIsForeverBad",
 }
 
-local function redeemCodes(codes)
+function redeemCodes(codes)
     local n = 0
     for _, code in ipairs(codes or {}) do
         if code and code ~= "" then
@@ -5524,7 +5548,7 @@ local function redeemCodes(codes)
     return n
 end
 
-local function unlockPasses(list)
+function unlockPasses(list)
     local gd = player:FindFirstChild("GachaData")
     if not gd then
         gd = Instance.new("Folder")
@@ -5560,7 +5584,7 @@ local CONFIG_SKIP = {
     Phase = true, LastReason = true, VoteState = true, Target = true,
 }
 
-local function configSnapshot()
+function configSnapshot()
     local data = {}
     for k, v in pairs(AUTO) do
         local tv = type(v)
@@ -5579,14 +5603,14 @@ local function configSnapshot()
     return data
 end
 
-local function saveConfig()
+function saveConfig()
     if type(writefile) ~= "function" then return false end
     return pcall(function()
         writefile(CONFIG_FILE, HttpService:JSONEncode(configSnapshot()))
     end)
 end
 
-local function jumpServer()
+function jumpServer()
     local ok, res = pcall(function()
         return HttpService:JSONDecode(game:HttpGet(
             "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
@@ -5656,7 +5680,7 @@ end
 ----------------------------------------------------------------
 -- 扩展框架：通用工具（不与旧函数重名）
 ----------------------------------------------------------------
-local function xSt(name)
+function xSt(name)
     local t = AUTO._RT[name]
     if not t then
         t = {}
@@ -5665,20 +5689,20 @@ local function xSt(name)
     return t
 end
 
-local function xClamp(n, lo, hi)
+function xClamp(n, lo, hi)
     n = tonumber(n) or lo
     if n < lo then return lo end
     if n > hi then return hi end
     return n
 end
 
-local function xRound(n)
+function xRound(n)
     n = tonumber(n) or 0
     if n >= 0 then return math.floor(n + 0.5) end
     return math.ceil(n - 0.5)
 end
 
-local function xFmt(n)
+function xFmt(n)
     n = tonumber(n) or 0
     if n >= 100000000 then return string.format("%.2f亿", n / 100000000) end
     if n >= 10000 then return string.format("%.2f万", n / 10000) end
@@ -13340,7 +13364,7 @@ local astroWaveArmed = false
 local astroIgnoreUntil = 0
 local astroLocks = false
 
-local function astroTimerValue()
+function astroTimerValue()
     local waves = pg:FindFirstChild("WavesGui")
     local frame = waves and waves:FindFirstChild("Frame")
     local label = frame and frame:FindFirstChild("Timer")
@@ -13352,14 +13376,14 @@ local function astroTimerValue()
     return nums[#nums]
 end
 
-local function astroTimerEnding()
+function astroTimerEnding()
     if tick() < astroIgnoreUntil then return false end
     local v = astroTimerValue()
     if v and v > 10 then astroWaveArmed = true end
     return v ~= nil and v <= 5 and astroWaveArmed == true
 end
 
-local function astroEnsurePart()
+function astroEnsurePart()
     if astroPart and astroPart.Parent then return astroPart end
     local part = Instance.new("Part")
     part.Name = "astrotoken_farm_part"
@@ -13383,7 +13407,7 @@ local function astroEnsurePart()
     return part
 end
 
-local function astroSnap()
+function astroSnap()
     local c = myChar()
     local b = hrpOf(c)
     if not c or not b or not astroPart then return end
@@ -13400,7 +13424,7 @@ local function astroSnap()
     end)
 end
 
-local function astroTweenTo(cf)
+function astroTweenTo(cf)
     local part = astroPart
     if not part or not part.Parent then return false end
     local tw = TweenService:Create(part, TweenInfo.new(ASTRO.TWEEN, Enum.EasingStyle.Linear), { CFrame = cf })
@@ -13418,7 +13442,7 @@ local function astroTweenTo(cf)
 end
 
 -- 倒计时到 5 秒：自杀重置 → 等复活 → 贴到计时器底部锁位
-local function astroRespawnToTimer()
+function astroRespawnToTimer()
     local c = myChar()
     local head = c and c:FindFirstChild("Head")
     if head then
@@ -13446,7 +13470,7 @@ local function astroRespawnToTimer()
     astroLocks = true
 end
 
-local function astroWaitNextWave()
+function astroWaitNextWave()
     local start = tick()
     while AUTO.AutoAstroToken and not AUTO.Paused do
         if astroLocks then
@@ -13462,7 +13486,7 @@ local function astroWaitNextWave()
     astroIgnoreUntil = tick() + 2
 end
 
-local function astroLoop()
+function astroLoop()
     if astroRunning then return end
     astroRunning = true
     task.spawn(function()
@@ -13509,7 +13533,7 @@ local boostActive = false
 local boostConn = nil
 local boostData = {}
 
-local function isLivingObj(obj)
+function isLivingObj(obj)
     local cur = obj
     while cur and cur ~= workspace do
         if cur.Name == "Living" then return true end
@@ -13518,7 +13542,7 @@ local function isLivingObj(obj)
     return false
 end
 
-local function boostApply(obj)
+function boostApply(obj)
     if not obj or not obj.Parent or isLivingObj(obj) then return end
     if obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
         if not boostData[obj] then
@@ -13536,7 +13560,7 @@ local function boostApply(obj)
     end
 end
 
-local function setRemoveMap(on)
+function setRemoveMap(on)
     if on == boostActive then return end
     boostActive = on
     if on then
@@ -13611,7 +13635,7 @@ end
 -- 坚守模式刷币时，倒计时到 5 秒自杀重置并贴计时器底部，等下一波
 ----------------------------------------------------------------
 local astroHoldoutReset = false
-local function astroHoldoutCheck()
+function astroHoldoutCheck()
     if not AUTO.AutoAstroFarm or AUTO.FarmMode ~= "Astro Holdout Mode" then return false end
     if astroHoldoutReset then return false end
     if not astroTimerEnding() then return false end
