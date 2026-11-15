@@ -3030,10 +3030,14 @@ N.UserInputType==Enum.UserInputType.MouseButton1
 or N.UserInputType==Enum.UserInputType.Touch
 then
 if m and m.CurrentInput and m.CurrentInput~=A then
+if (m.CurrentInputAt or 0)+1.2>os.clock() then
 return
+end
+m.CurrentInput=nil
 end
 
 m.CurrentInput=A
+m.CurrentInputAt=os.clock()
 
 C=true
 H=N
@@ -3074,6 +3078,8 @@ end
 
 if
 L==H
+or L.UserInputType==Enum.UserInputType.MouseButton1
+or L.UserInputType==Enum.UserInputType.Touch
 or(
 H.UserInputType==Enum.UserInputType.MouseButton1
 and L.UserInputType==Enum.UserInputType.MouseButton1
@@ -17474,7 +17480,7 @@ local Window = WindUI:CreateWindow({
     Acrylic   = false,
 
     SideBarWidth  = 72,
-    HideSearchBar = false,
+    HideSearchBar = true,
     Radius        = 16,
     ElementsRadius = 16,
 
@@ -17941,6 +17947,14 @@ SecFight:Toggle({
     Desc  = string.format("血量低于 %d%% 自动重置角色，立刻重生，不会真死", AUTO.ReviveHp),
     Value = AUTO.AutoRespawn,
     Callback = function(v) AUTO.AutoRespawn = v end,
+})
+
+SecFight:Slider({
+    Title = "无限复活血量",
+    Desc  = "血量百分比低于这个值就重置角色复活，直接拖动设置",
+    Value = { Min = 1, Max = 99, Default = AUTO.ReviveHp },
+    Step = 1,
+    Callback = function(v) AUTO.ReviveHp = v end,
 })
 
 local SecFarmSet = MainTab:Section({ Title = "刷怪设置", Icon = "crosshair" })
