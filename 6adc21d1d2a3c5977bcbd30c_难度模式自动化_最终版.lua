@@ -324,6 +324,15 @@ AUTO = {
     AutoTitle      = false,  -- 自动装备指定称号
     -- 商店 / 消耗品自动化（默认全关）
     AutoBuyHP      = false,  -- 低血量自动在商店买补血
+    AutoFullHP     = false,  -- 血量未满就在商店买满（自动满血）
+    AutoFaceMob    = true,   -- 刷怪/攻击时始终面朝目标怪物，技能更容易命中
+    AutoDodgeMelee = false,  -- 怪物打中你时自动侧向闪避
+    DodgeRange     = 25,     -- 自动闪避的检测距离
+    -- 持枪打怪（默认关闭）
+    AutoGun        = false,  -- 自动持枪打怪
+    AutoGunSwitch  = true,   -- 没子弹 / 打不动就换下一把枪
+    AutoGunHitRun  = true,   -- 空中点射：瞬移到怪物上方打一枪，再换下一只
+    GunRange       = 14,     -- 点射高度（站在怪物上方多少格）
     AutoPotion     = false,  -- 低血量自动喝药水
     AutoBoost      = false,  -- 自动续开加速卡
     AutoUseMoney   = false,  -- 自动使用金钱袋（UseItems Money）
@@ -546,10 +555,13 @@ FarmPositionMap = {
     ["环绕"] = "环绕",
 }
 
-MovementDisplayNames = { "传送", "补间" }
+MovementDisplayNames = { "传送", "平滑" }
 MovementMap = {
     ["传送"] = "Teleport",
+    ["平滑"] = "Tween",
     ["补间"] = "Tween",
+    ["Tween"] = "Tween",
+    ["Teleport"] = "Teleport",
 }
 
 CollectModeDisplayNames = { "清洁", "IDGF" }
@@ -715,9 +727,9 @@ skillDropdownValues = { "全部", "Q", "E", "R", "T", "Y", "G", "H", "Z", "X", "
 
 -- ====================== FARM HELPERS ======================
 function NormalizeFarmMode(mode)
-    mode = tostring(mode or "补间")
-    if mode == "传送" then return "Teleport" end
-    if mode == "补间" then return "Tween" end
+    mode = tostring(mode or "平滑")
+    if mode == "传送" or mode == "Teleport" then return "Teleport" end
+    if mode == "平滑" or mode == "补间" or mode == "Tween" then return "Tween" end
     return "Tween"
 end
 
@@ -1076,6 +1088,10 @@ MissingRemoteWarnAt = {}
 
 function GetRemote(name)
     local remote = ReplicatedStorage and ReplicatedStorage:FindFirstChild(name)
+    -- 升级：新版遥控可能改名或挪进子文件夹，走统一查找兜底
+    if not remote and type(findRemote) == "function" then
+        remote = findRemote(name)
+    end
     if not remote then
         local now = tick()
         if not MissingRemoteWarnAt[name] or now - MissingRemoteWarnAt[name] >= 10 then
@@ -5036,8 +5052,18 @@ UpToggle(Main, "AutoFarmAssist", "刷怪辅助", "保持锁定与持续输出")
 UpToggle(Main, "AutoRespawn", "无限复活", "血量过低自动重置角色，立刻重生")
 UpSlider(Main, "ReviveHp", "复活血量", "血量百分比低于此值触发复活", 1, 99, 35)
 UpToggle(Main, "AutoBuyHP", "自动补血 / 补货", "低血量自动在商店买补血")
+UpToggle(Main, "AutoFullHP", "自动满血（商店）", "血量没满就自动在商店买补血，瞬间补满")
+UpToggle(Main, "AutoFaceMob", "锁定面朝怪物", "刷怪/攻击时角色始终面向目标，技能更容易命中")
+UpToggle(Main, "AutoDodgeMelee", "攻击自动闪避", "被怪物打中时自动侧向闪开")
+UpSlider(Main, "DodgeRange", "闪避检测距离", "此距离内的怪物攻击才触发自动闪避", 8, 60, 25)
 UpToggle(Main, "AutoDodge", "自动躲投射物", "投射物飞来时侧向瞬移")
 UpToggle(Main, "AutoRetreatHeal", "残血自动撤退", "血量过低自动拉开距离")
+
+Main:Section({ Title = "持枪打怪 · 升级", Icon = "crosshair" })
+UpToggle(Main, "AutoGun", "持枪打怪", "自动装备远程武器并对目标开火，边打边躲")
+UpToggle(Main, "AutoGunSwitch", "没子弹自动换枪", "弹药打空或这把枪打不动时，立刻换下一把武器")
+UpToggle(Main, "AutoGunHitRun", "空中点射", "瞬移到怪物上方打一枪，再瞬移到下一只怪（自动刷怪开着时由刷怪接管）")
+UpSlider(Main, "GunRange", "点射高度", "点射时站在怪物上方多少格", 5, 40, 14)
 
 Main:Section({ Title = "刷怪设置", Icon = "settings" })
 
@@ -8436,7 +8462,7 @@ end
 local holdingTool = nil
 local lastActivate = 0
 function ensureFire()
-    if not AUTO.AutoFight then return end
+    if not (AUTO.AutoFight or AUTO.AutoGun) then return end
     local c = myChar()
     if not c then return end
     local tool = c:FindFirstChildOfClass("Tool")
@@ -8722,8 +8748,16 @@ function autoReady()
     if now - lastReadyAt < 2 then return false end
     lastReadyAt = now
 
-    local remote = RS:FindFirstChild("GetReadyRemote")
-    if not remote then return false end
+    local remote = findRemote("GetReadyRemote")
+    if not remote then
+        -- 升级：新版没有老遥控，直接点新版界面的准备按钮
+        if clickGuiByKey({ "准备", "READY", "Ready", "开始游戏", "Start" }, "准备") then
+            AUTO.LastReason = "新版界面已点准备"
+            log("新版界面已点准备")
+            return true
+        end
+        return false
+    end
 
     readying = true
     task.spawn(function()
@@ -8758,7 +8792,7 @@ end
 function autoContinue()
     local gui = pg:FindFirstChild("ModeResult")
     if not hasShownGui(gui) then return false end
-    local remote = RS:FindFirstChild("ModeResult")
+    local remote = findRemote("ModeResult")
     if remote then
         pcall(function() remote:FireServer("Ready") end)
         return true
@@ -8771,7 +8805,7 @@ end
 ----------------------------------------------------------------
 function enableAutoSkip()
     if not AUTO.AutoSkip then return end
-    local r = RS:FindFirstChild("SetSettingAutoSkipWave")
+    local r = findRemote("SetSettingAutoSkipWave")
     if r then
         pcall(function() r:FireServer(true) end)
     end
@@ -8910,9 +8944,22 @@ function autoVote()
     local now = tick()
     if now - lastVoteAt < 1 then return false end
     lastVoteAt = now
-    local remote = RS:FindFirstChild("Vote")
-    if not remote then return false end
+    local remote = findRemote("Vote")
     local mode, why = bestMode()
+
+    -- 升级：新版没有老投票遥控时，直接点新版界面上的模式按钮
+    if not remote then
+        if clickGuiByKey({ mode }, "投票") then
+            AUTO.VoteState = string.format("%s（界面点击）", mode)
+            AUTO.LastReason = "投票（界面）：" .. mode
+            if lastVotedMode ~= mode then
+                lastVotedMode = mode
+                log("投票 → " .. mode .. "（界面点击）")
+            end
+            return true
+        end
+        return false
+    end
 
     -- 老版就是这样：不点界面，直接发 Vote 遥控（参数是英文模式名）
     local ok = pcall(function() remote:FireServer(mode) end)
@@ -9159,26 +9206,32 @@ function autoGacha()
     if inMatch() then return false end
     local did = false
     if AUTO.AutoGachaChar and every("gachachar", 4) then
-        local r = RS:FindFirstChild("GachaCharacter")
+        local r = findRemote("GachaCharacter")
         if r then
             pcall(function() r:FireServer(AUTO.GachaSpin) end)
             log("自动抽角色：" .. tostring(AUTO.GachaSpin))
             did = true
+        elseif clickGuiByKey({ "1次抽奖", "10次抽奖", "100次抽奖", "抽奖", "Spin" }, "抽角色") then
+            did = true
         end
     end
     if AUTO.AutoGachaSkin and every("gachaskin", 4) then
-        local r = RS:FindFirstChild("GachaSkins")
+        local r = findRemote("GachaSkins")
         if r then
             pcall(function() r:FireServer(AUTO.GachaSpin) end)
             log("自动抽皮肤：" .. tostring(AUTO.GachaSpin))
             did = true
+        elseif clickGuiByKey({ "幸运抽奖", "皮肤抽奖", "皮肤", "Skin" }, "抽皮肤") then
+            did = true
         end
     end
     if AUTO.AutoCapsule and every("capsule", 4) then
-        local r = RS:FindFirstChild("GachaCapsule")
+        local r = findRemote("GachaCapsule")
         if r then
             pcall(function() r:FireServer() end)
             log("自动开胶囊")
+            did = true
+        elseif clickGuiByKey({ "胶囊", "Capsule" }, "开胶囊") then
             did = true
         end
     end
@@ -9226,7 +9279,7 @@ function autoRestartVote()
     local voteFolder = workspace:FindFirstChild("Vote")
     local rg = voteFolder and voteFolder:FindFirstChild("RestartGame")
     if not rg then return false end
-    local r = RS:FindFirstChild("VoteRestartGame")
+    local r = findRemote("VoteRestartGame")
     if r then
         pcall(function() r:FireServer("Yes") end)
         AUTO.LastReason = "已投重新开始票（Yes）"
@@ -9269,7 +9322,7 @@ end
 
 function buyHP()
     if os.clock() < buyHpNext then return false end
-    local r = RS:FindFirstChild("ShopSystem")
+    local r = findRemote("ShopSystem")
     if not r then return false end
     if not fillUpReady() then
         AUTO.LastReason = "自动补货：等待商店件到位"
@@ -9283,6 +9336,190 @@ function buyHP()
     AUTO.LastReason = "自动补货：已购买 FillHP"
     log("商店：已请求购买补血（FillHP x2）")
     return true
+end
+
+----------------------------------------------------------------
+-- 持枪打怪升级：自动持枪 / 远程优先 / 空弹或打不动就换枪 / 空中点射
+----------------------------------------------------------------
+local gunSwitchNext = 0
+local gunNoDmgAt, gunNoDmgHp, gunNoDmgTarget = nil, nil, nil
+local gunCursor = 0
+
+function isGunTool(t)
+    if not t or not t:IsA("Tool") then return false end
+    local n = string.lower(t.Name)
+    if string.find(n, "sword", 1, true) or string.find(n, "knife", 1, true) then return false end
+    for _, k in ipairs({ "gun", "rifle", "shot", "launcher", "epd", "laser", "stungun",
+                         "flamethrower", "harpoon", "blaster", "cannon", "bow" }) do
+        if string.find(n, k, 1, true) then return true end
+    end
+    -- 连发武器在游戏里带 Folder/Hold
+    local ok, hold = pcall(function()
+        local f = t:FindFirstChild("Folder")
+        return f and f:FindFirstChild("Hold")
+    end)
+    return ok and hold ~= nil
+end
+
+function gunToolList()
+    local out = {}
+    local c = myChar()
+    local bp = player:FindFirstChild("Backpack")
+    for _, src in ipairs({ c, bp }) do
+        if src then
+            for _, t in ipairs(src:GetChildren()) do
+                if isGunTool(t) then table.insert(out, t) end
+            end
+        end
+    end
+    return out
+end
+
+function gunAmmoOf(t)
+    if not t then return nil end
+    for _, k in ipairs({ "Ammo", "AmmoCount", "AmmoValue", "Bullets", "Magazine", "Clip", "Mag" }) do
+        local ok, v = pcall(function() return t:GetAttribute(k) end)
+        if ok and tonumber(v) then return tonumber(v) end
+    end
+    local function scan(box)
+        if not box then return nil end
+        for _, ch in ipairs(box:GetChildren()) do
+            if ch:IsA("NumberValue") or ch:IsA("IntValue") then
+                local cn = string.lower(ch.Name)
+                if string.find(cn, "ammo", 1, true) or string.find(cn, "clip", 1, true)
+                    or string.find(cn, "bullet", 1, true) or string.find(cn, "mag", 1, true) then
+                    return tonumber(ch.Value)
+                end
+            end
+        end
+        return nil
+    end
+    return scan(t) or scan(t:FindFirstChild("Folder"))
+end
+
+function gunEquipped()
+    local c = myChar()
+    if not c then return nil end
+    local cur = c:FindFirstChildOfClass("Tool")
+    if cur and isGunTool(cur) then return cur end
+    return nil
+end
+
+function gunSwitchTo(reason)
+    local list = gunToolList()
+    if #list < 1 then return false end
+    local cur = gunEquipped()
+    gunCursor = gunCursor % #list + 1
+    local pick = list[gunCursor]
+    if cur and #list > 1 then
+        local guard = 0
+        while pick == cur and guard < #list do
+            gunCursor = gunCursor % #list + 1
+            pick = list[gunCursor]
+            guard = guard + 1
+        end
+    end
+    if not pick then return false end
+    if cur ~= pick then xEquipTool(pick) end
+    AUTO.CurrentGun = pick.Name
+    AUTO.LastReason = "持枪：" .. tostring(reason) .. " → " .. pick.Name
+    if every("gunswitchlog", 2) then log("持枪：" .. tostring(reason) .. "，切换到 " .. pick.Name) end
+    return true
+end
+
+function gunStep(enemy, dist)
+    if not AUTO.AutoGun or AUTO.Paused then return false end
+    local now = os.clock()
+    local c = myChar()
+    if not c or not humOf(c) then return false end
+
+    local gun = gunEquipped()
+    -- 1) 手上没枪：装一把远程武器
+    if not gun then
+        if now < gunSwitchNext then return false end
+        if not gunSwitchTo("未持枪") then return false end
+        gunSwitchNext = now + 0.8
+        return true
+    end
+    AUTO.CurrentGun = gun.Name
+
+    if AUTO.AutoGunSwitch and now >= gunSwitchNext then
+        -- 换弹中不抢枪
+        local okR, reloading = pcall(function()
+            return gun:GetAttribute("Reloading") or gun:GetAttribute("IsReloading") or gun:GetAttribute("Reload")
+        end)
+        if not (okR and reloading) then
+            -- 2) 弹药打空：迅速换下一把
+            local ammo = gunAmmoOf(gun)
+            if ammo ~= nil and ammo <= 0 then
+                if #gunToolList() > 1 then
+                    if gunSwitchTo("没子弹") then
+                        gunSwitchNext = now + 0.8
+                        gunNoDmgAt, gunNoDmgHp, gunNoDmgTarget = nil, nil, nil
+                        return true
+                    end
+                elseif AUTO.AutoReload then
+                    local okReload = xFire("Reload") or xFire("ReloadWeapon")
+                    if not okReload then pcall(function() gun:Activate() end) end
+                    gunSwitchNext = now + 1.5
+                    AUTO.LastReason = "持枪：没子弹，正在换弹"
+                end
+            end
+        end
+        -- 3) 打不动（旧模型枪失效）：2.5 秒没掉血就换下一把
+        if enemy then
+            local eh = enemy:FindFirstChildOfClass("Humanoid")
+            local ehp = eh and tonumber(eh.Health)
+            if ehp ~= nil then
+                if gunNoDmgTarget ~= enemy or gunNoDmgHp == nil or ehp < (gunNoDmgHp or math.huge) - 0.5 then
+                    gunNoDmgHp, gunNoDmgAt, gunNoDmgTarget = ehp, now, enemy
+                elseif gunNoDmgAt and now - gunNoDmgAt > 2.5 then
+                    if #gunToolList() > 1 and gunSwitchTo("这把枪打不动") then
+                        gunSwitchNext = now + 1
+                        gunNoDmgAt, gunNoDmgHp, gunNoDmgTarget = nil, nil, nil
+                        return true
+                    end
+                    gunNoDmgAt = now
+                end
+            end
+        end
+    end
+
+    -- 4) 空中点射：瞬移到怪物上方 → 打一枪 → 瞬移到下一只怪
+    --    （不再边打边退，避免退到边界墙上）
+    if AUTO.AutoGunHitRun and not AUTO.AutoFarm and enemy then
+        local tgt = AUTO._GunTarget
+        local alive = false
+        if tgt and tgt.Parent then
+            local th = tgt:FindFirstChildOfClass("Humanoid")
+            alive = th ~= nil and th.Health > 0
+        end
+        local dwell = tonumber(AUTO.GunDwell) or 0.3
+        if (not alive) or (now - (tonumber(AUTO._GunTargetAt) or 0) >= dwell) then
+            local list = farmCandidates()
+            local pick = nil
+            if #list > 0 then
+                local idx = ((tonumber(AUTO._GunIdx) or 0) % #list) + 1
+                AUTO._GunIdx = idx
+                pick = list[idx]
+            end
+            if not pick then pick = enemy end
+            local hp = hrpOf(pick)
+            if hp then
+                AUTO._GunTarget, AUTO._GunTargetAt = pick, now
+                local hgt = tonumber(AUTO.GunRange) or 14
+                local dest = hp.Position + Vector3.new(0, hgt, 0)
+                -- 夹进屏障，保证不会瞬移到墙外
+                local cp, clamped = clampInsideBarrier(dest)
+                if clamped then dest = cp end
+                moveChar(dest, hp.Position, "Teleport")
+                faceMob(pick)
+                AUTO.LastReason = "持枪点射：上方 → " .. tostring(pick.Name)
+                if every("gunhitlog", 3) then log("持枪点射：" .. tostring(pick.Name)) end
+            end
+        end
+    end
+    return false
 end
 
 function usePotion()
@@ -9413,7 +9650,8 @@ function findIncoming(base)
 end
 
 function dodgeProjectile(base)
-    if not AUTO.AutoDodge or not base then return false end
+    -- 升级：开了持枪打怪也自动躲投射物
+    if not (AUTO.AutoDodge or AUTO.AutoGun) or not base then return false end
     local now = os.clock()
     if now - lastDodge < 0.6 then return false end
     if now - lastDodgeScan < 0.3 then return false end
@@ -9462,8 +9700,109 @@ function waveNumber()
     return firstNumber(waveText())
 end
 
+-- 升级：新版遥控可能改名/挪进子文件夹，统一按别名 + 全目录索引查找
+local REMOTE_ALIASES = {
+    Vote            = { "Vote", "VoteMap", "VoteMode", "VoteRemote", "CastVote", "Voting" },
+    GetReadyRemote  = { "GetReadyRemote", "ReadyRemote", "SetReady", "GetReady", "Ready" },
+    ShopSystem      = { "ShopSystem", "ShopRemote", "ShopBuy", "BuyItem", "Shop" },
+    GachaCharacter  = { "GachaCharacter", "GachaChar", "CharacterGacha", "Gacha" },
+    GachaSkins      = { "GachaSkins", "GachaSkin", "SkinGacha", "SkinsGacha" },
+    GachaCapsule    = { "GachaCapsule", "Capsule", "OpenCapsule", "GachaOpen" },
+    ForChangeCharacter = { "ForChangeCharacter", "ChangeCharacter", "SelectCharacter" },
+    VoteRestartGame = { "VoteRestartGame", "RestartGameVote", "RestartVote" },
+}
+local remoteIndex, remoteIndexAt = nil, 0
+
+function buildRemoteIndex()
+    local map = {}
+    local function scan(box, depth)
+        if not box or depth > 4 then return end
+        for _, obj in ipairs(box:GetChildren()) do
+            if obj:IsA("RemoteEvent") then
+                local key = string.lower(obj.Name)
+                if not map[key] then map[key] = obj end
+            elseif obj:IsA("Folder") then
+                scan(obj, depth + 1)
+            end
+        end
+    end
+    scan(RS, 0)
+    remoteIndex, remoteIndexAt = map, os.clock()
+end
+
+function findRemote(name, seen)
+    if not name or name == "" then return nil end
+    if not RS then return nil end
+    seen = seen or {}
+    if seen[name] then return nil end
+    seen[name] = true
+
+    local direct = RS:FindFirstChild(name)
+    if direct and direct:IsA("RemoteEvent") then return direct end
+
+    if not remoteIndex or os.clock() - remoteIndexAt > 5 then buildRemoteIndex() end
+    local hit = remoteIndex[string.lower(name)]
+    if hit and hit.Parent then return hit end
+
+    local list = REMOTE_ALIASES[name]
+    if list then
+        for _, alias in ipairs(list) do
+            local r = findRemote(alias, seen)
+            if r then return r end
+        end
+    end
+    return nil
+end
+
+-- 升级：新版没有遥控时，直接点新版界面上的按钮兜底
+local guiClickNext = 0
+function clickGuiByKey(keywords, label)
+    if type(keywords) ~= "table" or #keywords == 0 then return false end
+    if not pg then return false end
+    local now = os.clock()
+    if now < guiClickNext then return false end
+    local own = pg:FindFirstChild("WindUI")
+    local function match(text)
+        if not text or text == "" then return false end
+        local low = string.lower(tostring(text))
+        for _, k in ipairs(keywords) do
+            if k ~= "" and string.find(low, string.lower(k), 1, true) then return true end
+        end
+        return false
+    end
+    local found = nil
+    for _, gui in ipairs(pg:GetChildren()) do
+        if not found and gui:IsA("ScreenGui") and gui.Enabled ~= false and (not own or gui ~= own) then
+            for _, obj in ipairs(gui:GetDescendants()) do
+                if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                    if obj.Visible and (match(obj.Name) or (obj:IsA("TextButton") and match(obj.Text))) then
+                        found = obj
+                        break
+                    end
+                end
+            end
+        end
+    end
+    if not found then return false end
+    guiClickNext = now + 0.8
+    local ok = pcall(function()
+        local vim = game:GetService("VirtualInputManager")
+        local pos = found.AbsolutePosition
+        local size = found.AbsoluteSize
+        local x = pos.X + size.X / 2
+        local y = pos.Y + size.Y / 2
+        vim:SendMouseButtonEvent(x, y, 0, true, game, 1)
+        vim:SendMouseButtonEvent(x, y, 0, false, game, 1)
+    end)
+    if ok then
+        AUTO.LastReason = "界面点击：" .. tostring(found.Name)
+        if every("guiclicklog", 2) then log("界面点击：" .. tostring(found.Name) .. "（" .. tostring(label or "") .. "）") end
+    end
+    return ok
+end
+
 function fireRemote(name, ...)
-    local r = RS:FindFirstChild(name)
+    local r = findRemote(name)
     if not r or not r:IsA("RemoteEvent") then return false end
     local args = { ... }
     return pcall(function() r:FireServer(table.unpack(args)) end)
@@ -9788,6 +10127,39 @@ local orbitAngle = 0
 local boundsCache, boundsAt = {}, {}
 local farmLockUntil = 0
 
+-- 升级：怪物攻击自动闪避（掉血即判定被怪物打中，侧向闪开）
+local lastMeleeDodge = 0
+function dodgeMelee(base, enemy)
+    if not AUTO.AutoDodgeMelee or not base then return false end
+    local now = os.clock()
+    if now - lastMeleeDodge < 1.2 then return false end
+    local p = hrpOf(enemy)
+    if not p then return false end
+    lastMeleeDodge = now
+    local away = base.Position - p.Position
+    local flat = Vector3.new(away.X, 0, away.Z)
+    if flat.Magnitude < 0.1 then flat = Vector3.new(1, 0, 0) end
+    flat = flat.Unit
+    local side = Vector3.new(-flat.Z, 0, flat.X)
+    local dest = base.Position + side * 16 + Vector3.new(0, 4, 0)
+    local char = myChar()
+    local ok = false
+    if char then
+        ok = pcall(function() char:PivotTo(CFrame.lookAt(dest, p.Position + Vector3.new(0, 1, 0))) end)
+    end
+    if not ok then
+        pcall(function() base.CFrame = CFrame.lookAt(dest, p.Position) end)
+    end
+    pcall(function()
+        base.AssemblyLinearVelocity = Vector3.zero
+        base.AssemblyAngularVelocity = Vector3.zero
+    end)
+    farmLockUntil = os.clock() + 0.9
+    AUTO.LastReason = "闪避怪物攻击：" .. tostring(enemy.Name)
+    if every("dodgemelee", 2) then log("闪避怪物攻击：" .. tostring(enemy.Name)) end
+    return true
+end
+
 function mobMaxHp(mob)
     local h = mob:FindFirstChildOfClass("Humanoid")
     return h and h.MaxHealth or 0
@@ -10042,16 +10414,38 @@ function showFarmCFrame(cf)
     if clamped then
         cf = CFrame.new(p, p + cf.LookVector)
     end
-    if AUTO.FarmMove == "Tween" or AUTO.FarmMove == "补间" then
+    if AUTO.FarmMove == "Tween" or AUTO.FarmMove == "补间" or AUTO.FarmMove == "平滑" then
         local tw = TweenService:Create(b, TweenInfo.new(tonumber(AUTO.TweenSpeed) or 1, Enum.EasingStyle.Linear), { CFrame = cf })
         tw:Play()
     else
+        -- 传送：PivotTo + 直接写 CFrame 双保险，瞬间到位
         pcall(function() c:PivotTo(cf) end)
+        pcall(function() b.CFrame = cf end)
         pcall(function()
             b.AssemblyLinearVelocity = Vector3.zero
             b.AssemblyAngularVelocity = Vector3.zero
         end)
     end
+end
+
+-- 升级：面朝怪物（技能判定看角色朝向，必须锁头对准目标）
+function faceMob(mob)
+    if not AUTO.AutoFaceMob then return false end
+    local c = myChar()
+    local b = hrpOf(c)
+    local p = hrpOf(mob)
+    if not b or not p then return false end
+    local from = b.Position
+    local to = p.Position + Vector3.new(0, 1, 0)
+    local d = to - from
+    if d.Magnitude < 0.05 then return false end
+    -- 正上方/正下方时 lookAt 的 up 向量会退化，保留刷怪落点自带朝向
+    local flat = Vector3.new(d.X, 0, d.Z)
+    if flat.Magnitude < 0.2 then return false end
+    local cf = CFrame.lookAt(from, to)
+    pcall(function() c:PivotTo(cf) end)
+    pcall(function() b.CFrame = cf end)
+    return true
 end
 
 local lastFarmAt = 0
@@ -10093,6 +10487,10 @@ function farmStep()
     local cf = farmCFrame(mob, paddingAdj)
     if cf then
         showFarmCFrame(cf)
+        -- 升级：锁定面朝怪物（传送模式每步都校正朝向，平滑模式由落点自带朝向）
+        if AUTO.FarmMove ~= "Tween" and AUTO.FarmMove ~= "补间" and AUTO.FarmMove ~= "平滑" then
+            faceMob(mob)
+        end
     end
 
     -- Giant ST：贴着怪的同时不停按拉杆
@@ -10413,7 +10811,11 @@ function shopStep()
     if AUTO.AutoRequest then
         local w = waveNumber() or 0
         if w >= 10 then
-            if shopFire(AUTO.RequestName) then n = n + 1 end
+            if shopFire(AUTO.RequestName) then
+                n = n + 1
+            elseif clickGuiByKey({ "泰坦请求", "特殊泰坦", "泰坦", "Titan", "请求" }, "请求") then
+                n = n + 1
+            end
             task.wait(0.35)
         elseif every("reqwarn", 20) then
             log("自动请求：需要第 10 波或更高")
@@ -10473,7 +10875,7 @@ function autoGameModeLobby()
     if AUTO.GameMode == nil or AUTO.GameMode == "" then return end
     -- 新版客户端没有 Play.Classic / mode select2 / Lobby 这套旧界面，选模式统一走投票遥控
     if not votePhase() then return end
-    local remote = RS:FindFirstChild("Vote")
+    local remote = findRemote("Vote")
     if remote then
         pcall(function() remote:FireServer(AUTO.GameMode) end)
         AUTO.LastReason = "自动游戏模式：已投 " .. tostring(AUTO.GameMode)
@@ -18305,15 +18707,30 @@ do
 end
 
 ----------------------------------------------------------------
--- 全部模块：把注册表里的模块全部生成菜单开关
--- （主界面只放了常用项，这里保证每个模块都能直接开关）
+-- 全部模块：把注册表里的模块全部融进原版各页面
+-- （不再单开「扩展模块」页，按分组直接挂到对应原版页面里）
 ----------------------------------------------------------------
 pcall(function()
     if not Window or not Window.Tab then return end
-    local AllTab = Window:Tab({ Title = "扩展模块", Icon = "list" })
+    local tabOf = {
+        ["战斗"] = Main, ["补给"] = Main, ["生存"] = Main, ["技能"] = Main,
+        ["科技"] = Main, ["任务"] = Main7, ["经济"] = Main5, ["大厅"] = Main7,
+        ["互动"] = Main2, ["收集"] = Main6, ["移动"] = Main2, ["系统"] = Main3,
+        ["核心"] = Main7, ["装备"] = Main2, ["拾取"] = Main6, ["社交"] = Main2,
+        ["统计"] = Main3, ["天文"] = Main7, ["流程"] = Main7, ["养成"] = Main5,
+        ["场景"] = Main7, ["活动"] = Main7,
+    }
     local groups, order = {}, {}
+    -- 原版页面/升级分区已经有的开关不重复生成
+    local skipKey = {
+        AutoFarm = true, AutoFight = true, AutoAim = true, AutoSkill = true,
+        AutoTeleport = true, AutoFarmAssist = true, AutoRespawn = true,
+        AutoBuyHP = true, AutoFullHP = true, AutoFaceMob = true,
+        AutoDodgeMelee = true, AutoDodge = true, AutoRetreatHeal = true,
+        AutoSkillTree = true,
+    }
     for _, m in ipairs(MODULE_REGISTRY) do
-        if m.kind == "bool" and m.key and AUTO[m.key] ~= nil then
+        if m.kind == "bool" and m.key and AUTO[m.key] ~= nil and not skipKey[m.key] then
             local g = m.group or "其他"
             if not groups[g] then
                 groups[g] = {}
@@ -18334,7 +18751,8 @@ pcall(function()
     local total = 0
     for _, g in ipairs(order) do
         local list = groups[g]
-        local sec = AllTab:Section({ Title = g .. "（" .. #list .. "）", Icon = iconOf[g] or "list" })
+        local tab = tabOf[g] or Main3
+        local sec = tab:Section({ Title = g .. "（" .. #list .. "）", Icon = iconOf[g] or "list" })
         for _, m in ipairs(list) do
             total = total + 1
             sec:Toggle({
@@ -18345,7 +18763,7 @@ pcall(function()
             })
         end
     end
-    log(string.format("全部模块页已生成：%d 个开关 / %d 组", total, #order))
+    log(string.format("全部模块已融入原版页面：%d 个开关 / %d 组", total, #order))
 end)
 
 ----------------------------------------------------------------
@@ -19021,7 +19439,7 @@ end
 
 AUTO.Actions.RestoreVote = function()
     task.spawn(function()
-        local ready = RS:FindFirstChild("GetReadyRemote")
+        local ready = findRemote("GetReadyRemote")
         if ready and (ready:IsA("RemoteEvent") or ready:IsA("RemoteFunction")) then
             pcall(function()
                 ready:FireServer("1", true)
@@ -19067,7 +19485,7 @@ AUTO.Actions.Diag = function()
         log("Living：" .. tostring(living() ~= nil) .. "   敌人数：" .. enemyCount())
         log("BotBridge：" .. tostring(bot() ~= nil) .. "   MouseStream：" .. tostring(RS:FindFirstChild("MouseStream") ~= nil))
         log("准备区域检测：" .. tostring(workspace:FindFirstChild("AutoReady") ~= nil))
-        log("投票阶段：" .. tostring(votePhase()) .. "   Vote 遥控：" .. tostring(RS:FindFirstChild("Vote") ~= nil))
+        log("投票阶段：" .. tostring(votePhase()) .. "   Vote 遥控：" .. tostring(findRemote("Vote") ~= nil))
         log("Play 界面：" .. tostring(pg:FindFirstChild("Play") ~= nil) .. "   SelectCharacter：" .. tostring(pg:FindFirstChild("SelectCharacter") ~= nil))
         log("投票建议：" .. tostring(AUTO.VoteState or "—") .. "   Normal票：" .. tostring(voteCount("Normal")))
         log("跳波界面：" .. tostring(pg:FindFirstChild("VoteSkip") ~= nil) .. "   跳波遥控：" .. tostring(RS:FindFirstChild("SkipWaveVote") ~= nil))
@@ -19374,6 +19792,27 @@ task.spawn(function()
             if AUTO.AutoBoost then useBoost() end
             if AUTO.AutoRestartVote then autoRestartVote() end
 
+            -- 升级：自动满血（血量没满就在商店买满，瞬间回满）
+            if AUTO.AutoFullHP and every("fullhp", 0.5) then
+                local fh = humOf(myChar())
+                if fh and fh.MaxHealth > 0 and fh.Health > 0 and fh.Health < fh.MaxHealth - 0.5 then
+                    buyHP()
+                end
+            end
+
+            -- 升级：怪物攻击自动闪避（掉血即判定被怪物打中；持枪模式默认也躲）
+            if (AUTO.AutoDodgeMelee or AUTO.AutoGun) and every("meleecheck", 0.2) then
+                local mh = humOf(myChar())
+                if mh then
+                    if AUTO._LastMeleeHp == nil then AUTO._LastMeleeHp = mh.Health end
+                    if mh.Health < AUTO._LastMeleeHp - 0.5 then
+                        local atk = nearestEnemy(tonumber(AUTO.DodgeRange) or 25)
+                        if atk then dodgeMelee(base, atk) end
+                    end
+                    AUTO._LastMeleeHp = mh.Health
+                end
+            end
+
             -- 扩展自动化队列：战斗阶段
             xRunCombatModules()
 
@@ -19384,8 +19823,16 @@ task.spawn(function()
             if enemy then
                 local p = hrpOf(enemy)
                 if p then
+                    -- 升级：没开自动刷怪时也锁定面朝目标（技能更容易命中）
+                    if AUTO.AutoFaceMob and not AUTO.AutoFarm then
+                        faceMob(enemy)
+                    end
                     if AUTO.AutoAim then
                         aimAt(p.Position + Vector3.new(0, 1.2, 0))
+                    end
+                    -- 升级：持枪打怪（先换枪再开火）
+                    if AUTO.AutoGun then
+                        gunStep(enemy, dist)
                     end
                     ensureFire()
 
