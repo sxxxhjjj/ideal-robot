@@ -95,6 +95,27 @@ local RS = game:GetService("ReplicatedStorage")
 local VirtualUser = game:GetService("VirtualUser")
 local pg = player:WaitForChild("PlayerGui")
 
+-- 顶部拖动修复：搜索框会盖住标题栏的拖动区域，这里直接隐藏掉，标题栏就能正常拖
+pcall(function()
+    local hosts = { (gethui and gethui()) or game:GetService("CoreGui"), player:WaitForChild("PlayerGui") }
+    for _, host in ipairs(hosts) do
+        for _, gui in ipairs(host:GetChildren()) do
+            if gui:IsA("ScreenGui") then
+                local bar = gui:FindFirstChild("SearchBar", true)
+                if bar then
+                    bar.Visible = false
+                    bar.Active = false
+                    local box = bar:FindFirstChildWhichIsA("TextBox", true)
+                    if box then
+                        box.Visible = false
+                        box.Active = false
+                    end
+                end
+            end
+        end
+    end
+end)
+
 ----------------------------------------------------------------
 -- 基础工具
 ----------------------------------------------------------------
@@ -524,20 +545,35 @@ end
 ----------------------------------------------------------------
 local function clickGui(btn)
     if not btn or not btn:IsA("GuiButton") then return false end
-    local ok = pcall(function()
+    local clicked = false
+    pcall(function()
         if type(firesignal) == "function" then
             firesignal(btn.MouseButton1Click)
             firesignal(btn.Activated)
+            clicked = true
         elseif type(getconnections) == "function" then
             local cons = getconnections(btn.Activated) or {}
             for _, c in ipairs(cons) do
-                if c.Function then pcall(c.Function) end
+                if c.Function then
+                    pcall(c.Function)
+                    clicked = true
+                end
             end
-        else
-            btn:Activate()
         end
     end)
-    return ok
+    if clicked then return true end
+    -- 没有 firesignal / getconnections 时，用真实鼠标点一下（老版就是玩家手点）
+    local ok = pcall(function()
+        local guiService = game:GetService("GuiService")
+        local inset = guiService:GetGuiInset()
+        local p = btn.AbsolutePosition + btn.AbsoluteSize / 2 + inset
+        local vim = game:GetService("VirtualInputManager")
+        vim:SendMouseButtonEvent(p.X, p.Y, 0, true, game, 1)
+        task.wait(0.05)
+        vim:SendMouseButtonEvent(p.X, p.Y, 0, false, game, 1)
+    end)
+    if ok then return true end
+    return pcall(function() btn:Activate() end)
 end
 
 -- 自动准备：新版有 UI —— 直接点 ChrGUI["Frame-Ready"].Menu.Ready.Button
@@ -546,30 +582,27 @@ end
 ----------------------------------------------------------------
 local lastReadyAt = 0
 local function autoReady()
-    -- 按钮显示 UNREADY = 已经准备好了
-    if readyText() == "UNREADY" then
-        AUTO.LastReason = "已准备（新版 UI 显示 UNREADY）"
-        return true
-    end
-
     local now = tick()
-    if now - lastReadyAt < 1.2 then return false end
+    if now - lastReadyAt < 2 then return false end
     lastReadyAt = now
 
-    -- 首选：点新版 UI 的准备按钮（等于玩家自己点）
-    local chr = pg:FindFirstChild("ChrGUI")
-    local btn = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button" })
-    if btn and clickGui(btn) then
-        AUTO.LastReason = "已点击新版 UI 准备按钮，等服务器确认"
-        return true
-    end
-
-    -- 兜底：按钮点不动时，直接发按钮底层同款遥控 GetReadyRemote("1", true)
+    -- 直接用按钮底层同一个遥控，参数就是“想要的准备状态”：
+    -- 一直发 true 不会把已准备翻回未准备，服务端每局重置后也能重新准备
     local remote = RS:FindFirstChild("GetReadyRemote")
     if remote then
         pcall(function() remote:FireServer("1", true) end)
-        AUTO.LastReason = "UI 点不动，改发 GetReadyRemote(\"1\", true)"
+        AUTO.LastReason = "已发送准备状态（GetReadyRemote 1, true）"
         return true
+    end
+
+    -- 没有遥控时才模拟点 UI，且只在 READY 时点一次，避免反复切换
+    if readyText() == "READY" then
+        local chr = pg:FindFirstChild("ChrGUI")
+        local btn = chr and findPath(chr, { "Frame-Ready", "Menu", "Ready", "Button" })
+        if btn and clickGui(btn) then
+            AUTO.LastReason = "已点击新版 UI 准备按钮"
+            return true
+        end
     end
     return false
 end
