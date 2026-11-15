@@ -14,9 +14,11 @@
 local UILINK = "https://raw.githubusercontent.com/sxxxhjjj/ideal-robot/refs/heads/main/6adc21d1d2a3c5977bcbd30c_%E9%9A%BE%E5%BA%A6%E6%A8%A1%E5%BC%8F_UI.lua"
 
 local function loadUIExport()
+    -- 直接加载你这个 UI 链接
     if UILINK and UILINK ~= "" then
         return loadstring(game:HttpGet(UILINK))()
     end
+    -- 没填链接时才看已执行的 UI / 本地文件
     if getgenv then
         local cached = getgenv().DifficultyModeUI
         if type(cached) == "table" and cached.AUTO then
@@ -1796,8 +1798,36 @@ local function collectNameMatches(name)
     return false
 end
 
+local function collectModelOf(prompt)
+    local cur = prompt
+    while cur and cur ~= workspace do
+        if cur:IsA("Model") or cur:IsA("BasePart") then return cur end
+        cur = cur.Parent
+    end
+    return nil
+end
+
 local function rebuildCollect()
     collectCache = {}
+    collectStamp = os.clock()
+    -- IDGF：不管列表，所有带交互提示的东西都收
+    if AUTO.CollectMode == "IDGF" then
+        local seen = {}
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("ProximityPrompt") and d.Enabled then
+                local obj = collectModelOf(d)
+                if obj and not seen[obj] then
+                    seen[obj] = true
+                    local root = obj:IsA("BasePart") and obj or obj.PrimaryPart
+                        or obj:FindFirstChildWhichIsA("BasePart", true)
+                    if root then
+                        table.insert(collectCache, { obj = obj, root = root })
+                    end
+                end
+            end
+        end
+        return
+    end
     if #(AUTO.CollectItems or {}) == 0 then return end
     for _, d in ipairs(workspace:GetDescendants()) do
         if d:IsA("Model") or d:IsA("BasePart") then
